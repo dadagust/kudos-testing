@@ -1,0 +1,30 @@
+.pagination
+  display: flex
+  align-items: center
+  gap: var(--space-sm)
+
+.button
+  width: 32px
+  height: 32px
+  border-radius: 8px
+  border: 1px solid var(--color-border)
+  background-color: var(--color-surface)
+  color: var(--color-text)
+  font-size: var(--font-size-sm)
+  cursor: pointer
+  display: inline-flex
+  align-items: center
+  justify-content: center
+  transition: background-color 0.2s ease
+
+  &:hover:not(:disabled)
+    background-color: rgba(75, 94, 255, 0.12)
+
+  &:disabled
+    opacity: 0.5
+    cursor: not-allowed
+
+.active
+  background-color: var(--color-primary)
+  color: #ffffff
+  border-color: transparent

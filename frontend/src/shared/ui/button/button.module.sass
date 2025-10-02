@@ -1,0 +1,39 @@
+.button
+  display: inline-flex
+  align-items: center
+  justify-content: center
+  gap: var(--space-xs)
+  padding: var(--space-sm) var(--space-lg)
+  font-size: var(--font-size-sm)
+  font-weight: var(--font-weight-medium)
+  color: #ffffff
+  background-color: var(--color-primary)
+  border: none
+  border-radius: 10px
+  cursor: pointer
+  transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease
+  text-decoration: none
+
+  &:hover:not(:disabled)
+    background-color: var(--color-primary-hover)
+
+  &:active:not(:disabled)
+    transform: translateY(1px)
+
+  &:disabled
+    opacity: 0.6
+    cursor: not-allowed
+
+.ghost
+  background-color: transparent
+  color: var(--color-text)
+  border: 1px solid var(--color-border)
+
+  &:hover:not(:disabled)
+    background-color: rgba(75, 94, 255, 0.1)
+
+.danger
+  background-color: var(--color-error)
+
+  &:hover:not(:disabled)
+    background-color: #a92f2f

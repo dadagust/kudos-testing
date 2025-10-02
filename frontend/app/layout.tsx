@@ -1,18 +1,20 @@
 import "../styles/globals.sass";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "../styles/globals.sass";
 
 import type { Metadata } from "next";
 
+import { AppProviders } from "@/app/providers";
+
 export const metadata: Metadata = {
-  title: "Kudos",
-  description: "Next.js + Django"
+  title: "Kudos Admin Gateway",
+  description: "Админ-панель агрегатора kudos.ru",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ru">
-      <body>{children}</body>
+      <body>
+        <AppProviders>{children}</AppProviders>
+      </body>
     </html>
   );
 }
