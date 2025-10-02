@@ -35,12 +35,7 @@
 - `backend-gateway/.env` — можно задать `DJANGO_SECRET_KEY`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS`, `DJANGO_CORS_ORIGINS`.
 - `frontend` использует `NEXT_PUBLIC_API_URL` (по умолчанию `http://localhost:8000/api`).
 
-## CI
-
-В репозитории настроен GitHub Actions workflow (`.github/workflows/ci.yml`) для линтинга и тестов фронтенда/бэкенда при PR.
-
 ## Полезные команды
 
 - Генерация фикстур: `poetry run python manage.py seed_demo_data --password MySecurePass1!`
-- Создание суперпользователя: `poetry run python manage.py createsuperuser`
 - Сброс базы данных: удалить `backend-gateway/db.sqlite3` и заново выполнить миграции/seed.
