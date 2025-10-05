@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import clsx from "clsx";
-import { FC, ReactNode } from "react";
+import clsx from 'clsx';
+import { FC, ReactNode } from 'react';
 
-import styles from "./badge.module.sass";
+import styles from './badge.module.sass';
 
-type BadgeTone = "success" | "warning" | "danger" | "info";
+type BadgeTone = 'success' | 'warning' | 'danger' | 'info';
 
 interface BadgeProps {
   tone?: BadgeTone;
@@ -20,6 +20,6 @@ const toneClass: Record<BadgeTone, string | null> = {
   info: styles.info,
 };
 
-export const Badge: FC<BadgeProps> = ({ tone = "success", children, className }) => (
+export const Badge: FC<BadgeProps> = ({ tone = 'success', children, className }) => (
   <span className={clsx(styles.badge, toneClass[tone], className)}>{children}</span>
 );

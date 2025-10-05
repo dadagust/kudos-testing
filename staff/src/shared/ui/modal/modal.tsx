@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import clsx from "clsx";
-import { FC, ReactNode } from "react";
+import clsx from 'clsx';
+import { FC, ReactNode } from 'react';
 
-import { Icon } from "../icon/icon";
+import { Icon } from '../icon/icon';
 
-import styles from "./modal.module.sass";
+import styles from './modal.module.sass';
 
 interface ModalProps {
   open: boolean;

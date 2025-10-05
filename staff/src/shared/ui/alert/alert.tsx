@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import clsx from "clsx";
-import { FC, ReactNode } from "react";
+import clsx from 'clsx';
+import { FC, ReactNode } from 'react';
 
-import { Icon } from "../icon/icon";
+import { Icon } from '../icon/icon';
 
-import styles from "./alert.module.sass";
+import styles from './alert.module.sass';
 
-type AlertTone = "danger" | "info" | "success";
+type AlertTone = 'danger' | 'info' | 'success';
 
 interface AlertProps {
   tone?: AlertTone;
@@ -17,12 +17,12 @@ interface AlertProps {
 }
 
 const toneIcon: Record<AlertTone, string> = {
-  danger: "alert",
-  info: "info",
-  success: "check",
+  danger: 'alert',
+  info: 'info',
+  success: 'check',
 };
 
-export const Alert: FC<AlertProps> = ({ tone = "danger", title, children, className }) => (
+export const Alert: FC<AlertProps> = ({ tone = 'danger', title, children, className }) => (
   <div className={clsx(styles.alert, styles[tone], className)}>
     <Icon name={toneIcon[tone]} size={20} />
     <div>

@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import clsx from "clsx";
-import { FC } from "react";
+import clsx from 'clsx';
+import { FC } from 'react';
 
-import styles from "./pagination.module.sass";
+import styles from './pagination.module.sass';
 
 interface PaginationProps {
   page: number;

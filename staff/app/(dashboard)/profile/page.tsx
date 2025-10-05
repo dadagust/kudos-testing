@@ -1,27 +1,27 @@
-"use client";
+'use client';
 
-import { useMemo } from "react";
+import { useMemo } from 'react';
 
-import { useAuth } from "@/features/auth";
+import { useAuth } from '@/features/auth';
 import {
   ADMIN_SECTIONS,
   ROLE_DESCRIPTIONS,
   ROLE_SECTION_ACCESS,
   ROLE_TITLES,
   Role,
-} from "@/shared/config/roles";
-import { Table, Tag } from "@/shared/ui";
+} from '@/shared/config/roles';
+import { Table, Tag } from '@/shared/ui';
 
 const sectionsLabels: Record<(typeof ADMIN_SECTIONS)[number], string> = {
-  dashboard: "Дашборд",
-  products: "Товары",
-  orders: "Заказы",
-  customers: "Клиенты",
-  inventory: "Склад",
-  documents: "Документы",
-  integrations: "Интеграции",
-  settings: "Настройки",
-  logs: "Логи",
+  dashboard: 'Дашборд',
+  products: 'Товары',
+  orders: 'Заказы',
+  customers: 'Клиенты',
+  inventory: 'Склад',
+  documents: 'Документы',
+  integrations: 'Интеграции',
+  settings: 'Настройки',
+  logs: 'Логи',
 };
 
 type MatrixRow = {
@@ -39,36 +39,36 @@ export default function ProfilePage() {
         label: ROLE_DESCRIPTIONS[role as Role],
         access: new Set(access),
       })),
-    [],
+    []
   );
 
   const columns = useMemo(
     () => [
       {
-        key: "role",
-        header: "Роль",
+        key: 'role',
+        header: 'Роль',
         render: (row: MatrixRow) => (
-          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             <strong>{ROLE_TITLES[row.role]}</strong>
-            <span style={{ color: "var(--color-text-muted)", fontSize: "12px" }}>{row.label}</span>
+            <span style={{ color: 'var(--color-text-muted)', fontSize: '12px' }}>{row.label}</span>
           </div>
         ),
       },
       ...ADMIN_SECTIONS.map((section) => ({
         key: section,
         header: sectionsLabels[section],
-        render: (row: MatrixRow) => <Tag>{row.access.has(section) ? "Доступно" : "Скрыто"}</Tag>,
+        render: (row: MatrixRow) => <Tag>{row.access.has(section) ? 'Доступно' : 'Скрыто'}</Tag>,
       })),
     ],
-    [],
+    []
   );
 
   return (
-    <section style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+    <section style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       <div>
         <h1>Профиль</h1>
-        <p style={{ color: "var(--color-text-muted)" }}>
-          Вы авторизованы как <strong>{user?.fullName}</strong> ({user?.email}). Текущая роль —{" "}
+        <p style={{ color: 'var(--color-text-muted)' }}>
+          Вы авторизованы как <strong>{user?.fullName}</strong> ({user?.email}). Текущая роль —{' '}
           {user?.role}.
         </p>
       </div>

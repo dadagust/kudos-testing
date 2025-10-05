@@ -1,4 +1,4 @@
-import { Role } from "../config/roles";
+import { Role } from '../config/roles';
 
 export const hasAccess = (role: Role | null, allowed: Role[]): boolean => {
   if (!role) {

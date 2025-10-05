@@ -1,4 +1,4 @@
-import { AdminSection, Role } from "@/shared/config/roles";
+import { AdminSection, Role } from '@/shared/config/roles';
 
 export type AccessMatrix = Record<AdminSection, boolean>;
 

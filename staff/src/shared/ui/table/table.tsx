@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { ReactNode } from "react";
+import { ReactNode } from 'react';
 
-import styles from "./table.module.sass";
+import styles from './table.module.sass';
 
 export interface TableColumn<T> {
   key: keyof T | string;
@@ -22,7 +22,7 @@ export const Table = <T extends Record<string, unknown>>({
   emptyMessage,
 }: TableProps<T>) => {
   if (!data.length) {
-    return <div className={styles.emptyState}>{emptyMessage ?? "Нет данных для отображения."}</div>;
+    return <div className={styles.emptyState}>{emptyMessage ?? 'Нет данных для отображения.'}</div>;
   }
 
   return (

@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { FC, ReactNode } from "react";
+import { FC, ReactNode } from 'react';
 
-import styles from "./drawer.module.sass";
+import styles from './drawer.module.sass';
 
 interface DrawerProps {
   open: boolean;

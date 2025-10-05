@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import clsx from "clsx";
-import { FC } from "react";
+import clsx from 'clsx';
+import { FC } from 'react';
 
-import styles from "./icon.module.sass";
+import styles from './icon.module.sass';
 
 interface IconProps {
   name: string;

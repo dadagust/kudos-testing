@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import clsx from "clsx";
-import { DetailedHTMLProps, InputHTMLAttributes, forwardRef } from "react";
+import clsx from 'clsx';
+import { DetailedHTMLProps, InputHTMLAttributes, forwardRef } from 'react';
 
-import styles from "./input.module.sass";
+import styles from './input.module.sass';
 
 type NativeInputProps = DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
 
@@ -21,7 +21,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       {error ? <span className={clsx(styles.helper, styles.helperError)}>{error}</span> : null}
       {!error && helperText ? <span className={styles.helper}>{helperText}</span> : null}
     </label>
-  ),
+  )
 );
 
-Input.displayName = "Input";
+Input.displayName = 'Input';

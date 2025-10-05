@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import clsx from "clsx";
-import { FC, ReactNode } from "react";
+import clsx from 'clsx';
+import { FC, ReactNode } from 'react';
 
-import styles from "./form-field.module.sass";
+import styles from './form-field.module.sass';
 
 interface FormFieldProps {
   label: string;

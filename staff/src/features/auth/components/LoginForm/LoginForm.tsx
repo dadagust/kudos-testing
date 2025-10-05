@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useState } from 'react';
 
-import { useAuth } from "@/features/auth";
-import { Alert, Button, Input } from "@/shared/ui";
+import { useAuth } from '@/features/auth';
+import { Alert, Button, Input } from '@/shared/ui';
 
-import styles from "./LoginForm.module.sass";
+import styles from './LoginForm.module.sass';
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -13,7 +13,7 @@ interface LoginFormProps {
 
 export const LoginForm = ({ onSuccess }: LoginFormProps) => {
   const { login, status } = useAuth();
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -24,7 +24,7 @@ export const LoginForm = ({ onSuccess }: LoginFormProps) => {
       await login(form);
       onSuccess?.();
     } catch (err) {
-      setError("Не удалось выполнить вход. Проверьте логин и пароль.");
+      setError('Не удалось выполнить вход. Проверьте логин и пароль.');
     }
   };
 
@@ -58,8 +58,8 @@ export const LoginForm = ({ onSuccess }: LoginFormProps) => {
         />
       </div>
       <div className={styles.actions}>
-        <Button type="submit" disabled={status === "loading"}>
-          {status === "loading" ? "Входим…" : "Войти"}
+        <Button type="submit" disabled={status === 'loading'}>
+          {status === 'loading' ? 'Входим…' : 'Войти'}
         </Button>
         {error ? <Alert tone="danger">{error}</Alert> : null}
       </div>

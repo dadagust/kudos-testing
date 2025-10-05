@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { FC, ReactNode } from "react";
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { FC, ReactNode } from 'react';
 
-import { UserProfile } from "@/entities/user";
-import { useAuth } from "@/features/auth";
-import { NAVIGATION_ITEMS } from "@/shared/config/navigation";
-import { ROLE_TITLES, Role } from "@/shared/config/roles";
-import { Button, Icon } from "@/shared/ui";
+import { UserProfile } from '@/entities/user';
+import { useAuth } from '@/features/auth';
+import { NAVIGATION_ITEMS } from '@/shared/config/navigation';
+import { ROLE_TITLES, Role } from '@/shared/config/roles';
+import { Button, Icon } from '@/shared/ui';
 
-import styles from "./AdminLayout.module.sass";
+import styles from './AdminLayout.module.sass';
 
 interface AdminLayoutProps {
   user: UserProfile;
@@ -56,7 +56,7 @@ export const AdminLayout: FC<AdminLayoutProps> = ({ user, children }) => {
             <span>Рабочее пространство агрегатора kudos.ru</span>
           </div>
           <div className={styles.topbarActions}>
-            <Button variant="ghost" iconLeft="user" onClick={() => router.push("/profile")}>
+            <Button variant="ghost" iconLeft="user" onClick={() => router.push('/profile')}>
               Профиль
             </Button>
             <div className={styles.user}>

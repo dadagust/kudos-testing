@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import clsx from "clsx";
-import { DetailedHTMLProps, SelectHTMLAttributes, forwardRef } from "react";
+import clsx from 'clsx';
+import { DetailedHTMLProps, SelectHTMLAttributes, forwardRef } from 'react';
 
-import styles from "./select.module.sass";
+import styles from './select.module.sass';
 
 type NativeSelectProps = DetailedHTMLProps<
   SelectHTMLAttributes<HTMLSelectElement>,
@@ -26,7 +26,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
       {error ? <span className={clsx(styles.helper, styles.helperError)}>{error}</span> : null}
       {!error && helperText ? <span className={styles.helper}>{helperText}</span> : null}
     </label>
-  ),
+  )
 );
 
-Select.displayName = "Select";
+Select.displayName = 'Select';

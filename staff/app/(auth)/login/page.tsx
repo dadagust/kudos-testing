@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
+import { useRouter } from 'next/navigation';
 
-import { LoginForm } from "@/features/auth";
+import { LoginForm } from '@/features/auth';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -10,7 +10,7 @@ export default function LoginPage() {
   return (
     <LoginForm
       onSuccess={() => {
-        router.replace("/dashboard");
+        router.replace('/dashboard');
       }}
     />
   );

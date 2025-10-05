@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import clsx from "clsx";
-import { FC, ReactNode } from "react";
+import clsx from 'clsx';
+import { FC, ReactNode } from 'react';
 
-import styles from "./tag.module.sass";
+import styles from './tag.module.sass';
 
 interface TagProps {
   children: ReactNode;

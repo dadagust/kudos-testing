@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import clsx from "clsx";
-import { FC } from "react";
+import clsx from 'clsx';
+import { FC } from 'react';
 
-import styles from "./spinner.module.sass";
+import styles from './spinner.module.sass';
 
 interface SpinnerProps {
   label?: string;
