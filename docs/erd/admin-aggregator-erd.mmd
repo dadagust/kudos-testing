@@ -1,0 +1,281 @@
+erDiagram
+  CATEGORY ||--o{ CATEGORY : "parent"
+  CATEGORY ||--o{ PRODUCT : contains
+  PRODUCT ||--o{ PRODUCT_ATTRIBUTE : has
+  ATTRIBUTE ||--o{ PRODUCT_ATTRIBUTE : defines
+  PRODUCT ||--o{ BUNDLE_ITEM : included_in
+  BUNDLE ||--o{ BUNDLE_ITEM : composed_of
+  PRODUCT ||--o{ MEDIA_ASSET : illustrated_by
+  BUNDLE ||--o{ MEDIA_ASSET : illustrated_by
+  PRODUCT ||--o{ INVENTORY_ITEM : tracked_by
+  INVENTORY_ITEM ||--o{ RESERVATION : allocated_by
+  ORDER ||--o{ ORDER_ITEM : aggregates
+  PRODUCT ||--o{ ORDER_ITEM : ordered_as
+  BUNDLE ||--o{ ORDER_ITEM : ordered_as
+  ORDER ||--o{ PAYMENT : settled_with
+  ORDER ||--o{ DEPOSIT : secured_by
+  ORDER ||--o{ DOCUMENT : documented_by
+  ORDER ||--o{ SHIPMENT : fulfilled_by
+  ROUTE ||--o{ SHIPMENT : schedules
+  SHIPMENT }o--|| ADDRESS : delivers_to
+  CUSTOMER ||--o{ ORDER : places
+  CUSTOMER ||--o{ ADDRESS : uses
+  COMPANY ||--o{ CUSTOMER : represented_by
+  COMPANY ||--o{ ADDRESS : registered_at
+  CUSTOMER ||--o{ CONTACT : has
+  COMPANY ||--o{ CONTACT : has
+  INVENTORY_ITEM ||--o{ DAMAGE_REPORT : logs
+  ORDER ||--o{ RESERVATION : requires
+
+  CATEGORY {
+    uuid id PK
+    uuid parent_id FK
+    string name
+    string slug
+    string description
+    int display_order
+    bool is_active
+  }
+
+  PRODUCT {
+    uuid id PK
+    uuid category_id FK
+    string sku
+    string name
+    string slug
+    string status
+    string availability_status
+    decimal base_price
+    decimal security_deposit
+    string rental_unit
+    text short_description
+    text full_description
+    jsonb attributes_snapshot
+    timestamp created_at
+    timestamp updated_at
+  }
+
+  ATTRIBUTE {
+    uuid id PK
+    string code
+    string name
+    string data_type
+    string unit
+    bool filterable
+    bool searchable
+  }
+
+  PRODUCT_ATTRIBUTE {
+    uuid id PK
+    uuid product_id FK
+    uuid attribute_id FK
+    string value
+  }
+
+  BUNDLE {
+    uuid id PK
+    string name
+    string slug
+    string description
+    bool is_active
+    decimal bundle_price
+  }
+
+  BUNDLE_ITEM {
+    uuid id PK
+    uuid bundle_id FK
+    uuid product_id FK
+    int quantity
+    decimal override_price
+  }
+
+  MEDIA_ASSET {
+    uuid id PK
+    uuid product_id FK
+    uuid bundle_id FK
+    string type
+    string url
+    string alt_text
+    int sort_order
+    bool is_primary
+  }
+
+  CUSTOMER {
+    uuid id PK
+    uuid company_id FK
+    string role
+    string email
+    string phone
+    string first_name
+    string last_name
+    string status
+    timestamp registered_at
+  }
+
+  COMPANY {
+    uuid id PK
+    string legal_name
+    string trade_name
+    string tax_id
+    string payment_terms
+    string website
+  }
+
+  ADDRESS {
+    uuid id PK
+    uuid customer_id FK
+    uuid company_id FK
+    string label
+    string country
+    string region
+    string city
+    string street
+    string building
+    string postal_code
+    bool is_primary
+    geojson location
+  }
+
+  CONTACT {
+    uuid id PK
+    uuid customer_id FK
+    uuid company_id FK
+    string type
+    string email
+    string phone
+    string position
+    string notes
+  }
+
+  ORDER {
+    uuid id PK
+    uuid customer_id FK
+    uuid company_id FK
+    string code
+    string status
+    string channel
+    date rental_start_date
+    date rental_end_date
+    decimal rental_total
+    decimal delivery_total
+    decimal deposit_total
+    decimal discount_total
+    decimal grand_total
+    string currency
+    string payment_status
+    timestamp created_at
+    timestamp updated_at
+  }
+
+  ORDER_ITEM {
+    uuid id PK
+    uuid order_id FK
+    uuid product_id FK
+    uuid bundle_id FK
+    string name
+    int quantity
+    int rental_days
+    decimal unit_price
+    decimal deposit_amount
+    decimal discount_amount
+    string status
+  }
+
+  PAYMENT {
+    uuid id PK
+    uuid order_id FK
+    string purpose
+    string provider
+    string method
+    decimal amount
+    string currency
+    string status
+    timestamp due_at
+    timestamp paid_at
+    string external_reference
+  }
+
+  DEPOSIT {
+    uuid id PK
+    uuid order_id FK
+    decimal expected_amount
+    decimal captured_amount
+    string status
+    timestamp captured_at
+    timestamp released_at
+    string notes
+  }
+
+  INVENTORY_ITEM {
+    uuid id PK
+    uuid product_id FK
+    string warehouse_id
+    string condition
+    string serial_number
+    int quantity_total
+    int quantity_available
+    int quantity_reserved
+    string status
+  }
+
+  RESERVATION {
+    uuid id PK
+    uuid order_id FK
+    uuid inventory_item_id FK
+    date reserved_from
+    date reserved_to
+    int quantity
+    string status
+    timestamp created_at
+  }
+
+  DAMAGE_REPORT {
+    uuid id PK
+    uuid inventory_item_id FK
+    uuid order_id FK
+    uuid reported_by_id FK
+    string reported_by_type
+    text description
+    string severity
+    decimal estimated_cost
+    decimal charged_amount
+    timestamp reported_at
+    timestamp resolved_at
+  }
+
+  DOCUMENT {
+    uuid id PK
+    uuid order_id FK
+    string type
+    string status
+    string file_url
+    string file_hash
+    int version
+    timestamp issued_at
+    timestamp signed_at
+  }
+
+  ROUTE {
+    uuid id PK
+    string code
+    date scheduled_for
+    string status
+    string vehicle_label
+    uuid driver_id FK
+    timestamp departure_at
+    timestamp arrival_at
+  }
+
+  SHIPMENT {
+    uuid id PK
+    uuid order_id FK
+    uuid route_id FK
+    uuid pickup_address_id FK
+    uuid dropoff_address_id FK
+    timestamp pickup_planned_at
+    timestamp pickup_actual_at
+    timestamp dropoff_planned_at
+    timestamp dropoff_actual_at
+    string status
+    string instructions
+  }

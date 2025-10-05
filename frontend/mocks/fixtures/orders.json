@@ -1,0 +1,216 @@
+[
+  {
+    "id": "5f47af21-bfb0-43c0-9868-f0f3077f5bc8",
+    "code": "ORD-2025-00125",
+    "customer": {
+      "id": "a2468b64-3e2d-471f-9b8d-0f0ced464c48",
+      "display_name": "Анна Морозова",
+      "email": "anna.morozova@example.com"
+    },
+    "company": null,
+    "status": "in_progress",
+    "payment_status": "partial",
+    "channel": "online",
+    "rental_start_date": "2025-09-05",
+    "rental_end_date": "2025-09-07",
+    "totals": {
+      "rental_total": 16200,
+      "delivery_total": 4800,
+      "deposit_total": 20000,
+      "discount_total": 1200,
+      "grand_total": 39800
+    },
+    "items": [
+      {
+        "id": "efad94f2-0f5f-4a13-bc3d-1bc7028e5fb3",
+        "product_id": "7f5d0c5d-9a6f-4f77-9d79-0dd60923a3c1",
+        "bundle_id": null,
+        "name": "Диван Velour Oslo",
+        "quantity": 2,
+        "rental_days": 3,
+        "unit_price": 4200,
+        "deposit_amount": 12000,
+        "discount_amount": 0,
+        "status": "confirmed"
+      },
+      {
+        "id": "4acf8774-8a2d-4c85-92c3-9961f88148e3",
+        "product_id": "b5174b1b-38bf-4af0-a038-1d74de66ca05",
+        "bundle_id": null,
+        "name": "Гирлянда Edison 15м",
+        "quantity": 4,
+        "rental_days": 3,
+        "unit_price": 950,
+        "deposit_amount": 2500,
+        "discount_amount": 200,
+        "status": "pending"
+      }
+    ],
+    "payments": [
+      {
+        "id": "a3c6f2f0-fb68-46c3-997d-f5a9b1da3558",
+        "purpose": "rental",
+        "provider": "yookassa",
+        "method": "card",
+        "amount": 15000,
+        "currency": "RUB",
+        "status": "succeeded",
+        "due_at": null,
+        "paid_at": "2025-08-20T10:15:00Z",
+        "external_reference": "YK-843259"
+      }
+    ],
+    "deposit": {
+      "id": "8f2edce5-bf61-40ad-8f8e-3f75817e4b96",
+      "expected_amount": 20000,
+      "captured_amount": 10000,
+      "status": "partially_returned",
+      "captured_at": "2025-08-20T10:20:00Z",
+      "released_at": null,
+      "notes": "Возврат после проверки повреждений"
+    },
+    "created_at": "2025-08-18T08:45:00Z",
+    "updated_at": "2025-08-21T11:12:00Z"
+  },
+  {
+    "id": "1a87e148-5b09-4b15-9786-9ca72007ba86",
+    "code": "ORD-2025-00131",
+    "customer": {
+      "id": "d83cc915-6e2c-4a7b-bb9c-8bd99c7bf83b",
+      "display_name": "ООО \"Студия праздников\"",
+      "email": "office@eventstudio.ru"
+    },
+    "company": {
+      "id": "c3236822-6e7a-4b19-9153-8af828f60c76",
+      "legal_name": "ООО \"Студия праздников\"",
+      "trade_name": "Event Studio"
+    },
+    "status": "reserved",
+    "payment_status": "awaiting",
+    "channel": "manager",
+    "rental_start_date": "2025-09-20",
+    "rental_end_date": "2025-09-21",
+    "totals": {
+      "rental_total": 24800,
+      "delivery_total": 6800,
+      "deposit_total": 30000,
+      "discount_total": 0,
+      "grand_total": 61600
+    },
+    "items": [
+      {
+        "id": "c5e3499b-5ce7-4ffc-baa5-2f030615f5f9",
+        "product_id": "b1c09e2d-8e33-4e6d-bfb7-10aa6af166bf",
+        "bundle_id": null,
+        "name": "Банкетный стол Loft",
+        "quantity": 12,
+        "rental_days": 2,
+        "unit_price": 1800,
+        "deposit_amount": 6000,
+        "discount_amount": 0,
+        "status": "pending"
+      },
+      {
+        "id": "e45a14bb-bbd7-45f4-9e1e-ccb364f35374",
+        "product_id": "5dcaadbd-04e7-4c6b-850c-696e7f7c1714",
+        "bundle_id": null,
+        "name": "Стул Chiavari белый",
+        "quantity": 120,
+        "rental_days": 2,
+        "unit_price": 420,
+        "deposit_amount": 1500,
+        "discount_amount": 0,
+        "status": "pending"
+      }
+    ],
+    "payments": [],
+    "deposit": {
+      "id": "a7645d27-043e-44a8-980a-4bb9a60d0e53",
+      "expected_amount": 30000,
+      "captured_amount": null,
+      "status": "pending",
+      "captured_at": null,
+      "released_at": null,
+      "notes": null
+    },
+    "created_at": "2025-08-19T09:10:00Z",
+    "updated_at": "2025-08-19T09:10:00Z"
+  },
+  {
+    "id": "357a8a5f-68b8-4da7-925a-bd49a3a1bdcc",
+    "code": "ORD-2025-00138",
+    "customer": {
+      "id": "7508bc38-df04-4a41-8927-52ad28c67c59",
+      "display_name": "ИП Ковалёв",
+      "email": "sales@kovalev.pro"
+    },
+    "company": {
+      "id": "50405f15-987e-44ea-842f-7dfc27d06384",
+      "legal_name": "ИП Ковалёв Иван Сергеевич",
+      "trade_name": "Kovalev Decor"
+    },
+    "status": "completed",
+    "payment_status": "paid",
+    "channel": "online",
+    "rental_start_date": "2025-08-28",
+    "rental_end_date": "2025-08-30",
+    "totals": {
+      "rental_total": 9800,
+      "delivery_total": 3200,
+      "deposit_total": 8000,
+      "discount_total": 500,
+      "grand_total": 20500
+    },
+    "items": [
+      {
+        "id": "fc3f1f1f-35d2-4602-a633-61fd037f9f79",
+        "product_id": "b5174b1b-38bf-4af0-a038-1d74de66ca05",
+        "bundle_id": null,
+        "name": "Гирлянда Edison 15м",
+        "quantity": 6,
+        "rental_days": 3,
+        "unit_price": 950,
+        "deposit_amount": 2500,
+        "discount_amount": 300,
+        "status": "fulfilled"
+      }
+    ],
+    "payments": [
+      {
+        "id": "829f5b93-3cfb-4df7-9b01-6e13a3f8d6c1",
+        "purpose": "rental",
+        "provider": "yookassa",
+        "method": "card",
+        "amount": 17500,
+        "currency": "RUB",
+        "status": "succeeded",
+        "due_at": null,
+        "paid_at": "2025-08-20T13:00:00Z",
+        "external_reference": "YK-843498"
+      },
+      {
+        "id": "a718ab63-e0fb-4d38-9200-8de2db9201d3",
+        "purpose": "deposit",
+        "provider": "yookassa",
+        "method": "card",
+        "amount": 8000,
+        "currency": "RUB",
+        "status": "succeeded",
+        "due_at": null,
+        "paid_at": "2025-08-20T13:05:00Z",
+        "external_reference": "YK-843499"
+      }
+    ],
+    "deposit": {
+      "id": "9c5b6214-4d84-4820-9402-41e06b513d8f",
+      "expected_amount": 8000,
+      "captured_amount": 8000,
+      "status": "returned",
+      "captured_at": "2025-08-20T13:05:00Z",
+      "released_at": "2025-09-02T09:40:00Z",
+      "notes": null
+    },
+    "created_at": "2025-08-10T16:10:00Z",
+    "updated_at": "2025-09-02T09:40:00Z"
+  }
+]
