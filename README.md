@@ -1,11 +1,13 @@
 # Kudos Admin Aggregator
 
-Монорепозиторий с фронтендом (Next.js 14 + TypeScript + SASS) и backend-gateway (Django + DRF).
+Монорепозиторий с витриной магазина (Next.js 14 + TypeScript), кабинетом менеджера (Next.js 14 +
+TypeScript + SASS) и backend-gateway (Django + DRF).
 
 ## Старт окружения
 
 ### Backend
-1. Перейдите в папку `backend-gateway`.
+
+1. Перейдите в папку `backend`.
 2. Установите зависимости: `poetry install`.
 3. Выполните миграции: `poetry run python manage.py migrate`.
 4. Загрузите тестовые данные: `poetry run python manage.py seed_demo_data`.
@@ -13,29 +15,38 @@
 
 Тестовые пользователи создаются автоматически (пароль по умолчанию `ChangeMe123!`).
 
-### Frontend
+### Frontend (витрина)
+
 1. Перейдите в папку `frontend`.
-2. Установите зависимости: `npm install`.
-3. Подготовьте git-хуки: `npm run prepare`.
-4. Запустите dev-сервер: `npm run dev` (порт `3000`).
+2. Установите зависимости: `pnpm install`.
+3. Запустите dev-сервер: `pnpm dev` (порт `3000`).
+
+### Staff (ЛК менеджера)
+
+1. Перейдите в папку `staff`.
+2. Установите зависимости: `pnpm install`.
+3. Подготовьте git-хуки: `pnpm run prepare`.
+4. Запустите dev-сервер: `pnpm dev` (порт `3100`).
 
 ## Проверки качества
 
-- Линтинг фронтенда: `npm run lint` (из директории `frontend`).
-- Stylelint отдельно: `npm run lint:styles`.
-- TypeScript проверка: `npm run typecheck`.
-- Backend тесты: `poetry run python manage.py test`.
+- Линтинг витрины: `pnpm lint` (из директории `frontend`).
+- Линтинг кабинета менеджера: `pnpm lint` (из директории `staff`).
+- Stylelint для кабинета: `pnpm run lint:styles`.
+- TypeScript проверка: `pnpm typecheck` (в нужной директории).
+- Backend тесты: `poetry run python manage.py test` (из `backend`).
 
 ## Husky + lint-staged + commitlint
 
-После `npm install` выполните `npm run prepare`, чтобы установить git-хуки. При коммите будет запускаться `lint-staged`, а сообщение проверяется `commitlint` (правила Conventional Commits).
+После `pnpm install` выполните `pnpm run prepare`, чтобы установить git-хуки в `staff`. При коммите будет запускаться `lint-staged`, а сообщение проверяется `commitlint` (правила Conventional Commits).
 
 ## Настройка переменных окружения
 
-- `backend-gateway/.env` — можно задать `DJANGO_SECRET_KEY`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS`, `DJANGO_CORS_ORIGINS`.
-- `frontend` использует `NEXT_PUBLIC_API_URL` (по умолчанию `http://localhost:8000/api`).
+- `backend/.env` — можно задать `DJANGO_SECRET_KEY`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS`, `DJANGO_CORS_ORIGINS`.
+- Витрина (`frontend`) использует `NEXT_PUBLIC_API_URL` (по умолчанию `http://localhost:8000/api`).
+- Кабинет менеджера (`staff`) использует `NEXT_PUBLIC_API_URL` (по умолчанию `http://localhost:8000/api`).
 
 ## Полезные команды
 
 - Генерация фикстур: `poetry run python manage.py seed_demo_data --password MySecurePass1!`
-- Сброс базы данных: удалить `backend-gateway/db.sqlite3` и заново выполнить миграции/seed.
+- Сброс базы данных: удалить `backend/db.sqlite3` и заново выполнить миграции/seed.
