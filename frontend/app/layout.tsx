@@ -1,20 +1,15 @@
-import "../styles/globals.sass";
-
 import type { Metadata } from "next";
-
-import { AppProviders } from "@/app/providers";
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Kudos Admin Gateway",
-  description: "Админ-панель агрегатора kudos.ru",
+  title: "Kudos Storefront",
+  description: "Customer-facing storefront for the Kudos platform.",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ru">
-      <body>
-        <AppProviders>{children}</AppProviders>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
