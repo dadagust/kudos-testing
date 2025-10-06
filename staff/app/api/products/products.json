@@ -1,0 +1,211 @@
+[
+  {
+    "id": "7f5d0c5d-9a6f-4f77-9d79-0dd60923a3c1",
+    "category": {
+      "id": "cc1c1f82-8846-4b6d-908c-08b3b7b7a21d",
+      "name": "Мягкая мебель",
+      "slug": "soft-seating"
+    },
+    "sku": "SOF-001",
+    "name": "Диван Velour Oslo",
+    "slug": "divan-velour-oslo",
+    "status": "active",
+    "availability_status": "in_stock",
+    "rental_unit": "day",
+    "base_price": 4200,
+    "security_deposit": 12000,
+    "short_description": "Уютный трёхместный диван с бархатной обивкой.",
+    "full_description": "Диван Velour Oslo с бархатной обивкой глубокого синего цвета. Каркас из массива, съёмные подушки.",
+    "media": [
+      {
+        "id": "b7d7c308-1f7b-4d8e-8515-7d8f2c0366ae",
+        "type": "image",
+        "url": "https://cdn.kudos.local/products/sofa-oslo.jpg",
+        "alt_text": "Диван Velour Oslo",
+        "is_primary": true,
+        "sort_order": 1
+      }
+    ],
+    "attributes": [
+      {
+        "attribute_id": "d937d39a-1a4a-4b13-854a-57f0bdc4c2a2",
+        "code": "color",
+        "name": "Цвет",
+        "value": "Темно-синий",
+        "unit": null
+      },
+      {
+        "attribute_id": "5d55bb40-50de-4a1d-b218-d8d7337bdf65",
+        "code": "material",
+        "name": "Материал",
+        "value": "Велюр",
+        "unit": null
+      }
+    ],
+    "created_at": "2025-08-11T08:21:00Z",
+    "updated_at": "2025-08-18T12:35:00Z"
+  },
+  {
+    "id": "b1c09e2d-8e33-4e6d-bfb7-10aa6af166bf",
+    "category": {
+      "id": "5c281519-404a-425f-bf98-a4c3f8fbfed2",
+      "name": "Столы",
+      "slug": "tables"
+    },
+    "sku": "TBL-014",
+    "name": "Банкетный стол Loft",
+    "slug": "banketnyj-stol-loft",
+    "status": "active",
+    "availability_status": "low_stock",
+    "rental_unit": "day",
+    "base_price": 1800,
+    "security_deposit": 6000,
+    "short_description": "Складной банкетный стол с металлическим основанием.",
+    "full_description": "Стол Loft выдерживает нагрузку до 120 кг, столешница из ламината, устойчивые ножки.",
+    "media": [
+      {
+        "id": "e2349e9f-f0b6-4dc3-ac01-177aee6c9b2f",
+        "type": "image",
+        "url": "https://cdn.kudos.local/products/table-loft.jpg",
+        "alt_text": "Банкетный стол Loft",
+        "is_primary": true,
+        "sort_order": 1
+      }
+    ],
+    "attributes": [
+      {
+        "attribute_id": "ca9eb2ee-4f5c-40d3-86e4-e627c9c916a0",
+        "code": "width",
+        "name": "Ширина",
+        "value": "180",
+        "unit": "см"
+      },
+      {
+        "attribute_id": "c04c82e7-161a-4a6d-bd6e-9860ffbd8ae3",
+        "code": "height",
+        "name": "Высота",
+        "value": "75",
+        "unit": "см"
+      }
+    ],
+    "created_at": "2025-07-02T09:12:00Z",
+    "updated_at": "2025-08-15T07:28:00Z"
+  },
+  {
+    "id": "5dcaadbd-04e7-4c6b-850c-696e7f7c1714",
+    "category": {
+      "id": "cc1c1f82-8846-4b6d-908c-08b3b7b7a21d",
+      "name": "Мягкая мебель",
+      "slug": "soft-seating"
+    },
+    "sku": "CHR-032",
+    "name": "Стул Chiavari белый",
+    "slug": "stul-chiavari-belyj",
+    "status": "active",
+    "availability_status": "in_stock",
+    "rental_unit": "day",
+    "base_price": 420,
+    "security_deposit": 1500,
+    "short_description": "Классический стул Chiavari с подушкой.",
+    "full_description": "Лёгкий, но прочный стул из бука с белой отделкой. В комплекте мягкая подушка.",
+    "media": [
+      {
+        "id": "3de169fb-5a6b-493f-88c1-c0d5f7713bad",
+        "type": "image",
+        "url": "https://cdn.kudos.local/products/chair-chiavari.jpg",
+        "alt_text": "Стул Chiavari",
+        "is_primary": true,
+        "sort_order": 1
+      }
+    ],
+    "attributes": [
+      {
+        "attribute_id": "d937d39a-1a4a-4b13-854a-57f0bdc4c2a2",
+        "code": "color",
+        "name": "Цвет",
+        "value": "Белый",
+        "unit": null
+      }
+    ],
+    "created_at": "2025-06-12T10:00:00Z",
+    "updated_at": "2025-08-10T11:45:00Z"
+  },
+  {
+    "id": "b5174b1b-38bf-4af0-a038-1d74de66ca05",
+    "category": {
+      "id": "f1bf7cd3-0cb9-4e40-96fb-cac5d6123eb4",
+      "name": "Освещение",
+      "slug": "lighting"
+    },
+    "sku": "LGT-011",
+    "name": "Гирлянда Edison 15м",
+    "slug": "girlyanda-edison-15m",
+    "status": "active",
+    "availability_status": "in_stock",
+    "rental_unit": "day",
+    "base_price": 950,
+    "security_deposit": 2500,
+    "short_description": "Гирлянда с лампами Эдисона, длина 15 м.",
+    "full_description": "Тёплая гирлянда из 30 ламп Эдисона, подходит для уличных мероприятий.",
+    "media": [
+      {
+        "id": "fcd454db-1df1-4f30-95da-4a33bf8fdfc5",
+        "type": "image",
+        "url": "https://cdn.kudos.local/products/edison-string.jpg",
+        "alt_text": "Гирлянда с лампами Эдисона",
+        "is_primary": true,
+        "sort_order": 1
+      }
+    ],
+    "attributes": [
+      {
+        "attribute_id": "68a97be6-0f48-4a9f-9818-5ef407417e80",
+        "code": "length",
+        "name": "Длина",
+        "value": "15",
+        "unit": "м"
+      }
+    ],
+    "created_at": "2025-07-21T15:32:00Z",
+    "updated_at": "2025-08-16T14:11:00Z"
+  },
+  {
+    "id": "947a6455-73de-4a3d-94bd-a6e93d2ff0e8",
+    "category": {
+      "id": "5c281519-404a-425f-bf98-a4c3f8fbfed2",
+      "name": "Столы",
+      "slug": "tables"
+    },
+    "sku": "BAR-004",
+    "name": "Барная стойка Skyline",
+    "slug": "barnaya-stojka-skyline",
+    "status": "draft",
+    "availability_status": "out_of_stock",
+    "rental_unit": "day",
+    "base_price": 3600,
+    "security_deposit": 9500,
+    "short_description": "Модульная барная стойка с LED‑подсветкой.",
+    "full_description": "Модульная стойка Skyline с RGB‑подсветкой, быстрая сборка, стойкий акрил.",
+    "media": [
+      {
+        "id": "645c9a19-4283-496c-8568-53cb39bb80b0",
+        "type": "image",
+        "url": "https://cdn.kudos.local/products/bar-skyline.jpg",
+        "alt_text": "Барная стойка Skyline",
+        "is_primary": true,
+        "sort_order": 1
+      }
+    ],
+    "attributes": [
+      {
+        "attribute_id": "d937d39a-1a4a-4b13-854a-57f0bdc4c2a2",
+        "code": "color",
+        "name": "Цвет",
+        "value": "Белый",
+        "unit": null
+      }
+    ],
+    "created_at": "2025-08-05T08:05:00Z",
+    "updated_at": "2025-08-19T10:45:00Z"
+  }
+]
