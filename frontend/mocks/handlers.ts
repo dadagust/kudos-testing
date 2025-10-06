@@ -254,16 +254,24 @@ const findCustomerCompany = (companyId: string | null | undefined): CustomerComp
   if (!companyId) {
     return null;
   }
-  return customers.map((item) => item.company).find((company) => company && company.id === companyId) ?? null;
+  return (
+    customers.map((item) => item.company).find((company) => company && company.id === companyId) ??
+    null
+  );
 };
 
 const findCompanySummary = (companyId: string | null | undefined): CompanySummary | null =>
   toCompanySummary(findCustomerCompany(companyId));
 
-const categoryMap = new Map(products.map((product) => [product.category.id, clone(product.category)]));
+const categoryMap = new Map(
+  products.map((product) => [product.category.id, clone(product.category)])
+);
 const attributeMap = new Map(
   products.flatMap((product) =>
-    product.attributes.map((attribute) => [attribute.attribute_id, { code: attribute.code, name: attribute.name, unit: attribute.unit }])
+    product.attributes.map((attribute) => [
+      attribute.attribute_id,
+      { code: attribute.code, name: attribute.name, unit: attribute.unit },
+    ])
   )
 );
 
@@ -281,7 +289,8 @@ const parsePagination = (url: URL) => {
   const pageSize = Number(url.searchParams.get('page_size') ?? '20');
   return {
     page: Number.isFinite(page) && page >= 1 ? Math.floor(page) : 1,
-    pageSize: Number.isFinite(pageSize) && pageSize >= 1 && pageSize <= 100 ? Math.floor(pageSize) : 20,
+    pageSize:
+      Number.isFinite(pageSize) && pageSize >= 1 && pageSize <= 100 ? Math.floor(pageSize) : 20,
   };
 };
 
@@ -296,15 +305,25 @@ const getFilterValues = (url: URL, filterName: string): string[] => {
   return values;
 };
 
-const applySearch = <T>(items: T[], searchTerm: string | null, selector: (item: T) => string[]): T[] => {
+const applySearch = <T>(
+  items: T[],
+  searchTerm: string | null,
+  selector: (item: T) => string[]
+): T[] => {
   if (!searchTerm) {
     return items;
   }
   const lowered = searchTerm.toLowerCase();
-  return items.filter((item) => selector(item).some((value) => value.toLowerCase().includes(lowered)));
+  return items.filter((item) =>
+    selector(item).some((value) => value.toLowerCase().includes(lowered))
+  );
 };
 
-const applySort = <T>(items: T[], sortRaw: string | null, selectors: Record<string, SortSelector<T>>): T[] => {
+const applySort = <T>(
+  items: T[],
+  sortRaw: string | null,
+  selectors: Record<string, SortSelector<T>>
+): T[] => {
   if (!sortRaw) {
     return [...items];
   }
@@ -353,7 +372,12 @@ const applySort = <T>(items: T[], sortRaw: string | null, selectors: Record<stri
   });
 };
 
-const buildPagination = <T>(url: URL, dataset: T[], page: number, pageSize: number): PaginatedPayload<T> => {
+const buildPagination = <T>(
+  url: URL,
+  dataset: T[],
+  page: number,
+  pageSize: number
+): PaginatedPayload<T> => {
   const total = dataset.length;
   const totalPages = total === 0 ? 0 : Math.ceil(total / pageSize);
   const safePage = totalPages === 0 ? 1 : Math.min(Math.max(page, 1), totalPages);
@@ -406,7 +430,11 @@ const selectProducts = (url: URL): PaginatedPayload<Product> | Response => {
   const categoryFilter = getFilterValues(url, 'category_id');
   const sortValue = url.searchParams.get('sort');
 
-  let subset = applySearch(products, searchTerm, (product) => [product.name, product.sku, product.category.name]);
+  let subset = applySearch(products, searchTerm, (product) => [
+    product.name,
+    product.sku,
+    product.category.name,
+  ]);
 
   if (statusFilter.length > 0) {
     const allowed = new Set(statusFilter);
@@ -441,7 +469,11 @@ const selectOrders = (url: URL): PaginatedPayload<Order> | Response => {
   const customerFilter = getFilterValues(url, 'customer_id');
   const sortValue = url.searchParams.get('sort');
 
-  let subset = applySearch(orders, searchTerm, (order) => [order.code, order.customer.display_name, order.customer.email]);
+  let subset = applySearch(orders, searchTerm, (order) => [
+    order.code,
+    order.customer.display_name,
+    order.customer.email,
+  ]);
 
   if (statusFilter.length > 0) {
     const allowed = new Set(statusFilter);
@@ -475,7 +507,11 @@ const selectCustomers = (url: URL): PaginatedPayload<Customer> | Response => {
   const roleFilter = getFilterValues(url, 'role');
   const sortValue = url.searchParams.get('sort');
 
-  let subset = applySearch(customers, searchTerm, (customer) => [customer.email, customer.first_name, customer.last_name]);
+  let subset = applySearch(customers, searchTerm, (customer) => [
+    customer.email,
+    customer.first_name,
+    customer.last_name,
+  ]);
 
   if (roleFilter.length > 0) {
     const allowed = new Set(roleFilter);
@@ -503,7 +539,10 @@ const selectInventory = (url: URL): PaginatedPayload<InventoryItem> | Response =
   const productFilter = getFilterValues(url, 'product_id');
   const sortValue = url.searchParams.get('sort');
 
-  let subset = applySearch(inventoryItems, searchTerm, (item) => [item.warehouse_id, item.product_id]);
+  let subset = applySearch(inventoryItems, searchTerm, (item) => [
+    item.warehouse_id,
+    item.product_id,
+  ]);
 
   if (productFilter.length > 0) {
     const allowed = new Set(productFilter);
@@ -591,7 +630,10 @@ const resolveAttributes = (
     };
   });
 
-const updateTimestamps = <T extends { created_at?: string; updated_at?: string }>(entity: T, isNew: boolean) => {
+const updateTimestamps = <T extends { created_at?: string; updated_at?: string }>(
+  entity: T,
+  isNew: boolean
+) => {
   const now = new Date().toISOString();
   if (isNew && !entity.created_at) {
     Object.assign(entity, { created_at: now });
@@ -804,12 +846,17 @@ export const handlers = [
     });
 
     const rentalTotal = orderItems.reduce((acc, item) => acc + item.unit_price * item.quantity, 0);
-    const depositTotal = orderItems.reduce((acc, item) => acc + item.deposit_amount * item.quantity, 0);
+    const depositTotal = orderItems.reduce(
+      (acc, item) => acc + item.deposit_amount * item.quantity,
+      0
+    );
     const now = new Date().toISOString();
 
     const newOrder: Order = {
       id: generateId(),
-      code: `ORD-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`,
+      code: `ORD-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000)
+        .toString()
+        .padStart(4, '0')}`,
       customer: {
         id: customer.id,
         display_name: `${customer.first_name} ${customer.last_name}`.trim() || customer.email,
@@ -817,7 +864,7 @@ export const handlers = [
       },
       company:
         body.company_id !== undefined
-          ? findCompanySummary(body.company_id) ?? toCompanySummary(customer.company)
+          ? (findCompanySummary(body.company_id) ?? toCompanySummary(customer.company))
           : toCompanySummary(customer.company),
       status: 'new',
       payment_status: 'awaiting',
@@ -859,7 +906,10 @@ export const handlers = [
       });
     }
 
-    const body = (await request.json()) as Partial<{ status: Order['status']; payment_status: Order['payment_status'] }>;
+    const body = (await request.json()) as Partial<{
+      status: Order['status'];
+      payment_status: Order['payment_status'];
+    }>;
     if (body.status) {
       order.status = body.status;
     }

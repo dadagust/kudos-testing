@@ -387,7 +387,22 @@ components:
           nullable: true
         status:
           type: string
-          enum: [new, in_progress, reserved, cancelled, partially_paid, paid, to_fulfillment, assembled, shipped, completed, dispute, surcharge, closed]
+          enum:
+            [
+              new,
+              in_progress,
+              reserved,
+              cancelled,
+              partially_paid,
+              paid,
+              to_fulfillment,
+              assembled,
+              shipped,
+              completed,
+              dispute,
+              surcharge,
+              closed,
+            ]
         payment_status:
           type: string
           enum: [awaiting, partial, paid, refunded]
