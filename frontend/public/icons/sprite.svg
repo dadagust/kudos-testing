@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <symbol id="logo" viewBox="0 0 24 24">
+    <path d="M4 4h7l2 4h7l-2 12h-7l-2-4H4z" fill="currentColor"/>
+  </symbol>
+  <symbol id="dashboard" viewBox="0 0 24 24">
+    <path d="M3 3h8v8H3zM13 3h8v5h-8zM13 10h8v11h-8zM3 13h8v8H3z" fill="currentColor"/>
+  </symbol>
+  <symbol id="box" viewBox="0 0 24 24">
+    <path d="M4 7l8-4 8 4v10l-8 4-8-4V7zm8-1.5L6.5 8 12 10.5 17.5 8 12 5.5z" fill="currentColor"/>
+  </symbol>
+  <symbol id="orders" viewBox="0 0 24 24">
+    <path d="M6 3h12l3 5-9 13L3 8l3-5zm3 5h6l-3 4.5L9 8z" fill="currentColor"/>
+  </symbol>
+  <symbol id="customers" viewBox="0 0 24 24">
+    <path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 3c-4.33 0-8 2.17-8 5v1h16v-1c0-2.83-3.67-5-8-5z" fill="currentColor"/>
+  </symbol>
+  <symbol id="inventory" viewBox="0 0 24 24">
+    <path d="M4 4h16v4H4zm0 6h16v10H4z" fill="currentColor"/>
+  </symbol>
+  <symbol id="documents" viewBox="0 0 24 24">
+    <path d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm8 1.5V8h4.5zM8 12h8v2H8zm0 4h8v2H8z" fill="currentColor"/>
+  </symbol>
+  <symbol id="integrations" viewBox="0 0 24 24">
+    <path d="M7 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm10 0a3 3 0 1 1 0 6 3 3 0 0 1 0-6zM7 16a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm10 0a3 3 0 1 1 0 6 3 3 0 0 1 0-6zM6 7h2l2 4h4l2-4h2l-2.5 5L18 17h-2l-2-4h-4l-2 4H6l2.5-5z" fill="currentColor"/>
+  </symbol>
+  <symbol id="settings" viewBox="0 0 24 24">
+    <path d="M12 8a4 4 0 1 1-4 4 4 4 0 0 1 4-4zm9 4a7.43 7.43 0 0 0-.08-1l2.11-1.65-2-3.46-2.49.5a7.49 7.49 0 0 0-1.73-1L16.5 2h-4.5l-.33 2.39a7.49 7.49 0 0 0-1.73 1l-2.49-.5-2 3.46L7.56 11a7.43 7.43 0 0 0 0 2l-2.11 1.66 2 3.46 2.49-.5a7.49 7.49 0 0 0 1.73 1L12 22h4.5l.33-2.39a7.49 7.49 0 0 0 1.73-1l2.49.5 2-3.46L20.92 13a7.43 7.43 0 0 0 .08-1z" fill="currentColor"/>
+  </symbol>
+  <symbol id="logs" viewBox="0 0 24 24">
+    <path d="M5 3h14v4H5zm0 6h14v12H5zm4 3v6h2v-6zm4 0v6h2v-6z" fill="currentColor"/>
+  </symbol>
+  <symbol id="logout" viewBox="0 0 24 24">
+    <path d="M10 3H5v18h5v-2H7V5h3zM14 7l5 5-5 5v-3h-6v-4h6z" fill="currentColor"/>
+  </symbol>
+  <symbol id="plus" viewBox="0 0 24 24">
+    <path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z" fill="currentColor"/>
+  </symbol>
+  <symbol id="filter" viewBox="0 0 24 24">
+    <path d="M4 5h16v2l-6 7v4l-4 2v-6L4 7z" fill="currentColor"/>
+  </symbol>
+  <symbol id="upload" viewBox="0 0 24 24">
+    <path d="M5 20h14v-2H5zm7-16l5 5h-3v4h-4v-4H7z" fill="currentColor"/>
+  </symbol>
+  <symbol id="user" viewBox="0 0 24 24">
+    <path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-4.33 0-8 2.17-8 5v1h16v-1c0-2.83-3.67-5-8-5z" fill="currentColor"/>
+  </symbol>
+  <symbol id="alert" viewBox="0 0 24 24">
+    <path d="M1 21h22L12 2 1 21zm12-3h-2v2h2zm0-6h-2v4h2z" fill="currentColor"/>
+  </symbol>
+  <symbol id="info" viewBox="0 0 24 24">
+    <path d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2zm1 15h-2v-6h2zm0-8h-2V7h2z" fill="currentColor"/>
+  </symbol>
+  <symbol id="check" viewBox="0 0 24 24">
+    <path d="M9 16.17l-3.88-3.88L4 12.41l5 5 11-11-1.41-1.41z" fill="currentColor"/>
+  </symbol>
+  <symbol id="close" viewBox="0 0 24 24">
+    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  </symbol>
+</svg>
