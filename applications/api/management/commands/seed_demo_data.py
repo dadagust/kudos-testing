@@ -43,6 +43,7 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.SUCCESS(
-                f'Данные готовы. Пользователи: {len(self.DEMO_USERS)}, новых создано: {created_count}. Пароль: {default_password}'
+                f'Данные готовы. Пользователи: {len(self.DEMO_USERS)}, новых создано:'
+                f' {created_count}. Пароль: {default_password}'
             )
         )

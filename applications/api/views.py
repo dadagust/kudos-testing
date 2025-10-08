@@ -9,17 +9,17 @@ from .models import UserProfile
 from .serializers import AuthResponseSerializer, LoginSerializer, UserProfileSerializer
 
 
-@api_view(["GET"])
+@api_view(['GET'])
 @permission_classes([AllowAny])
 def ping(request):
-    return Response({"status": "ok"})
+    return Response({'status': 'ok'})
 
 
 class AuthMeView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        profile = getattr(request.user, "profile", None)
+        profile = getattr(request.user, 'profile', None)
         if profile is None:
             profile, _ = UserProfile.objects.get_or_create(user=request.user)
         data = UserProfileSerializer(profile).data
@@ -32,14 +32,14 @@ class AuthLoginView(APIView):
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data["user"]
+        user = serializer.validated_data['user']
         refresh = RefreshToken.for_user(user)
         profile, _ = UserProfile.objects.get_or_create(user=user)
 
         payload = {
-            "access": str(refresh.access_token),
-            "refresh": str(refresh),
-            "user": profile,
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+            'user': profile,
         }
         response_serializer = AuthResponseSerializer(payload)
         return Response(response_serializer.data, status=status.HTTP_200_OK)
@@ -50,4 +50,4 @@ class AuthLogoutView(APIView):
 
     def post(self, request):
         # Токены не храним на сервере на этом этапе, фронт сбрасывает их самостоятельно.
-        return Response({"detail": "Logged out"}, status=status.HTTP_200_OK)
+        return Response({'detail': 'Logged out'}, status=status.HTTP_200_OK)

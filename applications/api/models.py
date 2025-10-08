@@ -6,22 +6,24 @@ from django.dispatch import receiver
 
 
 class RoleChoices(models.TextChoices):
-    GUEST = "guest", "Гость"
-    CLIENT = "client", "Клиент"
-    B2B = "b2b", "B2B Клиент"
-    MANAGER = "manager", "Менеджер"
-    WAREHOUSE = "warehouse", "Склад"
-    ACCOUNTANT = "accountant", "Бухгалтерия"
-    CONTENT_MANAGER = "content_manager", "Контент-менеджер"
-    ADMINISTRATOR = "administrator", "Администратор"
+    GUEST = 'guest', 'Гость'
+    CLIENT = 'client', 'Клиент'
+    B2B = 'b2b', 'B2B Клиент'
+    MANAGER = 'manager', 'Менеджер'
+    WAREHOUSE = 'warehouse', 'Склад'
+    ACCOUNTANT = 'accountant', 'Бухгалтерия'
+    CONTENT_MANAGER = 'content_manager', 'Контент-менеджер'
+    ADMINISTRATOR = 'administrator', 'Администратор'
 
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile")
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile'
+    )
     role = models.CharField(max_length=32, choices=RoleChoices.choices, default=RoleChoices.MANAGER)
 
     def __str__(self) -> str:  # pragma: no cover - human readable
-        return f"{self.user.get_full_name() or self.user.email} ({self.get_role_display()})"
+        return f'{self.user.get_full_name() or self.user.email} ({self.get_role_display()})'
 
 
 User = get_user_model()

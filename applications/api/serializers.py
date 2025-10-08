@@ -6,15 +6,15 @@ from .models import UserProfile
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(source="user.id")
-    email = serializers.EmailField(source="user.email")
+    id = serializers.IntegerField(source='user.id')
+    email = serializers.EmailField(source='user.email')
     full_name = serializers.SerializerMethodField()
     role = serializers.CharField()
     access = serializers.SerializerMethodField()
 
     class Meta:
         model = UserProfile
-        fields = ("id", "email", "full_name", "role", "access")
+        fields = ('id', 'email', 'full_name', 'role', 'access')
 
     def get_full_name(self, obj: UserProfile) -> str:
         return obj.user.get_full_name() or obj.user.email
@@ -30,8 +30,8 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField()
 
     def validate(self, attrs):
-        email = attrs.get("email")
-        password = attrs.get("password")
+        email = attrs.get('email')
+        password = attrs.get('password')
         user_model = get_user_model()
 
         try:
@@ -42,9 +42,9 @@ class LoginSerializer(serializers.Serializer):
 
         user = authenticate(username=username, password=password)
         if not user:
-            raise serializers.ValidationError("Неверный email или пароль")
+            raise serializers.ValidationError('Неверный email или пароль')
 
-        attrs["user"] = user
+        attrs['user'] = user
         return attrs
 
 
