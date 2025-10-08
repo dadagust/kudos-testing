@@ -42,8 +42,8 @@ TypeScript + SASS) и backend-gateway (Django + DRF).
 ## Настройка переменных окружения
 
 - `.env` — можно задать `DJANGO_SECRET_KEY`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS`, `DJANGO_CORS_ORIGINS`.
-- Витрина (`frontend`) использует `NEXT_PUBLIC_API_URL` (по умолчанию `http://localhost:8000/api`).
-- Кабинет менеджера (`staff`) использует `NEXT_PUBLIC_API_URL` (по умолчанию `http://localhost:8000/api`).
+- Витрина (`frontend`) использует `NEXT_PUBLIC_API_URL` (по умолчанию `http://localhost:8000/core`).
+- Кабинет менеджера (`staff`) использует `NEXT_PUBLIC_API_URL` (по умолчанию `http://localhost:8000/core`).
 
 ## Полезные команды
 

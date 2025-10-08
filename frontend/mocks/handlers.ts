@@ -642,7 +642,7 @@ const updateTimestamps = <T extends { created_at?: string; updated_at?: string }
 };
 
 export const handlers = [
-  http.get('/api/products', ({ request }) => {
+  http.get('/core/products', ({ request }) => {
     const url = new URL(request.url);
     const payload = selectProducts(url);
     if (payload instanceof Response) {
@@ -650,7 +650,7 @@ export const handlers = [
     }
     return HttpResponse.json(payload);
   }),
-  http.get('/api/products/:productId', ({ params }) => {
+  http.get('/core/products/:productId', ({ params }) => {
     const product = products.find((item) => item.id === params.productId);
     if (!product) {
       return createErrorResponse(404, {
@@ -661,7 +661,7 @@ export const handlers = [
     }
     return HttpResponse.json({ data: product });
   }),
-  http.post('/api/products', async ({ request }) => {
+  http.post('/core/products', async ({ request }) => {
     const body = (await request.json()) as {
       category_id: string;
       sku: string;
@@ -710,7 +710,7 @@ export const handlers = [
 
     return HttpResponse.json({ data: newProduct }, { status: 201 });
   }),
-  http.patch('/api/products/:productId', async ({ request, params }) => {
+  http.patch('/core/products/:productId', async ({ request, params }) => {
     const product = products.find((item) => item.id === params.productId);
     if (!product) {
       return createErrorResponse(404, {
@@ -767,7 +767,7 @@ export const handlers = [
 
     return HttpResponse.json({ data: product });
   }),
-  http.delete('/api/products/:productId', ({ params }) => {
+  http.delete('/core/products/:productId', ({ params }) => {
     const index = products.findIndex((item) => item.id === params.productId);
     if (index === -1) {
       return createErrorResponse(404, {
@@ -778,7 +778,7 @@ export const handlers = [
     products.splice(index, 1);
     return HttpResponse.json(null, { status: 204 });
   }),
-  http.get('/api/orders', ({ request }) => {
+  http.get('/core/orders', ({ request }) => {
     const url = new URL(request.url);
     const payload = selectOrders(url);
     if (payload instanceof Response) {
@@ -786,7 +786,7 @@ export const handlers = [
     }
     return HttpResponse.json(payload);
   }),
-  http.get('/api/orders/:orderId', ({ params }) => {
+  http.get('/core/orders/:orderId', ({ params }) => {
     const order = orders.find((item) => item.id === params.orderId);
     if (!order) {
       return createErrorResponse(404, {
@@ -796,7 +796,7 @@ export const handlers = [
     }
     return HttpResponse.json({ data: order });
   }),
-  http.post('/api/orders', async ({ request }) => {
+  http.post('/core/orders', async ({ request }) => {
     const body = (await request.json()) as {
       customer_id: string;
       company_id?: string | null;
@@ -897,7 +897,7 @@ export const handlers = [
 
     return HttpResponse.json({ data: newOrder }, { status: 201 });
   }),
-  http.patch('/api/orders/:orderId', async ({ request, params }) => {
+  http.patch('/core/orders/:orderId', async ({ request, params }) => {
     const order = orders.find((item) => item.id === params.orderId);
     if (!order) {
       return createErrorResponse(404, {
@@ -920,7 +920,7 @@ export const handlers = [
 
     return HttpResponse.json({ data: order });
   }),
-  http.delete('/api/orders/:orderId', ({ params }) => {
+  http.delete('/core/orders/:orderId', ({ params }) => {
     const index = orders.findIndex((item) => item.id === params.orderId);
     if (index === -1) {
       return createErrorResponse(404, {
@@ -931,7 +931,7 @@ export const handlers = [
     orders.splice(index, 1);
     return HttpResponse.json(null, { status: 204 });
   }),
-  http.post('/api/orders/:orderId/payments', async ({ params, request }) => {
+  http.post('/core/orders/:orderId/payments', async ({ params, request }) => {
     const order = orders.find((item) => item.id === params.orderId);
     if (!order) {
       return createErrorResponse(404, {
@@ -977,7 +977,7 @@ export const handlers = [
 
     return HttpResponse.json({ data: order }, { status: 201 });
   }),
-  http.get('/api/customers', ({ request }) => {
+  http.get('/core/customers', ({ request }) => {
     const url = new URL(request.url);
     const payload = selectCustomers(url);
     if (payload instanceof Response) {
@@ -985,7 +985,7 @@ export const handlers = [
     }
     return HttpResponse.json(payload);
   }),
-  http.get('/api/customers/:customerId', ({ params }) => {
+  http.get('/core/customers/:customerId', ({ params }) => {
     const customer = customers.find((item) => item.id === params.customerId);
     if (!customer) {
       return createErrorResponse(404, {
@@ -995,7 +995,7 @@ export const handlers = [
     }
     return HttpResponse.json({ data: customer });
   }),
-  http.post('/api/customers', async ({ request }) => {
+  http.post('/core/customers', async ({ request }) => {
     const body = (await request.json()) as {
       email: string;
       phone?: string;
@@ -1034,7 +1034,7 @@ export const handlers = [
 
     return HttpResponse.json({ data: newCustomer }, { status: 201 });
   }),
-  http.patch('/api/customers/:customerId', async ({ request, params }) => {
+  http.patch('/core/customers/:customerId', async ({ request, params }) => {
     const customer = customers.find((item) => item.id === params.customerId);
     if (!customer) {
       return createErrorResponse(404, {
@@ -1062,7 +1062,7 @@ export const handlers = [
 
     return HttpResponse.json({ data: customer });
   }),
-  http.delete('/api/customers/:customerId', ({ params }) => {
+  http.delete('/core/customers/:customerId', ({ params }) => {
     const index = customers.findIndex((item) => item.id === params.customerId);
     if (index === -1) {
       return createErrorResponse(404, {
@@ -1073,7 +1073,7 @@ export const handlers = [
     customers.splice(index, 1);
     return HttpResponse.json(null, { status: 204 });
   }),
-  http.get('/api/inventory-items', ({ request }) => {
+  http.get('/core/inventory-items', ({ request }) => {
     const url = new URL(request.url);
     const payload = selectInventory(url);
     if (payload instanceof Response) {
@@ -1081,7 +1081,7 @@ export const handlers = [
     }
     return HttpResponse.json(payload);
   }),
-  http.get('/api/inventory-items/:inventoryItemId', ({ params }) => {
+  http.get('/core/inventory-items/:inventoryItemId', ({ params }) => {
     const item = inventoryItems.find((entry) => entry.id === params.inventoryItemId);
     if (!item) {
       return createErrorResponse(404, {
@@ -1091,7 +1091,7 @@ export const handlers = [
     }
     return HttpResponse.json({ data: item });
   }),
-  http.post('/api/inventory-items', async ({ request }) => {
+  http.post('/core/inventory-items', async ({ request }) => {
     const body = (await request.json()) as {
       product_id: string;
       warehouse_id: string;
@@ -1127,7 +1127,7 @@ export const handlers = [
 
     return HttpResponse.json({ data: newItem }, { status: 201 });
   }),
-  http.patch('/api/inventory-items/:inventoryItemId', async ({ request, params }) => {
+  http.patch('/core/inventory-items/:inventoryItemId', async ({ request, params }) => {
     const item = inventoryItems.find((entry) => entry.id === params.inventoryItemId);
     if (!item) {
       return createErrorResponse(404, {
@@ -1149,7 +1149,7 @@ export const handlers = [
 
     return HttpResponse.json({ data: item });
   }),
-  http.delete('/api/inventory-items/:inventoryItemId', ({ params }) => {
+  http.delete('/core/inventory-items/:inventoryItemId', ({ params }) => {
     const index = inventoryItems.findIndex((entry) => entry.id === params.inventoryItemId);
     if (index === -1) {
       return createErrorResponse(404, {
@@ -1160,7 +1160,7 @@ export const handlers = [
     inventoryItems.splice(index, 1);
     return HttpResponse.json(null, { status: 204 });
   }),
-  http.get('/api/documents', ({ request }) => {
+  http.get('/core/documents', ({ request }) => {
     const url = new URL(request.url);
     const payload = selectDocuments(url);
     if (payload instanceof Response) {
@@ -1168,7 +1168,7 @@ export const handlers = [
     }
     return HttpResponse.json(payload);
   }),
-  http.get('/api/documents/:documentId', ({ params }) => {
+  http.get('/core/documents/:documentId', ({ params }) => {
     const document = documents.find((item) => item.id === params.documentId);
     if (!document) {
       return createErrorResponse(404, {
@@ -1178,7 +1178,7 @@ export const handlers = [
     }
     return HttpResponse.json({ data: document });
   }),
-  http.post('/api/documents', async ({ request }) => {
+  http.post('/core/documents', async ({ request }) => {
     const body = (await request.json()) as {
       order_id: string;
       type: Document['type'];
@@ -1211,7 +1211,7 @@ export const handlers = [
 
     return HttpResponse.json({ data: newDocument }, { status: 201 });
   }),
-  http.patch('/api/documents/:documentId', async ({ request, params }) => {
+  http.patch('/core/documents/:documentId', async ({ request, params }) => {
     const document = documents.find((item) => item.id === params.documentId);
     if (!document) {
       return createErrorResponse(404, {
@@ -1232,7 +1232,7 @@ export const handlers = [
 
     return HttpResponse.json({ data: document });
   }),
-  http.delete('/api/documents/:documentId', ({ params }) => {
+  http.delete('/core/documents/:documentId', ({ params }) => {
     const index = documents.findIndex((item) => item.id === params.documentId);
     if (index === -1) {
       return createErrorResponse(404, {
