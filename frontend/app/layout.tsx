@@ -1,17 +1,19 @@
-import type { ReactNode } from 'react';
-import './globals.css';
-import { MSWProvider } from './providers/msw-provider';
+import '../styles/globals.sass';
 
-export const metadata = {
-  title: 'Kudos Storefront',
-  description: 'Витрина магазина Kudos.',
+import type { Metadata } from 'next';
+
+import { AppProviders } from '@/app/providers';
+
+export const metadata: Metadata = {
+  title: 'Kudos Admin Gateway',
+  description: 'Админ-панель агрегатора kudos.ru',
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ru">
       <body>
-        <MSWProvider>{children}</MSWProvider>
+        <AppProviders>{children}</AppProviders>
       </body>
     </html>
   );

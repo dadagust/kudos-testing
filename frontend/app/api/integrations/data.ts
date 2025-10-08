@@ -1,0 +1,68 @@
+import { IntegrationDescriptor } from '@/entities/integration';
+
+export const INTEGRATIONS_FIXTURE: IntegrationDescriptor[] = [
+  {
+    id: 'integration-amocrm',
+    provider: 'amocrm',
+    name: 'AmoCRM',
+    status: 'connected',
+    description: 'Синхронизация сделок, статусов и карточек клиентов.',
+    connected_by: 'admin@kudos.ru',
+    last_synced_at: '2025-10-12T06:30:00.000Z',
+    settings_summary: 'Webhook, pipeline=Rentals, статус по умолчанию — "Новая заявка".',
+    metrics: {
+      success_operations: 482,
+      failed_operations: 3,
+      last_error: null,
+    },
+    capabilities: ['crm'],
+  },
+  {
+    id: 'integration-yookassa',
+    provider: 'yookassa',
+    name: 'ЮKassa',
+    status: 'connected',
+    description: 'Приём платежей, предавторизация и возврат залогов.',
+    connected_by: 'finance@kudos.ru',
+    last_synced_at: '2025-10-12T07:45:00.000Z',
+    settings_summary: 'Shop ID 123456, онлайн-чеки включены, СБП активирован.',
+    metrics: {
+      success_operations: 1298,
+      failed_operations: 8,
+      last_error: null,
+    },
+    capabilities: ['payments'],
+  },
+  {
+    id: 'integration-yandex-geocoder',
+    provider: 'yandex_geocoder',
+    name: 'Яндекс Геокодер',
+    status: 'draft',
+    description: 'Маршрутизация доставок, расчёт километража и времени в пути.',
+    connected_by: 'logistics@kudos.ru',
+    last_synced_at: null,
+    settings_summary: 'API ключ не активирован, требуется подтверждение тарифа.',
+    metrics: {
+      success_operations: 0,
+      failed_operations: 0,
+      last_error: null,
+    },
+    capabilities: ['geocoding'],
+  },
+  {
+    id: 'integration-amocrm-webhooks',
+    provider: 'amocrm',
+    name: 'AmoCRM Webhooks',
+    status: 'error',
+    description: 'Обновление статусов заказов при смене этапа в CRM.',
+    connected_by: 'it@kudos.ru',
+    last_synced_at: '2025-10-11T21:15:00.000Z',
+    settings_summary: 'Webhook: /core/integrations/amocrm/callback, требуется проверка подписи.',
+    metrics: {
+      success_operations: 214,
+      failed_operations: 5,
+      last_error: '401 Unauthorized от AmoCRM при проверке подписи.',
+    },
+    capabilities: ['crm', 'webhooks'],
+  },
+];
