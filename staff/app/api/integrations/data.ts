@@ -57,7 +57,7 @@ export const INTEGRATIONS_FIXTURE: IntegrationDescriptor[] = [
     description: 'Обновление статусов заказов при смене этапа в CRM.',
     connected_by: 'it@kudos.ru',
     last_synced_at: '2025-10-11T21:15:00.000Z',
-    settings_summary: 'Webhook: /api/integrations/amocrm/callback, требуется проверка подписи.',
+    settings_summary: 'Webhook: /core/integrations/amocrm/callback, требуется проверка подписи.',
     metrics: {
       success_operations: 214,
       failed_operations: 5,

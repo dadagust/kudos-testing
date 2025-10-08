@@ -3,7 +3,7 @@ import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { auditLogger } from '../lib/logger';
 import { useAuthStore } from '../state/auth-store';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/core';
 
 type ExtendedAxiosRequestConfig = AxiosRequestConfig & { kudosTraceId?: string };
 
@@ -95,5 +95,5 @@ export const httpClient = createHttpClient({
 });
 
 export const mockClient = createHttpClient({
-  baseURL: '/api',
+  baseURL: '/core',
 });

@@ -1090,7 +1090,7 @@ components:
       required:
         - data
 paths:
-  /api/products:
+  /core/products:
     get:
       summary: Список продуктов
       description: Возвращает страницу продуктов каталога с поддержкой поиска, фильтрации и сортировки.
@@ -1125,7 +1125,7 @@ paths:
                 $ref: '#/components/schemas/ProductResponse'
         '400':
           $ref: '#/components/responses/ValidationError'
-  /api/products/{productId}:
+  /core/products/{productId}:
     parameters:
       - name: productId
         in: path
@@ -1170,7 +1170,7 @@ paths:
           description: Продукт удалён.
         '404':
           $ref: '#/components/responses/NotFound'
-  /api/orders:
+  /core/orders:
     get:
       summary: Список заказов
       parameters:
@@ -1204,7 +1204,7 @@ paths:
                 $ref: '#/components/schemas/OrderResponse'
         '400':
           $ref: '#/components/responses/ValidationError'
-  /api/orders/{orderId}:
+  /core/orders/{orderId}:
     parameters:
       - name: orderId
         in: path
@@ -1249,7 +1249,7 @@ paths:
           description: Заказ удалён.
         '404':
           $ref: '#/components/responses/NotFound'
-  /api/orders/{orderId}/payments:
+  /core/orders/{orderId}/payments:
     post:
       summary: Создание платежа по заказу
       parameters:
@@ -1276,7 +1276,7 @@ paths:
           $ref: '#/components/responses/ValidationError'
         '404':
           $ref: '#/components/responses/NotFound'
-  /api/customers:
+  /core/customers:
     get:
       summary: Список клиентов
       parameters:
@@ -1309,7 +1309,7 @@ paths:
                 $ref: '#/components/schemas/CustomerResponse'
         '400':
           $ref: '#/components/responses/ValidationError'
-  /api/customers/{customerId}:
+  /core/customers/{customerId}:
     parameters:
       - name: customerId
         in: path
@@ -1354,7 +1354,7 @@ paths:
           description: Клиент удалён.
         '404':
           $ref: '#/components/responses/NotFound'
-  /api/inventory-items:
+  /core/inventory-items:
     get:
       summary: Список складских позиций
       parameters:
@@ -1387,7 +1387,7 @@ paths:
                 $ref: '#/components/schemas/InventoryResponse'
         '400':
           $ref: '#/components/responses/ValidationError'
-  /api/inventory-items/{inventoryItemId}:
+  /core/inventory-items/{inventoryItemId}:
     parameters:
       - name: inventoryItemId
         in: path
@@ -1432,7 +1432,7 @@ paths:
           description: Позиция удалена.
         '404':
           $ref: '#/components/responses/NotFound'
-  /api/documents:
+  /core/documents:
     get:
       summary: Список документов
       parameters:
@@ -1465,7 +1465,7 @@ paths:
                 $ref: '#/components/schemas/DocumentResponse'
         '400':
           $ref: '#/components/responses/ValidationError'
-  /api/documents/{documentId}:
+  /core/documents/{documentId}:
     parameters:
       - name: documentId
         in: path
