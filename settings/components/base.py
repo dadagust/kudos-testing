@@ -1,7 +1,8 @@
+# settings/base.py
+
 """Base settings shared across environments."""
 
 from pathlib import Path
-
 import environ
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -22,7 +23,15 @@ DEBUG = env.bool('DJANGO_DEBUG', default=False)
 ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS', default=['localhost'])
 
 DATABASES = {
-    'default': env.db(default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}"),
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'kudos',
+        'USER': 'kudos',
+        'PASSWORD': 'kudos',
+        'HOST': 'localhost',
+        'PORT': '5432',
+        'CONN_MAX_AGE': 60,
+    }
 }
 
 MIDDLEWARE = [
