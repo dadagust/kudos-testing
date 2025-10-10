@@ -7,7 +7,7 @@ import { FC, ReactNode } from 'react';
 import { UserProfile } from '@/entities/user';
 import { useAuth } from '@/features/auth';
 import { NAVIGATION_ITEMS } from '@/shared/config/navigation';
-import { ROLE_TITLES, Role } from '@/shared/config/roles';
+import { ROLE_TITLES } from '@/shared/config/roles';
 import { Button, Icon } from '@/shared/ui';
 
 import styles from './AdminLayout.module.sass';
@@ -17,14 +17,22 @@ interface AdminLayoutProps {
   children: ReactNode;
 }
 
-const getAvailableNavItems = (role: Role) =>
-  NAVIGATION_ITEMS.filter((item) => item.roles.includes(role));
+const getAvailableNavItems = (user: UserProfile) =>
+  NAVIGATION_ITEMS.filter((item) => {
+    const canAccessSection = user.access?.[item.id];
+
+    if (typeof canAccessSection === 'boolean') {
+      return canAccessSection;
+    }
+
+    return item.roles.includes(user.role);
+  });
 
 export const AdminLayout: FC<AdminLayoutProps> = ({ user, children }) => {
   const pathname = usePathname();
   const router = useRouter();
   const { logout } = useAuth();
-  const navItems = getAvailableNavItems(user.role);
+  const navItems = getAvailableNavItems(user);
 
   return (
     <div className={styles.layout}>

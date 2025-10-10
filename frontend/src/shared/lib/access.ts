@@ -8,4 +8,4 @@ export const hasAccess = (role: Role | null, allowed: Role[]): boolean => {
   return allowed.includes(role);
 };
 
-export const isAdministrator = (role: Role | null): boolean => role === Role.Administrator;
+export const isAdministrator = (role: Role | null): boolean => role === Role.Admin;
