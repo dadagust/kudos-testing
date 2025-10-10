@@ -9,7 +9,6 @@ import {
   useProductQuery,
 } from '@/entities/product';
 import { RoleGuard } from '@/features/auth';
-import { Role } from '@/shared/config/roles';
 import { Alert, Badge, Button, Spinner, Tag } from '@/shared/ui';
 
 const formatCurrency = new Intl.NumberFormat('ru-RU', {
@@ -46,7 +45,7 @@ export default function ProductDetailsPage({ params }: ProductDetailsPageProps) 
   const product = data?.data;
 
   return (
-    <RoleGuard allow={[Role.Manager, Role.ContentManager, Role.Administrator]}>
+    <RoleGuard section="products">
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Button variant="ghost" onClick={() => router.back()}>

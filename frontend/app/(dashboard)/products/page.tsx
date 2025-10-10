@@ -11,7 +11,6 @@ import {
 } from '@/entities/product';
 import type { ProductListQuery, ProductSummary } from '@/entities/product';
 import { RoleGuard } from '@/features/auth';
-import { Role } from '@/shared/config/roles';
 import { Alert, Badge, Button, Input, Pagination, Select, Spinner, Tag, Table } from '@/shared/ui';
 import type { TableColumn } from '@/shared/ui';
 
@@ -149,7 +148,7 @@ export default function ProductsPage() {
   };
 
   return (
-    <RoleGuard allow={[Role.Manager, Role.ContentManager, Role.Administrator]}>
+    <RoleGuard section="products">
       <header
         style={{
           display: 'flex',

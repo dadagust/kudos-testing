@@ -2,24 +2,26 @@
 
 import { ReactNode } from 'react';
 
-import { Role } from '@/shared/config/roles';
+import { AdminSection } from '@/shared/config/roles';
 import { Alert } from '@/shared/ui';
 
 import { useAuth } from '../hooks/use-auth';
 
 interface RoleGuardProps {
-  allow: Role[];
+  section: AdminSection;
   fallback?: ReactNode;
   children: ReactNode;
 }
 
-export const RoleGuard = ({ allow, fallback, children }: RoleGuardProps) => {
+export const RoleGuard = ({ section, fallback, children }: RoleGuardProps) => {
   const { user } = useAuth();
 
-  if (!user || !allow.includes(user.role)) {
+  const hasAccess = Boolean(user?.access?.[section]);
+
+  if (!hasAccess) {
     return (fallback ?? (
       <Alert title="Недостаточно прав" tone="danger">
-        Для просмотра раздела необходима другая роль.
+        Для просмотра раздела необходим доступ к соответствующему разделу.
       </Alert>
     )) as ReactNode;
   }

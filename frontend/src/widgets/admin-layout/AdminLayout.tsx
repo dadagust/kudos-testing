@@ -7,7 +7,7 @@ import { FC, ReactNode } from 'react';
 import { UserProfile } from '@/entities/user';
 import { useAuth } from '@/features/auth';
 import { NAVIGATION_ITEMS } from '@/shared/config/navigation';
-import { ROLE_TITLES, Role } from '@/shared/config/roles';
+import { AdminSection, ROLE_TITLES } from '@/shared/config/roles';
 import { Button, Icon } from '@/shared/ui';
 
 import styles from './AdminLayout.module.sass';
@@ -17,14 +17,22 @@ interface AdminLayoutProps {
   children: ReactNode;
 }
 
-const getAvailableNavItems = (role: Role) =>
-  NAVIGATION_ITEMS.filter((item) => item.roles.includes(role));
+const hasSectionAccess = (access: UserProfile['access'], section: AdminSection) => {
+  if (!access) {
+    return false;
+  }
+
+  return Boolean(access[section]);
+};
+
+const getAvailableNavItems = (user: UserProfile) =>
+  NAVIGATION_ITEMS.filter((item) => hasSectionAccess(user.access, item.id));
 
 export const AdminLayout: FC<AdminLayoutProps> = ({ user, children }) => {
   const pathname = usePathname();
   const router = useRouter();
   const { logout } = useAuth();
-  const navItems = getAvailableNavItems(user.role);
+  const navItems = getAvailableNavItems(user);
 
   return (
     <div className={styles.layout}>
@@ -61,7 +69,7 @@ export const AdminLayout: FC<AdminLayoutProps> = ({ user, children }) => {
             </Button>
             <div className={styles.user}>
               <span className={styles.userName}>{user.fullName}</span>
-              <span className={styles.userRole}>{ROLE_TITLES[user.role]}</span>
+              <span className={styles.userRole}>{ROLE_TITLES[user.role] ?? user.role}</span>
             </div>
             <Button variant="ghost" iconLeft="logout" onClick={logout}>
               Выйти

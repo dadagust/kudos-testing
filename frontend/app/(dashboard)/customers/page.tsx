@@ -1,7 +1,6 @@
 'use client';
 
 import { RoleGuard } from '@/features/auth';
-import { Role } from '@/shared/config/roles';
 import { Button, Table } from '@/shared/ui';
 
 const customers = [
@@ -12,7 +11,7 @@ const customers = [
 
 export default function CustomersPage() {
   return (
-    <RoleGuard allow={[Role.Manager, Role.Accountant, Role.Administrator]}>
+    <RoleGuard section="customers">
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1>Клиентская база</h1>

@@ -3,7 +3,6 @@
 import { useMemo } from 'react';
 
 import { RoleGuard } from '@/features/auth';
-import { Role } from '@/shared/config/roles';
 import { useAuditLogStore } from '@/shared/state/audit-log-store';
 import type { AuditLogEntry } from '@/shared/state/audit-log-store';
 import { Badge, Button, Table, Tag } from '@/shared/ui';
@@ -86,7 +85,7 @@ export default function LogsPage() {
   ];
 
   return (
-    <RoleGuard allow={[Role.Manager, Role.Warehouse, Role.Accountant, Role.Administrator]}>
+    <RoleGuard section="logs">
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           <h1>Аудит и логи</h1>

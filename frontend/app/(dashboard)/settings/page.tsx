@@ -3,14 +3,13 @@
 import { useState } from 'react';
 
 import { RoleGuard } from '@/features/auth';
-import { Role } from '@/shared/config/roles';
 import { Button, Input, Select } from '@/shared/ui';
 
 export default function SettingsPage() {
   const [timezone, setTimezone] = useState('Europe/Moscow');
 
   return (
-    <RoleGuard allow={[Role.Administrator]}>
+    <RoleGuard section="settings">
       <h1>Настройки платформы</h1>
       <section style={{ display: 'grid', gap: '24px', maxWidth: '520px', marginTop: '24px' }}>
         <Input label="Название компании" placeholder="Kudos" defaultValue="Kudos" />

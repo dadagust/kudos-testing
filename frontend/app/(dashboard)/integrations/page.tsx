@@ -6,7 +6,6 @@ import {
   useIntegrationsQuery,
 } from '@/entities/integration';
 import { RoleGuard } from '@/features/auth';
-import { Role } from '@/shared/config/roles';
 import { Alert, Badge, Button, Spinner, Tag } from '@/shared/ui';
 
 const formatDateTime = (value: string | null) =>
@@ -21,7 +20,7 @@ export default function IntegrationsPage() {
   const { data, isLoading, isError, error, refetch, isFetching } = useIntegrationsQuery();
 
   return (
-    <RoleGuard allow={[Role.Administrator]}>
+    <RoleGuard section="integrations">
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           <h1>Интеграции</h1>
