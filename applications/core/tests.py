@@ -13,6 +13,7 @@ from .rbac import ROLE_GROUP_MAP, ROLE_PERMISSION_MATRIX
 from .serializers import LoginSerializer
 
 
+
 class AuthTests(APITestCase):
     def setUp(self):
         self.user = get_user_model().objects.create_user(
