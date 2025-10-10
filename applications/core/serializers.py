@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate, get_user_model
+from django.db import DatabaseError, OperationalError, ProgrammingError
 from rest_framework import serializers
 
 from auditlog.models import LogEntry
@@ -41,6 +42,10 @@ class LoginSerializer(serializers.Serializer):
             username = user_obj.get_username()
         except user_model.DoesNotExist:
             username = email
+        except (OperationalError, ProgrammingError, DatabaseError) as exc:
+            raise serializers.ValidationError(
+                'Сервис авторизации временно недоступен. Повторите попытку позже.'
+            ) from exc
 
         user = authenticate(username=username, password=password)
         if not user:

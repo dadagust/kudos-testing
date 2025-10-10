@@ -34,6 +34,10 @@ DATABASES = {
     }
 }
 
+database_url = env.db('DATABASE_URL', default=None)
+if database_url:
+    DATABASES['default'].update(database_url)
+
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
