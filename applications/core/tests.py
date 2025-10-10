@@ -1,8 +1,10 @@
+from unittest.mock import patch
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.test import TestCase
 from django.urls import reverse
-from rest_framework import status
+from rest_framework import serializers, status
 from rest_framework.test import APITestCase
 
 from .models import RoleChoices, UserProfile
@@ -39,6 +41,15 @@ class AuthTests(APITestCase):
             reverse('auth-login'), {'email': 'manager@kudos.ru', 'password': 'wrong'}
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_login_handles_database_errors(self):
+        user_model = get_user_model()
+        with patch.object(user_model.objects, 'get', side_effect=OperationalError('db down')):
+            serializer = LoginSerializer(data={'email': 'user@example.com', 'password': 'secret'})
+            with self.assertRaises(serializers.ValidationError) as exc:
+                serializer.is_valid(raise_exception=True)
+
+        self.assertIn('Сервис авторизации временно недоступен', str(exc.exception))
 
     def test_me_requires_auth(self):
         response = self.client.get(reverse('auth-me'))
