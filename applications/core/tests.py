@@ -2,6 +2,7 @@ from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
+from django.db.utils import OperationalError
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework import serializers, status
@@ -9,6 +10,8 @@ from rest_framework.test import APITestCase
 
 from .models import RoleChoices, UserProfile
 from .rbac import ROLE_GROUP_MAP, ROLE_PERMISSION_MATRIX
+from .serializers import LoginSerializer
+
 
 
 class AuthTests(APITestCase):

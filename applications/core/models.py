@@ -58,7 +58,6 @@ class UserProfile(models.Model):
             return
 
 
-
 User = get_user_model()
 
 

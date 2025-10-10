@@ -1,36 +1,42 @@
 export enum Role {
   Guest = 'guest',
-  Client = 'client',
+  Customer = 'customer',
   B2B = 'b2b',
-  Manager = 'manager',
+  SalesManager = 'sales_manager',
   Warehouse = 'warehouse',
   Accountant = 'accountant',
   ContentManager = 'content_manager',
-  Administrator = 'administrator',
+  Admin = 'admin',
+  Driver = 'driver',
+  Loader = 'loader',
 }
 
 export type RoleKey = `${Role}`;
 
 export const ROLE_TITLES: Record<Role, string> = {
   [Role.Guest]: 'Гость',
-  [Role.Client]: 'Клиент',
+  [Role.Customer]: 'Клиент',
   [Role.B2B]: 'B2B Клиент',
-  [Role.Manager]: 'Менеджер продаж',
+  [Role.SalesManager]: 'Менеджер продаж',
   [Role.Warehouse]: 'Склад / Логистика',
   [Role.Accountant]: 'Бухгалтерия',
   [Role.ContentManager]: 'Контент-менеджер',
-  [Role.Administrator]: 'Администратор',
+  [Role.Admin]: 'Администратор',
+  [Role.Driver]: 'Водитель',
+  [Role.Loader]: 'Грузчик',
 };
 
 export const ROLE_DESCRIPTIONS: Record<Role, string> = {
   [Role.Guest]: 'Просмотр витрины, публичные страницы и калькуляторы без авторизации.',
-  [Role.Client]: 'Личный кабинет с заказами, документами, платежами и профилем.',
+  [Role.Customer]: 'Личный кабинет с заказами, документами, платежами и профилем.',
   [Role.B2B]: 'Корпоративный кабинет с тарифами, документами и опциональным постоплатным режимом.',
-  [Role.Manager]: 'Управление заказами, резервами, расчетами и печатью документов.',
+  [Role.SalesManager]: 'Управление заказами, резервами, расчетами и печатью документов.',
   [Role.Warehouse]: 'Доступ к календарю сборки, выдаче, маршрутам и фиксации повреждений.',
   [Role.Accountant]: 'Выставление счетов, фиксация оплат, отчеты и возвраты залога.',
   [Role.ContentManager]: 'Ведение каталога товаров, комплектов, тегов и контента.',
-  [Role.Administrator]: 'Полный доступ к настройкам, ролям, интеграциям и мониторингу.',
+  [Role.Admin]: 'Полный доступ к настройкам, ролям, интеграциям и мониторингу.',
+  [Role.Driver]: 'Маршруты доставки и актуальный статус выдачи заказов.',
+  [Role.Loader]: 'Календарь выдачи/приёмки и складские операции.',
 };
 
 export const ADMIN_SECTIONS = [
@@ -49,9 +55,9 @@ export type AdminSection = (typeof ADMIN_SECTIONS)[number];
 
 export const ROLE_SECTION_ACCESS: Record<Role, AdminSection[]> = {
   [Role.Guest]: [],
-  [Role.Client]: ['dashboard'],
+  [Role.Customer]: ['dashboard'],
   [Role.B2B]: ['dashboard'],
-  [Role.Manager]: [
+  [Role.SalesManager]: [
     'dashboard',
     'products',
     'orders',
@@ -63,7 +69,7 @@ export const ROLE_SECTION_ACCESS: Record<Role, AdminSection[]> = {
   [Role.Warehouse]: ['dashboard', 'orders', 'inventory', 'logs'],
   [Role.Accountant]: ['dashboard', 'orders', 'customers', 'documents', 'logs'],
   [Role.ContentManager]: ['dashboard', 'products', 'documents'],
-  [Role.Administrator]: [
+  [Role.Admin]: [
     'dashboard',
     'products',
     'orders',
@@ -74,6 +80,8 @@ export const ROLE_SECTION_ACCESS: Record<Role, AdminSection[]> = {
     'settings',
     'logs',
   ],
+  [Role.Driver]: ['dashboard', 'orders'],
+  [Role.Loader]: ['dashboard', 'orders', 'inventory'],
 };
 
-export const DEFAULT_ROLE = Role.Manager;
+export const DEFAULT_ROLE = Role.SalesManager;
