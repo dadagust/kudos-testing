@@ -161,3 +161,4 @@ class RolePermissionsTests(TestCase):
         profile.refresh_from_db()
         self.assertEqual(profile.role, RoleChoices.SALES_MANAGER)
         self.assertTrue(user.is_staff)
+

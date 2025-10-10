@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.utils import DatabaseError, OperationalError, ProgrammingError
 from django.db.models.signals import post_save
 from django.db.utils import DatabaseError, OperationalError, ProgrammingError
 from django.dispatch import receiver
@@ -52,6 +53,7 @@ class UserProfile(models.Model):
 
     def save(self, *args, **kwargs):
         self._normalize_role()
+
         super().save(*args, **kwargs)
         self.sync_role_membership()
 
@@ -74,6 +76,7 @@ class UserProfile(models.Model):
                     return
 
             group_name = ROLE_GROUP_MAP.get(role_value)
+
             if group_name:
                 group, _ = Group.objects.get_or_create(name=group_name)
                 role_group_names = set(ROLE_GROUP_MAP.values())
@@ -84,6 +87,7 @@ class UserProfile(models.Model):
                     self.user.groups.add(group)
 
             expected_staff = role_value in STAFF_ROLE_CODES or self.user.is_superuser
+
             if self.user.is_staff != expected_staff:
                 self.user.is_staff = expected_staff
                 self.user.save(update_fields=['is_staff'])
