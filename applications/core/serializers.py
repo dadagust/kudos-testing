@@ -5,14 +5,14 @@ from rest_framework import serializers
 from auditlog.models import LogEntry
 
 from .constants import ADMIN_SECTIONS, ROLE_ACCESS_MATRIX
-from .models import UserProfile
+from .models import LEGACY_ROLE_MAP, RoleChoices, UserProfile
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(source='user.id')
     email = serializers.EmailField(source='user.email')
     full_name = serializers.SerializerMethodField()
-    role = serializers.CharField()
+    role = serializers.SerializerMethodField()
     access = serializers.SerializerMethodField()
 
     class Meta:
@@ -22,8 +22,17 @@ class UserProfileSerializer(serializers.ModelSerializer):
     def get_full_name(self, obj: UserProfile) -> str:
         return obj.user.get_full_name() or obj.user.email
 
+    def get_role(self, obj: UserProfile) -> str:
+        value = obj.role
+        if value in RoleChoices.values:
+            return value
+
+        legacy = LEGACY_ROLE_MAP.get(value)
+        return legacy if legacy else str(value)
+
     def get_access(self, obj: UserProfile) -> dict[str, bool]:
-        allowed = set(ROLE_ACCESS_MATRIX.get(obj.role, []))
+        role_key = self.get_role(obj)
+        allowed = set(ROLE_ACCESS_MATRIX.get(role_key, []))
         sections = ADMIN_SECTIONS
         return {section: section in allowed for section in sections}
 

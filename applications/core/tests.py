@@ -10,8 +10,7 @@ from rest_framework.test import APITestCase
 
 from .models import RoleChoices, UserProfile
 from .rbac import ROLE_GROUP_MAP, ROLE_PERMISSION_MATRIX
-from .serializers import LoginSerializer
-
+from .serializers import LoginSerializer, UserProfileSerializer
 
 
 class AuthTests(APITestCase):
@@ -138,3 +137,28 @@ class RolePermissionsTests(TestCase):
         client.force_login(user)
         response = client.get(reverse('admin:index'))
         self.assertEqual(response.status_code, 200)
+
+    def test_superuser_profile_forced_to_admin(self):
+        user = get_user_model().objects.create_superuser(
+            username='root@example.com', email='root@example.com', password='ChangeMe123!'
+        )
+        profile = user.profile
+        self.assertEqual(profile.role, RoleChoices.ADMIN)
+        self.assertTrue(user.is_staff)
+
+        serialized = UserProfileSerializer(profile).data
+        self.assertEqual(serialized['role'], RoleChoices.ADMIN)
+        self.assertTrue(serialized['access']['settings'])
+
+    def test_legacy_role_values_are_normalized(self):
+        user = get_user_model().objects.create_user(
+            username='legacy@example.com', email='legacy@example.com', password='ChangeMe123!'
+        )
+        profile = user.profile
+        profile.role = 'manager'
+        profile.save(update_fields=['role'])
+
+        profile.refresh_from_db()
+        self.assertEqual(profile.role, RoleChoices.SALES_MANAGER)
+        self.assertTrue(user.is_staff)
+

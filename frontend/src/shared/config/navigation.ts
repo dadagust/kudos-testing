@@ -1,7 +1,7 @@
-import { Role, RoleKey } from './roles';
+import { AdminSection, Role, RoleKey } from './roles';
 
 export interface NavigationItem {
-  id: string;
+  id: AdminSection;
   label: string;
   href: string;
   icon: string;
