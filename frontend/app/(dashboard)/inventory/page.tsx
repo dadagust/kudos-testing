@@ -18,7 +18,7 @@ const inventory = [
 
 export default function InventoryPage() {
   return (
-    <RoleGuard allow={[Role.Manager, Role.Warehouse, Role.Administrator]}>
+    <RoleGuard allow={[Role.SalesManager, Role.Warehouse, Role.Admin]}>
       <h1>Склад</h1>
       <p style={{ color: 'var(--color-text-muted)', marginBottom: '16px' }}>
         На второй неделе сюда добавим календарь сборки и бронирования.

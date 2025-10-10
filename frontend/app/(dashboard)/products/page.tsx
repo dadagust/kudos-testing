@@ -149,7 +149,7 @@ export default function ProductsPage() {
   };
 
   return (
-    <RoleGuard allow={[Role.Manager, Role.ContentManager, Role.Administrator]}>
+    <RoleGuard allow={[Role.SalesManager, Role.ContentManager, Role.Admin]}>
       <header
         style={{
           display: 'flex',

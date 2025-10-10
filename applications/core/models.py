@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.db.utils import DatabaseError, OperationalError, ProgrammingError
 from django.db.models.signals import post_save
 from django.db.utils import DatabaseError, OperationalError, ProgrammingError
 from django.dispatch import receiver
@@ -31,7 +30,9 @@ class UserProfile(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile'
     )
-    role = models.CharField(max_length=32, choices=RoleChoices.choices, default=RoleChoices.SALES_MANAGER)
+    role = models.CharField(
+        max_length=32, choices=RoleChoices.choices, default=RoleChoices.SALES_MANAGER
+    )
 
     def __str__(self) -> str:  # pragma: no cover - human readable
         return f'{self.user.get_full_name() or self.user.email} ({self.get_role_display()})'
@@ -80,7 +81,9 @@ class UserProfile(models.Model):
             if group_name:
                 group, _ = Group.objects.get_or_create(name=group_name)
                 role_group_names = set(ROLE_GROUP_MAP.values())
-                extra_groups = self.user.groups.exclude(name=group_name).filter(name__in=role_group_names)
+                extra_groups = self.user.groups.exclude(name=group_name).filter(
+                    name__in=role_group_names
+                )
                 if extra_groups.exists():
                     self.user.groups.remove(*extra_groups)
                 if not self.user.groups.filter(pk=group.pk).exists():
@@ -92,8 +95,6 @@ class UserProfile(models.Model):
                 self.user.is_staff = expected_staff
                 self.user.save(update_fields=['is_staff'])
         except (OperationalError, ProgrammingError, DatabaseError):
-            # База еще не инициализирована (например, до применения миграций).
-            # В этом случае просто пропускаем синхронизацию, она выполнится при следующем сохранении.
             return
 
 

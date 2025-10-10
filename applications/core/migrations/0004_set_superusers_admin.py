@@ -13,7 +13,6 @@ def revert_superusers_roles(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('core', '0003_create_role_groups'),
     ]

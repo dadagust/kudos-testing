@@ -6,9 +6,8 @@ class CoreConfig(AppConfig):
     name = 'applications.core'
 
     def ready(self):
-        from django.apps import apps as django_apps
-
         from auditlog.registry import auditlog
+        from django.apps import apps as django_apps
 
         for model in django_apps.get_models():
             if model.__module__.startswith('applications.'):

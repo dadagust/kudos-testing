@@ -1,6 +1,5 @@
-from django.db.models import Q
-
 from auditlog.models import LogEntry
+from django.db.models import Q
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.generics import ListAPIView
@@ -84,15 +83,13 @@ class AuditLogListView(ListAPIView):
         actor_param = self.request.query_params.get('actor')
         if actor_param:
             queryset = queryset.filter(
-                Q(actor__email__icontains=actor_param)
-                | Q(actor__username__icontains=actor_param)
+                Q(actor__email__icontains=actor_param) | Q(actor__username__icontains=actor_param)
             )
 
         search_param = self.request.query_params.get('search')
         if search_param:
             queryset = queryset.filter(
-                Q(object_repr__icontains=search_param)
-                | Q(object_pk__icontains=search_param)
+                Q(object_repr__icontains=search_param) | Q(object_pk__icontains=search_param)
             )
 
         limit_param = self.request.query_params.get('limit')

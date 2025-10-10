@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -17,9 +16,37 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='UserProfile',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('role', models.CharField(choices=[('guest', 'Гость'), ('client', 'Клиент'), ('b2b', 'B2B Клиент'), ('manager', 'Менеджер'), ('warehouse', 'Склад'), ('accountant', 'Бухгалтерия'), ('content_manager', 'Контент-менеджер'), ('administrator', 'Администратор')], default='manager', max_length=32)),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='profile', to=settings.AUTH_USER_MODEL)),
+                (
+                    'id',
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name='ID'
+                    ),
+                ),
+                (
+                    'role',
+                    models.CharField(
+                        choices=[
+                            ('guest', 'Гость'),
+                            ('client', 'Клиент'),
+                            ('b2b', 'B2B Клиент'),
+                            ('manager', 'Менеджер'),
+                            ('warehouse', 'Склад'),
+                            ('accountant', 'Бухгалтерия'),
+                            ('content_manager', 'Контент-менеджер'),
+                            ('administrator', 'Администратор'),
+                        ],
+                        default='manager',
+                        max_length=32,
+                    ),
+                ),
+                (
+                    'user',
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name='profile',
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

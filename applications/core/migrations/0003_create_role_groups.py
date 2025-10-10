@@ -1,6 +1,5 @@
 from django.db import migrations
 
-
 ACTION_LABELS = {
     'view': 'Can view',
     'add': 'Can add',
@@ -20,7 +19,7 @@ def create_permissions(permission_model, content_type_model, required_permission
         for action in sorted(actions):
             codename = f'{action}_{model}'
             label = ACTION_LABELS.get(action, action.title())
-            name = f"{label} {verbose_model}".strip()
+            name = f'{label} {verbose_model}'.strip()
             permission, _ = permission_model.objects.update_or_create(
                 codename=codename,
                 content_type=content_type,
@@ -51,7 +50,11 @@ def apply_group_permissions(group_model, permission_model, mapping):
 
 
 def forwards(apps, schema_editor):
-    from applications.core.rbac import ROLE_GROUP_MAP, ROLE_PERMISSION_MATRIX, flatten_required_permissions
+    from applications.core.rbac import (
+        ROLE_GROUP_MAP,
+        ROLE_PERMISSION_MATRIX,
+        flatten_required_permissions,
+    )
 
     group_model = apps.get_model('auth', 'Group')
     permission_model = apps.get_model('auth', 'Permission')
@@ -75,7 +78,6 @@ def backwards(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('core', '0002_alter_userprofile_role'),
         ('auth', '0012_alter_user_first_name_max_length'),

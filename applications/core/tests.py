@@ -21,7 +21,9 @@ class AuthTests(APITestCase):
             password='ChangeMe123!',
             first_name='Ирина',
         )
-        UserProfile.objects.update_or_create(user=self.user, defaults={'role': RoleChoices.SALES_MANAGER})
+        UserProfile.objects.update_or_create(
+            user=self.user, defaults={'role': RoleChoices.SALES_MANAGER}
+        )
 
     def test_ping(self):
         response = self.client.get(reverse('ping'))
@@ -103,12 +105,12 @@ class RolePermissionsTests(TestCase):
                 group = Group.objects.get(name=group_name)
                 for (app_label, model), actions in permission_map.items():
                     for action in actions:
-                        codename = f"{action}_{model}"
+                        codename = f'{action}_{model}'
                         self.assertTrue(
                             group.permissions.filter(
                                 codename=codename, content_type__app_label=app_label
                             ).exists(),
-                            msg=f"{group_name} missing {codename} for {app_label}",
+                            msg=f'{group_name} missing {codename} for {app_label}',
                         )
 
     def test_admin_access_blocked_for_non_staff(self):
@@ -161,4 +163,3 @@ class RolePermissionsTests(TestCase):
         profile.refresh_from_db()
         self.assertEqual(profile.role, RoleChoices.SALES_MANAGER)
         self.assertTrue(user.is_staff)
-

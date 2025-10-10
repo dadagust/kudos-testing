@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from typing import Dict, Mapping, Sequence
+from collections.abc import Mapping, Sequence
 
 from .models import RoleChoices
 
@@ -100,8 +100,9 @@ ROLE_PERMISSION_MATRIX: Mapping[str, Mapping[tuple[str, str], Sequence[str]]] = 
     'Admin': {},
 }
 
-def flatten_required_permissions() -> Dict[tuple[str, str], set[str]]:
-    accumulator: Dict[tuple[str, str], set[str]] = defaultdict(set)
+
+def flatten_required_permissions() -> dict[tuple[str, str], set[str]]:
+    accumulator: dict[tuple[str, str], set[str]] = defaultdict(set)
     for mapping in ROLE_PERMISSION_MATRIX.values():
         for (app_label, model), actions in mapping.items():
             accumulator[(app_label, model)].update(actions)

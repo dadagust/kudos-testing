@@ -12,7 +12,7 @@ const customers = [
 
 export default function CustomersPage() {
   return (
-    <RoleGuard allow={[Role.Manager, Role.Accountant, Role.Administrator]}>
+    <RoleGuard allow={[Role.SalesManager, Role.Accountant, Role.Admin]}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1>Клиентская база</h1>

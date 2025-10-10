@@ -86,7 +86,7 @@ export default function LogsPage() {
   ];
 
   return (
-    <RoleGuard allow={[Role.Manager, Role.Warehouse, Role.Accountant, Role.Administrator]}>
+    <RoleGuard allow={[Role.SalesManager, Role.Warehouse, Role.Accountant, Role.Admin]}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           <h1>Аудит и логи</h1>

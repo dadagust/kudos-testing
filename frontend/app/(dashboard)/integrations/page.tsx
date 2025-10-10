@@ -21,7 +21,7 @@ export default function IntegrationsPage() {
   const { data, isLoading, isError, error, refetch, isFetching } = useIntegrationsQuery();
 
   return (
-    <RoleGuard allow={[Role.Administrator]}>
+    <RoleGuard allow={[Role.Admin]}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           <h1>Интеграции</h1>

@@ -2,7 +2,6 @@
 
 from django.db import migrations, models
 
-
 ROLE_FORWARD_MAP = {
     'client': 'customer',
     'manager': 'sales_manager',
@@ -25,7 +24,6 @@ def migrate_role_values_backward(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('core', '0001_initial'),
     ]
@@ -35,6 +33,21 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='userprofile',
             name='role',
-            field=models.CharField(choices=[('guest', 'Гость'), ('customer', 'Клиент'), ('b2b', 'B2B Клиент'), ('sales_manager', 'Менеджер продаж'), ('warehouse', 'Склад'), ('accountant', 'Бухгалтерия'), ('content_manager', 'Контент-менеджер'), ('admin', 'Администратор'), ('driver', 'Водитель'), ('loader', 'Грузчик')], default='sales_manager', max_length=32),
+            field=models.CharField(
+                choices=[
+                    ('guest', 'Гость'),
+                    ('customer', 'Клиент'),
+                    ('b2b', 'B2B Клиент'),
+                    ('sales_manager', 'Менеджер продаж'),
+                    ('warehouse', 'Склад'),
+                    ('accountant', 'Бухгалтерия'),
+                    ('content_manager', 'Контент-менеджер'),
+                    ('admin', 'Администратор'),
+                    ('driver', 'Водитель'),
+                    ('loader', 'Грузчик'),
+                ],
+                default='sales_manager',
+                max_length=32,
+            ),
         ),
     ]

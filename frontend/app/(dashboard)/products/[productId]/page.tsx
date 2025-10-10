@@ -46,7 +46,7 @@ export default function ProductDetailsPage({ params }: ProductDetailsPageProps) 
   const product = data?.data;
 
   return (
-    <RoleGuard allow={[Role.Manager, Role.ContentManager, Role.Administrator]}>
+    <RoleGuard allow={[Role.SalesManager, Role.ContentManager, Role.Admin]}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Button variant="ghost" onClick={() => router.back()}>

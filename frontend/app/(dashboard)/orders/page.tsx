@@ -34,7 +34,7 @@ export default function OrdersPage() {
   const [selected, setSelected] = useState<(typeof orders)[number] | null>(null);
 
   return (
-    <RoleGuard allow={[Role.Manager, Role.Warehouse, Role.Accountant, Role.Administrator]}>
+    <RoleGuard allow={[Role.SalesManager, Role.Warehouse, Role.Accountant, Role.Admin]}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1>Заказы</h1>

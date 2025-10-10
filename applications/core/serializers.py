@@ -1,8 +1,7 @@
+from auditlog.models import LogEntry
 from django.contrib.auth import authenticate, get_user_model
 from django.db import DatabaseError, OperationalError, ProgrammingError
 from rest_framework import serializers
-
-from auditlog.models import LogEntry
 
 from .constants import ADMIN_SECTIONS, ROLE_ACCESS_MATRIX
 from .models import LEGACY_ROLE_MAP, RoleChoices, UserProfile
