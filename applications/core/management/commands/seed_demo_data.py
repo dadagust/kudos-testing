@@ -9,13 +9,15 @@ class Command(BaseCommand):
 
     DEMO_USERS = [
         ('guest@kudos.ru', 'Гость', RoleChoices.GUEST),
-        ('client@kudos.ru', 'Клиент', RoleChoices.CLIENT),
+        ('customer@kudos.ru', 'Клиент', RoleChoices.CUSTOMER),
         ('b2b@kudos.ru', 'B2B Клиент', RoleChoices.B2B),
-        ('manager@kudos.ru', 'Ирина', RoleChoices.MANAGER),
+        ('sales@kudos.ru', 'Менеджер продаж', RoleChoices.SALES_MANAGER),
         ('warehouse@kudos.ru', 'Склад', RoleChoices.WAREHOUSE),
         ('accountant@kudos.ru', 'Бухгалтерия', RoleChoices.ACCOUNTANT),
         ('content@kudos.ru', 'Контент', RoleChoices.CONTENT_MANAGER),
-        ('admin@kudos.ru', 'Администратор', RoleChoices.ADMINISTRATOR),
+        ('driver@kudos.ru', 'Водитель', RoleChoices.DRIVER),
+        ('loader@kudos.ru', 'Грузчик', RoleChoices.LOADER),
+        ('admin@kudos.ru', 'Администратор', RoleChoices.ADMIN),
     ]
 
     def handle(self, *args, **options):
