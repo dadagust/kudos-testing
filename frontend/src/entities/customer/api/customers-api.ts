@@ -5,6 +5,7 @@ import {
   CustomerDetailResponse,
   CustomerListQuery,
   CustomerListResponse,
+  UpdateCustomerPayload,
 } from '../model/types';
 
 const buildListParams = (params: CustomerListQuery) => {
@@ -71,6 +72,16 @@ export const customersApi = {
   },
   create: async (payload: CreateCustomerPayload): Promise<CustomerDetailResponse> => {
     const { data } = await apiV1Client.post<CustomerDetailResponse>('/customers/', payload);
+    return data;
+  },
+  update: async (
+    customerId: string,
+    payload: UpdateCustomerPayload
+  ): Promise<CustomerDetailResponse> => {
+    const { data } = await apiV1Client.put<CustomerDetailResponse>(
+      `/customers/${customerId}/`,
+      payload
+    );
     return data;
   },
 };
