@@ -4,6 +4,7 @@ import { auditLogger } from '../lib/logger';
 import { useAuthStore } from '../state/auth-store';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/core';
+const API_V1_URL = process.env.NEXT_PUBLIC_API_V1_URL ?? 'http://localhost:8000/api/v1';
 
 type ExtendedAxiosRequestConfig = AxiosRequestConfig & { kudosTraceId?: string };
 
@@ -90,6 +91,12 @@ const createHttpClient = (options: CreateClientOptions) => {
 
 export const httpClient = createHttpClient({
   baseURL: API_URL,
+  withCredentials: true,
+  attachAuthToken: true,
+});
+
+export const apiV1Client = createHttpClient({
+  baseURL: API_V1_URL,
   withCredentials: true,
   attachAuthToken: true,
 });
