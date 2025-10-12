@@ -8,14 +8,14 @@ interface LoginPayload {
 
 export const authApi = {
   login: async (payload: LoginPayload): Promise<AuthResponse> => {
-    const { data } = await httpClient.post<AuthResponse>('/auth/login/', payload);
+    const { data } = await httpClient.post<AuthResponse>('/core/auth/login/', payload);
     return data;
   },
   logout: async (): Promise<void> => {
-    await httpClient.post('/auth/logout/');
+    await httpClient.post('/core/auth/logout/');
   },
   me: async (): Promise<UserProfile> => {
-    const { data } = await httpClient.get<UserProfile>('/auth/me/');
+    const { data } = await httpClient.get<UserProfile>('/core/auth/me/');
     return data;
   },
 };

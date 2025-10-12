@@ -3,7 +3,7 @@ import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { auditLogger } from '../lib/logger';
 import { useAuthStore } from '../state/auth-store';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/core';
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
 
 type ExtendedAxiosRequestConfig = AxiosRequestConfig & { kudosTraceId?: string };
 
