@@ -10,7 +10,7 @@ from rest_framework import serializers
 
 from applications.core.models import RoleChoices
 
-from .models import Address, Company, Contact, Customer, CustomerType, PhoneNormalizer
+from .models import Company, Contact, Customer, CustomerType, PhoneNormalizer
 
 User = get_user_model()
 
@@ -66,28 +66,6 @@ class CompanyInputSerializer(serializers.ModelSerializer):
 
     def validate_phone(self, value: str) -> str:
         return PhoneNormalizer.normalize(value) if value else value
-
-
-class AddressSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Address
-        fields = (
-            'id',
-            'address_type',
-            'title',
-            'line1',
-            'line2',
-            'city',
-            'region',
-            'postal_code',
-            'country',
-            'is_primary',
-            'latitude',
-            'longitude',
-            'created_at',
-            'updated_at',
-        )
-        read_only_fields = ('id', 'created_at', 'updated_at')
 
 
 class ContactSerializer(serializers.ModelSerializer):
@@ -153,7 +131,6 @@ class CustomerListSerializer(serializers.ModelSerializer):
 
 
 class CustomerDetailSerializer(CustomerListSerializer):
-    addresses = AddressSerializer(many=True, read_only=True)
     contacts = ContactSerializer(many=True, read_only=True)
 
     class Meta(CustomerListSerializer.Meta):
@@ -162,7 +139,6 @@ class CustomerDetailSerializer(CustomerListSerializer):
             'last_name',
             'middle_name',
             'notes',
-            'addresses',
             'contacts',
         )
 
@@ -300,7 +276,6 @@ def get_customer_serializer(action: str) -> type[serializers.ModelSerializer]:
 
 
 __all__ = [
-    'AddressSerializer',
     'CompanySerializer',
     'ContactSerializer',
     'CustomerDetailSerializer',

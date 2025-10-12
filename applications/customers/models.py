@@ -183,56 +183,6 @@ class Customer(TimeStampedModel):
         super().save(*args, **kwargs)
 
 
-class AddressType(models.TextChoices):
-    BILLING = 'billing', 'Платёжный'
-    SHIPPING = 'shipping', 'Доставка'
-    OTHER = 'other', 'Другой'
-
-
-class Address(TimeStampedModel):
-    """Address belonging either to a customer or a company."""
-
-    customer = models.ForeignKey(
-        Customer,
-        on_delete=models.CASCADE,
-        related_name='addresses',
-        null=True,
-        blank=True,
-    )
-    company = models.ForeignKey(
-        Company,
-        on_delete=models.CASCADE,
-        related_name='addresses',
-        null=True,
-        blank=True,
-    )
-    address_type = models.CharField(
-        'Тип адреса', max_length=16, choices=AddressType.choices, default=AddressType.OTHER
-    )
-    title = models.CharField('Название', max_length=255, blank=True)
-    line1 = models.CharField('Адрес, строка 1', max_length=255)
-    line2 = models.CharField('Адрес, строка 2', max_length=255, blank=True)
-    city = models.CharField('Город', max_length=120, blank=True)
-    region = models.CharField('Регион', max_length=120, blank=True)
-    postal_code = models.CharField('Почтовый индекс', max_length=20, blank=True)
-    country = models.CharField('Страна', max_length=120, default='Россия')
-    is_primary = models.BooleanField('Основной адрес', default=False)
-    latitude = models.DecimalField('Широта', max_digits=9, decimal_places=6, null=True, blank=True)
-    longitude = models.DecimalField('Долгота', max_digits=9, decimal_places=6, null=True, blank=True)
-
-    class Meta(TimeStampedModel.Meta):
-        verbose_name = 'Адрес'
-        verbose_name_plural = 'Адреса'
-        indexes = [
-            models.Index(fields=('customer',), name='address_customer_idx'),
-            models.Index(fields=('company',), name='address_company_idx'),
-            models.Index(fields=('city',), name='address_city_idx'),
-        ]
-
-    def __str__(self) -> str:  # pragma: no cover - human readable
-        return f'{self.line1}, {self.city}' if self.city else self.line1
-
-
 class Contact(TimeStampedModel):
     """Additional contact person for a customer or company."""
 
