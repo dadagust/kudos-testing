@@ -63,10 +63,16 @@ export default function CustomersPage() {
     [page, searchTerm, sort]
   );
 
-  const { data, isLoading, isError, error, isFetching } = useCustomersQuery(queryParams);
+  const {
+    data: customersResponse,
+    isLoading,
+    isError,
+    error,
+    isFetching,
+  } = useCustomersQuery(queryParams);
 
-  const rows: CustomerSummary[] = data?.data ?? [];
-  const pagination = data?.meta?.pagination;
+  const rows: CustomerSummary[] = customersResponse?.data ?? [];
+  const pagination = customersResponse?.meta?.pagination;
 
   const columns: TableColumn<CustomerSummary>[] = [
     {

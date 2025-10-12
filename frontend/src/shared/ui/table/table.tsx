@@ -16,11 +16,9 @@ interface TableProps<T> {
   emptyMessage?: string;
 }
 
-export const Table = <T extends Record<string, unknown>>({
-  columns,
-  data,
-  emptyMessage,
-}: TableProps<T>) => {
+type TableRowRecord = Record<PropertyKey, unknown>;
+
+export const Table = <T extends object>({ columns, data, emptyMessage }: TableProps<T>) => {
   if (!data.length) {
     return <div className={styles.emptyState}>{emptyMessage ?? 'Нет данных для отображения.'}</div>;
   }
@@ -40,7 +38,9 @@ export const Table = <T extends Record<string, unknown>>({
             <tr key={index}>
               {columns.map((column) => (
                 <td key={String(column.key)}>
-                  {column.render ? column.render(row) : (row[column.key as keyof T] as ReactNode)}
+                  {column.render
+                    ? column.render(row)
+                    : ((row as TableRowRecord)[column.key as keyof TableRowRecord] as ReactNode)}
                 </td>
               ))}
             </tr>

@@ -5,7 +5,7 @@ import { CustomerListQuery, CustomerListResponse } from '../model/types';
 
 export const useCustomersQuery = (params: CustomerListQuery) =>
   useQuery<CustomerListResponse, Error>({
-    queryKey: ['customers', params],
+    queryKey: ['customers', params] as const,
     queryFn: () => customersApi.list(params),
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData,
   });
