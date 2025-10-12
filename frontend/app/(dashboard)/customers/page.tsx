@@ -1,6 +1,5 @@
 'use client';
 
-import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { ChangeEvent, FormEvent, useMemo, useState } from 'react';
 
@@ -51,8 +50,6 @@ export default function CustomersPage() {
   const [createError, setCreateError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const queryClient = useQueryClient();
-
   const queryParams = useMemo(
     () => ({
       search: searchTerm || undefined,
@@ -69,6 +66,7 @@ export default function CustomersPage() {
     isError,
     error,
     isFetching,
+    refetch,
   } = useCustomersQuery(queryParams);
 
   const rows: CustomerSummary[] = customersResponse?.data ?? [];
@@ -195,7 +193,7 @@ export default function CustomersPage() {
         setIsCreateOpen(false);
         setCreateForm(initialFormState);
         setSuccessMessage('Клиент успешно создан. Список обновлён.');
-        queryClient.invalidateQueries({ queryKey: ['customers'] });
+        void refetch();
       },
       onError: (mutationError) => {
         setCreateError(
