@@ -7,5 +7,5 @@ export const useCustomersQuery = (params: CustomerListQuery) =>
   useQuery<CustomerListResponse, Error>({
     queryKey: ['customers', params],
     queryFn: () => customersApi.list(params),
-    keepPreviousData: true,
+    staleTime: 30 * 1000,
   });
