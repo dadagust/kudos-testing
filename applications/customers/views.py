@@ -10,7 +10,7 @@ from rest_framework.response import Response
 
 from applications.core.models import RoleChoices
 
-from .models import Address, Contact, Customer, PhoneNormalizer
+from .models import Contact, Customer, PhoneNormalizer
 from .permissions import CustomerAccessPolicy
 from .serializers import (
     ContactSerializer,
@@ -25,7 +25,6 @@ class CustomerViewSet(viewsets.ModelViewSet):
     """Full CRUD endpoint for customers with scoped access."""
 
     queryset = Customer.objects.all().select_related('company', 'owner').prefetch_related(
-        Prefetch('addresses', queryset=Address.objects.filter(is_active=True)),
         Prefetch('contacts', queryset=Contact.objects.filter(is_active=True)),
     )
     permission_classes = [IsAuthenticated, CustomerAccessPolicy]

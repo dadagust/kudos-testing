@@ -2,12 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 
-import {
-  ADDRESS_TYPE_LABELS,
-  CUSTOMER_TYPE_LABELS,
-  CustomerDetail,
-  useCustomerQuery,
-} from '@/entities/customer';
+import { CUSTOMER_TYPE_LABELS, CustomerDetail, useCustomerQuery } from '@/entities/customer';
 import { RoleGuard } from '@/features/auth';
 import { Role } from '@/shared/config/roles';
 import { Alert, Badge, Button, Spinner, Tag } from '@/shared/ui';
@@ -204,60 +199,6 @@ export default function CustomerDetailsPage({ params }: CustomerDetailsPageProps
                   </dl>
                 </div>
               ) : null}
-            </section>
-
-            <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <h2 style={{ fontSize: '1.25rem' }}>Адреса</h2>
-              {customer.addresses.length ? (
-                <ul
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '12px',
-                    listStyle: 'none',
-                    padding: 0,
-                  }}
-                >
-                  {customer.addresses.map((address) => (
-                    <li
-                      key={address.id}
-                      style={{
-                        border: '1px solid var(--color-border)',
-                        borderRadius: '12px',
-                        padding: '16px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '8px',
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                        }}
-                      >
-                        <strong>{address.title || 'Адрес без названия'}</strong>
-                        <Tag>
-                          {ADDRESS_TYPE_LABELS[address.address_type] ?? address.address_type}
-                        </Tag>
-                      </div>
-                      <span>{address.line1}</span>
-                      {address.line2 ? <span>{address.line2}</span> : null}
-                      <span>
-                        {[address.city, address.region, address.postal_code]
-                          .filter(Boolean)
-                          .join(', ')}
-                      </span>
-                      <span>{address.country}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <Alert tone="info" title="Адреса отсутствуют">
-                  Для клиента ещё не добавлены адреса.
-                </Alert>
-              )}
             </section>
 
             <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>

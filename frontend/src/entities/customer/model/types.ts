@@ -31,23 +31,6 @@ export interface CustomerSummary {
   updated_at: string;
 }
 
-export interface Address {
-  id: string;
-  address_type: 'billing' | 'shipping' | 'other';
-  title: string;
-  line1: string;
-  line2: string;
-  city: string;
-  region: string;
-  postal_code: string;
-  country: string;
-  is_primary: boolean;
-  latitude: string | null;
-  longitude: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
 export interface Contact {
   id: string;
   first_name: string;
@@ -66,7 +49,6 @@ export interface CustomerDetail extends CustomerSummary {
   last_name: string;
   middle_name: string;
   notes: string;
-  addresses: Address[];
   contacts: Contact[];
 }
 
