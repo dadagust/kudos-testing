@@ -52,6 +52,19 @@ export interface CustomerDetail extends CustomerSummary {
   contacts: Contact[];
 }
 
+export interface CustomerCompanyInput {
+  id?: string;
+  name?: string;
+  legal_name?: string;
+  inn?: string;
+  kpp?: string;
+  ogrn?: string;
+  email?: string;
+  phone?: string;
+  website?: string;
+  notes?: string;
+}
+
 export interface PaginationMeta {
   page: number;
   page_size: number;
@@ -103,4 +116,9 @@ export interface CreateCustomerPayload {
   tags?: string[];
   gdpr_consent?: boolean;
   notes?: string;
+}
+
+export interface UpdateCustomerPayload extends CreateCustomerPayload {
+  company?: CustomerCompanyInput | null;
+  owner_id?: number | null;
 }
