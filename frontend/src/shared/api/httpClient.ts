@@ -5,6 +5,20 @@ import { useAuthStore } from '../state/auth-store';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/core';
 
+const normalizeBaseUrl = (value: string) => value.replace(/\/$/, '');
+
+const resolveApiRoot = (value: string) => {
+  const normalized = normalizeBaseUrl(value);
+  if (normalized.endsWith('/core')) {
+    return normalized.slice(0, -'/core'.length);
+  }
+  return normalized;
+};
+
+const API_ROOT = resolveApiRoot(API_URL);
+const CORE_API_URL = `${API_ROOT}/core`;
+const API_V1_URL = `${API_ROOT}/api/v1`;
+
 type ExtendedAxiosRequestConfig = AxiosRequestConfig & { kudosTraceId?: string };
 
 const createTraceId = () =>
@@ -89,11 +103,17 @@ const createHttpClient = (options: CreateClientOptions) => {
 };
 
 export const httpClient = createHttpClient({
-  baseURL: API_URL,
+  baseURL: CORE_API_URL,
   withCredentials: true,
   attachAuthToken: true,
 });
 
 export const mockClient = createHttpClient({
   baseURL: '/core',
+});
+
+export const apiV1Client = createHttpClient({
+  baseURL: API_V1_URL,
+  withCredentials: true,
+  attachAuthToken: true,
 });

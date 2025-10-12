@@ -668,23 +668,43 @@ components:
         id:
           type: string
           format: uuid
-        email:
+        customer_type:
           type: string
-          format: email
-        phone:
+          enum: [personal, business]
+        display_name:
+          type: string
+        full_name:
           type: string
         first_name:
           type: string
+          nullable: true
         last_name:
           type: string
-        role:
+          nullable: true
+        middle_name:
           type: string
-          enum: [guest, retail, b2b, manager, warehouse, accountant, content_manager, administrator]
-        status:
+          nullable: true
+        email:
           type: string
-          enum: [pending, active, suspended]
+          format: email
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: string
+        gdpr_consent:
+          type: boolean
+        notes:
+          type: string
+          nullable: true
         company:
-          $ref: '#/components/schemas/CompanySummary'
+          $ref: '#/components/schemas/Company'
+          nullable: true
+        owner_id:
+          type: integer
           nullable: true
         addresses:
           type: array
@@ -694,130 +714,299 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Contact'
+        is_active:
+          type: boolean
         created_at:
+          type: string
+          format: date-time
+        updated_at:
           type: string
           format: date-time
       required:
         - id
-        - email
-        - role
-        - status
+        - customer_type
+        - display_name
         - created_at
+        - updated_at
     CustomerSummary:
       type: object
       properties:
         id:
           type: string
           format: uuid
+        customer_type:
+          type: string
+          enum: [personal, business]
         display_name:
+          type: string
+        full_name:
           type: string
         email:
           type: string
           format: email
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: string
+        gdpr_consent:
+          type: boolean
+        company:
+          $ref: '#/components/schemas/CompanySummary'
+          nullable: true
+        owner_id:
+          type: integer
+          nullable: true
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
       required:
         - id
+        - customer_type
         - display_name
-        - email
+        - created_at
+        - updated_at
     CustomerInput:
       type: object
       properties:
+        customer_type:
+          type: string
+          enum: [personal, business]
+        first_name:
+          type: string
+          nullable: true
+        last_name:
+          type: string
+          nullable: true
+        middle_name:
+          type: string
+          nullable: true
+        display_name:
+          type: string
+          nullable: true
         email:
           type: string
           format: email
+          nullable: true
         phone:
           type: string
-        first_name:
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: string
+        gdpr_consent:
+          type: boolean
+        notes:
           type: string
-        last_name:
-          type: string
-        role:
-          type: string
-          enum: [retail, b2b, manager, warehouse, accountant, content_manager, administrator]
-        status:
-          type: string
-          enum: [pending, active, suspended]
-        company_id:
-          type: string
-          format: uuid
+          nullable: true
+        owner_id:
+          type: integer
+          nullable: true
+        company:
+          $ref: '#/components/schemas/CompanyInput'
           nullable: true
       required:
-        - email
-        - role
-        - status
+        - customer_type
     CompanySummary:
       type: object
       properties:
         id:
           type: string
           format: uuid
+        name:
+          type: string
         legal_name:
           type: string
-        trade_name:
+          nullable: true
+        inn:
           type: string
+          nullable: true
       required:
         - id
-        - legal_name
+        - name
     Company:
       allOf:
         - $ref: '#/components/schemas/CompanySummary'
         - type: object
           properties:
-            tax_id:
-              type: string
-            payment_terms:
-              type: string
-            website:
+            kpp:
               type: string
               nullable: true
+            ogrn:
+              type: string
+              nullable: true
+            email:
+              type: string
+              format: email
+              nullable: true
+            phone:
+              type: string
+              nullable: true
+            website:
+              type: string
+              format: uri
+              nullable: true
+            notes:
+              type: string
+              nullable: true
+    CompanyInput:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        legal_name:
+          type: string
+          nullable: true
+        inn:
+          type: string
+          nullable: true
+        kpp:
+          type: string
+          nullable: true
+        ogrn:
+          type: string
+          nullable: true
+        email:
+          type: string
+          format: email
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        website:
+          type: string
+          format: uri
+          nullable: true
+        notes:
+          type: string
+          nullable: true
     Address:
       type: object
       properties:
         id:
           type: string
           format: uuid
-        label:
+        address_type:
           type: string
-        country:
+          enum: [billing, shipping, other]
+        title:
           type: string
-        region:
+          nullable: true
+        line1:
           type: string
+        line2:
+          type: string
+          nullable: true
         city:
           type: string
-        street:
+          nullable: true
+        region:
           type: string
-        building:
-          type: string
+          nullable: true
         postal_code:
+          type: string
+          nullable: true
+        country:
           type: string
         is_primary:
           type: boolean
+        latitude:
+          type: number
+          format: float
+          nullable: true
+        longitude:
+          type: number
+          format: float
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
       required:
         - id
-        - label
+        - address_type
+        - line1
         - country
-        - city
-        - street
-        - building
-        - postal_code
         - is_primary
+        - created_at
+        - updated_at
     Contact:
       type: object
       properties:
         id:
           type: string
           format: uuid
-        type:
+        first_name:
           type: string
-          enum: [email, phone, messenger]
-        value:
+        last_name:
           type: string
+          nullable: true
+        email:
+          type: string
+          format: email
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        position:
+          type: string
+          nullable: true
         notes:
           type: string
           nullable: true
+        is_primary:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
       required:
         - id
-        - type
-        - value
+        - first_name
+        - is_primary
+        - created_at
+        - updated_at
+    ContactInput:
+      type: object
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+          nullable: true
+        email:
+          type: string
+          format: email
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        position:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        is_primary:
+          type: boolean
+      required:
+        - first_name
     InventoryItem:
       type: object
       properties:
@@ -1037,6 +1226,31 @@ components:
       properties:
         data:
           $ref: '#/components/schemas/Customer'
+      required:
+        - data
+    ContactCollection:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Contact'
+        meta:
+          type: object
+          properties:
+            pagination:
+              $ref: '#/components/schemas/PaginationMeta'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+      required:
+        - data
+        - meta
+        - links
+    ContactResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Contact'
       required:
         - data
     InventoryCollection:
@@ -1276,7 +1490,7 @@ paths:
           $ref: '#/components/responses/ValidationError'
         '404':
           $ref: '#/components/responses/NotFound'
-  /core/customers:
+  /api/v1/customers/:
     get:
       summary: Список клиентов
       parameters:
@@ -1284,7 +1498,40 @@ paths:
         - $ref: '#/components/parameters/PageSizeParam'
         - $ref: '#/components/parameters/SearchParam'
         - $ref: '#/components/parameters/SortParam'
-        - $ref: '#/components/parameters/FilterCustomerRole'
+        - name: filter[email]
+          in: query
+          description: Фильтр по email клиента.
+          schema:
+            type: string
+            format: email
+        - name: filter[phone]
+          in: query
+          description: Фильтр по телефону клиента.
+          schema:
+            type: string
+        - name: filter[tag]
+          in: query
+          description: Фильтр по тегам (может повторяться).
+          schema:
+            type: string
+        - name: filter[company_id]
+          in: query
+          description: Фильтр по идентификатору компании.
+          schema:
+            type: string
+            format: uuid
+        - name: filter[created_at][from]
+          in: query
+          description: Начало диапазона по дате создания.
+          schema:
+            type: string
+            format: date-time
+        - name: filter[created_at][to]
+          in: query
+          description: Конец диапазона по дате создания.
+          schema:
+            type: string
+            format: date-time
       responses:
         '200':
           description: Список клиентов.
@@ -1309,7 +1556,7 @@ paths:
                 $ref: '#/components/schemas/CustomerResponse'
         '400':
           $ref: '#/components/responses/ValidationError'
-  /core/customers/{customerId}:
+  /api/v1/customers/{customerId}/:
     parameters:
       - name: customerId
         in: path
@@ -1351,7 +1598,45 @@ paths:
       summary: Удаление клиента
       responses:
         '204':
-          description: Клиент удалён.
+          description: Клиент помечен как неактивный.
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/v1/customers/{customerId}/contacts/:
+    parameters:
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: Контакты клиента
+      responses:
+        '200':
+          description: Список контактов клиента.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactCollection'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      summary: Добавление контакта клиента
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactInput'
+      responses:
+        '201':
+          description: Контакт создан.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
         '404':
           $ref: '#/components/responses/NotFound'
   /core/inventory-items:
