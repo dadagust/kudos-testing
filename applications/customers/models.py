@@ -218,7 +218,7 @@ class Contact(TimeStampedModel):
             models.Index(fields=('phone_normalized',), name='contact_phone_idx'),
         ]
 
-    def __str__(self) -> str:  # pragma: no cover - human readable
+    def __str__(self) -> str:
         return f'{self.first_name} {self.last_name}'.strip()
 
     def save(self, *args, **kwargs):
