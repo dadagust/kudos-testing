@@ -506,9 +506,6 @@ export default function CustomersPage() {
               <option value="-name">По имени Я→A</option>
             </Select>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <Button type="submit" iconLeft="search">
-                Найти
-              </Button>
               <Button type="button" variant="ghost" onClick={handleReset}>
                 Сбросить
               </Button>

@@ -101,25 +101,33 @@ export default function CustomerDetailsPage({ params }: CustomerDetailsPageProps
                     <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
                       Email
                     </dt>
-                    <dd style={{ fontWeight: 600 }}>{customer.email || 'Не указан'}</dd>
+                    <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
+                      {customer.email || 'Не указан'}
+                    </dd>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
                       Телефон
                     </dt>
-                    <dd style={{ fontWeight: 600 }}>{formattedPhone || 'Не указан'}</dd>
+                    <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
+                      {formattedPhone || 'Не указан'}
+                    </dd>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
                       Создан
                     </dt>
-                    <dd style={{ fontWeight: 600 }}>{formatDateTime(customer.created_at)}</dd>
+                    <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
+                      {formatDateTime(customer.created_at)}
+                    </dd>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
                       Обновлён
                     </dt>
-                    <dd style={{ fontWeight: 600 }}>{formatDateTime(customer.updated_at)}</dd>
+                    <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
+                      {formatDateTime(customer.updated_at)}
+                    </dd>
                   </div>
                 </dl>
               </div>
@@ -131,7 +139,7 @@ export default function CustomerDetailsPage({ params }: CustomerDetailsPageProps
                     <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
                       Тип клиента
                     </dt>
-                    <dd style={{ fontWeight: 600 }}>
+                    <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
                       {CUSTOMER_TYPE_LABELS[customer.customer_type] ?? customer.customer_type}
                     </dd>
                   </div>
@@ -139,11 +147,13 @@ export default function CustomerDetailsPage({ params }: CustomerDetailsPageProps
                     <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
                       Ответственный
                     </dt>
-                    <dd style={{ fontWeight: 600 }}>{customer.owner_id ?? 'Не назначен'}</dd>
+                    <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
+                      {customer.owner_id ?? 'Не назначен'}
+                    </dd>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>GDPR</dt>
-                    <dd style={{ fontWeight: 600 }}>
+                    <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
                       {customer.gdpr_consent ? 'Согласие получено' : 'Согласие отсутствует'}
                     </dd>
                   </div>
@@ -151,7 +161,7 @@ export default function CustomerDetailsPage({ params }: CustomerDetailsPageProps
                     <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
                       Заметки
                     </dt>
-                    <dd style={{ fontWeight: 600, whiteSpace: 'pre-wrap' }}>
+                    <dd style={{ fontWeight: 600, whiteSpace: 'pre-wrap', marginInlineStart: 0 }}>
                       {customer.notes?.trim() ? customer.notes : 'Нет заметок'}
                     </dd>
                   </div>
@@ -166,14 +176,18 @@ export default function CustomerDetailsPage({ params }: CustomerDetailsPageProps
                       <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
                         Название
                       </dt>
-                      <dd style={{ fontWeight: 600 }}>{customer.company.name}</dd>
+                      <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
+                        {customer.company.name}
+                      </dd>
                     </div>
                     {customer.company.inn ? (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                         <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
                           ИНН
                         </dt>
-                        <dd style={{ fontWeight: 600 }}>{customer.company.inn}</dd>
+                        <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
+                          {customer.company.inn}
+                        </dd>
                       </div>
                     ) : null}
                     {customer.company.kpp ? (
@@ -181,7 +195,9 @@ export default function CustomerDetailsPage({ params }: CustomerDetailsPageProps
                         <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
                           КПП
                         </dt>
-                        <dd style={{ fontWeight: 600 }}>{customer.company.kpp}</dd>
+                        <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
+                          {customer.company.kpp}
+                        </dd>
                       </div>
                     ) : null}
                     {customer.company.email ? (
@@ -189,7 +205,9 @@ export default function CustomerDetailsPage({ params }: CustomerDetailsPageProps
                         <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
                           Email
                         </dt>
-                        <dd style={{ fontWeight: 600 }}>{customer.company.email}</dd>
+                        <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
+                          {customer.company.email}
+                        </dd>
                       </div>
                     ) : null}
                     {customer.company.phone ? (
@@ -197,7 +215,9 @@ export default function CustomerDetailsPage({ params }: CustomerDetailsPageProps
                         <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
                           Телефон
                         </dt>
-                        <dd style={{ fontWeight: 600 }}>{formattedCompanyPhone}</dd>
+                        <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
+                          {formattedCompanyPhone}
+                        </dd>
                       </div>
                     ) : null}
                   </dl>
