@@ -21,6 +21,7 @@ import {
   useCreateCustomerMutation,
   useCustomerQuery,
   useCustomersQuery,
+  useDeleteCustomerMutation,
   useUpdateCustomerMutation,
 } from '@/entities/customer';
 import { RoleGuard } from '@/features/auth';
@@ -100,6 +101,9 @@ export default function CustomersPage() {
   const [editCustomerId, setEditCustomerId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<CustomerFormState>(() => createInitialFormState());
   const [editError, setEditError] = useState<string | null>(null);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [customerToDelete, setCustomerToDelete] = useState<CustomerSummary | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const queryClient = useQueryClient();
 
@@ -159,6 +163,50 @@ export default function CustomersPage() {
   const rows: CustomerSummary[] = customersResponse?.data ?? [];
   const pagination = customersResponse?.meta?.pagination;
 
+  const deleteMutation = useDeleteCustomerMutation();
+
+  const handleOpenDelete = useCallback((customer: CustomerSummary) => {
+    setCustomerToDelete(customer);
+    setDeleteError(null);
+    setIsDeleteOpen(true);
+  }, []);
+
+  const closeDeleteModal = useCallback(() => {
+    if (deleteMutation.isPending) {
+      return;
+    }
+
+    setIsDeleteOpen(false);
+    setCustomerToDelete(null);
+    setDeleteError(null);
+  }, [deleteMutation.isPending]);
+
+  const handleConfirmDelete = useCallback(() => {
+    if (!customerToDelete) {
+      return;
+    }
+
+    setDeleteError(null);
+
+    const customerId = customerToDelete.id;
+
+    deleteMutation.mutate(customerId, {
+      onSuccess: () => {
+        setIsDeleteOpen(false);
+        setCustomerToDelete(null);
+        setSuccessMessage('Клиент успешно удалён. Список обновлён.');
+        void refetch();
+      },
+      onError: (mutationError) => {
+        setDeleteError(
+          mutationError instanceof Error
+            ? mutationError.message
+            : 'Не удалось удалить клиента. Попробуйте снова.'
+        );
+      },
+    });
+  }, [customerToDelete, deleteMutation, refetch]);
+
   const columns: TableColumn<CustomerSummary>[] = useMemo(
     () => [
       {
@@ -209,11 +257,19 @@ export default function CustomersPage() {
             <Button variant="ghost" type="button" onClick={() => handleOpenEdit(row.id)}>
               Редактировать
             </Button>
+            <Button
+              variant="ghost"
+              type="button"
+              onClick={() => handleOpenDelete(row)}
+              style={{ borderColor: 'var(--color-error)', color: 'var(--color-error)' }}
+            >
+              Удалить
+            </Button>
           </div>
         ),
       },
     ],
-    [handleOpenEdit]
+    [handleOpenDelete, handleOpenEdit]
   );
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -603,6 +659,46 @@ export default function CustomersPage() {
           ) : null}
         </div>
       </Drawer>
+      <Modal open={isDeleteOpen} onClose={closeDeleteModal} title="Удалить клиента?">
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px',
+            padding: '24px',
+            minWidth: '320px',
+          }}
+        >
+          <p style={{ lineHeight: 1.5 }}>
+            {`Вы уверены, что хотите удалить клиента "${
+              customerToDelete?.display_name || customerToDelete?.full_name || 'Без имени'
+            }"? Это действие нельзя отменить.`}
+          </p>
+          {deleteError ? (
+            <Alert tone="danger" title="Не удалось удалить клиента">
+              {deleteError}
+            </Alert>
+          ) : null}
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={closeDeleteModal}
+              disabled={deleteMutation.isPending}
+            >
+              Отмена
+            </Button>
+            <Button
+              type="button"
+              variant="danger"
+              onClick={handleConfirmDelete}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? 'Удаляем…' : 'Удалить'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </RoleGuard>
   );
 }

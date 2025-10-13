@@ -144,6 +144,14 @@ export default function CustomerDetailsPage({ params }: CustomerDetailsPageProps
                       {customer.gdpr_consent ? 'Согласие получено' : 'Согласие отсутствует'}
                     </dd>
                   </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                      Заметки
+                    </dt>
+                    <dd style={{ fontWeight: 600, whiteSpace: 'pre-wrap' }}>
+                      {customer.notes?.trim() ? customer.notes : 'Нет заметок'}
+                    </dd>
+                  </div>
                 </dl>
               </div>
 

@@ -76,4 +76,7 @@ export const customersApi = {
     );
     return data;
   },
+  delete: async (customerId: string): Promise<void> => {
+    await apiV1Client.delete(`/customers/${customerId}/`);
+  },
 };
