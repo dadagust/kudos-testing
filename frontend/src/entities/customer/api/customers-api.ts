@@ -58,6 +58,14 @@ export const customersApi = {
 
     return data;
   },
+  export: async (params: CustomerListQuery): Promise<Blob> => {
+    const response = await apiV1Client.get<Blob>('/customers/export/', {
+      params: buildListParams(params),
+      responseType: 'blob',
+    });
+
+    return response.data;
+  },
   details: async (customerId: string): Promise<CustomerDetailResponse> => {
     const { data } = await apiV1Client.get<CustomerDetailResponse>(`/customers/${customerId}/`);
     return data;
