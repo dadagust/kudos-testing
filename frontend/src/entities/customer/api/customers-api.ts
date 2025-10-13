@@ -39,14 +39,6 @@ const buildListParams = (params: CustomerListQuery) => {
     searchParams.set('filter[company_id]', params.company_id);
   }
 
-  if (params.tags?.length) {
-    params.tags.forEach((tag) => {
-      if (tag.trim()) {
-        searchParams.append('filter[tag]', tag.trim());
-      }
-    });
-  }
-
   if (params.created_from) {
     searchParams.set('filter[created_at][from]', params.created_from);
   }

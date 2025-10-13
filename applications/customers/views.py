@@ -87,10 +87,6 @@ class CustomerViewSet(viewsets.ModelViewSet):
         if company_id:
             queryset = queryset.filter(company_id=company_id)
 
-        tags = helper.get_filter_list('tag')
-        for tag in tags:
-            queryset = queryset.filter(tags__contains=[tag])
-
         created_from = helper.get_filter_datetime('created_at', 'from')
         if created_from:
             queryset = queryset.filter(created_at__gte=created_from)

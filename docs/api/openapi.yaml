@@ -691,10 +691,6 @@ components:
         phone:
           type: string
           nullable: true
-        tags:
-          type: array
-          items:
-            type: string
         gdpr_consent:
           type: boolean
         notes:
@@ -748,10 +744,6 @@ components:
         phone:
           type: string
           nullable: true
-        tags:
-          type: array
-          items:
-            type: string
         gdpr_consent:
           type: boolean
         company:
@@ -799,10 +791,6 @@ components:
         phone:
           type: string
           nullable: true
-        tags:
-          type: array
-          items:
-            type: string
         gdpr_consent:
           type: boolean
         notes:
@@ -1507,11 +1495,6 @@ paths:
         - name: filter[phone]
           in: query
           description: Фильтр по телефону клиента.
-          schema:
-            type: string
-        - name: filter[tag]
-          in: query
-          description: Фильтр по тегам (может повторяться).
           schema:
             type: string
         - name: filter[company_id]

@@ -15,14 +15,6 @@ from .models import Company, Contact, Customer, CustomerType, PhoneNormalizer
 User = get_user_model()
 
 
-class TagListField(serializers.ListField):
-    child = serializers.CharField(max_length=64)
-
-    def to_internal_value(self, data):  # type: ignore[override]
-        values = super().to_internal_value(data)
-        return [value.strip() for value in values if value and value.strip()]
-
-
 class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
@@ -101,7 +93,6 @@ class ContactSerializer(serializers.ModelSerializer):
 
 class CustomerListSerializer(serializers.ModelSerializer):
     company = CompanySerializer(read_only=True)
-    tags = TagListField(required=False, allow_empty=True)
     full_name = serializers.CharField(read_only=True)
     owner_id = serializers.IntegerField(read_only=True)
 
@@ -114,7 +105,6 @@ class CustomerListSerializer(serializers.ModelSerializer):
             'display_name',
             'email',
             'phone',
-            'tags',
             'gdpr_consent',
             'company',
             'owner_id',
@@ -148,7 +138,6 @@ class CustomerWriteSerializer(serializers.ModelSerializer):
     owner_id = serializers.PrimaryKeyRelatedField(
         source='owner', queryset=User.objects.all(), allow_null=True, required=False
     )
-    tags = TagListField(required=False)
 
     class Meta:
         model = Customer
@@ -160,7 +149,6 @@ class CustomerWriteSerializer(serializers.ModelSerializer):
             'display_name',
             'email',
             'phone',
-            'tags',
             'gdpr_consent',
             'company',
             'notes',
@@ -213,7 +201,6 @@ class CustomerWriteSerializer(serializers.ModelSerializer):
     @transaction.atomic
     def create(self, validated_data: dict[str, Any]) -> Customer:
         company_data = validated_data.pop('company', None)
-        tags = validated_data.pop('tags', [])
         phone = validated_data.pop('phone', '')
         if phone:
             validated_data['phone'] = phone
@@ -223,15 +210,11 @@ class CustomerWriteSerializer(serializers.ModelSerializer):
             company = self._upsert_company(company_data)
             customer.company = company
             customer.save(update_fields=['company', 'updated_at'])
-        if tags:
-            customer.tags = tags
-            customer.save(update_fields=['tags', 'updated_at'])
         return customer
 
     @transaction.atomic
     def update(self, instance: Customer, validated_data: dict[str, Any]) -> Customer:
         company_data = validated_data.pop('company', None)
-        tags = validated_data.pop('tags', None)
         phone = validated_data.pop('phone', None)
         if phone is not None:
             validated_data['phone'] = phone
@@ -249,9 +232,6 @@ class CustomerWriteSerializer(serializers.ModelSerializer):
             else:
                 instance.company = None
                 instance.save(update_fields=['company', 'updated_at'])
-        if tags is not None:
-            instance.tags = tags
-            instance.save(update_fields=['tags', 'updated_at'])
         return instance
 
     def _upsert_company(self, data: dict[str, Any]) -> Company:

@@ -41,7 +41,6 @@ class CustomerAPITests(APITestCase):
             'last_name': 'Петров',
             'email': 'Test@Example.com',
             'phone': '+7 (999) 123-45-67',
-            'tags': ['vip', 'priority'],
             'gdpr_consent': True,
             'notes': 'Новый клиент',
         }

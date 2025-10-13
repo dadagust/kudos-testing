@@ -77,13 +77,6 @@ export default function CustomerDetailsPage({ params }: CustomerDetailsPageProps
           >
             <header style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <h1 style={{ fontSize: '1.75rem' }}>{getDisplayName(customer)}</h1>
-              {customer.tags.length ? (
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  {customer.tags.map((tag) => (
-                    <Tag key={tag}>{tag}</Tag>
-                  ))}
-                </div>
-              ) : null}
               {customer.notes ? (
                 <p style={{ color: 'var(--color-text-muted)', lineHeight: 1.6 }}>
                   {customer.notes}
