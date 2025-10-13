@@ -2,9 +2,16 @@
 
 from __future__ import annotations
 
+from io import BytesIO
+
 from django.db.models import Prefetch, Q
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from openpyxl import Workbook
+from openpyxl.utils import get_column_letter
 from rest_framework import mixins, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -135,6 +142,72 @@ class CustomerViewSet(viewsets.ModelViewSet):
         response = super().list(request, *args, **kwargs)
         if isinstance(response.data, list):
             response.data = {'data': response.data}
+        return response
+
+    @action(detail=False, methods=['get'], url_path='export')
+    def export(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        workbook = Workbook()
+        worksheet = workbook.active
+        worksheet.title = 'Клиенты'
+
+        headers = [
+            'ID',
+            'Имя',
+            'Тип',
+            'Email',
+            'Телефон',
+            'Компания',
+            'Ответственный',
+            'Согласие на обработку',
+            'Дата создания',
+            'Дата обновления',
+            'Заметки',
+        ]
+        worksheet.append(headers)
+
+        def format_datetime(value):
+            if not value:
+                return ''
+            localized = timezone.localtime(value)
+            return localized.strftime('%d.%m.%Y %H:%M')
+
+        for customer in queryset:
+            worksheet.append(
+                [
+                    str(customer.id),
+                    customer.full_name,
+                    customer.get_customer_type_display(),
+                    customer.email,
+                    customer.phone,
+                    customer.company.name if customer.company else '',
+                    customer.owner.email if customer.owner else '',
+                    'Да' if customer.gdpr_consent else 'Нет',
+                    format_datetime(customer.created_at),
+                    format_datetime(customer.updated_at),
+                    customer.notes,
+                ]
+            )
+
+        for column_cells in worksheet.iter_cols(min_row=1, max_row=worksheet.max_row):
+            column_letter = get_column_letter(column_cells[0].column)
+            max_length = max(len(str(cell.value)) if cell.value is not None else 0 for cell in column_cells)
+            adjusted_width = min(max(max_length + 2, 12), 60)
+            worksheet.column_dimensions[column_letter].width = adjusted_width
+
+        buffer = BytesIO()
+        workbook.save(buffer)
+        buffer.seek(0)
+
+        timestamp = timezone.now().strftime('%Y%m%d-%H%M%S')
+        filename = f'customers-{timestamp}.xlsx'
+
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        )
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
         return response
 
     def perform_destroy(self, instance: Customer) -> None:

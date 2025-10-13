@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+from io import BytesIO
+
 from django.contrib.auth import get_user_model
+from openpyxl import load_workbook
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -129,3 +132,60 @@ class CustomerAPITests(APITestCase):
         list_response = self.client.get(contacts_url)
         self.assertEqual(list_response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(list_response.json()['data']), 1)
+
+    def test_export_customers_respects_search_and_sort(self):
+        self.authenticate(self.manager)
+        payloads = [
+            {
+                'customer_type': 'personal',
+                'first_name': 'Alice',
+                'last_name': 'Zeta',
+                'display_name': 'Alice Client',
+                'email': 'alice@example.com',
+            },
+            {
+                'customer_type': 'personal',
+                'first_name': 'Bob',
+                'last_name': 'Yellow',
+                'display_name': 'Bob Client',
+                'email': 'bob@example.com',
+            },
+            {
+                'customer_type': 'business',
+                'first_name': 'Charlie',
+                'last_name': 'Xavier',
+                'display_name': 'Charlie Client',
+                'email': 'charlie@example.com',
+            },
+        ]
+
+        for payload in payloads:
+            response = self.client.post(self.list_url, payload, format='json')
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        export_url = f'{self.list_url}export/'
+        response = self.client.get(export_url, {'search': 'client', 'sort': 'name'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response['Content-Type'],
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        )
+
+        workbook = load_workbook(BytesIO(response.content))
+        sheet = workbook.active
+        rows = list(sheet.iter_rows(values_only=True))
+        self.assertGreaterEqual(len(rows), 1)
+
+        header = rows[0]
+        name_index = header.index('Имя')
+
+        exported_names = [row[name_index] for row in rows[1:]]
+        self.assertEqual(exported_names, ['Alice Client', 'Bob Client', 'Charlie Client'])
+
+        filtered_response = self.client.get(export_url, {'search': 'Bob'})
+        self.assertEqual(filtered_response.status_code, status.HTTP_200_OK)
+        workbook_filtered = load_workbook(BytesIO(filtered_response.content))
+        sheet_filtered = workbook_filtered.active
+        filtered_rows = list(sheet_filtered.iter_rows(values_only=True))
+        self.assertEqual(len(filtered_rows) - 1, 1)
+        self.assertEqual(filtered_rows[1][name_index], 'Bob Client')

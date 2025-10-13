@@ -18,6 +18,7 @@ import {
   CreateCustomerPayload,
   CustomerSummary,
   UpdateCustomerPayload,
+  customersApi,
   useCreateCustomerMutation,
   useCustomerQuery,
   useCustomersQuery,
@@ -97,6 +98,7 @@ export default function CustomersPage() {
   const [createForm, setCreateForm] = useState<CustomerFormState>(() => createInitialFormState());
   const [createError, setCreateError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editCustomerId, setEditCustomerId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<CustomerFormState>(() => createInitialFormState());
@@ -104,6 +106,7 @@ export default function CustomersPage() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [customerToDelete, setCustomerToDelete] = useState<CustomerSummary | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -274,6 +277,7 @@ export default function CustomersPage() {
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setExportError(null);
     setSearchTerm(searchInput);
     setPage(1);
   };
@@ -283,9 +287,11 @@ export default function CustomersPage() {
     setSearchTerm('');
     setSort('-created_at');
     setPage(1);
+    setExportError(null);
   };
 
   const handleSortChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    setExportError(null);
     setSort(event.target.value);
     setPage(1);
   };
@@ -320,6 +326,35 @@ export default function CustomersPage() {
     setIsCreateOpen(false);
     setCreateError(null);
   };
+
+  const handleExport = useCallback(async () => {
+    setIsExporting(true);
+    setExportError(null);
+    try {
+      const blob = await customersApi.export(queryParams);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const timestamp = new Date()
+        .toISOString()
+        .replace(/[:T]/g, '-')
+        .slice(0, 19);
+      link.href = url;
+      link.download = `customers-${timestamp}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      setSuccessMessage('Файл с клиентами сформирован и загружается.');
+    } catch (error) {
+      setExportError(
+        error instanceof Error
+          ? error.message
+          : 'Не удалось выгрузить клиентов. Попробуйте снова позже.'
+      );
+    } finally {
+      setIsExporting(false);
+    }
+  }, [queryParams]);
 
   const handleEditSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -394,6 +429,16 @@ export default function CustomersPage() {
             </div>
           </Alert>
         ) : null}
+        {exportError ? (
+          <Alert tone="danger" title="Не удалось выгрузить клиентов">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              <span>{exportError}</span>
+              <Button variant="ghost" type="button" onClick={() => setExportError(null)}>
+                Скрыть
+              </Button>
+            </div>
+          </Alert>
+        ) : null}
 
         <section
           style={{
@@ -433,6 +478,16 @@ export default function CustomersPage() {
               </Button>
               <Button type="button" variant="ghost" onClick={handleReset}>
                 Сбросить
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                iconLeft="excel"
+                onClick={handleExport}
+                disabled={isExporting}
+                style={{ borderColor: 'var(--color-success)', color: 'var(--color-success)' }}
+              >
+                {isExporting ? 'Формируем…' : 'Экспорт в Excel'}
               </Button>
             </div>
           </form>
