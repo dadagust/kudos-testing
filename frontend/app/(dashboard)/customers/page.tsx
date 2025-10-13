@@ -27,7 +27,17 @@ import {
 } from '@/entities/customer';
 import { RoleGuard } from '@/features/auth';
 import { Role } from '@/shared/config/roles';
-import { Alert, Button, Drawer, Input, Pagination, Select, Spinner, Table } from '@/shared/ui';
+import {
+  Alert,
+  Button,
+  Drawer,
+  Input,
+  Modal,
+  Pagination,
+  Select,
+  Spinner,
+  Table,
+} from '@/shared/ui';
 import type { TableColumn } from '@/shared/ui';
 
 const DEFAULT_PAGE_SIZE = 10;
@@ -128,6 +138,15 @@ export default function CustomersPage() {
     isFetching,
     refetch,
   } = useCustomersQuery(queryParams);
+
+  useEffect(() => {
+    if (searchTerm === searchInput) {
+      return;
+    }
+
+    setSearchTerm(searchInput);
+    setPage(1);
+  }, [searchInput, searchTerm]);
 
   const handleCreateFieldChange = createFieldChangeHandler(setCreateForm);
   const handleEditFieldChange = createFieldChangeHandler(setEditForm);
@@ -334,10 +353,7 @@ export default function CustomersPage() {
       const blob = await customersApi.export(queryParams);
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-      const timestamp = new Date()
-        .toISOString()
-        .replace(/[:T]/g, '-')
-        .slice(0, 19);
+      const timestamp = new Date().toISOString().replace(/[:T]/g, '-').slice(0, 19);
       link.href = url;
       link.download = `customers-${timestamp}.xlsx`;
       document.body.appendChild(link);
