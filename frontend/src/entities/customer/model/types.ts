@@ -22,7 +22,6 @@ export interface CustomerSummary {
   display_name: string;
   email: string;
   phone: string;
-  tags: string[];
   gdpr_consent: boolean;
   company: CustomerCompany | null;
   owner_id: number | null;
@@ -97,7 +96,6 @@ export interface CustomerListQuery {
   email?: string;
   phone?: string;
   company_id?: string;
-  tags?: string[];
   created_from?: string;
   created_to?: string;
   sort?: string;
@@ -113,7 +111,6 @@ export interface CreateCustomerPayload {
   display_name?: string;
   email?: string;
   phone?: string;
-  tags?: string[];
   gdpr_consent?: boolean;
   notes?: string;
 }

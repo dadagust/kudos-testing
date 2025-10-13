@@ -124,7 +124,6 @@ class Customer(TimeStampedModel):
         blank=True,
         help_text='Используется для поиска и уникальности',
     )
-    tags = models.JSONField('Теги', default=list, blank=True)
     gdpr_consent = models.BooleanField('Согласие на обработку данных', default=False)
     company = models.ForeignKey(
         Company,

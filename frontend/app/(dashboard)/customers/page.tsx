@@ -26,18 +26,7 @@ import {
 } from '@/entities/customer';
 import { RoleGuard } from '@/features/auth';
 import { Role } from '@/shared/config/roles';
-import {
-  Alert,
-  Button,
-  Drawer,
-  Input,
-  Modal,
-  Pagination,
-  Select,
-  Spinner,
-  Table,
-  Tag,
-} from '@/shared/ui';
+import { Alert, Button, Drawer, Input, Pagination, Select, Spinner, Table } from '@/shared/ui';
 import type { TableColumn } from '@/shared/ui';
 
 const DEFAULT_PAGE_SIZE = 10;
@@ -53,7 +42,7 @@ const normalizeValue = (value: string) => {
   return trimmed.length ? trimmed : undefined;
 };
 
-type CustomerFormState = CreateCustomerPayload & { tagsInput: string; gdpr_consent: boolean };
+type CustomerFormState = CreateCustomerPayload & { gdpr_consent: boolean };
 
 const baseFormState: CustomerFormState = {
   customer_type: 'personal',
@@ -64,7 +53,6 @@ const baseFormState: CustomerFormState = {
   email: '',
   phone: '',
   notes: '',
-  tagsInput: '',
   gdpr_consent: true,
 };
 
@@ -86,18 +74,8 @@ const createFieldChangeHandler =
     }));
   };
 
-const buildPayloadFromForm = (
-  form: CustomerFormState,
-  options: { keepEmptyTags?: boolean } = {}
-): UpdateCustomerPayload => {
-  const tags = form.tagsInput
-    ? form.tagsInput
-        .split(',')
-        .map((tag) => tag.trim())
-        .filter(Boolean)
-    : [];
-
-  const payload: UpdateCustomerPayload = {
+const buildPayloadFromForm = (form: CustomerFormState): UpdateCustomerPayload => {
+  return {
     customer_type: form.customer_type,
     first_name: normalizeValue(form.first_name ?? ''),
     last_name: normalizeValue(form.last_name ?? ''),
@@ -107,14 +85,7 @@ const buildPayloadFromForm = (
     phone: normalizeValue(form.phone ?? ''),
     notes: normalizeValue(form.notes ?? ''),
     gdpr_consent: form.gdpr_consent,
-    tags,
   };
-
-  if (!tags.length && !options.keepEmptyTags) {
-    delete payload.tags;
-  }
-
-  return payload;
 };
 
 export default function CustomersPage() {
@@ -177,7 +148,6 @@ export default function CustomersPage() {
         email: customer.email ?? '',
         phone: customer.phone ?? '',
         notes: customer.notes ?? '',
-        tagsInput: customer.tags.join(', '),
         gdpr_consent: customer.gdpr_consent ?? false,
       });
     }
@@ -270,20 +240,6 @@ export default function CustomersPage() {
         render: (row) => row.phone || '—',
       },
       {
-        key: 'tags',
-        header: 'Теги',
-        render: (row) =>
-          row.tags.length ? (
-            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-              {row.tags.map((tag) => (
-                <Tag key={tag}>{tag}</Tag>
-              ))}
-            </div>
-          ) : (
-            <span style={{ color: 'var(--color-text-muted)' }}>Нет</span>
-          ),
-      },
-      {
         key: 'updated_at',
         header: 'Обновлён',
         render: (row) => formatDateTime(row.updated_at),
@@ -373,7 +329,7 @@ export default function CustomersPage() {
 
     setEditError(null);
 
-    const payload = buildPayloadFromForm(editForm, { keepEmptyTags: true });
+    const payload = buildPayloadFromForm(editForm);
     const customerId = editCustomerId;
 
     updateMutation.mutate(
@@ -576,12 +532,6 @@ export default function CustomersPage() {
             onChange={handleCreateFieldChange('phone')}
           />
           <Input
-            label="Теги"
-            helperText="Через запятую"
-            value={createForm.tagsInput}
-            onChange={handleCreateFieldChange('tagsInput')}
-          />
-          <Input
             label="Заметки"
             value={createForm.notes ?? ''}
             onChange={handleCreateFieldChange('notes')}
@@ -691,12 +641,6 @@ export default function CustomersPage() {
                 <option value="true">Согласие получено</option>
                 <option value="false">Согласие отсутствует</option>
               </Select>
-              <Input
-                label="Теги"
-                helperText="Через запятую"
-                value={editForm.tagsInput}
-                onChange={handleEditFieldChange('tagsInput')}
-              />
               <Input
                 label="Заметки"
                 value={editForm.notes ?? ''}
