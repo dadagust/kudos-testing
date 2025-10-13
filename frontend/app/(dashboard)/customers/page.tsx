@@ -27,6 +27,7 @@ import {
 } from '@/entities/customer';
 import { RoleGuard } from '@/features/auth';
 import { Role } from '@/shared/config/roles';
+import { formatPhoneDisplay, formatPhoneInput, normalizePhoneNumber } from '@/shared/lib/phone';
 import {
   Alert,
   Button,
@@ -93,7 +94,7 @@ const buildPayloadFromForm = (form: CustomerFormState): UpdateCustomerPayload =>
     middle_name: normalizeValue(form.middle_name ?? ''),
     display_name: normalizeValue(form.display_name ?? ''),
     email: normalizeValue(form.email ?? ''),
-    phone: normalizeValue(form.phone ?? ''),
+    phone: normalizePhoneNumber(form.phone),
     notes: normalizeValue(form.notes ?? ''),
     gdpr_consent: form.gdpr_consent,
   };
@@ -151,6 +152,22 @@ export default function CustomersPage() {
   const handleCreateFieldChange = createFieldChangeHandler(setCreateForm);
   const handleEditFieldChange = createFieldChangeHandler(setEditForm);
 
+  const handleCreatePhoneChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhoneInput(event.target.value);
+    setCreateForm((prev) => ({
+      ...prev,
+      phone: formatted,
+    }));
+  }, []);
+
+  const handleEditPhoneChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhoneInput(event.target.value);
+    setEditForm((prev) => ({
+      ...prev,
+      phone: formatted,
+    }));
+  }, []);
+
   const {
     data: editCustomerResponse,
     isLoading: isEditLoading,
@@ -168,7 +185,7 @@ export default function CustomersPage() {
         middle_name: customer.middle_name ?? '',
         display_name: customer.display_name ?? '',
         email: customer.email ?? '',
-        phone: customer.phone ?? '',
+        phone: formatPhoneInput(customer.phone ?? ''),
         notes: customer.notes ?? '',
         gdpr_consent: customer.gdpr_consent ?? false,
       });
@@ -259,7 +276,7 @@ export default function CustomersPage() {
       {
         key: 'phone',
         header: 'Телефон',
-        render: (row) => row.phone || '—',
+        render: (row) => (row.phone ? formatPhoneDisplay(row.phone) : '—'),
       },
       {
         key: 'updated_at',
@@ -600,7 +617,7 @@ export default function CustomersPage() {
           <Input
             label="Телефон"
             value={createForm.phone ?? ''}
-            onChange={handleCreateFieldChange('phone')}
+            onChange={handleCreatePhoneChange}
           />
           <Input
             label="Заметки"
@@ -702,7 +719,7 @@ export default function CustomersPage() {
               <Input
                 label="Телефон"
                 value={editForm.phone ?? ''}
-                onChange={handleEditFieldChange('phone')}
+                onChange={handleEditPhoneChange}
               />
               <Select
                 label="GDPR согласие"

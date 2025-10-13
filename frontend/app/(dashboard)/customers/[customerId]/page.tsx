@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { CUSTOMER_TYPE_LABELS, CustomerDetail, useCustomerQuery } from '@/entities/customer';
 import { RoleGuard } from '@/features/auth';
 import { Role } from '@/shared/config/roles';
+import { formatPhoneDisplay } from '@/shared/lib/phone';
 import { Alert, Badge, Button, Spinner, Tag } from '@/shared/ui';
 
 const formatDateTime = (value: string) =>
@@ -32,6 +33,8 @@ export default function CustomerDetailsPage({ params }: CustomerDetailsPageProps
   const router = useRouter();
   const { data, isLoading, isError, error } = useCustomerQuery(params.customerId);
   const customer = data?.data;
+  const formattedPhone = formatPhoneDisplay(customer?.phone);
+  const formattedCompanyPhone = formatPhoneDisplay(customer?.company?.phone);
 
   return (
     <RoleGuard allow={[Role.SalesManager, Role.Accountant, Role.Admin]}>
@@ -104,7 +107,7 @@ export default function CustomerDetailsPage({ params }: CustomerDetailsPageProps
                     <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
                       Телефон
                     </dt>
-                    <dd style={{ fontWeight: 600 }}>{customer.phone || 'Не указан'}</dd>
+                    <dd style={{ fontWeight: 600 }}>{formattedPhone || 'Не указан'}</dd>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
@@ -194,7 +197,7 @@ export default function CustomerDetailsPage({ params }: CustomerDetailsPageProps
                         <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
                           Телефон
                         </dt>
-                        <dd style={{ fontWeight: 600 }}>{customer.company.phone}</dd>
+                        <dd style={{ fontWeight: 600 }}>{formattedCompanyPhone}</dd>
                       </div>
                     ) : null}
                   </dl>
