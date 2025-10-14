@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('users', '0003_create_role_groups'),
     ]
@@ -12,6 +11,10 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='userprofile',
-            options={'ordering': ['-created'], 'verbose_name': 'Профиль пользователя', 'verbose_name_plural': 'Профили пользователей'},
+            options={
+                'ordering': ['-created'],
+                'verbose_name': 'Профиль пользователя',
+                'verbose_name_plural': 'Профили пользователей',
+            },
         ),
     ]

@@ -9,22 +9,22 @@ from applications.core.models import Date
 
 
 class RoleChoices(models.TextChoices):
-    GUEST = "guest", "Гость"
-    CUSTOMER = "customer", "Клиент"
-    B2B = "b2b", "B2B Клиент"
-    SALES_MANAGER = "sales_manager", "Менеджер продаж"
-    WAREHOUSE = "warehouse", "Склад"
-    ACCOUNTANT = "accountant", "Бухгалтерия"
-    CONTENT_MANAGER = "content_manager", "Контент-менеджер"
-    ADMIN = "admin", "Администратор"
-    DRIVER = "driver", "Водитель"
-    LOADER = "loader", "Грузчик"
+    GUEST = 'guest', 'Гость'
+    CUSTOMER = 'customer', 'Клиент'
+    B2B = 'b2b', 'B2B Клиент'
+    SALES_MANAGER = 'sales_manager', 'Менеджер продаж'
+    WAREHOUSE = 'warehouse', 'Склад'
+    ACCOUNTANT = 'accountant', 'Бухгалтерия'
+    CONTENT_MANAGER = 'content_manager', 'Контент-менеджер'
+    ADMIN = 'admin', 'Администратор'
+    DRIVER = 'driver', 'Водитель'
+    LOADER = 'loader', 'Грузчик'
 
 
 LEGACY_ROLE_MAP = {
-    "client": RoleChoices.CUSTOMER,
-    "manager": RoleChoices.SALES_MANAGER,
-    "administrator": RoleChoices.ADMIN,
+    'client': RoleChoices.CUSTOMER,
+    'manager': RoleChoices.SALES_MANAGER,
+    'administrator': RoleChoices.ADMIN,
 }
 
 
@@ -32,7 +32,7 @@ class UserProfile(Date):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="profile",
+        related_name='profile',
     )
     role = models.CharField(
         max_length=32,
@@ -47,7 +47,7 @@ class UserProfile(Date):
         verbose_name_plural = 'Профили пользователей'
 
     def __str__(self) -> str:  # pragma: no cover - human readable
-        return f"{self.user.get_full_name() or self.user.email} ({self.get_role_display()})"
+        return f'{self.user.get_full_name() or self.user.email} ({self.get_role_display()})'
 
     def _normalize_role(self) -> None:
         """Ensure the stored role always matches the canonical enum value."""
@@ -83,7 +83,7 @@ class UserProfile(Date):
                     role_value = legacy_role
                     if self.role != legacy_role:
                         self.role = legacy_role
-                        super().save(update_fields=["role"])
+                        super().save(update_fields=['role'])
                 else:
                     # Роль неизвестна системе — ничего не трогаем, чтобы не потерять данные.
                     return
@@ -105,7 +105,7 @@ class UserProfile(Date):
 
             if self.user.is_staff != expected_staff:
                 self.user.is_staff = expected_staff
-                self.user.save(update_fields=["is_staff"])
+                self.user.save(update_fields=['is_staff'])
         except (OperationalError, ProgrammingError, DatabaseError):
             return
 
@@ -119,4 +119,4 @@ def ensure_user_profile(sender, instance, created, **kwargs):
 
     if instance.is_superuser and profile.role != RoleChoices.ADMIN:
         profile.role = RoleChoices.ADMIN
-        profile.save(update_fields=["role"])
+        profile.save(update_fields=['role'])

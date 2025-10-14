@@ -107,7 +107,7 @@ class CustomerAPITests(APITestCase):
             format='json',
         ).json()['data']
         customer = Customer.objects.get(pk=created['id'])
-        delete_response = self.client.delete(f"{self.list_url}{customer.id}/")
+        delete_response = self.client.delete(f'{self.list_url}{customer.id}/')
         self.assertEqual(delete_response.status_code, status.HTTP_204_NO_CONTENT)
         customer.refresh_from_db()
         self.assertFalse(customer.is_active)
@@ -120,7 +120,7 @@ class CustomerAPITests(APITestCase):
             format='json',
         ).json()['data']
         customer_id = created['id']
-        contacts_url = f"{self.list_url}{customer_id}/contact/"
+        contacts_url = f'{self.list_url}{customer_id}/contact/'
         response = self.client.post(
             contacts_url,
             {'first_name': 'Анна', 'last_name': 'Иванова', 'email': 'anna@example.com'},

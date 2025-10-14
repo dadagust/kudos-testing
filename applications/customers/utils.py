@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime, time
+
 from django.utils import timezone
 from django.utils.dateparse import parse_date, parse_datetime
 from rest_framework import exceptions
@@ -51,7 +52,9 @@ class QueryParamsHelper:
         if date_value is None:
             raise exceptions.ValidationError({key: 'Некорректный формат даты'})
         if bound == 'to':
-            return timezone.make_aware(datetime.combine(date_value, time.max), timezone=timezone.utc)
+            return timezone.make_aware(
+                datetime.combine(date_value, time.max), timezone=timezone.utc
+            )
         return timezone.make_aware(datetime.combine(date_value, time.min), timezone=timezone.utc)
 
     def get_sort_fields(self, mapping: dict[str, str]) -> list[str]:
@@ -74,5 +77,6 @@ class QueryParamsHelper:
                 )
             fields.append(f'{direction}{mapped}')
         return fields
+
 
 __all__ = ['QueryParamsHelper']

@@ -29,8 +29,12 @@ from .utils import QueryParamsHelper
 class CustomerViewSet(viewsets.ModelViewSet):
     """Full CRUD endpoint for customers with scoped access."""
 
-    queryset = Customer.objects.all().select_related('company', 'owner').prefetch_related(
-        Prefetch('contacts', queryset=Contact.objects.filter(is_active=True)),
+    queryset = (
+        Customer.objects.all()
+        .select_related('company', 'owner')
+        .prefetch_related(
+            Prefetch('contacts', queryset=Contact.objects.filter(is_active=True)),
+        )
     )
     permission_classes = [IsAuthenticated, CustomerAccessPolicy]
 
@@ -104,7 +108,9 @@ class CustomerViewSet(viewsets.ModelViewSet):
         return queryset
 
     def create(self, request, *args, **kwargs):
-        serializer = CustomerWriteSerializer(data=request.data, context=self.get_serializer_context())
+        serializer = CustomerWriteSerializer(
+            data=request.data, context=self.get_serializer_context()
+        )
         serializer.is_valid(raise_exception=True)
         customer = serializer.save()
         read_serializer = CustomerDetailSerializer(customer, context=self.get_serializer_context())
@@ -186,7 +192,9 @@ class CustomerViewSet(viewsets.ModelViewSet):
 
         for column_cells in worksheet.iter_cols(min_row=1, max_row=worksheet.max_row):
             column_letter = get_column_letter(column_cells[0].column)
-            max_length = max(len(str(cell.value)) if cell.value is not None else 0 for cell in column_cells)
+            max_length = max(
+                len(str(cell.value)) if cell.value is not None else 0 for cell in column_cells
+            )
             adjusted_width = min(max(max_length + 2, 12), 60)
             worksheet.column_dimensions[column_letter].width = adjusted_width
 
@@ -209,7 +217,9 @@ class CustomerViewSet(viewsets.ModelViewSet):
         instance.save(update_fields=['is_active', 'modified'])
 
 
-class CustomerContactViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
+class CustomerContactViewSet(
+    mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet
+):
     permission_classes = [IsAuthenticated, CustomerAccessPolicy]
     serializer_class = ContactSerializer
 
@@ -235,7 +245,9 @@ class CustomerContactViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, vie
         contact = serializer.save()
         read_serializer = self.get_serializer(contact)
         headers = self.get_success_headers(read_serializer.data)
-        return Response({'data': read_serializer.data}, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(
+            {'data': read_serializer.data}, status=status.HTTP_201_CREATED, headers=headers
+        )
 
     def list(self, request, *args, **kwargs):
         response = super().list(request, *args, **kwargs)

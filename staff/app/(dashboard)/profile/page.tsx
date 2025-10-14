@@ -72,7 +72,9 @@ export default function ProfilePage() {
       {
         key: 'change',
         header: 'Изменение',
-        render: (row: { change: boolean }) => <Tag tone={row.change ? 'success' : 'default'}>{row.change ? 'Да' : 'Нет'}</Tag>,
+        render: (row: { change: boolean }) => (
+          <Tag tone={row.change ? 'success' : 'default'}>{row.change ? 'Да' : 'Нет'}</Tag>
+        ),
       },
     ],
     []

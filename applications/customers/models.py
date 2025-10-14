@@ -5,7 +5,7 @@ from __future__ import annotations
 import secrets
 import time
 import uuid
-from typing import Iterable
+from collections.abc import Iterable
 
 from django.conf import settings
 from django.core.validators import RegexValidator
@@ -69,10 +69,10 @@ class CustomerType(models.TextChoices):
 
 
 class CustomerQuerySet(models.QuerySet):
-    def active(self) -> 'CustomerQuerySet':
+    def active(self) -> CustomerQuerySet:
         return self.filter(is_active=True)
 
-    def for_user(self, user) -> 'CustomerQuerySet':
+    def for_user(self, user) -> CustomerQuerySet:
         if not getattr(user, 'is_authenticated', False):
             return self.none()
 

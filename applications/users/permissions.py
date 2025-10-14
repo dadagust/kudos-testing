@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
-from typing import Mapping
+from collections.abc import Iterable, Mapping
 
 PermissionMap = dict[str, dict[str, bool]]
 
@@ -123,7 +122,9 @@ def _has_any(user_permissions: set[str], codes: Iterable[str]) -> bool:
 
 
 def serialize_user_permissions(user) -> PermissionMap:
-    permissions = {scope: {'view': False, 'change': False} for scope in PERMISSION_SCOPE_DEFINITIONS}
+    permissions = {
+        scope: {'view': False, 'change': False} for scope in PERMISSION_SCOPE_DEFINITIONS
+    }
     if not getattr(user, 'is_authenticated', False):
         return permissions
 

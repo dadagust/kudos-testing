@@ -34,8 +34,12 @@ export const RoleGuard = ({ allow, mode = 'all', fallback, children }: RoleGuard
 
   const hasAccess = normalized.length
     ? mode === 'any'
-      ? normalized.some((requirement) => Boolean(user?.permissions?.[requirement.scope]?.[requirement.action]))
-      : normalized.every((requirement) => Boolean(user?.permissions?.[requirement.scope]?.[requirement.action]))
+      ? normalized.some((requirement) =>
+          Boolean(user?.permissions?.[requirement.scope]?.[requirement.action])
+        )
+      : normalized.every((requirement) =>
+          Boolean(user?.permissions?.[requirement.scope]?.[requirement.action])
+        )
     : true;
 
   if (!user || !hasAccess) {

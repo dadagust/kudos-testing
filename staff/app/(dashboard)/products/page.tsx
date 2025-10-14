@@ -149,7 +149,7 @@ export default function ProductsPage() {
   };
 
   return (
-    <RoleGuard allow={[{ scope: 'admin_products' }, { scope: 'inventory' }]}> 
+    <RoleGuard allow={[{ scope: 'admin_products' }, { scope: 'inventory' }]}>
       <header
         style={{
           display: 'flex',
