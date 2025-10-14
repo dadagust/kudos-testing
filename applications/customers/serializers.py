@@ -29,10 +29,10 @@ class CompanySerializer(serializers.ModelSerializer):
             'phone',
             'website',
             'notes',
-            'created_at',
-            'updated_at',
+            'created',
+            'modified',
         )
-        read_only_fields = ('id', 'created_at', 'updated_at')
+        read_only_fields = ('id', 'created', 'modified')
 
 
 class CompanyInputSerializer(serializers.ModelSerializer):
@@ -74,10 +74,10 @@ class ContactSerializer(serializers.ModelSerializer):
             'position',
             'notes',
             'is_primary',
-            'created_at',
-            'updated_at',
+            'created',
+            'modified',
         )
-        read_only_fields = ('id', 'created_at', 'updated_at')
+        read_only_fields = ('id', 'created', 'modified')
 
     def validate_email(self, value: str) -> str:
         return value.lower() if value else value
@@ -109,14 +109,14 @@ class CustomerListSerializer(serializers.ModelSerializer):
             'company',
             'owner_id',
             'is_active',
-            'created_at',
-            'updated_at',
+            'created',
+            'modified',
         )
         read_only_fields = (
             'id',
             'full_name',
-            'created_at',
-            'updated_at',
+            'created',
+            'modified',
         )
 
 
@@ -209,7 +209,7 @@ class CustomerWriteSerializer(serializers.ModelSerializer):
         if company_data:
             company = self._upsert_company(company_data)
             customer.company = company
-            customer.save(update_fields=['company', 'updated_at'])
+            customer.save(update_fields=['company', 'modified'])
         return customer
 
     @transaction.atomic
@@ -228,10 +228,10 @@ class CustomerWriteSerializer(serializers.ModelSerializer):
                 company = self._upsert_company(company_data)
                 if instance.company_id != company.id:
                     instance.company = company
-                    instance.save(update_fields=['company', 'updated_at'])
+                    instance.save(update_fields=['company', 'modified'])
             else:
                 instance.company = None
-                instance.save(update_fields=['company', 'updated_at'])
+                instance.save(update_fields=['company', 'modified'])
         return instance
 
     def _upsert_company(self, data: dict[str, Any]) -> Company:
