@@ -18,15 +18,7 @@ interface AdminLayoutProps {
 }
 
 const getAvailableNavItems = (user: UserProfile) =>
-  NAVIGATION_ITEMS.filter((item) => {
-    const canAccessSection = user.access?.[item.id];
-
-    if (typeof canAccessSection === 'boolean') {
-      return canAccessSection;
-    }
-
-    return item.roles.includes(user.role);
-  });
+  NAVIGATION_ITEMS.filter((item) => user.access?.[item.id]?.view === true);
 
 export const AdminLayout: FC<AdminLayoutProps> = ({ user, children }) => {
   const pathname = usePathname();

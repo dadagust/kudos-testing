@@ -11,7 +11,6 @@ import {
 } from '@/entities/product';
 import type { ProductListQuery, ProductSummary } from '@/entities/product';
 import { RoleGuard } from '@/features/auth';
-import { Role } from '@/shared/config/roles';
 import { Alert, Badge, Button, Input, Pagination, Select, Spinner, Tag, Table } from '@/shared/ui';
 import type { TableColumn } from '@/shared/ui';
 
@@ -149,7 +148,7 @@ export default function ProductsPage() {
   };
 
   return (
-    <RoleGuard allow={[Role.SalesManager, Role.ContentManager, Role.Admin]}>
+    <RoleGuard section="products">
       <header
         style={{
           display: 'flex',
@@ -165,9 +164,11 @@ export default function ProductsPage() {
             товара в режиме read-only. Данные формируются из моков API с трассировкой запросов.
           </p>
         </div>
-        <Button iconLeft="plus" disabled title="Создание товара появится на следующей итерации">
-          Новый товар
-        </Button>
+        <RoleGuard section="products" permission="change" fallback={null}>
+          <Button iconLeft="plus" disabled title="Создание товара появится на следующей итерации">
+            Новый товар
+          </Button>
+        </RoleGuard>
       </header>
 
       <section

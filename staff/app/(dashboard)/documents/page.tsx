@@ -1,7 +1,6 @@
 'use client';
 
 import { RoleGuard } from '@/features/auth';
-import { Role } from '@/shared/config/roles';
 import { Button, Table } from '@/shared/ui';
 
 const documents = [
@@ -23,10 +22,12 @@ const documents = [
 
 export default function DocumentsPage() {
   return (
-    <RoleGuard allow={[Role.SalesManager, Role.Accountant, Role.ContentManager, Role.Admin]}>
+    <RoleGuard section="documents">
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1>Документы</h1>
-        <Button iconLeft="upload">Загрузить</Button>
+        <RoleGuard section="documents" permission="change" fallback={null}>
+          <Button iconLeft="upload">Загрузить</Button>
+        </RoleGuard>
       </header>
       <Table
         columns={[
