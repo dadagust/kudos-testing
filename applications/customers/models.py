@@ -13,6 +13,8 @@ from django.db import models
 from django.db.models import Q
 from django.db.models.functions import Lower
 
+from applications.core.models import Common
+
 
 def generate_uuid7() -> uuid.UUID:
     """Generate a time-ordered UUIDv7 compatible identifier."""
@@ -26,20 +28,17 @@ def generate_uuid7() -> uuid.UUID:
     return uuid.UUID(int=(msb << 64) | lsb)
 
 
-class TimeStampedModel(models.Model):
-    """Abstract base providing UUID pk and audit timestamps."""
+class CustomerBase(Common):
+    """Common base for customer models with UUID primary key."""
 
     id = models.UUIDField(primary_key=True, default=generate_uuid7, editable=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
 
-    class Meta:
+    class Meta(Common.Meta):
         abstract = True
-        ordering = ('-created_at',)
 
 
-class Company(TimeStampedModel):
+class Company(CustomerBase):
     """Legal entity related to one or many customers."""
 
     name = models.CharField('Название компании', max_length=255)
@@ -52,7 +51,7 @@ class Company(TimeStampedModel):
     website = models.URLField('Сайт', blank=True)
     notes = models.TextField('Заметки', blank=True)
 
-    class Meta(TimeStampedModel.Meta):
+    class Meta(CustomerBase.Meta):
         verbose_name = 'Компания'
         verbose_name_plural = 'Компании'
         indexes = [
@@ -99,7 +98,7 @@ class CustomerQuerySet(models.QuerySet):
         return self.none()
 
 
-class Customer(TimeStampedModel):
+class Customer(CustomerBase):
     """Customer profile that might be linked with a company and contacts."""
 
     owner = models.ForeignKey(
@@ -136,7 +135,7 @@ class Customer(TimeStampedModel):
 
     objects = CustomerQuerySet.as_manager()
 
-    class Meta(TimeStampedModel.Meta):
+    class Meta(CustomerBase.Meta):
         verbose_name = 'Клиент'
         verbose_name_plural = 'Клиенты'
         constraints = [
@@ -182,7 +181,7 @@ class Customer(TimeStampedModel):
         super().save(*args, **kwargs)
 
 
-class Contact(TimeStampedModel):
+class Contact(CustomerBase):
     """Additional contact person for a customer or company."""
 
     customer = models.ForeignKey(
@@ -208,7 +207,7 @@ class Contact(TimeStampedModel):
 
     phone_validator = RegexValidator(r'^[0-9+()\-\s]*$', 'Некорректный формат номера телефона')
 
-    class Meta(TimeStampedModel.Meta):
+    class Meta(CustomerBase.Meta):
         verbose_name = 'Контакт'
         verbose_name_plural = 'Контакты'
         indexes = [

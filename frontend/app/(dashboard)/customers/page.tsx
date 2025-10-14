@@ -103,7 +103,7 @@ const buildPayloadFromForm = (form: CustomerFormState): UpdateCustomerPayload =>
 export default function CustomersPage() {
   const [searchInput, setSearchInput] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [sort, setSort] = useState('-created_at');
+  const [sort, setSort] = useState('-created');
   const [page, setPage] = useState(1);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [createForm, setCreateForm] = useState<CustomerFormState>(() => createInitialFormState());
@@ -279,9 +279,9 @@ export default function CustomersPage() {
         render: (row) => (row.phone ? formatPhoneDisplay(row.phone) : '—'),
       },
       {
-        key: 'updated_at',
+        key: 'modified',
         header: 'Обновлён',
-        render: (row) => formatDateTime(row.updated_at),
+        render: (row) => formatDateTime(row.modified),
       },
       {
         key: 'actions',
@@ -321,7 +321,7 @@ export default function CustomersPage() {
   const handleReset = () => {
     setSearchInput('');
     setSearchTerm('');
-    setSort('-created_at');
+    setSort('-created');
     setPage(1);
     setExportError(null);
   };
@@ -500,8 +500,8 @@ export default function CustomersPage() {
               onChange={(event) => setSearchInput(event.target.value)}
             />
             <Select label="Сортировка" value={sort} onChange={handleSortChange}>
-              <option value="-created_at">Сначала новые</option>
-              <option value="created_at">Сначала старые</option>
+              <option value="-created">Сначала новые</option>
+              <option value="created">Сначала старые</option>
               <option value="name">По имени A→Я</option>
               <option value="-name">По имени Я→A</option>
             </Select>
