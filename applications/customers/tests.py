@@ -31,7 +31,7 @@ class CustomerAPITests(APITestCase):
         self.customer_user.profile.role = RoleChoices.CUSTOMER
         self.customer_user.profile.save()
 
-        self.list_url = '/api/v1/customers/'
+        self.list_url = '/api/v1/customer/'
 
     def authenticate(self, user):
         self.client.force_authenticate(user=user)
@@ -120,7 +120,7 @@ class CustomerAPITests(APITestCase):
             format='json',
         ).json()['data']
         customer_id = created['id']
-        contacts_url = f"{self.list_url}{customer_id}/contacts/"
+        contacts_url = f"{self.list_url}{customer_id}/contact/"
         response = self.client.post(
             contacts_url,
             {'first_name': 'Анна', 'last_name': 'Иванова', 'email': 'anna@example.com'},

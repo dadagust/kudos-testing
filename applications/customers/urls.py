@@ -8,11 +8,11 @@ from .views import CustomerContactViewSet, CustomerViewSet
 app_name = 'customers'
 
 router = DefaultRouter()
-router.register('customers', CustomerViewSet, basename='customer')
+router.register('customer', CustomerViewSet, basename='customer')
 
 contact_list = CustomerContactViewSet.as_view({'get': 'list', 'post': 'create'})
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('customers/<uuid:customer_id>/contacts/', contact_list, name='customer-contacts'),
+    path('customer/<uuid:customer_id>/contact/', contact_list, name='customer-contact'),
 ]
