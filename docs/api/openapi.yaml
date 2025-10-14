@@ -1478,7 +1478,7 @@ paths:
           $ref: '#/components/responses/ValidationError'
         '404':
           $ref: '#/components/responses/NotFound'
-  /api/v1/customers/:
+  /api/v1/customer/:
     get:
       summary: Список клиентов
       parameters:
@@ -1539,7 +1539,7 @@ paths:
                 $ref: '#/components/schemas/CustomerResponse'
         '400':
           $ref: '#/components/responses/ValidationError'
-  /api/v1/customers/{customerId}/:
+  /api/v1/customer/{customerId}/:
     parameters:
       - name: customerId
         in: path
@@ -1584,7 +1584,7 @@ paths:
           description: Клиент помечен как неактивный.
         '404':
           $ref: '#/components/responses/NotFound'
-  /api/v1/customers/{customerId}/contacts/:
+  /api/v1/customer/{customerId}/contact/:
     parameters:
       - name: customerId
         in: path
