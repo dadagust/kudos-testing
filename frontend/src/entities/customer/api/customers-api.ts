@@ -40,11 +40,11 @@ const buildListParams = (params: CustomerListQuery) => {
   }
 
   if (params.created_from) {
-    searchParams.set('filter[created_at][from]', params.created_from);
+    searchParams.set('filter[created][from]', params.created_from);
   }
 
   if (params.created_to) {
-    searchParams.set('filter[created_at][to]', params.created_to);
+    searchParams.set('filter[created][to]', params.created_to);
   }
 
   return searchParams;

@@ -51,8 +51,8 @@ erDiagram
     text short_description
     text full_description
     jsonb attributes_snapshot
-    timestamp created_at
-    timestamp updated_at
+    timestamp created
+    timestamp modified
   }
 
   ATTRIBUTE {
@@ -163,8 +163,8 @@ erDiagram
     decimal grand_total
     string currency
     string payment_status
-    timestamp created_at
-    timestamp updated_at
+    timestamp created
+    timestamp modified
   }
 
   ORDER_ITEM {
@@ -226,7 +226,7 @@ erDiagram
     date reserved_to
     int quantity
     string status
-    timestamp created_at
+    timestamp created
   }
 
   DAMAGE_REPORT {

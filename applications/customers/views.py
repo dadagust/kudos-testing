@@ -94,18 +94,18 @@ class CustomerViewSet(viewsets.ModelViewSet):
         if company_id:
             queryset = queryset.filter(company_id=company_id)
 
-        created_from = helper.get_filter_datetime('created_at', 'from')
+        created_from = helper.get_filter_datetime('created', 'from')
         if created_from:
-            queryset = queryset.filter(created_at__gte=created_from)
-        created_to = helper.get_filter_datetime('created_at', 'to')
+            queryset = queryset.filter(created__gte=created_from)
+        created_to = helper.get_filter_datetime('created', 'to')
         if created_to:
-            queryset = queryset.filter(created_at__lte=created_to)
+            queryset = queryset.filter(created__lte=created_to)
 
-        sort_fields = helper.get_sort_fields({'name': 'display_name', 'created_at': 'created_at'})
+        sort_fields = helper.get_sort_fields({'name': 'display_name', 'created': 'created'})
         if sort_fields:
             queryset = queryset.order_by(*sort_fields)
         else:
-            queryset = queryset.order_by('-created_at')
+            queryset = queryset.order_by('-created')
 
         return queryset
 
@@ -184,8 +184,8 @@ class CustomerViewSet(viewsets.ModelViewSet):
                     customer.company.name if customer.company else '',
                     customer.owner.email if customer.owner else '',
                     'Да' if customer.gdpr_consent else 'Нет',
-                    format_datetime(customer.created_at),
-                    format_datetime(customer.updated_at),
+                    format_datetime(customer.created),
+                    format_datetime(customer.modified),
                     customer.notes,
                 ]
             )
@@ -212,7 +212,7 @@ class CustomerViewSet(viewsets.ModelViewSet):
 
     def perform_destroy(self, instance: Customer) -> None:
         instance.is_active = False
-        instance.save(update_fields=['is_active', 'updated_at'])
+        instance.save(update_fields=['is_active', 'modified'])
 
 
 class CustomerContactViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
@@ -228,7 +228,7 @@ class CustomerContactViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, vie
 
     def get_queryset(self):  # type: ignore[override]
         customer = self.get_customer()
-        return customer.contacts.filter(is_active=True).order_by('-is_primary', '-created_at')
+        return customer.contacts.filter(is_active=True).order_by('-is_primary', '-created')
 
     def get_serializer_context(self):
         context = super().get_serializer_context()

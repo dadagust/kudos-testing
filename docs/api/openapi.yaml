@@ -289,10 +289,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AttributeValue'
-        created_at:
+        created:
           type: string
           format: date-time
-        updated_at:
+        modified:
           type: string
           format: date-time
       required:
@@ -306,8 +306,8 @@ components:
         - rental_unit
         - base_price
         - short_description
-        - created_at
-        - updated_at
+        - created
+        - modified
     ProductInput:
       type: object
       properties:
@@ -427,10 +427,10 @@ components:
             $ref: '#/components/schemas/Payment'
         deposit:
           $ref: '#/components/schemas/Deposit'
-        created_at:
+        created:
           type: string
           format: date-time
-        updated_at:
+        modified:
           type: string
           format: date-time
       required:
@@ -445,8 +445,8 @@ components:
         - totals
         - items
         - payments
-        - created_at
-        - updated_at
+        - created
+        - modified
     OrderTotals:
       type: object
       properties:
@@ -712,18 +712,18 @@ components:
             $ref: '#/components/schemas/Contact'
         is_active:
           type: boolean
-        created_at:
+        created:
           type: string
           format: date-time
-        updated_at:
+        modified:
           type: string
           format: date-time
       required:
         - id
         - customer_type
         - display_name
-        - created_at
-        - updated_at
+        - created
+        - modified
     CustomerSummary:
       type: object
       properties:
@@ -754,18 +754,18 @@ components:
           nullable: true
         is_active:
           type: boolean
-        created_at:
+        created:
           type: string
           format: date-time
-        updated_at:
+        modified:
           type: string
           format: date-time
       required:
         - id
         - customer_type
         - display_name
-        - created_at
-        - updated_at
+        - created
+        - modified
     CustomerInput:
       type: object
       properties:
@@ -918,10 +918,10 @@ components:
           type: number
           format: float
           nullable: true
-        created_at:
+        created:
           type: string
           format: date-time
-        updated_at:
+        modified:
           type: string
           format: date-time
       required:
@@ -930,8 +930,8 @@ components:
         - line1
         - country
         - is_primary
-        - created_at
-        - updated_at
+        - created
+        - modified
     Contact:
       type: object
       properties:
@@ -958,18 +958,18 @@ components:
           nullable: true
         is_primary:
           type: boolean
-        created_at:
+        created:
           type: string
           format: date-time
-        updated_at:
+        modified:
           type: string
           format: date-time
       required:
         - id
         - first_name
         - is_primary
-        - created_at
-        - updated_at
+        - created
+        - modified
     ContactInput:
       type: object
       properties:
@@ -1503,13 +1503,13 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: filter[created_at][from]
+        - name: filter[created][from]
           in: query
           description: Начало диапазона по дате создания.
           schema:
             type: string
             format: date-time
-        - name: filter[created_at][to]
+        - name: filter[created][to]
           in: query
           description: Конец диапазона по дате создания.
           schema:
