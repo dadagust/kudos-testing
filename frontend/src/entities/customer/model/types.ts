@@ -11,8 +11,8 @@ export interface CustomerCompany {
   phone: string;
   website: string;
   notes: string;
-  created_at: string;
-  updated_at: string;
+  created: string;
+  modified: string;
 }
 
 export interface CustomerSummary {
@@ -26,8 +26,8 @@ export interface CustomerSummary {
   company: CustomerCompany | null;
   owner_id: number | null;
   is_active: boolean;
-  created_at: string;
-  updated_at: string;
+  created: string;
+  modified: string;
 }
 
 export interface Contact {
@@ -39,8 +39,8 @@ export interface Contact {
   position: string;
   notes: string;
   is_primary: boolean;
-  created_at: string;
-  updated_at: string;
+  created: string;
+  modified: string;
 }
 
 export interface CustomerDetail extends CustomerSummary {
