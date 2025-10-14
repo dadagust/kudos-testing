@@ -7,7 +7,7 @@ from openpyxl import load_workbook
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from applications.core.models import RoleChoices
+from applications.users.models import RoleChoices
 
 from .models import Contact, Customer
 

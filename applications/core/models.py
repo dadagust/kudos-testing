@@ -1,110 +1,146 @@
-from django.conf import settings
-from django.contrib.auth import get_user_model
+import os
+import uuid
+from typing import Any
+
+from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models.signals import post_save
-from django.db.utils import DatabaseError, OperationalError, ProgrammingError
-from django.dispatch import receiver
+from django.utils.deconstruct import deconstructible
+from model_utils.managers import QueryManager
 
 
-class RoleChoices(models.TextChoices):
-    GUEST = 'guest', 'Гость'
-    CUSTOMER = 'customer', 'Клиент'
-    B2B = 'b2b', 'B2B Клиент'
-    SALES_MANAGER = 'sales_manager', 'Менеджер продаж'
-    WAREHOUSE = 'warehouse', 'Склад'
-    ACCOUNTANT = 'accountant', 'Бухгалтерия'
-    CONTENT_MANAGER = 'content_manager', 'Контент-менеджер'
-    ADMIN = 'admin', 'Администратор'
-    DRIVER = 'driver', 'Водитель'
-    LOADER = 'loader', 'Грузчик'
+class Date(models.Model):
+    """
+    Дата / абстрактный класс
+    """
 
-
-LEGACY_ROLE_MAP = {
-    'client': RoleChoices.CUSTOMER,
-    'manager': RoleChoices.SALES_MANAGER,
-    'administrator': RoleChoices.ADMIN,
-}
-
-
-class UserProfile(models.Model):
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile'
-    )
-    role = models.CharField(
-        max_length=32, choices=RoleChoices.choices, default=RoleChoices.SALES_MANAGER
+    created = models.DateTimeField(
+        verbose_name='Дата создания',
+        auto_now_add=True,
     )
 
-    def __str__(self) -> str:  # pragma: no cover - human readable
-        return f'{self.user.get_full_name() or self.user.email} ({self.get_role_display()})'
+    modified = models.DateTimeField(
+        verbose_name='Дата изменения',
+        auto_now=True,
+    )
 
-    def _normalize_role(self) -> None:
-        """Ensure the stored role always matches the canonical enum value."""
-
-        if self.user.is_superuser:
-            # Суперпользователи всегда должны иметь полный доступ администратора.
-            self.role = RoleChoices.ADMIN
-            return
-
-        if self.role in RoleChoices.values:
-            return
-
-        legacy_role = LEGACY_ROLE_MAP.get(self.role)
-        if legacy_role:
-            self.role = legacy_role
-
-    def save(self, *args, **kwargs):
-        self._normalize_role()
-
-        super().save(*args, **kwargs)
-        self.sync_role_membership()
-
-    def sync_role_membership(self) -> None:
-        from django.contrib.auth.models import Group
-
-        from .rbac import ROLE_GROUP_MAP, STAFF_ROLE_CODES
-
-        try:
-            role_value = self.role
-            if role_value not in RoleChoices.values:
-                legacy_role = LEGACY_ROLE_MAP.get(role_value)
-                if legacy_role:
-                    role_value = legacy_role
-                    if self.role != legacy_role:
-                        self.role = legacy_role
-                        super().save(update_fields=['role'])
-                else:
-                    # Роль неизвестна системе — ничего не трогаем, чтобы не потерять данные.
-                    return
-
-            group_name = ROLE_GROUP_MAP.get(role_value)
-
-            if group_name:
-                group, _ = Group.objects.get_or_create(name=group_name)
-                role_group_names = set(ROLE_GROUP_MAP.values())
-                extra_groups = self.user.groups.exclude(name=group_name).filter(
-                    name__in=role_group_names
-                )
-                if extra_groups.exists():
-                    self.user.groups.remove(*extra_groups)
-                if not self.user.groups.filter(pk=group.pk).exists():
-                    self.user.groups.add(group)
-
-            expected_staff = role_value in STAFF_ROLE_CODES or self.user.is_superuser
-
-            if self.user.is_staff != expected_staff:
-                self.user.is_staff = expected_staff
-                self.user.save(update_fields=['is_staff'])
-        except (OperationalError, ProgrammingError, DatabaseError):
-            return
+    class Meta:
+        abstract = True
+        ordering = ['-created']
 
 
-User = get_user_model()
+class Common(Date):
+    """
+    Общий / абстрактный класс
+    """
+
+    class Status(models.TextChoices):
+        DRAFT = 'draft', 'Черновик'
+        PUBLISHED = 'published', 'Опубликовано'
+
+    status = models.CharField(
+        verbose_name='Статус',
+        choices=Status.choices,
+        default=Status.PUBLISHED,
+        max_length=50,
+    )
+
+    objects = models.Manager()
+    drafted = QueryManager(status=Status.DRAFT)
+    published = QueryManager(status=Status.PUBLISHED)
+
+    class Meta(Date.Meta):
+        abstract = True
 
 
-@receiver(post_save, sender=User)
-def ensure_user_profile(sender, instance, created, **kwargs):
-    profile, _ = UserProfile.objects.get_or_create(user=instance)
+class Seo(models.Model):
+    """
+    SEO / абстрактный класс
+    """
 
-    if instance.is_superuser and profile.role != RoleChoices.ADMIN:
-        profile.role = RoleChoices.ADMIN
-        profile.save(update_fields=['role'])
+    seo_title = models.CharField(
+        verbose_name='SEO заголовок',
+        max_length=100,
+        help_text='Если заполнено, то используется вместо заголовка в title',
+        blank=True,
+    )
+
+    seo_description = models.CharField(
+        verbose_name='SEO описание',
+        max_length=200,
+        help_text='Рекомендуемая длина мета описания = 160 символов.',
+        blank=True,
+    )
+
+    seo_keywords = models.CharField(
+        verbose_name='SEO ключевые слова',
+        max_length=2500,
+        help_text='Укажите ключевые слова через запятую.',
+        blank=True,
+    )
+
+    class Meta:
+        abstract = True
+
+
+class Single(models.Model):
+    """
+    Сингл / абстрактный класс
+    Модель ограничивает класс одним инстансом
+    """
+
+    class Meta:
+        abstract = True
+
+    def save(self, *args, **kwargs) -> None:
+        if not self.pk and self.__class__.objects.exists():
+            raise ValidationError('Может быть только один объект этого класса')
+        return super().save(*args, **kwargs)
+
+
+class Metadata(models.Model):
+    """Метадата / абстрактный класс"""
+
+    metadata = models.JSONField(
+        default=dict,
+        blank=True,
+        null=True,
+    )
+
+    class Meta:
+        abstract = True
+
+    def get_value_from_metadata(self, key: str, default: Any = None) -> Any:
+        if not self.metadata:
+            return default
+        return self.metadata.get(key, default)
+
+    def store_value_in_metadata(self, items: dict) -> None:
+        if not self.metadata:
+            self.metadata = {}
+        self.metadata.update(items)
+        return None
+
+    def clear_metadata(self) -> None:
+        self.metadata = {}
+        return None
+
+    def delete_value_from_metadata(self, key: str) -> None:
+        if self.metadata and key in self.metadata:
+            del self.metadata[key]
+        return None
+
+
+@deconstructible
+class PathAndRename:
+    """
+    Класс используется для генерации уникальных имён в FileField, ImageField
+    Ex.: upload_to=PathAndRename('app/model/field')
+    """
+
+    def __init__(self, sub_path: str) -> None:
+        self.path = sub_path
+
+    def __call__(self, _, filename: str) -> str:
+        _, extension = os.path.splitext(filename)
+        filename = f'{uuid.uuid4().hex}{extension}'
+        return os.path.join(self.path, filename)

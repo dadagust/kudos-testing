@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 
-from applications.core.models import RoleChoices, UserProfile
+from applications.users.models import RoleChoices, UserProfile
 
 
 class Command(BaseCommand):

@@ -15,7 +15,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from applications.core.models import RoleChoices
+from applications.users.models import RoleChoices
 
 from .models import Contact, Customer, PhoneNormalizer
 from .permissions import CustomerAccessPolicy

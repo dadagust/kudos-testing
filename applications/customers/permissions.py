@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from rest_framework.permissions import BasePermission
 
-from applications.core.models import RoleChoices
+from applications.users.models import RoleChoices
 
 
 class CustomerAccessPolicy(BasePermission):
