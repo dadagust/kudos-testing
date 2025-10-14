@@ -150,7 +150,32 @@ class RolePermissionsTests(TestCase):
 
         serialized = UserProfileSerializer(profile).data
         self.assertEqual(serialized['role'], RoleChoices.ADMIN)
-        self.assertTrue(serialized['access']['settings'])
+        self.assertTrue(serialized['access']['settings']['view'])
+        self.assertTrue(serialized['access']['settings']['change'])
+
+    def test_access_matrix_reflects_permissions(self):
+        user = get_user_model().objects.create_user(
+            username='sales@example.com', email='sales@example.com', password='ChangeMe123!'
+        )
+        profile = user.profile
+        profile.role = RoleChoices.SALES_MANAGER
+        profile.save()
+
+        serialized = UserProfileSerializer(profile).data
+
+        self.assertTrue(serialized['access']['dashboard']['view'])
+
+        customers_access = serialized['access']['customers']
+        self.assertTrue(customers_access['view'])
+        self.assertTrue(customers_access['change'])
+
+        orders_access = serialized['access']['orders']
+        self.assertTrue(orders_access['view'])
+        self.assertTrue(orders_access['change'])
+
+        integrations_access = serialized['access']['integrations']
+        self.assertFalse(integrations_access['view'])
+        self.assertFalse(integrations_access['change'])
 
     def test_legacy_role_values_are_normalized(self):
         user = get_user_model().objects.create_user(

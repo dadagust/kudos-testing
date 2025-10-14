@@ -3,7 +3,6 @@
 import { useState } from 'react';
 
 import { RoleGuard } from '@/features/auth';
-import { Role } from '@/shared/config/roles';
 import { Badge, Button, Drawer, Table } from '@/shared/ui';
 
 const orders = [
@@ -34,7 +33,7 @@ export default function OrdersPage() {
   const [selected, setSelected] = useState<(typeof orders)[number] | null>(null);
 
   return (
-    <RoleGuard allow={[Role.SalesManager, Role.Warehouse, Role.Accountant, Role.Admin]}>
+    <RoleGuard section="orders">
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1>Заказы</h1>

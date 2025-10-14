@@ -1,6 +1,11 @@
 import { AdminSection, Role } from '@/shared/config/roles';
 
-export type AccessMatrix = Record<AdminSection, boolean>;
+export interface SectionAccess {
+  view: boolean;
+  change: boolean;
+}
+
+export type AccessMatrix = Record<AdminSection, SectionAccess>;
 
 export interface UserProfile {
   id: number;

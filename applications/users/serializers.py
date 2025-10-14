@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate, get_user_model
 from django.db import DatabaseError, OperationalError, ProgrammingError
 from rest_framework import serializers
 
-from .constants import ADMIN_SECTIONS, ROLE_ACCESS_MATRIX
+from .access import build_access_matrix
 from .models import LEGACY_ROLE_MAP, RoleChoices, UserProfile
 
 
@@ -28,11 +28,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
         legacy = LEGACY_ROLE_MAP.get(value)
         return legacy if legacy else str(value)
 
-    def get_access(self, obj: UserProfile) -> dict[str, bool]:
+    def get_access(self, obj: UserProfile) -> dict[str, dict[str, bool]]:
         role_key = self.get_role(obj)
-        allowed = set(ROLE_ACCESS_MATRIX.get(role_key, []))
-        sections = ADMIN_SECTIONS
-        return {section: section in allowed for section in sections}
+        return build_access_matrix(obj.user, role_key)
 
 
 class LoginSerializer(serializers.Serializer):

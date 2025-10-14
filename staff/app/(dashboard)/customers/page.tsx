@@ -26,7 +26,6 @@ import {
   useUpdateCustomerMutation,
 } from '@/entities/customer';
 import { RoleGuard } from '@/features/auth';
-import { Role } from '@/shared/config/roles';
 import { formatPhoneDisplay, formatPhoneInput, normalizePhoneNumber } from '@/shared/lib/phone';
 import {
   Alert,
@@ -293,17 +292,21 @@ export default function CustomersPage() {
                 Подробнее
               </Button>
             </Link>
-            <Button variant="ghost" type="button" onClick={() => handleOpenEdit(row.id)}>
-              Редактировать
-            </Button>
-            <Button
-              variant="ghost"
-              type="button"
-              onClick={() => handleOpenDelete(row)}
-              style={{ borderColor: 'var(--color-error)', color: 'var(--color-error)' }}
-            >
-              Удалить
-            </Button>
+            <RoleGuard section="customers" permission="change" fallback={null}>
+              <Button variant="ghost" type="button" onClick={() => handleOpenEdit(row.id)}>
+                Редактировать
+              </Button>
+            </RoleGuard>
+            <RoleGuard section="customers" permission="change" fallback={null}>
+              <Button
+                variant="ghost"
+                type="button"
+                onClick={() => handleOpenDelete(row)}
+                style={{ borderColor: 'var(--color-error)', color: 'var(--color-error)' }}
+              >
+                Удалить
+              </Button>
+            </RoleGuard>
           </div>
         ),
       },
@@ -430,7 +433,7 @@ export default function CustomersPage() {
   };
 
   return (
-    <RoleGuard allow={[Role.SalesManager, Role.Accountant, Role.Admin]}>
+    <RoleGuard section="customers">
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         <header
           style={{
@@ -447,9 +450,11 @@ export default function CustomersPage() {
               карточку клиента для детальной информации.
             </p>
           </div>
-          <Button iconLeft="plus" onClick={() => setIsCreateOpen(true)}>
-            Добавить клиента
-          </Button>
+          <RoleGuard section="customers" permission="change" fallback={null}>
+            <Button iconLeft="plus" onClick={() => setIsCreateOpen(true)}>
+              Добавить клиента
+            </Button>
+          </RoleGuard>
         </header>
 
         {successMessage ? (
@@ -550,137 +555,36 @@ export default function CustomersPage() {
         ) : null}
       </div>
 
-      <Drawer open={isCreateOpen} onClose={closeCreateDrawer}>
-        <form
-          onSubmit={handleCreateSubmit}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '16px',
-            padding: '24px',
-            minWidth: '360px',
-          }}
-        >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <h2 style={{ fontSize: '1.25rem' }}>Новый клиент</h2>
-            <p style={{ color: 'var(--color-text-muted)' }}>
-              Заполните основную информацию. Остальные поля можно будет отредактировать позже в
-              карточке клиента.
-            </p>
-          </div>
-
-          {createError ? (
-            <Alert tone="danger" title="Ошибка">
-              {createError}
-            </Alert>
-          ) : null}
-
-          <Select
-            label="Тип клиента"
-            value={createForm.customer_type}
-            onChange={handleCreateFieldChange('customer_type')}
-          >
-            <option value="personal">Физическое лицо</option>
-            <option value="business">Юридическое лицо</option>
-          </Select>
-
-          <Input
-            label="Имя"
-            value={createForm.first_name ?? ''}
-            onChange={handleCreateFieldChange('first_name')}
-          />
-          <Input
-            label="Фамилия"
-            value={createForm.last_name ?? ''}
-            onChange={handleCreateFieldChange('last_name')}
-          />
-          <Input
-            label="Отчество"
-            value={createForm.middle_name ?? ''}
-            onChange={handleCreateFieldChange('middle_name')}
-          />
-          <Input
-            label="Отображаемое имя"
-            helperText="Если оставить пустым, будет использовано полное имя"
-            value={createForm.display_name ?? ''}
-            onChange={handleCreateFieldChange('display_name')}
-          />
-          <Input
-            label="Email"
-            type="email"
-            value={createForm.email ?? ''}
-            onChange={handleCreateFieldChange('email')}
-          />
-          <Input
-            label="Телефон"
-            value={createForm.phone ?? ''}
-            onChange={handleCreatePhoneChange}
-          />
-          <Input
-            label="Заметки"
-            value={createForm.notes ?? ''}
-            onChange={handleCreateFieldChange('notes')}
-          />
-
-          <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-            <Button type="submit" iconLeft="check" disabled={createMutation.isPending}>
-              {createMutation.isPending ? 'Сохраняем…' : 'Создать клиента'}
-            </Button>
-            <Button type="button" variant="ghost" onClick={closeCreateDrawer}>
-              Отмена
-            </Button>
-          </div>
-        </form>
-      </Drawer>
-      <Drawer open={isEditOpen} onClose={closeEditDrawer}>
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '16px',
-            padding: '24px',
-            minWidth: '360px',
-          }}
-        >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <h2 style={{ fontSize: '1.25rem' }}>Редактирование клиента</h2>
-            <p style={{ color: 'var(--color-text-muted)' }}>
-              Обновите сведения о клиенте. После сохранения изменения сразу отобразятся в таблице и
-              карточке клиента.
-            </p>
-          </div>
-
-          {isEditFetchError ? (
-            <Alert tone="danger" title="Не удалось загрузить клиента">
-              {editFetchError instanceof Error
-                ? editFetchError.message
-                : 'Попробуйте закрыть окно и повторить попытку позже.'}
-            </Alert>
-          ) : null}
-
-          {isEditLoading ? <Spinner label="Загружаем данные клиента" /> : null}
-
-          {!isEditLoading && !isEditFetchError && !editCustomerResponse?.data ? (
-            <Alert tone="info" title="Клиент не найден">
-              Возможно, запись была удалена или у вас нет доступа к её редактированию.
-            </Alert>
-          ) : null}
-
-          {!isEditLoading && !isEditFetchError && editCustomerResponse?.data ? (
+        <RoleGuard section="customers" permission="change" fallback={null}>
+          <Drawer open={isCreateOpen} onClose={closeCreateDrawer}>
             <form
-              onSubmit={handleEditSubmit}
-              style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+              onSubmit={handleCreateSubmit}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px',
+                padding: '24px',
+                minWidth: '360px',
+              }}
             >
-              {editError ? (
-                <Alert tone="danger" title="Ошибка при сохранении">
-                  {editError}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <h2 style={{ fontSize: '1.25rem' }}>Новый клиент</h2>
+                <p style={{ color: 'var(--color-text-muted)' }}>
+                  Заполните основную информацию. Остальные поля можно будет отредактировать позже в
+                  карточке клиента.
+                </p>
+              </div>
+
+              {createError ? (
+                <Alert tone="danger" title="Ошибка">
+                  {createError}
                 </Alert>
               ) : null}
 
               <Select
                 label="Тип клиента"
-                value={editForm.customer_type}
-                onChange={handleEditFieldChange('customer_type')}
+                value={createForm.customer_type}
+                onChange={handleCreateFieldChange('customer_type')}
               >
                 <option value="personal">Физическое лицо</option>
                 <option value="business">Юридическое лицо</option>
@@ -688,102 +592,209 @@ export default function CustomersPage() {
 
               <Input
                 label="Имя"
-                value={editForm.first_name ?? ''}
-                onChange={handleEditFieldChange('first_name')}
+                value={createForm.first_name ?? ''}
+                onChange={handleCreateFieldChange('first_name')}
               />
               <Input
                 label="Фамилия"
-                value={editForm.last_name ?? ''}
-                onChange={handleEditFieldChange('last_name')}
+                value={createForm.last_name ?? ''}
+                onChange={handleCreateFieldChange('last_name')}
               />
               <Input
                 label="Отчество"
-                value={editForm.middle_name ?? ''}
-                onChange={handleEditFieldChange('middle_name')}
+                value={createForm.middle_name ?? ''}
+                onChange={handleCreateFieldChange('middle_name')}
               />
               <Input
                 label="Отображаемое имя"
                 helperText="Если оставить пустым, будет использовано полное имя"
-                value={editForm.display_name ?? ''}
-                onChange={handleEditFieldChange('display_name')}
+                value={createForm.display_name ?? ''}
+                onChange={handleCreateFieldChange('display_name')}
               />
               <Input
                 label="Email"
                 type="email"
-                value={editForm.email ?? ''}
-                onChange={handleEditFieldChange('email')}
+                value={createForm.email ?? ''}
+                onChange={handleCreateFieldChange('email')}
               />
               <Input
                 label="Телефон"
-                value={editForm.phone ?? ''}
-                onChange={handleEditPhoneChange}
+                value={createForm.phone ?? ''}
+                onChange={handleCreatePhoneChange}
               />
-              <Select
-                label="GDPR согласие"
-                value={editForm.gdpr_consent ? 'true' : 'false'}
-                onChange={handleEditFieldChange('gdpr_consent')}
-              >
-                <option value="true">Согласие получено</option>
-                <option value="false">Согласие отсутствует</option>
-              </Select>
               <Input
                 label="Заметки"
-                value={editForm.notes ?? ''}
-                onChange={handleEditFieldChange('notes')}
+                value={createForm.notes ?? ''}
+                onChange={handleCreateFieldChange('notes')}
               />
 
               <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-                <Button type="submit" iconLeft="check" disabled={updateMutation.isPending}>
-                  {updateMutation.isPending ? 'Сохраняем…' : 'Сохранить изменения'}
+                <Button type="submit" iconLeft="check" disabled={createMutation.isPending}>
+                  {createMutation.isPending ? 'Сохраняем…' : 'Создать клиента'}
                 </Button>
-                <Button type="button" variant="ghost" onClick={closeEditDrawer}>
+                <Button type="button" variant="ghost" onClick={closeCreateDrawer}>
                   Отмена
                 </Button>
               </div>
             </form>
-          ) : null}
-        </div>
-      </Drawer>
-      <Modal open={isDeleteOpen} onClose={closeDeleteModal} title="Удалить клиента?">
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '16px',
-            padding: '24px',
-            minWidth: '320px',
-          }}
-        >
-          <p style={{ lineHeight: 1.5 }}>
-            {`Вы уверены, что хотите удалить клиента "${
-              customerToDelete?.display_name || customerToDelete?.full_name || 'Без имени'
-            }"? Это действие нельзя отменить.`}
-          </p>
-          {deleteError ? (
-            <Alert tone="danger" title="Не удалось удалить клиента">
-              {deleteError}
-            </Alert>
-          ) : null}
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={closeDeleteModal}
-              disabled={deleteMutation.isPending}
+          </Drawer>
+        </RoleGuard>
+        <RoleGuard section="customers" permission="change" fallback={null}>
+          <Drawer open={isEditOpen} onClose={closeEditDrawer}>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px',
+                padding: '24px',
+                minWidth: '360px',
+              }}
             >
-              Отмена
-            </Button>
-            <Button
-              type="button"
-              variant="danger"
-              onClick={handleConfirmDelete}
-              disabled={deleteMutation.isPending}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <h2 style={{ fontSize: '1.25rem' }}>Редактирование клиента</h2>
+                <p style={{ color: 'var(--color-text-muted)' }}>
+                  Обновите сведения о клиенте. После сохранения изменения сразу отобразятся в таблице
+                  и карточке клиента.
+                </p>
+              </div>
+
+              {isEditFetchError ? (
+                <Alert tone="danger" title="Не удалось загрузить клиента">
+                  {editFetchError instanceof Error
+                    ? editFetchError.message
+                    : 'Попробуйте закрыть окно и повторить попытку позже.'}
+                </Alert>
+              ) : null}
+
+              {isEditLoading ? <Spinner label="Загружаем данные клиента" /> : null}
+
+              {!isEditLoading && !isEditFetchError && !editCustomerResponse?.data ? (
+                <Alert tone="info" title="Клиент не найден">
+                  Возможно, запись была удалена или у вас нет доступа к её редактированию.
+                </Alert>
+              ) : null}
+
+              {!isEditLoading && !isEditFetchError && editCustomerResponse?.data ? (
+                <form
+                  onSubmit={handleEditSubmit}
+                  style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+                >
+                  {editError ? (
+                    <Alert tone="danger" title="Ошибка при сохранении">
+                      {editError}
+                    </Alert>
+                  ) : null}
+
+                  <Select
+                    label="Тип клиента"
+                    value={editForm.customer_type}
+                    onChange={handleEditFieldChange('customer_type')}
+                  >
+                    <option value="personal">Физическое лицо</option>
+                    <option value="business">Юридическое лицо</option>
+                  </Select>
+
+                  <Input
+                    label="Имя"
+                    value={editForm.first_name ?? ''}
+                    onChange={handleEditFieldChange('first_name')}
+                  />
+                  <Input
+                    label="Фамилия"
+                    value={editForm.last_name ?? ''}
+                    onChange={handleEditFieldChange('last_name')}
+                  />
+                  <Input
+                    label="Отчество"
+                    value={editForm.middle_name ?? ''}
+                    onChange={handleEditFieldChange('middle_name')}
+                  />
+                  <Input
+                    label="Отображаемое имя"
+                    helperText="Если оставить пустым, будет использовано полное имя"
+                    value={editForm.display_name ?? ''}
+                    onChange={handleEditFieldChange('display_name')}
+                  />
+                  <Input
+                    label="Email"
+                    type="email"
+                    value={editForm.email ?? ''}
+                    onChange={handleEditFieldChange('email')}
+                  />
+                  <Input
+                    label="Телефон"
+                    value={editForm.phone ?? ''}
+                    onChange={handleEditPhoneChange}
+                  />
+                  <Select
+                    label="GDPR согласие"
+                    value={editForm.gdpr_consent ? 'true' : 'false'}
+                    onChange={handleEditFieldChange('gdpr_consent')}
+                  >
+                    <option value="true">Согласие получено</option>
+                    <option value="false">Согласие отсутствует</option>
+                  </Select>
+                  <Input
+                    label="Заметки"
+                    value={editForm.notes ?? ''}
+                    onChange={handleEditFieldChange('notes')}
+                  />
+
+                  <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                    <Button type="submit" iconLeft="check" disabled={updateMutation.isPending}>
+                      {updateMutation.isPending ? 'Сохраняем…' : 'Сохранить изменения'}
+                    </Button>
+                    <Button type="button" variant="ghost" onClick={closeEditDrawer}>
+                      Отмена
+                    </Button>
+                  </div>
+                </form>
+              ) : null}
+            </div>
+          </Drawer>
+        </RoleGuard>
+        <RoleGuard section="customers" permission="change" fallback={null}>
+          <Modal open={isDeleteOpen} onClose={closeDeleteModal} title="Удалить клиента?">
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px',
+                padding: '24px',
+                minWidth: '320px',
+              }}
             >
-              {deleteMutation.isPending ? 'Удаляем…' : 'Удалить'}
-            </Button>
-          </div>
-        </div>
-      </Modal>
+              <p style={{ lineHeight: 1.5 }}>
+                {`Вы уверены, что хотите удалить клиента "${
+                  customerToDelete?.display_name || customerToDelete?.full_name || 'Без имени'
+                }"? Это действие нельзя отменить.`}
+              </p>
+              {deleteError ? (
+                <Alert tone="danger" title="Не удалось удалить клиента">
+                  {deleteError}
+                </Alert>
+              ) : null}
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={closeDeleteModal}
+                  disabled={deleteMutation.isPending}
+                >
+                  Отмена
+                </Button>
+                <Button
+                  type="button"
+                  variant="danger"
+                  onClick={handleConfirmDelete}
+                  disabled={deleteMutation.isPending}
+                >
+                  {deleteMutation.isPending ? 'Удаляем…' : 'Удалить'}
+                </Button>
+              </div>
+            </div>
+          </Modal>
+        </RoleGuard>
     </RoleGuard>
   );
 }

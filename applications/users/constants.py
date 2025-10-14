@@ -1,3 +1,5 @@
+"""Constants shared across the users application."""
+
 ADMIN_SECTIONS = [
     'dashboard',
     'products',
@@ -10,25 +12,66 @@ ADMIN_SECTIONS = [
     'logs',
 ]
 
-ROLE_ACCESS_MATRIX = {
-    'guest': [],
-    'customer': ['dashboard'],
-    'b2b': ['dashboard'],
-    'sales_manager': [
-        'dashboard',
-        'products',
-        'orders',
-        'customers',
-        'inventory',
-        'documents',
-        'logs',
-    ],
-    'warehouse': ['dashboard', 'orders', 'inventory', 'logs'],
-    'accountant': ['dashboard', 'orders', 'customers', 'documents', 'logs'],
-    'content_manager': ['dashboard', 'products', 'documents'],
-    'driver': ['dashboard', 'orders'],
-    'loader': ['dashboard', 'orders', 'inventory'],
-    'admin': ADMIN_SECTIONS,
+#: Mapping between admin sections and the permissions required to access them.
+#: Each entry contains two keys:
+#:   - ``view``: a collection of permission codes that allow read-only access.
+#:   - ``change``: permission codes that unlock editing capabilities.
+#:
+#: The mapping intentionally references permissions created by the RBAC
+#: migration (see ``applications.users.migrations.0003_create_role_groups``),
+#: even for domains that are not yet implemented. This keeps the front-end in
+#: sync with the long-term access matrix from the product requirements.
+SECTION_PERMISSION_REQUIREMENTS = {
+    'customers': {
+        'view': (
+            'customers.view_customer',
+            'customers.view_company',
+            'customers.view_address',
+            'customers.view_contact',
+        ),
+        'change': (
+            'customers.add_customer',
+            'customers.change_customer',
+            'customers.delete_customer',
+            'customers.add_company',
+            'customers.change_company',
+            'customers.delete_company',
+            'customers.add_address',
+            'customers.change_address',
+            'customers.delete_address',
+            'customers.add_contact',
+            'customers.change_contact',
+            'customers.delete_contact',
+        ),
+    },
+    'orders': {
+        'view': ('orders.view_order',),
+        'change': (
+            'orders.add_order',
+            'orders.change_order',
+            'orders.delete_order',
+        ),
+    },
+    'inventory': {
+        'view': ('inventory.view_inventoryitem',),
+        'change': (
+            'inventory.add_inventoryitem',
+            'inventory.change_inventoryitem',
+            'inventory.delete_inventoryitem',
+        ),
+    },
+    'documents': {
+        'view': ('documents.view_document',),
+        'change': (
+            'documents.add_document',
+            'documents.change_document',
+            'documents.delete_document',
+        ),
+    },
+    # Sections "products", "integrations", "settings" and "logs" currently
+    # rely on full admin access. They remain in the matrix so that the
+    # front-end renders them for administrators while keeping the structure
+    # future-proof when dedicated models appear.
 }
 
 ROLE_DESCRIPTIONS = {
