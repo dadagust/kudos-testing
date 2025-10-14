@@ -118,7 +118,7 @@ export default function CustomerDetailsPage({ params }: CustomerDetailsPageProps
                       Создан
                     </dt>
                     <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
-                      {formatDateTime(customer.created_at)}
+                      {formatDateTime(customer.created)}
                     </dd>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -126,7 +126,7 @@ export default function CustomerDetailsPage({ params }: CustomerDetailsPageProps
                       Обновлён
                     </dt>
                     <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
-                      {formatDateTime(customer.updated_at)}
+                      {formatDateTime(customer.modified)}
                     </dd>
                   </div>
                 </dl>

@@ -712,18 +712,18 @@ components:
             $ref: '#/components/schemas/Contact'
         is_active:
           type: boolean
-        created_at:
+        created:
           type: string
           format: date-time
-        updated_at:
+        modified:
           type: string
           format: date-time
       required:
         - id
         - customer_type
         - display_name
-        - created_at
-        - updated_at
+        - created
+        - modified
     CustomerSummary:
       type: object
       properties:
@@ -754,18 +754,18 @@ components:
           nullable: true
         is_active:
           type: boolean
-        created_at:
+        created:
           type: string
           format: date-time
-        updated_at:
+        modified:
           type: string
           format: date-time
       required:
         - id
         - customer_type
         - display_name
-        - created_at
-        - updated_at
+        - created
+        - modified
     CustomerInput:
       type: object
       properties:
@@ -818,6 +818,12 @@ components:
         inn:
           type: string
           nullable: true
+        created:
+          type: string
+          format: date-time
+        modified:
+          type: string
+          format: date-time
       required:
         - id
         - name
@@ -846,6 +852,12 @@ components:
             notes:
               type: string
               nullable: true
+            created:
+              type: string
+              format: date-time
+            modified:
+              type: string
+              format: date-time
     CompanyInput:
       type: object
       properties:
@@ -958,18 +970,18 @@ components:
           nullable: true
         is_primary:
           type: boolean
-        created_at:
+        created:
           type: string
           format: date-time
-        updated_at:
+        modified:
           type: string
           format: date-time
       required:
         - id
         - first_name
         - is_primary
-        - created_at
-        - updated_at
+        - created
+        - modified
     ContactInput:
       type: object
       properties:
@@ -1503,13 +1515,13 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: filter[created_at][from]
+        - name: filter[created][from]
           in: query
           description: Начало диапазона по дате создания.
           schema:
             type: string
             format: date-time
-        - name: filter[created_at][to]
+        - name: filter[created][to]
           in: query
           description: Конец диапазона по дате создания.
           schema:
