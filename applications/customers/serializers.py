@@ -16,6 +16,9 @@ User = get_user_model()
 
 
 class CompanySerializer(serializers.ModelSerializer):
+    created_at = serializers.DateTimeField(source='created', read_only=True)
+    updated_at = serializers.DateTimeField(source='modified', read_only=True)
+
     class Meta:
         model = Company
         fields = (
@@ -62,6 +65,8 @@ class CompanyInputSerializer(serializers.ModelSerializer):
 
 class ContactSerializer(serializers.ModelSerializer):
     phone = serializers.CharField(required=False, allow_blank=True)
+    created_at = serializers.DateTimeField(source='created', read_only=True)
+    updated_at = serializers.DateTimeField(source='modified', read_only=True)
 
     class Meta:
         model = Contact
@@ -95,6 +100,8 @@ class CustomerListSerializer(serializers.ModelSerializer):
     company = CompanySerializer(read_only=True)
     full_name = serializers.CharField(read_only=True)
     owner_id = serializers.IntegerField(read_only=True)
+    created_at = serializers.DateTimeField(source='created', read_only=True)
+    updated_at = serializers.DateTimeField(source='modified', read_only=True)
 
     class Meta:
         model = Customer
@@ -209,7 +216,7 @@ class CustomerWriteSerializer(serializers.ModelSerializer):
         if company_data:
             company = self._upsert_company(company_data)
             customer.company = company
-            customer.save(update_fields=['company', 'updated_at'])
+            customer.save(update_fields=['company', 'modified'])
         return customer
 
     @transaction.atomic
@@ -228,10 +235,10 @@ class CustomerWriteSerializer(serializers.ModelSerializer):
                 company = self._upsert_company(company_data)
                 if instance.company_id != company.id:
                     instance.company = company
-                    instance.save(update_fields=['company', 'updated_at'])
+                    instance.save(update_fields=['company', 'modified'])
             else:
                 instance.company = None
-                instance.save(update_fields=['company', 'updated_at'])
+                instance.save(update_fields=['company', 'modified'])
         return instance
 
     def _upsert_company(self, data: dict[str, Any]) -> Company:
