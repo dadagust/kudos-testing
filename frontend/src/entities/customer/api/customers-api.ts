@@ -52,14 +52,14 @@ const buildListParams = (params: CustomerListQuery) => {
 
 export const customersApi = {
   list: async (params: CustomerListQuery): Promise<CustomerListResponse> => {
-    const { data } = await apiV1Client.get<CustomerListResponse>('/customers/', {
+    const { data } = await apiV1Client.get<CustomerListResponse>('/customer/', {
       params: buildListParams(params),
     });
 
     return data;
   },
   export: async (params: CustomerListQuery): Promise<Blob> => {
-    const response = await apiV1Client.get<Blob>('/customers/export/', {
+    const response = await apiV1Client.get<Blob>('/customer/export/', {
       params: buildListParams(params),
       responseType: 'blob',
     });
@@ -67,11 +67,11 @@ export const customersApi = {
     return response.data;
   },
   details: async (customerId: string): Promise<CustomerDetailResponse> => {
-    const { data } = await apiV1Client.get<CustomerDetailResponse>(`/customers/${customerId}/`);
+    const { data } = await apiV1Client.get<CustomerDetailResponse>(`/customer/${customerId}/`);
     return data;
   },
   create: async (payload: CreateCustomerPayload): Promise<CustomerDetailResponse> => {
-    const { data } = await apiV1Client.post<CustomerDetailResponse>('/customers/', payload);
+    const { data } = await apiV1Client.post<CustomerDetailResponse>('/customer/', payload);
     return data;
   },
   update: async (
@@ -79,12 +79,12 @@ export const customersApi = {
     payload: UpdateCustomerPayload
   ): Promise<CustomerDetailResponse> => {
     const { data } = await apiV1Client.put<CustomerDetailResponse>(
-      `/customers/${customerId}/`,
+      `/customer/${customerId}/`,
       payload
     );
     return data;
   },
   delete: async (customerId: string): Promise<void> => {
-    await apiV1Client.delete(`/customers/${customerId}/`);
+    await apiV1Client.delete(`/customer/${customerId}/`);
   },
 };
