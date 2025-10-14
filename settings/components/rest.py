@@ -7,7 +7,7 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.AllowAny',),
-    'DEFAULT_PAGINATION_CLASS': 'applications.core.pagination.DefaultPagination',
+    'DEFAULT_PAGINATION_CLASS': 'applications.common.pagination.DefaultPagination',
 }
 
 SIMPLE_JWT = {

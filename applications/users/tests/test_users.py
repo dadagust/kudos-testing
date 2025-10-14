@@ -8,9 +8,9 @@ from django.urls import reverse
 from rest_framework import serializers, status
 from rest_framework.test import APITestCase
 
-from .models import RoleChoices, UserProfile
-from .rbac import ROLE_GROUP_MAP, ROLE_PERMISSION_MATRIX
-from .serializers import LoginSerializer, UserProfileSerializer
+from applications.users.models import RoleChoices, UserProfile
+from applications.users.rbac import ROLE_GROUP_MAP, ROLE_PERMISSION_MATRIX
+from applications.users.serializers import LoginSerializer, UserProfileSerializer
 
 
 class AuthTests(APITestCase):

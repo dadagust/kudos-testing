@@ -17,6 +17,9 @@ THIRD_PARTY_APPS = [
 
 LOCAL_APPS = [
     'applications.core',
+    'applications.users',
+    'applications.audit',
+    'applications.system',
     'applications.customers',
 ]
 

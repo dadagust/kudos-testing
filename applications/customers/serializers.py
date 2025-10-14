@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 from rest_framework import serializers
 
-from applications.core.models import RoleChoices
+from applications.users.models import RoleChoices
 
 from .models import Company, Contact, Customer, CustomerType, PhoneNormalizer
 

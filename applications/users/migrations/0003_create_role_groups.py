@@ -50,7 +50,7 @@ def apply_group_permissions(group_model, permission_model, mapping):
 
 
 def forwards(apps, schema_editor):
-    from applications.core.rbac import (
+    from applications.users.rbac import (
         ROLE_GROUP_MAP,
         ROLE_PERMISSION_MATRIX,
         flatten_required_permissions,
@@ -71,7 +71,7 @@ def forwards(apps, schema_editor):
 
 
 def backwards(apps, schema_editor):
-    from applications.core.rbac import ROLE_GROUP_MAP
+    from applications.users.rbac import ROLE_GROUP_MAP
 
     group_model = apps.get_model('auth', 'Group')
     group_model.objects.filter(name__in=ROLE_GROUP_MAP.values()).delete()
@@ -79,7 +79,7 @@ def backwards(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('core', '0002_alter_userprofile_role'),
+        ('users', '0002_alter_userprofile_role'),
         ('auth', '0012_alter_user_first_name_max_length'),
     ]
 

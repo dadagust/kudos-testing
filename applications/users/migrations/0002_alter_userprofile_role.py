@@ -12,20 +12,20 @@ ROLE_BACKWARD_MAP = {v: k for k, v in ROLE_FORWARD_MAP.items()}
 
 
 def migrate_role_values_forward(apps, schema_editor):
-    UserProfile = apps.get_model('core', 'UserProfile')
+    UserProfile = apps.get_model('users', 'UserProfile')
     for old_value, new_value in ROLE_FORWARD_MAP.items():
         UserProfile.objects.filter(role=old_value).update(role=new_value)
 
 
 def migrate_role_values_backward(apps, schema_editor):
-    UserProfile = apps.get_model('core', 'UserProfile')
+    UserProfile = apps.get_model('users', 'UserProfile')
     for new_value, old_value in ROLE_BACKWARD_MAP.items():
         UserProfile.objects.filter(role=new_value).update(role=old_value)
 
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('core', '0001_initial'),
+        ('users', '0001_initial'),
     ]
 
     operations = [

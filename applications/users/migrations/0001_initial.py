@@ -23,19 +23,29 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
+                    'created',
+                    models.DateTimeField(auto_now_add=True, verbose_name='Дата создания'),
+                ),
+                (
+                    'modified',
+                    models.DateTimeField(auto_now=True, verbose_name='Дата изменения'),
+                ),
+                (
                     'role',
                     models.CharField(
                         choices=[
                             ('guest', 'Гость'),
-                            ('client', 'Клиент'),
+                            ('customer', 'Клиент'),
                             ('b2b', 'B2B Клиент'),
-                            ('manager', 'Менеджер'),
+                            ('sales_manager', 'Менеджер продаж'),
                             ('warehouse', 'Склад'),
                             ('accountant', 'Бухгалтерия'),
                             ('content_manager', 'Контент-менеджер'),
-                            ('administrator', 'Администратор'),
+                            ('admin', 'Администратор'),
+                            ('driver', 'Водитель'),
+                            ('loader', 'Грузчик'),
                         ],
-                        default='manager',
+                        default='sales_manager',
                         max_length=32,
                     ),
                 ),
@@ -48,5 +58,9 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
+            options={
+                'db_table': 'core_userprofile',
+                'ordering': ['-created'],
+            },
         ),
     ]

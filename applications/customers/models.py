@@ -74,7 +74,7 @@ class CustomerQuerySet(models.QuerySet):
         return self.filter(is_active=True)
 
     def for_user(self, user) -> 'CustomerQuerySet':
-        from applications.core.models import RoleChoices
+        from applications.users.models import RoleChoices
 
         if not getattr(user, 'is_authenticated', False):
             return self.none()
