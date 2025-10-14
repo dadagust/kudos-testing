@@ -8,9 +8,12 @@ TypeScript + SASS) и backend-gateway (Django + DRF).
 ### Backend
 
 1. Установите зависимости в корне репозитория: `poetry install`.
-2. Выполните миграции: `poetry run python manage.py migrate`.
-3. Загрузите тестовые данные: `poetry run python manage.py seed_demo_data`.
-4. Запустите сервер: `poetry run python manage.py runserver 0.0.0.0:8000`.
+2. Установите переменную окружения для подключения к локальной SQLite базе данных:
+   `export DATABASE_URL=sqlite:///db.sqlite3` (по умолчанию используется PostgreSQL и
+   потребуется `psycopg2`).
+3. Выполните миграции: `poetry run python manage.py migrate`.
+4. Загрузите тестовые данные: `poetry run python manage.py seed_demo_data`.
+5. Запустите сервер: `poetry run python manage.py runserver 0.0.0.0:8000`.
 
 Тестовые пользователи создаются автоматически (пароль по умолчанию `ChangeMe123!`).
 
@@ -33,7 +36,8 @@ TypeScript + SASS) и backend-gateway (Django + DRF).
 - Линтинг кабинета менеджера: `pnpm lint` (из директории `staff`).
 - Stylelint для кабинета: `pnpm run lint:styles`.
 - TypeScript проверка: `pnpm typecheck` (в нужной директории).
-- Backend тесты: `poetry run python manage.py test` (из корня репозитория).
+- Backend тесты: `poetry run python manage.py test` (из корня репозитория). Для запуска
+  без PostgreSQL предварительно задайте `DATABASE_URL=sqlite:///db.sqlite3`.
 
 ## Husky + lint-staged + commitlint
 

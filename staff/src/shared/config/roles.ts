@@ -53,35 +53,4 @@ export const ADMIN_SECTIONS = [
 
 export type AdminSection = (typeof ADMIN_SECTIONS)[number];
 
-export const ROLE_SECTION_ACCESS: Record<Role, AdminSection[]> = {
-  [Role.Guest]: [],
-  [Role.Customer]: ['dashboard'],
-  [Role.B2B]: ['dashboard'],
-  [Role.SalesManager]: [
-    'dashboard',
-    'products',
-    'orders',
-    'customers',
-    'inventory',
-    'documents',
-    'logs',
-  ],
-  [Role.Warehouse]: ['dashboard', 'orders', 'inventory', 'logs'],
-  [Role.Accountant]: ['dashboard', 'orders', 'customers', 'documents', 'logs'],
-  [Role.ContentManager]: ['dashboard', 'products', 'documents'],
-  [Role.Admin]: [
-    'dashboard',
-    'products',
-    'orders',
-    'customers',
-    'inventory',
-    'documents',
-    'integrations',
-    'settings',
-    'logs',
-  ],
-  [Role.Driver]: ['dashboard', 'orders'],
-  [Role.Loader]: ['dashboard', 'orders', 'inventory'],
-};
-
 export const DEFAULT_ROLE = Role.SalesManager;

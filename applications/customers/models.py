@@ -73,27 +73,14 @@ class CustomerQuerySet(models.QuerySet):
         return self.filter(is_active=True)
 
     def for_user(self, user) -> 'CustomerQuerySet':
-        from applications.users.models import RoleChoices
-
         if not getattr(user, 'is_authenticated', False):
             return self.none()
 
-        profile = getattr(user, 'profile', None)
-        role = getattr(profile, 'role', RoleChoices.CUSTOMER if profile else None)
-
-        if role in (RoleChoices.ADMIN, RoleChoices.SALES_MANAGER):
+        if user.is_staff:
             return self
 
-        if role in (RoleChoices.CUSTOMER, RoleChoices.B2B):
+        if user.has_perm('customers.view_customer'):
             return self.filter(owner=user)
-
-        if role in (
-            RoleChoices.WAREHOUSE,
-            RoleChoices.ACCOUNTANT,
-            RoleChoices.DRIVER,
-            RoleChoices.LOADER,
-        ):
-            return self
 
         return self.none()
 

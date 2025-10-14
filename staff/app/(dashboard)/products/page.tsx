@@ -10,8 +10,7 @@ import {
   useProductsQuery,
 } from '@/entities/product';
 import type { ProductListQuery, ProductSummary } from '@/entities/product';
-import { RoleGuard } from '@/features/auth';
-import { Role } from '@/shared/config/roles';
+import { RoleGuard, usePermission } from '@/features/auth';
 import { Alert, Badge, Button, Input, Pagination, Select, Spinner, Tag, Table } from '@/shared/ui';
 import type { TableColumn } from '@/shared/ui';
 
@@ -64,6 +63,7 @@ export default function ProductsPage() {
   );
 
   const { data, isLoading, isError, error, isFetching } = useProductsQuery(queryParams);
+  const canManageProducts = usePermission('inventory', 'change');
 
   const rows: ProductSummary[] = data?.data ?? [];
   const filters = data?.filters;
@@ -149,7 +149,7 @@ export default function ProductsPage() {
   };
 
   return (
-    <RoleGuard allow={[Role.SalesManager, Role.ContentManager, Role.Admin]}>
+    <RoleGuard allow={[{ scope: 'admin_products' }, { scope: 'inventory' }]}> 
       <header
         style={{
           display: 'flex',
@@ -165,9 +165,11 @@ export default function ProductsPage() {
             товара в режиме read-only. Данные формируются из моков API с трассировкой запросов.
           </p>
         </div>
-        <Button iconLeft="plus" disabled title="Создание товара появится на следующей итерации">
-          Новый товар
-        </Button>
+        {canManageProducts ? (
+          <Button iconLeft="plus" disabled title="Создание товара появится на следующей итерации">
+            Новый товар
+          </Button>
+        ) : null}
       </header>
 
       <section

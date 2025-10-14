@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation';
 
 import { CUSTOMER_TYPE_LABELS, CustomerDetail, useCustomerQuery } from '@/entities/customer';
 import { RoleGuard } from '@/features/auth';
-import { Role } from '@/shared/config/roles';
 import { formatPhoneDisplay } from '@/shared/lib/phone';
 import { Alert, Badge, Button, Spinner, Tag } from '@/shared/ui';
 
@@ -37,7 +36,7 @@ export default function CustomerDetailsPage({ params }: CustomerDetailsPageProps
   const formattedCompanyPhone = formatPhoneDisplay(customer?.company?.phone);
 
   return (
-    <RoleGuard allow={[Role.SalesManager, Role.Accountant, Role.Admin]}>
+    <RoleGuard allow={[{ scope: 'admin_customers' }, { scope: 'customers' }]}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Button variant="ghost" onClick={() => router.back()}>

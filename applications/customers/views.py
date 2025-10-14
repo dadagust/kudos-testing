@@ -15,8 +15,6 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from applications.users.models import RoleChoices
-
 from .models import Contact, Customer, PhoneNormalizer
 from .permissions import CustomerAccessPolicy
 from .serializers import (
@@ -41,20 +39,16 @@ class CustomerViewSet(viewsets.ModelViewSet):
         queryset = queryset.filter(is_active=True)
 
         user = self.request.user
-        profile = getattr(user, 'profile', None)
-        role = getattr(profile, 'role', RoleChoices.CUSTOMER)
 
-        if role in (RoleChoices.ADMIN, RoleChoices.SALES_MANAGER):
+        if not user or not user.is_authenticated:
+            return queryset.none()
+
+        if user.is_staff:
             return queryset
-        if role in (RoleChoices.CUSTOMER, RoleChoices.B2B):
+
+        if user.has_perm('customers.view_customer'):
             return queryset.filter(owner=user)
-        if role in (
-            RoleChoices.WAREHOUSE,
-            RoleChoices.ACCOUNTANT,
-            RoleChoices.DRIVER,
-            RoleChoices.LOADER,
-        ):
-            return queryset
+
         return queryset.none()
 
     def get_serializer_class(self):
