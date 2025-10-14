@@ -25,8 +25,7 @@ import {
   useDeleteCustomerMutation,
   useUpdateCustomerMutation,
 } from '@/entities/customer';
-import { RoleGuard } from '@/features/auth';
-import { Role } from '@/shared/config/roles';
+import { RoleGuard, usePermission } from '@/features/auth';
 import { formatPhoneDisplay, formatPhoneInput, normalizePhoneNumber } from '@/shared/lib/phone';
 import {
   Alert,
@@ -120,6 +119,7 @@ export default function CustomersPage() {
   const [isExporting, setIsExporting] = useState(false);
 
   const queryClient = useQueryClient();
+  const canManageCustomers = usePermission('customers', 'change');
 
   const queryParams = useMemo(
     () => ({
@@ -192,23 +192,37 @@ export default function CustomersPage() {
     }
   }, [editCustomerResponse]);
 
-  const handleOpenEdit = useCallback((customerId: string) => {
-    setEditCustomerId(customerId);
-    setEditError(null);
-    setEditForm(createInitialFormState());
-    setIsEditOpen(true);
-  }, []);
+  const handleOpenEdit = useCallback(
+    (customerId: string) => {
+      if (!canManageCustomers) {
+        return;
+      }
+
+      setEditCustomerId(customerId);
+      setEditError(null);
+      setEditForm(createInitialFormState());
+      setIsEditOpen(true);
+    },
+    [canManageCustomers]
+  );
 
   const rows: CustomerSummary[] = customersResponse?.data ?? [];
   const pagination = customersResponse?.meta?.pagination;
 
   const deleteMutation = useDeleteCustomerMutation();
 
-  const handleOpenDelete = useCallback((customer: CustomerSummary) => {
-    setCustomerToDelete(customer);
-    setDeleteError(null);
-    setIsDeleteOpen(true);
-  }, []);
+  const handleOpenDelete = useCallback(
+    (customer: CustomerSummary) => {
+      if (!canManageCustomers) {
+        return;
+      }
+
+      setCustomerToDelete(customer);
+      setDeleteError(null);
+      setIsDeleteOpen(true);
+    },
+    [canManageCustomers]
+  );
 
   const closeDeleteModal = useCallback(() => {
     if (deleteMutation.isPending) {
@@ -221,7 +235,7 @@ export default function CustomersPage() {
   }, [deleteMutation.isPending]);
 
   const handleConfirmDelete = useCallback(() => {
-    if (!customerToDelete) {
+    if (!canManageCustomers || !customerToDelete) {
       return;
     }
 
@@ -244,7 +258,7 @@ export default function CustomersPage() {
         );
       },
     });
-  }, [customerToDelete, deleteMutation, refetch]);
+  }, [canManageCustomers, customerToDelete, deleteMutation, refetch]);
 
   const columns: TableColumn<CustomerSummary>[] = useMemo(
     () => [
@@ -293,22 +307,26 @@ export default function CustomersPage() {
                 Подробнее
               </Button>
             </Link>
-            <Button variant="ghost" type="button" onClick={() => handleOpenEdit(row.id)}>
-              Редактировать
-            </Button>
-            <Button
-              variant="ghost"
-              type="button"
-              onClick={() => handleOpenDelete(row)}
-              style={{ borderColor: 'var(--color-error)', color: 'var(--color-error)' }}
-            >
-              Удалить
-            </Button>
+            {canManageCustomers ? (
+              <>
+                <Button variant="ghost" type="button" onClick={() => handleOpenEdit(row.id)}>
+                  Редактировать
+                </Button>
+                <Button
+                  variant="ghost"
+                  type="button"
+                  onClick={() => handleOpenDelete(row)}
+                  style={{ borderColor: 'var(--color-error)', color: 'var(--color-error)' }}
+                >
+                  Удалить
+                </Button>
+              </>
+            ) : null}
           </div>
         ),
       },
     ],
-    [handleOpenDelete, handleOpenEdit]
+    [canManageCustomers, handleOpenDelete, handleOpenEdit]
   );
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -337,6 +355,9 @@ export default function CustomersPage() {
 
   const handleCreateSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!canManageCustomers) {
+      return;
+    }
     setCreateError(null);
 
     const payload = buildPayloadFromForm(createForm);
@@ -391,7 +412,7 @@ export default function CustomersPage() {
 
   const handleEditSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!editCustomerId) {
+    if (!canManageCustomers || !editCustomerId) {
       return;
     }
 
@@ -430,7 +451,7 @@ export default function CustomersPage() {
   };
 
   return (
-    <RoleGuard allow={[Role.SalesManager, Role.Accountant, Role.Admin]}>
+    <RoleGuard allow={[{ scope: 'admin_customers' }, { scope: 'customers' }]}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         <header
           style={{
@@ -447,9 +468,11 @@ export default function CustomersPage() {
               карточку клиента для детальной информации.
             </p>
           </div>
-          <Button iconLeft="plus" onClick={() => setIsCreateOpen(true)}>
-            Добавить клиента
-          </Button>
+          {canManageCustomers ? (
+            <Button iconLeft="plus" onClick={() => setIsCreateOpen(true)}>
+              Добавить клиента
+            </Button>
+          ) : null}
         </header>
 
         {successMessage ? (
@@ -550,17 +573,18 @@ export default function CustomersPage() {
         ) : null}
       </div>
 
-      <Drawer open={isCreateOpen} onClose={closeCreateDrawer}>
-        <form
-          onSubmit={handleCreateSubmit}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '16px',
-            padding: '24px',
-            minWidth: '360px',
-          }}
-        >
+      {canManageCustomers ? (
+        <Drawer open={isCreateOpen} onClose={closeCreateDrawer}>
+          <form
+            onSubmit={handleCreateSubmit}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px',
+              padding: '24px',
+              minWidth: '360px',
+            }}
+          >
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             <h2 style={{ fontSize: '1.25rem' }}>Новый клиент</h2>
             <p style={{ color: 'var(--color-text-muted)' }}>
@@ -632,7 +656,9 @@ export default function CustomersPage() {
           </div>
         </form>
       </Drawer>
-      <Drawer open={isEditOpen} onClose={closeEditDrawer}>
+      ) : null}
+      {canManageCustomers ? (
+        <Drawer open={isEditOpen} onClose={closeEditDrawer}>
         <div
           style={{
             display: 'flex',
@@ -744,7 +770,9 @@ export default function CustomersPage() {
           ) : null}
         </div>
       </Drawer>
-      <Modal open={isDeleteOpen} onClose={closeDeleteModal} title="Удалить клиента?">
+      ) : null}
+      {canManageCustomers ? (
+        <Modal open={isDeleteOpen} onClose={closeDeleteModal} title="Удалить клиента?">
         <div
           style={{
             display: 'flex',
@@ -783,7 +811,8 @@ export default function CustomersPage() {
             </Button>
           </div>
         </div>
-      </Modal>
+        </Modal>
+      ) : null}
     </RoleGuard>
   );
 }

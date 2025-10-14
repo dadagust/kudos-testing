@@ -39,6 +39,9 @@ class AuthTests(APITestCase):
         self.assertIn('access', data)
         self.assertIn('refresh', data)
         self.assertEqual(data['user']['role'], RoleChoices.SALES_MANAGER)
+        self.assertIn('permissions', data['user'])
+        self.assertTrue(data['user']['permissions']['admin_dashboard']['view'])
+        self.assertTrue(data['user']['permissions']['customers']['change'])
 
     def test_login_fail(self):
         response = self.client.post(
@@ -70,6 +73,9 @@ class AuthTests(APITestCase):
         data = response.json()
         self.assertEqual(data['email'], 'manager@kudos.ru')
         self.assertEqual(data['role'], RoleChoices.SALES_MANAGER)
+        self.assertIn('permissions', data)
+        self.assertTrue(data['permissions']['admin_dashboard']['view'])
+        self.assertTrue(data['permissions']['customers']['view'])
 
 
 class RolePermissionsTests(TestCase):
@@ -150,7 +156,8 @@ class RolePermissionsTests(TestCase):
 
         serialized = UserProfileSerializer(profile).data
         self.assertEqual(serialized['role'], RoleChoices.ADMIN)
-        self.assertTrue(serialized['access']['settings'])
+        self.assertTrue(serialized['permissions']['admin_settings']['view'])
+        self.assertTrue(serialized['permissions']['customers']['change'])
 
     def test_legacy_role_values_are_normalized(self):
         user = get_user_model().objects.create_user(

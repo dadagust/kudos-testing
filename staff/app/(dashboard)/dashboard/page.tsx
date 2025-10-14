@@ -97,7 +97,7 @@ export default function DashboardPage() {
         <aside style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <h3>Моя роль</h3>
           <p style={{ color: 'var(--color-text-muted)' }}>
-            Вы вошли как <strong>{user?.fullName}</strong>. Текущая роль —{' '}
+            Вы вошли как <strong>{user?.full_name}</strong>. Текущая роль —{' '}
             <strong>{user?.role}</strong>. Используйте страницу «Профиль» для просмотра матрицы
             доступов.
           </p>

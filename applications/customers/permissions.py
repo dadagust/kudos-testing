@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-from rest_framework.permissions import BasePermission
-
-from applications.users.models import RoleChoices
+from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 
 class CustomerAccessPolicy(BasePermission):
@@ -15,36 +13,35 @@ class CustomerAccessPolicy(BasePermission):
         if not user or not user.is_authenticated:
             return False
 
-        role = getattr(getattr(user, 'profile', None), 'role', RoleChoices.CUSTOMER)
-        action = getattr(view, 'action', request.method.lower())
+        method = request.method
 
-        if action in {'list', 'retrieve'} or request.method in {'GET', 'HEAD', 'OPTIONS'}:
-            return role not in {RoleChoices.GUEST, RoleChoices.CONTENT_MANAGER}
+        if method in SAFE_METHODS:
+            return user.has_perm('customers.view_customer')
 
-        if action == 'create':
-            return role in {RoleChoices.SALES_MANAGER, RoleChoices.ADMIN}
+        if method == 'POST':
+            return user.has_perm('customers.add_customer')
 
-        if action in {'update', 'partial_update'}:
-            return role in {
-                RoleChoices.CUSTOMER,
-                RoleChoices.B2B,
-                RoleChoices.SALES_MANAGER,
-                RoleChoices.ADMIN,
-            }
+        if method in {'PUT', 'PATCH'}:
+            return user.has_perm('customers.change_customer')
 
-        if action == 'destroy':
-            return role in {RoleChoices.SALES_MANAGER, RoleChoices.ADMIN}
+        if method == 'DELETE':
+            return user.has_perm('customers.delete_customer')
 
         return False
 
     def has_object_permission(self, request, view, obj) -> bool:  # type: ignore[override]
         user = request.user
-        role = getattr(getattr(user, 'profile', None), 'role', RoleChoices.CUSTOMER)
+        if not user or not user.is_authenticated:
+            return False
 
-        if role in {RoleChoices.ADMIN, RoleChoices.SALES_MANAGER}:
-            return True
-
-        if role in {RoleChoices.CUSTOMER, RoleChoices.B2B}:
+        if request.method in SAFE_METHODS:
+            if user.is_staff:
+                return True
             return getattr(obj, 'owner_id', None) == user.id
 
-        return request.method in {'GET', 'HEAD', 'OPTIONS'}
+        if user.has_perm('customers.change_customer') or user.has_perm('customers.delete_customer'):
+            if user.is_staff:
+                return True
+            return getattr(obj, 'owner_id', None) == user.id
+
+        return False

@@ -1,11 +1,12 @@
-import { AdminSection, Role, RoleKey } from './roles';
+import { PermissionScope } from './permissions';
+import { AdminSection } from './roles';
 
 export interface NavigationItem {
   id: AdminSection;
   label: string;
   href: string;
   icon: string;
-  roles: RoleKey[];
+  permission: PermissionScope;
 }
 
 export const NAVIGATION_ITEMS: NavigationItem[] = [
@@ -14,79 +15,62 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     label: 'Дашборд',
     href: '/dashboard',
     icon: 'dashboard',
-    roles: [
-      Role.Customer,
-      Role.B2B,
-      Role.SalesManager,
-      Role.Warehouse,
-      Role.Accountant,
-      Role.ContentManager,
-      Role.Admin,
-      Role.Driver,
-      Role.Loader,
-    ],
+    permission: 'admin_dashboard',
   },
   {
     id: 'products',
     label: 'Товары',
     href: '/products',
     icon: 'box',
-    roles: [Role.SalesManager, Role.ContentManager, Role.Admin],
+    permission: 'admin_products',
   },
   {
     id: 'orders',
     label: 'Заказы',
     href: '/orders',
     icon: 'orders',
-    roles: [
-      Role.SalesManager,
-      Role.Warehouse,
-      Role.Accountant,
-      Role.Admin,
-      Role.Driver,
-      Role.Loader,
-    ],
+    permission: 'admin_orders',
   },
   {
     id: 'customers',
     label: 'Клиенты',
     href: '/customers',
     icon: 'customers',
-    roles: [Role.SalesManager, Role.Accountant, Role.Admin],
+    permission: 'admin_customers',
   },
   {
     id: 'inventory',
     label: 'Склад',
     href: '/inventory',
     icon: 'inventory',
-    roles: [Role.SalesManager, Role.Warehouse, Role.Admin, Role.Loader],
+    permission: 'admin_inventory',
   },
   {
     id: 'documents',
     label: 'Документы',
     href: '/documents',
     icon: 'documents',
-    roles: [Role.SalesManager, Role.Accountant, Role.ContentManager, Role.Admin],
+    permission: 'admin_documents',
   },
   {
     id: 'integrations',
     label: 'Интеграции',
     href: '/integrations',
     icon: 'integrations',
-    roles: [Role.Admin],
+    permission: 'admin_integrations',
   },
   {
     id: 'settings',
     label: 'Настройки',
     href: '/settings',
     icon: 'settings',
-    roles: [Role.Admin],
+    permission: 'admin_settings',
   },
   {
     id: 'logs',
     label: 'Логи',
     href: '/logs',
     icon: 'logs',
-    roles: [Role.SalesManager, Role.Warehouse, Role.Accountant, Role.Admin],
+    permission: 'admin_logs',
   },
 ];

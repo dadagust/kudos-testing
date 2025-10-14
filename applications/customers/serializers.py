@@ -8,8 +8,6 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 from rest_framework import serializers
 
-from applications.users.models import RoleChoices
-
 from .models import Company, Contact, Customer, CustomerType, PhoneNormalizer
 
 User = get_user_model()
@@ -182,12 +180,14 @@ class CustomerWriteSerializer(serializers.ModelSerializer):
     def validate_owner(self, owner):  # type: ignore[override]
         request = self.context.get('request')
         user = getattr(request, 'user', None)
-        profile = getattr(user, 'profile', None)
-        role = getattr(profile, 'role', None)
 
-        if role not in (RoleChoices.ADMIN, RoleChoices.SALES_MANAGER):
-            return user
-        return owner or user
+        if not user or not user.is_authenticated:
+            return owner
+
+        if user.is_staff and user.has_perm('customers.change_customer'):
+            return owner or user
+
+        return user
 
     def validate_company(self, value: dict[str, Any] | None) -> dict[str, Any] | None:
         if not value:

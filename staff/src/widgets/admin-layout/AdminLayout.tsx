@@ -18,15 +18,7 @@ interface AdminLayoutProps {
 }
 
 const getAvailableNavItems = (user: UserProfile) =>
-  NAVIGATION_ITEMS.filter((item) => {
-    const canAccessSection = user.access?.[item.id];
-
-    if (typeof canAccessSection === 'boolean') {
-      return canAccessSection;
-    }
-
-    return item.roles.includes(user.role);
-  });
+  NAVIGATION_ITEMS.filter((item) => Boolean(user.permissions[item.permission]?.view));
 
 export const AdminLayout: FC<AdminLayoutProps> = ({ user, children }) => {
   const pathname = usePathname();
@@ -68,7 +60,7 @@ export const AdminLayout: FC<AdminLayoutProps> = ({ user, children }) => {
               Профиль
             </Button>
             <div className={styles.user}>
-              <span className={styles.userName}>{user.fullName}</span>
+              <span className={styles.userName}>{user.full_name}</span>
               <span className={styles.userRole}>{ROLE_TITLES[user.role]}</span>
             </div>
             <Button variant="ghost" iconLeft="logout" onClick={logout}>

@@ -1,7 +1,6 @@
 'use client';
 
 import { RoleGuard } from '@/features/auth';
-import { Role } from '@/shared/config/roles';
 import { Badge, Table } from '@/shared/ui';
 
 const inventory = [
@@ -18,7 +17,7 @@ const inventory = [
 
 export default function InventoryPage() {
   return (
-    <RoleGuard allow={[Role.SalesManager, Role.Warehouse, Role.Admin]}>
+    <RoleGuard allow={[{ scope: 'admin_inventory' }, { scope: 'inventory' }]}>
       <h1>Склад</h1>
       <p style={{ color: 'var(--color-text-muted)', marginBottom: '16px' }}>
         На второй неделе сюда добавим календарь сборки и бронирования.

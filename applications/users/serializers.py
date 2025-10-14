@@ -2,8 +2,8 @@ from django.contrib.auth import authenticate, get_user_model
 from django.db import DatabaseError, OperationalError, ProgrammingError
 from rest_framework import serializers
 
-from .constants import ADMIN_SECTIONS, ROLE_ACCESS_MATRIX
 from .models import LEGACY_ROLE_MAP, RoleChoices, UserProfile
+from .permissions import serialize_user_permissions
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -11,11 +11,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source='user.email')
     full_name = serializers.SerializerMethodField()
     role = serializers.SerializerMethodField()
-    access = serializers.SerializerMethodField()
+    permissions = serializers.SerializerMethodField()
 
     class Meta:
         model = UserProfile
-        fields = ('id', 'email', 'full_name', 'role', 'access')
+        fields = ('id', 'email', 'full_name', 'role', 'permissions')
 
     def get_full_name(self, obj: UserProfile) -> str:
         return obj.user.get_full_name() or obj.user.email
@@ -28,11 +28,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
         legacy = LEGACY_ROLE_MAP.get(value)
         return legacy if legacy else str(value)
 
-    def get_access(self, obj: UserProfile) -> dict[str, bool]:
-        role_key = self.get_role(obj)
-        allowed = set(ROLE_ACCESS_MATRIX.get(role_key, []))
-        sections = ADMIN_SECTIONS
-        return {section: section in allowed for section in sections}
+    def get_permissions(self, obj: UserProfile) -> dict[str, dict[str, bool]]:
+        return serialize_user_permissions(obj.user)
 
 
 class LoginSerializer(serializers.Serializer):
