@@ -9,9 +9,7 @@ from model_utils.managers import QueryManager
 
 
 class Date(models.Model):
-    """
-    Дата / абстрактный класс
-    """
+    """Абстрактный класс с временными метками создания и обновления."""
 
     created = models.DateTimeField(
         verbose_name='Дата создания',
@@ -26,6 +24,18 @@ class Date(models.Model):
     class Meta:
         abstract = True
         ordering = ['-created']
+
+    @property
+    def created_at(self):
+        """Совместимость с кодом, обращающимся к created_at."""
+
+        return self.created
+
+    @property
+    def updated_at(self):
+        """Совместимость с кодом, обращающимся к updated_at."""
+
+        return self.modified
 
 
 class Common(Date):

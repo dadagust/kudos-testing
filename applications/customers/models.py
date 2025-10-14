@@ -42,14 +42,6 @@ class CustomerBaseModel(Common):
         abstract = True
         ordering = ('-created',)
 
-    @property
-    def created_at(self):
-        return self.created
-
-    @property
-    def updated_at(self):
-        return self.modified
-
 
 class Company(CustomerBaseModel):
     """Legal entity related to one or many customers."""
