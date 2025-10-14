@@ -54,6 +54,15 @@ class CustomerAPITests(APITestCase):
         self.assertEqual(data['phone'], '+79991234567')
         self.assertTrue(Customer.objects.filter(email='test@example.com').exists())
 
+    def test_empty_customer_list_returns_success(self):
+        self.authenticate(self.manager)
+        response = self.client.get(self.list_url, {'page': 1, 'page_size': 10})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        payload = response.json()
+        self.assertEqual(payload['data'], [])
+        self.assertEqual(payload['meta']['pagination']['total_items'], 0)
+        self.assertEqual(payload['meta']['pagination']['page'], 1)
+
     def test_customer_sees_only_own_record(self):
         self.authenticate(self.manager)
         self.client.post(
