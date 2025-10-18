@@ -11,3 +11,4 @@ export * from './pagination';
 export * from './icon/icon';
 export * from './alert';
 export * from './spinner';
+export * from './accordion';

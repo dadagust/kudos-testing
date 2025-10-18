@@ -1,0 +1,26 @@
+.accordion
+  display: flex
+  flex-direction: column
+  gap: 12px
+
+.item
+  border: 1px solid var(--color-border)
+  border-radius: 8px
+  overflow: hidden
+  background: var(--color-surface)
+
+.summary
+  cursor: pointer
+  list-style: none
+  padding: 12px 16px
+  font-weight: 600
+  background: var(--color-surface-muted)
+
+.summary::-webkit-details-marker
+  display: none
+
+.content
+  padding: 16px
+  display: flex
+  flex-direction: column
+  gap: 12px
