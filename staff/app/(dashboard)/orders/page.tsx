@@ -12,6 +12,7 @@ import {
   useState,
 } from 'react';
 
+import { CustomerSummary as CustomerEntitySummary, useCustomersQuery } from '@/entities/customer';
 import {
   CreateOrderPayload,
   CustomerSummary,
@@ -28,7 +29,6 @@ import {
   useOrdersQuery,
   useUpdateOrderMutation,
 } from '@/entities/order';
-import { CustomerSummary as CustomerEntitySummary, useCustomersQuery } from '@/entities/customer';
 import { RoleGuard, usePermission } from '@/features/auth';
 import {
   Accordion,
@@ -65,14 +65,15 @@ const STATUS_GROUP_TABS: { id: OrderStatusGroup; label: string }[] = [
   { id: 'cancelled', label: 'Отмененные' },
 ];
 
-const STATUS_TAG_TONES: Record<OrderStatus, 'default' | 'info' | 'success' | 'warning' | 'danger'> = {
-  new: 'info',
-  reserved: 'warning',
-  rented: 'success',
-  in_work: 'info',
-  archived: 'default',
-  declined: 'danger',
-};
+const STATUS_TAG_TONES: Record<OrderStatus, 'default' | 'info' | 'success' | 'warning' | 'danger'> =
+  {
+    new: 'info',
+    reserved: 'warning',
+    rented: 'success',
+    in_work: 'info',
+    archived: 'default',
+    declined: 'danger',
+  };
 
 const currencyFormatter = new Intl.NumberFormat('ru-RU', {
   style: 'currency',
@@ -131,8 +132,7 @@ const buildPayloadFromForm = (form: OrderFormState): CreateOrderPayload => ({
   dismantle_date: form.dismantle_date,
   customer_id: form.customer?.id ?? null,
   delivery_type: form.delivery_type,
-  delivery_address:
-    form.delivery_type === 'pickup' ? null : form.delivery_address.trim() || null,
+  delivery_address: form.delivery_type === 'pickup' ? null : form.delivery_address.trim() || null,
   comment: form.comment.trim() || null,
   items: ORDER_PRODUCTS.filter((product) => (form.productQuantities[product.id] ?? 0) > 0).map(
     (product) => ({
@@ -256,7 +256,13 @@ const OrderFormContent = ({
         </Alert>
       ) : null}
 
-      <div style={{ display: 'grid', gap: '16px', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+      <div
+        style={{
+          display: 'grid',
+          gap: '16px',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+        }}
+      >
         <Select label="Статус" value={form.status} onChange={handleStatusChange}>
           {Object.entries(ORDER_STATUS_LABELS).map(([key, label]) => (
             <option key={key} value={key}>
@@ -308,7 +314,15 @@ const OrderFormContent = ({
           value={customerSearch}
           onChange={(event) => onCustomerSearchChange(event.target.value)}
         />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: 240, overflow: 'auto' }}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+            maxHeight: 240,
+            overflow: 'auto',
+          }}
+        >
           {customers.length ? (
             customers.map((customer) => {
               const isSelected = customer.id === form.customer?.id;
@@ -331,7 +345,14 @@ const OrderFormContent = ({
         </div>
       </Accordion>
 
-      <Accordion title="Товары" actions={<span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>{totalFormatted}</span>}>
+      <Accordion
+        title="Товары"
+        actions={
+          <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+            {totalFormatted}
+          </span>
+        }
+      >
         <Input
           placeholder="Поиск товара"
           value={productSearch}
@@ -369,8 +390,14 @@ const OrderFormContent = ({
                   >
                     −
                   </Button>
-                  <span style={{ minWidth: 24, textAlign: 'center', fontWeight: 600 }}>{quantity}</span>
-                  <Button type="button" variant="ghost" onClick={() => onIncrementProduct(product.id)}>
+                  <span style={{ minWidth: 24, textAlign: 'center', fontWeight: 600 }}>
+                    {quantity}
+                  </span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => onIncrementProduct(product.id)}
+                  >
                     +
                   </Button>
                 </div>
@@ -407,7 +434,9 @@ const OrderFormContent = ({
         }}
       >
         <div>
-          <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>Сумма заказа</span>
+          <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+            Сумма заказа
+          </span>
           <div style={{ fontSize: '1.5rem', fontWeight: 600 }}>{totalFormatted}</div>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
@@ -477,10 +506,10 @@ export default function OrdersPage() {
   const createMutation = useCreateOrderMutation();
   const updateMutation = useUpdateOrderMutation();
 
-  const {
-    data: editOrderResponse,
-    isLoading: isEditLoading,
-  } = useOrderQuery(editOrderId ?? '', Boolean(isEditOpen && editOrderId !== null));
+  const { data: editOrderResponse, isLoading: isEditLoading } = useOrderQuery(
+    editOrderId ?? '',
+    Boolean(isEditOpen && editOrderId !== null)
+  );
 
   useEffect(() => {
     if (isEditOpen && editOrderResponse?.data) {
@@ -694,9 +723,7 @@ export default function OrdersPage() {
         key: 'delivery_address',
         header: 'Доставка',
         render: (row) =>
-          row.delivery_type === 'pickup'
-            ? 'Самовывоз'
-            : row.delivery_address || 'Адрес не указан',
+          row.delivery_type === 'pickup' ? 'Самовывоз' : row.delivery_address || 'Адрес не указан',
       },
       {
         key: 'comment',
@@ -804,7 +831,9 @@ export default function OrdersPage() {
               }}
             >
               <Spinner />
-              <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>Обновление…</span>
+              <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>
+                Обновление…
+              </span>
             </div>
           ) : null}
           {isLoading ? (

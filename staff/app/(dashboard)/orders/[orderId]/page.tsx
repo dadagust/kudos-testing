@@ -120,26 +120,44 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                 <h2 style={{ fontSize: '1.125rem', margin: 0 }}>Основная информация</h2>
                 <dl style={{ display: 'grid', gap: '12px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>Статус</dt>
+                    <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                      Статус
+                    </dt>
                     <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
                       {ORDER_STATUS_LABELS[order.status]}
                     </dd>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>Дата монтажа</dt>
-                    <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>{formatDate(order.installation_date)}</dd>
+                    <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                      Дата монтажа
+                    </dt>
+                    <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
+                      {formatDate(order.installation_date)}
+                    </dd>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>Дата демонтажа</dt>
-                    <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>{formatDate(order.dismantle_date)}</dd>
+                    <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                      Дата демонтажа
+                    </dt>
+                    <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
+                      {formatDate(order.dismantle_date)}
+                    </dd>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>Создан</dt>
-                    <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>{formatDateTime(order.created)}</dd>
+                    <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                      Создан
+                    </dt>
+                    <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
+                      {formatDateTime(order.created)}
+                    </dd>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>Обновлён</dt>
-                    <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>{formatDateTime(order.modified)}</dd>
+                    <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                      Обновлён
+                    </dt>
+                    <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
+                      {formatDateTime(order.modified)}
+                    </dd>
                   </div>
                 </dl>
               </div>
@@ -148,14 +166,18 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                 <h2 style={{ fontSize: '1.125rem', margin: 0 }}>Доставка</h2>
                 <dl style={{ display: 'grid', gap: '12px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>Способ</dt>
+                    <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                      Способ
+                    </dt>
                     <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
                       {order.delivery_type === 'pickup' ? 'Самовывоз' : 'Доставка'}
                     </dd>
                   </div>
                   {order.delivery_type === 'delivery' ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>Адрес</dt>
+                      <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                        Адрес
+                      </dt>
                       <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
                         {order.delivery_address || 'Адрес не указан'}
                       </dd>
@@ -169,10 +191,17 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                 {order.customer ? (
                   <dl style={{ display: 'grid', gap: '12px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>Имя</dt>
-                      <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>{order.customer.display_name}</dd>
+                      <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                        Имя
+                      </dt>
+                      <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
+                        {order.customer.display_name}
+                      </dd>
                     </div>
-                    <Link href={`/customers/${order.customer.id}`} style={{ color: 'var(--color-primary)' }}>
+                    <Link
+                      href={`/customers/${order.customer.id}`}
+                      style={{ color: 'var(--color-primary)' }}
+                    >
                       Перейти в карточку клиента →
                     </Link>
                   </dl>
@@ -201,8 +230,12 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
               }}
             >
               <div>
-                <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>Сумма заказа</span>
-                <div style={{ fontSize: '1.75rem', fontWeight: 600 }}>{formatCurrency(order.total_amount)}</div>
+                <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                  Сумма заказа
+                </span>
+                <div style={{ fontSize: '1.75rem', fontWeight: 600 }}>
+                  {formatCurrency(order.total_amount)}
+                </div>
               </div>
               {order.comment ? null : <span />}
             </footer>

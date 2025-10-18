@@ -1,10 +1,4 @@
-export type OrderStatus =
-  | 'new'
-  | 'reserved'
-  | 'rented'
-  | 'in_work'
-  | 'archived'
-  | 'declined';
+export type OrderStatus = 'new' | 'reserved' | 'rented' | 'in_work' | 'archived' | 'declined';
 
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   new: 'Новый',

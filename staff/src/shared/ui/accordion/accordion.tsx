@@ -12,7 +12,12 @@ interface AccordionProps {
   actions?: ReactNode;
 }
 
-export const Accordion: FC<AccordionProps> = ({ title, children, defaultOpen = false, actions }) => {
+export const Accordion: FC<AccordionProps> = ({
+  title,
+  children,
+  defaultOpen = false,
+  actions,
+}) => {
   const [open, setOpen] = useState(defaultOpen);
 
   return (
@@ -21,7 +26,9 @@ export const Accordion: FC<AccordionProps> = ({ title, children, defaultOpen = f
         <span className={styles.title}>{title}</span>
         <span className={styles.controls}>
           {actions ? <span className={styles.actions}>{actions}</span> : null}
-          <span className={styles.chevron} aria-hidden>⌄</span>
+          <span className={styles.chevron} aria-hidden>
+            ⌄
+          </span>
         </span>
       </button>
       {open ? <div className={styles.content}>{children}</div> : null}
