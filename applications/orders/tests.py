@@ -63,3 +63,21 @@ class OrderApiTests(APITestCase):
         data = response.json()['data']
         self.assertEqual(len(data), 1)
         self.assertEqual(data[0]['status'], OrderStatus.ARCHIVED)
+
+    def test_create_pickup_order_without_address_and_comment(self):
+        url = reverse('orders:order-list')
+        payload = {
+            'installation_date': '2024-07-10',
+            'dismantle_date': '2024-07-12',
+            'delivery_type': DeliveryType.PICKUP,
+            'delivery_address': '',
+            'comment': '',
+            'items': [{'product': OrderProduct.PRODUCT_2, 'quantity': 3}],
+        }
+
+        response = self.client.post(url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        data = response.json()['data']
+        self.assertEqual(data['delivery_type'], DeliveryType.PICKUP)
+        self.assertEqual(data['delivery_address'], '')
+        self.assertEqual(data['comment'], '')

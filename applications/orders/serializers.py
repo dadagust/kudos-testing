@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from decimal import Decimal
-from decimal import Decimal
 from typing import Any
 
 from django.db import transaction
@@ -104,6 +103,8 @@ class OrderWriteSerializer(serializers.ModelSerializer):
     customer_id = serializers.PrimaryKeyRelatedField(
         source='customer', queryset=Customer.objects.all(), allow_null=True, required=False
     )
+    delivery_address = serializers.CharField(allow_blank=True, allow_null=True, required=False)
+    comment = serializers.CharField(allow_blank=True, allow_null=True, required=False)
     items = OrderItemInputSerializer(many=True)
 
     class Meta:
@@ -121,9 +122,14 @@ class OrderWriteSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         delivery_type = attrs.get('delivery_type') or getattr(self.instance, 'delivery_type', None)
-        delivery_address = attrs.get('delivery_address') or getattr(
-            self.instance, 'delivery_address', ''
-        )
+        delivery_address_input = attrs.get('delivery_address', serializers.empty)
+        if delivery_address_input is serializers.empty:
+            delivery_address = getattr(self.instance, 'delivery_address', '')
+        elif delivery_address_input in (None, ''):
+            delivery_address = ''
+            attrs['delivery_address'] = ''
+        else:
+            delivery_address = delivery_address_input
         if delivery_type == DeliveryType.DELIVERY and not delivery_address:
             raise serializers.ValidationError(
                 {'delivery_address': 'Укажите адрес доставки или выберите самовывоз.'}
@@ -143,6 +149,11 @@ class OrderWriteSerializer(serializers.ModelSerializer):
         items = attrs.get('items')
         if items is not None and len(items) == 0:
             raise serializers.ValidationError({'items': 'Добавьте хотя бы один товар.'})
+        if delivery_type == DeliveryType.PICKUP:
+            attrs['delivery_address'] = ''
+        if 'comment' in attrs and attrs['comment'] in (None, ''):
+            attrs['comment'] = ''
+
         return attrs
 
     @transaction.atomic
