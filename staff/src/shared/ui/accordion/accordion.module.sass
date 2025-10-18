@@ -1,0 +1,57 @@
+.accordion
+  border: 1px solid var(--color-border)
+  border-radius: 12px
+  background-color: var(--color-surface)
+  transition: box-shadow 0.2s ease
+
+  &.open
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.1)
+
+.header
+  width: 100%
+  background: none
+  border: none
+  padding: var(--space-sm) var(--space-md)
+  display: flex
+  justify-content: space-between
+  align-items: center
+  gap: var(--space-sm)
+  cursor: pointer
+  font: inherit
+  color: var(--color-text)
+
+.title
+  font-weight: var(--font-weight-semibold)
+  font-size: var(--font-size-base)
+
+.controls
+  display: flex
+  align-items: center
+  gap: var(--space-xs)
+
+.actions
+  display: flex
+  align-items: center
+  gap: var(--space-xs)
+
+.chevron
+  display: inline-flex
+  align-items: center
+  justify-content: center
+  width: 20px
+  height: 20px
+  border-radius: 50%
+  background-color: var(--color-surface-elevated)
+  border: 1px solid var(--color-border)
+  font-size: 0.75rem
+  transform: rotate(0deg)
+  transition: transform 0.2s ease
+
+.accordion.open .chevron
+  transform: rotate(180deg)
+
+.content
+  padding: var(--space-sm) var(--space-md) var(--space-md)
+  display: flex
+  flex-direction: column
+  gap: var(--space-sm)
