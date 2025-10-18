@@ -5,6 +5,7 @@ export * from './table';
 export * from './modal';
 export * from './drawer';
 export * from './form-field';
+export * from './accordion';
 export * from './tag';
 export * from './badge';
 export * from './pagination';
