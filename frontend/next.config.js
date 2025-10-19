@@ -36,8 +36,32 @@ const nextConfig = {
   async rewrites() {
     return [
       {
+        source: '/core',
+        destination: `${backendOrigin}/core`,
+      },
+      {
+        source: '/core/',
+        destination: `${backendOrigin}/core/`,
+      },
+      {
+        source: '/core/:path*/',
+        destination: `${backendOrigin}/core/:path*/`,
+      },
+      {
         source: '/core/:path*',
         destination: `${backendOrigin}/core/:path*`,
+      },
+      {
+        source: '/api/v1',
+        destination: `${backendOrigin}/api/v1`,
+      },
+      {
+        source: '/api/v1/',
+        destination: `${backendOrigin}/api/v1/`,
+      },
+      {
+        source: '/api/v1/:path*/',
+        destination: `${backendOrigin}/api/v1/:path*/`,
       },
       {
         source: '/api/v1/:path*',
