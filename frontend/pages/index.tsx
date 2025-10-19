@@ -1,287 +1,491 @@
 import { FormEvent, useState } from 'react';
 import Head from 'next/head';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
 
+import {
+  ApiError,
+  authApi,
+  CreateOrderPayload,
+  OrderDetail,
+  ordersApi,
+  ProductSummary,
+  productsApi,
+  UserProfile,
+} from '../lib/api';
 import styles from '../styles/Home.module.css';
 
+type DeliveryOption = 'delivery' | 'pickup';
+
+type LoginFormState = {
+  email: string;
+  password: string;
+};
+
 type OrderFormState = {
-  installDate: string;
-  uninstallDate: string;
-  deliveryOption: 'delivery' | 'pickup';
-  address: string;
-  products: string;
+  installationDate: string;
+  dismantleDate: string;
+  deliveryType: DeliveryOption;
+  deliveryAddress: string;
   comment: string;
+  productQuantities: Record<string, number>;
 };
 
-type SubmittedOrder = OrderFormState & {
-  status: 'Новый';
-  userName: string | null;
+type Tokens = {
+  access: string;
+  refresh: string;
 };
 
-const initialOrderForm: OrderFormState = {
-  installDate: '',
-  uninstallDate: '',
-  deliveryOption: 'delivery',
-  address: '',
-  products: '',
+const createInitialLoginForm = (): LoginFormState => ({
+  email: '',
+  password: '',
+});
+
+const createInitialOrderForm = (): OrderFormState => ({
+  installationDate: '',
+  dismantleDate: '',
+  deliveryType: 'delivery',
+  deliveryAddress: '',
   comment: '',
+  productQuantities: {},
+});
+
+const ensureQuantities = (products: ProductSummary[], previous?: Record<string, number>) => {
+  const quantities: Record<string, number> = {};
+  products.forEach((product) => {
+    quantities[product.id] = previous?.[product.id] ?? 0;
+  });
+  return quantities;
 };
 
 export default function Home() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userName, setUserName] = useState('');
-  const [showLoginForm, setShowLoginForm] = useState(false);
-  const [showOrderForm, setShowOrderForm] = useState(false);
-  const [orderForm, setOrderForm] = useState<OrderFormState>(initialOrderForm);
-  const [submittedOrder, setSubmittedOrder] = useState<SubmittedOrder | null>(
-    null,
-  );
+  const [tokens, setTokens] = useState<Tokens | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [loginForm, setLoginForm] = useState<LoginFormState>(createInitialLoginForm);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
-  const handleLogin = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!userName.trim()) {
+  const [products, setProducts] = useState<ProductSummary[]>([]);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(false);
+  const [productsError, setProductsError] = useState<string | null>(null);
+
+  const [orderForm, setOrderForm] = useState<OrderFormState>(createInitialOrderForm);
+  const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
+  const [orderError, setOrderError] = useState<string | null>(null);
+  const [orderSuccess, setOrderSuccess] = useState<OrderDetail | null>(null);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('kudos-client-auth');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored) as { tokens: Tokens; user: UserProfile };
+        if (parsed.tokens?.access && parsed.tokens?.refresh) {
+          setTokens(parsed.tokens);
+          setUser(parsed.user ?? null);
+        }
+      } catch (error) {
+        console.error('Failed to parse stored auth data', error);
+        localStorage.removeItem('kudos-client-auth');
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!tokens?.access) {
       return;
     }
-    setIsLoggedIn(true);
-    setShowLoginForm(false);
+
+    const loadProducts = async () => {
+      setIsLoadingProducts(true);
+      setProductsError(null);
+      try {
+        const items = await productsApi.list(tokens.access);
+        setProducts(items);
+        setOrderForm((previous) => ({
+          ...previous,
+          productQuantities: ensureQuantities(items, previous.productQuantities),
+        }));
+      } catch (error) {
+        console.error(error);
+        const message =
+          error instanceof ApiError
+            ? error.message
+            : 'Не удалось загрузить список товаров. Попробуйте еще раз позднее.';
+        setProductsError(message);
+      } finally {
+        setIsLoadingProducts(false);
+      }
+    };
+
+    void loadProducts();
+  }, [tokens]);
+
+  useEffect(() => {
+    if (!tokens) {
+      localStorage.removeItem('kudos-client-auth');
+      return;
+    }
+
+    localStorage.setItem(
+      'kudos-client-auth',
+      JSON.stringify({ tokens, user })
+    );
+  }, [tokens, user]);
+
+  const handleLoginSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsLoggingIn(true);
+    setLoginError(null);
+
+    try {
+      const response = await authApi.login(loginForm.email.trim(), loginForm.password);
+      setTokens({ access: response.access, refresh: response.refresh });
+      setUser(response.user);
+      setLoginForm(createInitialLoginForm());
+    } catch (error) {
+      console.error(error);
+      const message =
+        error instanceof ApiError && error.status !== 0
+          ? error.message
+          : 'Не удалось выполнить вход. Проверьте данные и повторите попытку.';
+      setLoginError(message);
+    } finally {
+      setIsLoggingIn(false);
+    }
   };
 
   const handleLogout = () => {
-    setIsLoggedIn(false);
-    setUserName('');
+    setTokens(null);
+    setUser(null);
+    setProducts([]);
+    setOrderForm(createInitialOrderForm());
+    setOrderSuccess(null);
+    setProductsError(null);
   };
 
-  const handleOrderSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const atLeastOneProductSelected = useMemo(
+    () =>
+      products.some((product) => {
+        const value = orderForm.productQuantities[product.id] ?? 0;
+        return Number(value) > 0;
+      }),
+    [orderForm.productQuantities, products]
+  );
+
+  const handleOrderSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const orderToSubmit: SubmittedOrder = {
-      ...orderForm,
-      status: 'Новый',
-      userName: isLoggedIn ? userName : null,
+    setOrderError(null);
+    setOrderSuccess(null);
+
+    if (!tokens?.access) {
+      setOrderError('Для создания заказа требуется выполнить вход.');
+      return;
+    }
+
+    if (!atLeastOneProductSelected) {
+      setOrderError('Добавьте хотя бы один товар.');
+      return;
+    }
+
+    if (orderForm.deliveryType === 'delivery' && !orderForm.deliveryAddress.trim()) {
+      setOrderError('Укажите адрес доставки или выберите самовывоз.');
+      return;
+    }
+
+    if (!user && !orderForm.comment.trim()) {
+      setOrderError('Укажите контактные данные, чтобы мы могли связаться с вами.');
+      return;
+    }
+
+    const items = products
+      .map((product) => ({
+        product: product.id,
+        quantity: Number(orderForm.productQuantities[product.id] ?? 0),
+      }))
+      .filter((item) => item.quantity > 0);
+
+    const payload: CreateOrderPayload = {
+      status: 'new',
+      installation_date: orderForm.installationDate,
+      dismantle_date: orderForm.dismantleDate,
+      delivery_type: orderForm.deliveryType,
+      delivery_address:
+        orderForm.deliveryType === 'pickup' ? null : orderForm.deliveryAddress.trim() || null,
+      comment: orderForm.comment.trim() || null,
+      items,
     };
-    setSubmittedOrder(orderToSubmit);
-    setOrderForm(initialOrderForm);
-    setShowOrderForm(false);
+
+    setIsSubmittingOrder(true);
+    try {
+      const response = await ordersApi.create(payload, tokens.access);
+      setOrderSuccess(response.data);
+      setOrderForm((previous) => ({
+        ...createInitialOrderForm(),
+        productQuantities: ensureQuantities(products),
+      }));
+    } catch (error) {
+      console.error(error);
+      const message =
+        error instanceof ApiError
+          ? error.message
+          : 'Не удалось создать заказ. Попробуйте еще раз немного позже.';
+      setOrderError(message);
+    } finally {
+      setIsSubmittingOrder(false);
+    }
   };
 
   return (
     <>
       <Head>
         <title>Kudos Клиентская часть</title>
-        <meta name="description" content="Kudos клиентское приложение" />
+        <meta name="description" content="Клиентский интерфейс создания заказов" />
       </Head>
       <main className={styles.main}>
         <div className={styles.container}>
-          <h1 className={styles.title}>Создание заказов</h1>
-          <p className={styles.subtitle}>
-            Создавайте заявки на аренду: заполните детали монтажа, доставки и
-            нужных товаров.
-          </p>
-
-          <div className={styles.actions}>
-            {isLoggedIn ? (
-              <div className={styles.loggedIn}>
-                <span>Вы вошли как {userName}</span>
-                <button className={styles.button} onClick={handleLogout}>
-                  Выйти
-                </button>
-              </div>
-            ) : (
-              <div className={styles.loginBlock}>
-                {showLoginForm ? (
-                  <form className={styles.inlineForm} onSubmit={handleLogin}>
-                    <label className={styles.label}>
-                      Имя или компания
-                      <input
-                        type="text"
-                        value={userName}
-                        onChange={(event) => setUserName(event.target.value)}
-                        className={styles.input}
-                        placeholder="Ваше имя"
-                      />
-                    </label>
-                    <div className={styles.inlineActions}>
-                      <button type="submit" className={styles.button}>
-                        Подтвердить
-                      </button>
-                      <button
-                        type="button"
-                        className={styles.button}
-                        onClick={() => {
-                          setShowLoginForm(false);
-                          setUserName('');
-                        }}
-                      >
-                        Отмена
-                      </button>
-                    </div>
-                  </form>
-                ) : (
-                  <button
-                    className={styles.button}
-                    onClick={() => setShowLoginForm(true)}
-                  >
-                    Войти
+          <header className={styles.header}>
+            <h1 className={styles.title}>Создание заказов</h1>
+            <p className={styles.subtitle}>
+              Авторизуйтесь, выберите подходящие товары и отправьте заявку на аренду.
+            </p>
+            <div className={styles.authBlock}>
+              {user ? (
+                <div className={styles.loggedIn}>
+                  <span className={styles.userBadge}>Вы вошли как {user.full_name || user.email}</span>
+                  <button className={styles.button} onClick={handleLogout}>
+                    Выйти
                   </button>
-                )}
-              </div>
-            )}
+                </div>
+              ) : (
+                <form className={styles.loginForm} onSubmit={handleLoginSubmit}>
+                  <div className={styles.fieldGroup}>
+                    <label className={styles.label} htmlFor="login-email">
+                      Email
+                    </label>
+                    <input
+                      id="login-email"
+                      type="email"
+                      className={styles.input}
+                      value={loginForm.email}
+                      onChange={(event) =>
+                        setLoginForm((prev) => ({ ...prev, email: event.target.value }))
+                      }
+                      placeholder="client@example.com"
+                      required
+                    />
+                  </div>
+                  <div className={styles.fieldGroup}>
+                    <label className={styles.label} htmlFor="login-password">
+                      Пароль
+                    </label>
+                    <input
+                      id="login-password"
+                      type="password"
+                      className={styles.input}
+                      value={loginForm.password}
+                      onChange={(event) =>
+                        setLoginForm((prev) => ({ ...prev, password: event.target.value }))
+                      }
+                      placeholder="Введите пароль"
+                      required
+                    />
+                  </div>
+                  {loginError && <p className={styles.errorText}>{loginError}</p>}
+                  <button className={styles.button} type="submit" disabled={isLoggingIn}>
+                    {isLoggingIn ? 'Входим…' : 'Войти'}
+                  </button>
+                </form>
+              )}
+            </div>
+          </header>
 
-            <button
-              className={styles.button}
-              onClick={() => setShowOrderForm(true)}
-            >
-              Создать заказ
-            </button>
-          </div>
-
-          {showOrderForm && (
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>Шаг 1. Заполните данные заказа</h2>
+            {productsError && <p className={styles.errorText}>{productsError}</p>}
             <form className={styles.orderForm} onSubmit={handleOrderSubmit}>
-              <label className={styles.label}>
-                Дата монтажа
-                <input
-                  type="date"
-                  value={orderForm.installDate}
-                  onChange={(event) =>
-                    setOrderForm((previous) => ({
-                      ...previous,
-                      installDate: event.target.value,
-                    }))
-                  }
-                  className={styles.input}
-                  required
-                />
-              </label>
-
-              <label className={styles.label}>
-                Дата демонтажа
-                <input
-                  type="date"
-                  value={orderForm.uninstallDate}
-                  onChange={(event) =>
-                    setOrderForm((previous) => ({
-                      ...previous,
-                      uninstallDate: event.target.value,
-                    }))
-                  }
-                  className={styles.input}
-                  required
-                />
-              </label>
+              <div className={styles.formRow}>
+                <div className={styles.fieldGroup}>
+                  <label className={styles.label} htmlFor="installation-date">
+                    Дата монтажа
+                  </label>
+                  <input
+                    id="installation-date"
+                    type="date"
+                    className={styles.input}
+                    value={orderForm.installationDate}
+                    onChange={(event) =>
+                      setOrderForm((prev) => ({ ...prev, installationDate: event.target.value }))
+                    }
+                    required
+                  />
+                </div>
+                <div className={styles.fieldGroup}>
+                  <label className={styles.label} htmlFor="dismantle-date">
+                    Дата демонтажа
+                  </label>
+                  <input
+                    id="dismantle-date"
+                    type="date"
+                    className={styles.input}
+                    value={orderForm.dismantleDate}
+                    onChange={(event) =>
+                      setOrderForm((prev) => ({ ...prev, dismantleDate: event.target.value }))
+                    }
+                    required
+                  />
+                </div>
+              </div>
 
               <fieldset className={styles.fieldset}>
-                <legend className={styles.legend}>Доставка</legend>
-                <label className={styles.option}>
+                <legend className={styles.legend}>Способ получения</legend>
+                <label className={styles.radioOption}>
                   <input
                     type="radio"
-                    name="deliveryOption"
+                    name="delivery-type"
                     value="delivery"
-                    checked={orderForm.deliveryOption === 'delivery'}
+                    checked={orderForm.deliveryType === 'delivery'}
                     onChange={() =>
-                      setOrderForm((previous) => ({
-                        ...previous,
-                        deliveryOption: 'delivery',
-                      }))
+                      setOrderForm((prev) => ({ ...prev, deliveryType: 'delivery' }))
                     }
                   />
                   Доставка по адресу
                 </label>
-                <label className={styles.option}>
+                <label className={styles.radioOption}>
                   <input
                     type="radio"
-                    name="deliveryOption"
+                    name="delivery-type"
                     value="pickup"
-                    checked={orderForm.deliveryOption === 'pickup'}
+                    checked={orderForm.deliveryType === 'pickup'}
                     onChange={() =>
-                      setOrderForm((previous) => ({
-                        ...previous,
-                        deliveryOption: 'pickup',
-                        address: '',
+                      setOrderForm((prev) => ({
+                        ...prev,
+                        deliveryType: 'pickup',
+                        deliveryAddress: '',
                       }))
                     }
                   />
-                  Самовывоз
+                  Самовывоз со склада
                 </label>
               </fieldset>
 
-              {orderForm.deliveryOption === 'delivery' && (
-                <label className={styles.label}>
-                  Адрес доставки
+              {orderForm.deliveryType === 'delivery' && (
+                <div className={styles.fieldGroup}>
+                  <label className={styles.label} htmlFor="delivery-address">
+                    Адрес доставки
+                  </label>
                   <input
+                    id="delivery-address"
                     type="text"
-                    value={orderForm.address}
-                    onChange={(event) =>
-                      setOrderForm((previous) => ({
-                        ...previous,
-                        address: event.target.value,
-                      }))
-                    }
                     className={styles.input}
-                    placeholder="Город, улица, дом"
-                    required
-                  />
-                </label>
-              )}
-
-              <label className={styles.label}>
-                Какие товары нужны
-                <textarea
-                  value={orderForm.products}
-                  onChange={(event) =>
-                    setOrderForm((previous) => ({
-                      ...previous,
-                      products: event.target.value,
-                    }))
-                  }
-                  className={styles.textarea}
-                  placeholder="Перечислите позиции"
-                  required
-                />
-              </label>
-
-              {!isLoggedIn && (
-                <label className={styles.label}>
-                  Напишите свои контактные данные, чтобы мы с вами связались
-                  <textarea
-                    value={orderForm.comment}
+                    value={orderForm.deliveryAddress}
                     onChange={(event) =>
-                      setOrderForm((previous) => ({
-                        ...previous,
-                        comment: event.target.value,
-                      }))
+                      setOrderForm((prev) => ({ ...prev, deliveryAddress: event.target.value }))
                     }
-                    className={styles.textarea}
-                    placeholder="Телефон, имя или любая другая информация"
-                    required
+                    placeholder="Город, улица, дом"
                   />
-                </label>
+                </div>
               )}
 
-              <button type="submit" className={styles.button}>
-                Отправить заказ
+              <div className={styles.fieldGroup}>
+                <label className={styles.label} htmlFor="order-comment">
+                  {user
+                    ? 'Комментарий к заказу (по желанию)'
+                    : 'Напишите свои контактные данные, чтобы мы с вами связались'}
+                </label>
+                <textarea
+                  id="order-comment"
+                  className={styles.textarea}
+                  value={orderForm.comment}
+                  onChange={(event) =>
+                    setOrderForm((prev) => ({ ...prev, comment: event.target.value }))
+                  }
+                  placeholder={user ? 'Дополнительная информация для менеджера' : 'Телефон и имя'}
+                  required={!user}
+                />
+              </div>
+
+              <div className={styles.fieldGroup}>
+                <p className={styles.label}>Товары</p>
+                {isLoadingProducts ? (
+                  <p className={styles.helperText}>Загружаем товары…</p>
+                ) : (
+                  <ul className={styles.productList}>
+                    {products.map((product) => (
+                      <li key={product.id} className={styles.productItem}>
+                        <div className={styles.productInfo}>
+                          <span className={styles.productName}>{product.name}</span>
+                          {Number.isFinite(product.base_price) && (
+                            <span className={styles.productPrice}>
+                              {new Intl.NumberFormat('ru-RU', {
+                                style: 'currency',
+                                currency: 'RUB',
+                                maximumFractionDigits: 0,
+                              }).format(product.base_price)}
+                            </span>
+                          )}
+                        </div>
+                        <input
+                          type="number"
+                          min={0}
+                          step={1}
+                          className={styles.quantityInput}
+                          value={orderForm.productQuantities[product.id] ?? 0}
+                          onChange={(event) => {
+                            const value = Number(event.target.value);
+                            setOrderForm((prev) => ({
+                              ...prev,
+                              productQuantities: {
+                                ...prev.productQuantities,
+                                [product.id]: Number.isNaN(value) ? 0 : value,
+                              },
+                            }));
+                          }}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+
+              {orderError && <p className={styles.errorText}>{orderError}</p>}
+
+              <button className={styles.button} type="submit" disabled={isSubmittingOrder}>
+                {isSubmittingOrder ? 'Отправляем…' : 'Создать заказ'}
               </button>
             </form>
-          )}
+          </section>
 
-          {submittedOrder && (
-            <section className={styles.orderSummary}>
-              <h2>Заказ создан</h2>
-              <ul>
-                <li>
-                  Статус: <strong>{submittedOrder.status}</strong>
-                </li>
-                <li>Дата монтажа: {submittedOrder.installDate}</li>
-                <li>Дата демонтажа: {submittedOrder.uninstallDate}</li>
-                <li>
-                  Доставка: {submittedOrder.deliveryOption === 'delivery'
-                    ? `по адресу ${submittedOrder.address}`
+          {orderSuccess && (
+            <section className={styles.section}>
+              <h2 className={styles.sectionTitle}>Заказ создан</h2>
+              <div className={styles.orderSummary}>
+                <p>
+                  Номер заказа: <strong>#{orderSuccess.id}</strong>
+                </p>
+                <p>
+                  Статус: <strong>{orderSuccess.status_label}</strong>
+                </p>
+                <p>Дата монтажа: {orderSuccess.installation_date}</p>
+                <p>Дата демонтажа: {orderSuccess.dismantle_date}</p>
+                <p>
+                  Доставка:{' '}
+                  {orderSuccess.delivery_type === 'delivery'
+                    ? orderSuccess.delivery_address || 'адрес не указан'
                     : 'самовывоз'}
-                </li>
-                <li>Товары: {submittedOrder.products}</li>
-                {submittedOrder.userName ? (
-                  <li>Клиент: {submittedOrder.userName}</li>
-                ) : (
-                  <li>Комментарий: {submittedOrder.comment}</li>
-                )}
-              </ul>
+                </p>
+                <p>
+                  Комментарий: {orderSuccess.comment ? orderSuccess.comment : '—'}
+                </p>
+                <div className={styles.summaryItems}>
+                  <h3>Товары:</h3>
+                  <ul>
+                    {orderSuccess.items.map((item) => (
+                      <li key={item.id}>
+                        {item.product_label} — {item.quantity} шт.
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
             </section>
           )}
         </div>
