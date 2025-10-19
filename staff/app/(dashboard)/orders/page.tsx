@@ -533,9 +533,18 @@ export default function OrdersPage() {
     }
   }, [editOrderResponse, isEditOpen]);
 
+  useEffect(() => {
+    const normalizedInput = searchInput.trim();
+
+    if (normalizedInput === searchTerm) {
+      return;
+    }
+
+    setSearchTerm(normalizedInput);
+  }, [searchInput, searchTerm]);
+
   const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setSearchTerm(searchInput.trim());
   };
 
   const handleResetSearch = () => {
