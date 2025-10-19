@@ -48,7 +48,7 @@ STATUS_GROUP_MAP: dict[str, tuple[str, ...]] = {
 
 
 class OrderQuerySet(models.QuerySet):
-    def for_status_group(self, group: str | None) -> 'OrderQuerySet':
+    def for_status_group(self, group: str | None) -> OrderQuerySet:
         if not group:
             return self
         statuses = STATUS_GROUP_MAP.get(group)

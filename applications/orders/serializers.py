@@ -11,12 +11,12 @@ from rest_framework import serializers
 from applications.customers.models import Customer
 
 from .models import (
+    ORDER_PRODUCT_PRICES,
     DeliveryType,
     Order,
     OrderItem,
     OrderProduct,
     OrderStatus,
-    ORDER_PRODUCT_PRICES,
 )
 
 
@@ -55,9 +55,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
 class OrderSummarySerializer(serializers.ModelSerializer):
     customer = CustomerSummarySerializer(read_only=True)
     status_label = serializers.CharField(source='get_status_display', read_only=True)
-    delivery_type_label = serializers.CharField(
-        source='get_delivery_type_display', read_only=True
-    )
+    delivery_type_label = serializers.CharField(source='get_delivery_type_display', read_only=True)
 
     class Meta:
         model = Order

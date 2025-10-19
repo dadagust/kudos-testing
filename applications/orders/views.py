@@ -15,11 +15,7 @@ from .serializers import OrderDetailSerializer, OrderSummarySerializer, OrderWri
 class OrderViewSet(viewsets.ModelViewSet):
     """CRUD endpoint for managing orders."""
 
-    queryset = (
-        Order.objects.all()
-        .select_related('customer')
-        .prefetch_related('items')
-    )
+    queryset = Order.objects.all().select_related('customer').prefetch_related('items')
     permission_classes = [IsAuthenticated, OrderAccessPolicy]
 
     def get_serializer_class(self):
@@ -75,7 +71,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         order = serializer.save()
         read_serializer = OrderDetailSerializer(order, context=self.get_serializer_context())
         headers = self.get_success_headers(read_serializer.data)
-        return Response({'data': read_serializer.data}, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(
+            {'data': read_serializer.data}, status=status.HTTP_201_CREATED, headers=headers
+        )
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
