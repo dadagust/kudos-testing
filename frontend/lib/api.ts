@@ -214,7 +214,7 @@ export const authApi = {
 export const productsApi = {
   list: async (token: string | null) => {
     try {
-      const response = await performRequest<ProductListResponse>(CORE_API_URL, '/products', {
+      const response = await performRequest<ProductListResponse>(CORE_API_URL, '/products/', {
         method: 'GET',
         token,
       });
@@ -256,3 +256,6 @@ export const ordersApi = {
 };
 
 export { ApiError };
+
+console.debug('CORE_API_URL=', CORE_API_URL);
+console.debug('API_V1_URL=', API_V1_URL);
