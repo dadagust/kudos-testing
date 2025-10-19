@@ -17,19 +17,20 @@ import {
   CreateOrderPayload,
   CustomerSummary,
   DeliveryType,
+  getOrderProductInfo,
+  ORDER_PRODUCTS,
+  ORDER_STATUS_LABELS,
   OrderProductId,
   OrderStatus,
   OrderStatusGroup,
   OrderSummary,
-  ORDER_PRODUCTS,
-  ORDER_STATUS_LABELS,
-  getOrderProductInfo,
   useCreateOrderMutation,
   useOrderQuery,
   useOrdersQuery,
   useUpdateOrderMutation,
 } from '@/entities/order';
 import { RoleGuard, usePermission } from '@/features/auth';
+import type { TableColumn } from '@/shared/ui';
 import {
   Accordion,
   Alert,
@@ -42,7 +43,6 @@ import {
   Table,
   Tag,
 } from '@/shared/ui';
-import type { TableColumn } from '@/shared/ui';
 
 type CustomerOption = CustomerSummary | CustomerEntitySummary;
 
@@ -780,13 +780,21 @@ export default function OrdersPage() {
           </div>
         ) : null}
 
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+            gap: '12px',
+            width: '100%',
+          }}
+        >
           {STATUS_GROUP_TABS.map((tab) => (
             <Button
               key={tab.id}
               type="button"
               variant={tab.id === statusGroup ? 'primary' : 'ghost'}
               onClick={() => setStatusGroup(tab.id)}
+              style={{ width: '100%' }}
             >
               {tab.label}
             </Button>
@@ -795,13 +803,19 @@ export default function OrdersPage() {
 
         <form
           onSubmit={handleSearchSubmit}
-          style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr auto auto',
+            gap: '12px',
+            alignItems: 'center',
+            width: '100%',
+          }}
         >
           <Input
             placeholder="Поиск по адресу или комментарию"
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}
-            style={{ minWidth: 240 }}
+            style={{ width: '100%' }}
           />
           <Button type="submit">Найти</Button>
           <Button type="button" variant="ghost" onClick={handleResetSearch}>
