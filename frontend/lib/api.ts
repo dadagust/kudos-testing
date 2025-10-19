@@ -1,4 +1,5 @@
-const DEFAULT_API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/core';
+const DEFAULT_CORE_PATH = '/core';
+const DEFAULT_API_V1_PATH = '/api/v1';
 
 const normalizeBaseUrl = (value: string) => value.replace(/\/$/, '');
 
@@ -7,12 +8,53 @@ const resolveApiRoot = (value: string) => {
   if (normalized.endsWith('/core')) {
     return normalized.slice(0, -'/core'.length);
   }
+  if (normalized.endsWith('/api/v1')) {
+    return normalized.slice(0, -'/api/v1'.length);
+  }
   return normalized;
 };
 
-const API_ROOT = resolveApiRoot(DEFAULT_API_URL);
-const CORE_API_URL = `${API_ROOT}/core`;
-const API_V1_URL = `${API_ROOT}/api/v1`;
+const resolveApiUrls = (): { core: string; apiV1: string } => {
+  const rawValue = process.env.NEXT_PUBLIC_API_URL;
+
+  if (!rawValue) {
+    return { core: DEFAULT_CORE_PATH, apiV1: DEFAULT_API_V1_PATH };
+  }
+
+  const normalized = normalizeBaseUrl(rawValue);
+  const isAbsolute = /^https?:\/\//i.test(normalized);
+
+  if (isAbsolute) {
+    const apiRoot = resolveApiRoot(normalized);
+    return {
+      core: `${apiRoot}/core`,
+      apiV1: `${apiRoot}/api/v1`,
+    };
+  }
+
+  if (normalized.endsWith('/core')) {
+    const prefix = normalized.slice(0, -'/core'.length);
+    return {
+      core: normalized,
+      apiV1: prefix ? `${prefix}/api/v1` : DEFAULT_API_V1_PATH,
+    };
+  }
+
+  if (normalized.endsWith('/api/v1')) {
+    const prefix = normalized.slice(0, -'/api/v1'.length);
+    return {
+      core: `${prefix}/core`,
+      apiV1: normalized,
+    };
+  }
+
+  return {
+    core: `${normalized}/core`,
+    apiV1: `${normalized}/api/v1`,
+  };
+};
+
+const { core: CORE_API_URL, apiV1: API_V1_URL } = resolveApiUrls();
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS';
 
