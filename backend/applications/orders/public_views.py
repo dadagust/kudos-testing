@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from decimal import Decimal
-from typing import Iterable
 
 from django.http import Http404
 from rest_framework.decorators import api_view, permission_classes

@@ -236,7 +236,9 @@ export const productsApi = {
         return choices
           .map((choice) => ({
             id: String(choice.value ?? choice.key ?? ''),
-            name: String(choice.display_name ?? choice.display ?? choice.label ?? choice.value ?? ''),
+            name: String(
+              choice.display_name ?? choice.display ?? choice.label ?? choice.value ?? ''
+            ),
             base_price: Number(choice.price ?? 0) || 0,
           }))
           .filter((item) => item.id.length > 0 && item.name.length > 0);

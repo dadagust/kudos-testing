@@ -8,7 +8,12 @@ CORS_ALLOW_CREDENTIALS = True
 
 cors_origins = env.list('DJANGO_CORS_ORIGINS', default=[])
 if not cors_origins:
-    cors_origins = ['http://localhost:3000','http://localhost:4000', 'http://127.0.0.1:3000','http://127.0.0.1:4000']
+    cors_origins = [
+        'http://localhost:3000',
+        'http://localhost:4000',
+        'http://127.0.0.1:3000',
+        'http://127.0.0.1:4000',
+    ]
 
 CORS_ALLOWED_ORIGINS = cors_origins
 CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS

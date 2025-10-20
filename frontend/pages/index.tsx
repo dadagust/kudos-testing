@@ -124,10 +124,7 @@ export default function Home() {
       return;
     }
 
-    localStorage.setItem(
-      'kudos-client-auth',
-      JSON.stringify({ tokens, user })
-    );
+    localStorage.setItem('kudos-client-auth', JSON.stringify({ tokens, user }));
   }, [tokens, user]);
 
   const handleLoginSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -249,7 +246,9 @@ export default function Home() {
             <div className={styles.authBlock}>
               {user ? (
                 <div className={styles.loggedIn}>
-                  <span className={styles.userBadge}>Вы вошли как {user.full_name || user.email}</span>
+                  <span className={styles.userBadge}>
+                    Вы вошли как {user.full_name || user.email}
+                  </span>
                   <button className={styles.button} onClick={handleLogout}>
                     Выйти
                   </button>
@@ -342,9 +341,7 @@ export default function Home() {
                     name="delivery-type"
                     value="delivery"
                     checked={orderForm.deliveryType === 'delivery'}
-                    onChange={() =>
-                      setOrderForm((prev) => ({ ...prev, deliveryType: 'delivery' }))
-                    }
+                    onChange={() => setOrderForm((prev) => ({ ...prev, deliveryType: 'delivery' }))}
                   />
                   Доставка по адресу
                 </label>
@@ -471,9 +468,7 @@ export default function Home() {
                     ? orderSuccess.delivery_address || 'адрес не указан'
                     : 'самовывоз'}
                 </p>
-                <p>
-                  Комментарий: {orderSuccess.comment ? orderSuccess.comment : '—'}
-                </p>
+                <p>Комментарий: {orderSuccess.comment ? orderSuccess.comment : '—'}</p>
                 <div className={styles.summaryItems}>
                   <h3>Товары:</h3>
                   <ul>
