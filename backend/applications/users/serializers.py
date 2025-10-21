@@ -28,7 +28,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         legacy = LEGACY_ROLE_MAP.get(value)
         return legacy if legacy else str(value)
 
-    def get_permissions(self, obj: UserProfile) -> dict[str, dict[str, bool]]:
+    def get_permissions(self, obj: UserProfile) -> list[str]:
         return serialize_user_permissions(obj.user)
 
 

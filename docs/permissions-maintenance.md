@@ -4,9 +4,8 @@
 
 The data migration `applications.users.migrations.0005_update_role_permissions` provisions
 all Django `auth.Permission` records we reference in the project and assigns them to
-groups according to the `ROLE_PERMISSION_MATRIX` constant in
-`applications.users.rbac`. Every time a fresh environment is migrated, migration 0005
-rebuilds the default mapping.
+groups according to the `ROLE_PERMISSION_MATRIX` constant defined inside that migration.
+Every time a fresh environment is migrated, migration 0005 rebuilds the default mapping.
 
 ## Extending permissions with follow-up migrations
 
@@ -63,9 +62,9 @@ class Migration(migrations.Migration):
 ### When you **do** need to touch the matrix
 
 If you introduce a brand-new permission (for example a new admin panel section with its
-own content type), you must update `ROLE_PERMISSION_MATRIX` so migration 0005 knows to
-create the underlying `auth.Permission` objects. Otherwise the follow-up migration will
-fail to find the permission codename to attach.
+own content type), you must update `ROLE_PERMISSION_MATRIX` in the relevant migration so
+it knows to create the underlying `auth.Permission` objects. Otherwise the follow-up
+migration will fail to find the permission codename to attach.
 
 Updating the matrix keeps the declarative baseline in sync with reality while allowing
 incremental adjustments through additional migrations.

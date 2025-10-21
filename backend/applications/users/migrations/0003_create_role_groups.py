@@ -1,4 +1,112 @@
+from collections import defaultdict
+
 from django.db import migrations
+
+ROLE_PERMISSION_MATRIX = {
+    'Guest': {
+        ('inventory', 'inventoryitem'): ('view',),
+    },
+    'Customer': {
+        ('customers', 'customer'): ('view', 'change'),
+        ('customers', 'company'): ('view', 'change'),
+        ('customers', 'address'): ('view', 'change'),
+        ('customers', 'contact'): ('view', 'change'),
+        ('orders', 'order'): ('view',),
+        ('inventory', 'inventoryitem'): ('view',),
+        ('documents', 'document'): ('view',),
+    },
+    'B2B': {
+        ('customers', 'customer'): ('view', 'change'),
+        ('customers', 'company'): ('view', 'change'),
+        ('customers', 'address'): ('view', 'change'),
+        ('customers', 'contact'): ('view', 'change'),
+        ('orders', 'order'): ('view',),
+        ('inventory', 'inventoryitem'): ('view',),
+        ('documents', 'document'): ('view',),
+    },
+    'SalesManager': {
+        ('customers', 'customer'): ('view', 'add', 'change', 'delete'),
+        ('customers', 'company'): ('view', 'change'),
+        ('customers', 'address'): ('view', 'change'),
+        ('customers', 'contact'): ('view', 'change'),
+        ('orders', 'order'): ('view', 'add', 'change', 'delete'),
+        ('inventory', 'inventoryitem'): ('view',),
+        ('documents', 'document'): ('view',),
+        ('adminpanel', 'dashboard'): ('view',),
+        ('adminpanel', 'products'): ('view',),
+        ('adminpanel', 'orders'): ('view',),
+        ('adminpanel', 'customers'): ('view',),
+        ('adminpanel', 'inventory'): ('view',),
+        ('adminpanel', 'documents'): ('view',),
+        ('adminpanel', 'logs'): ('view',),
+    },
+    'Warehouse': {
+        ('customers', 'customer'): ('view',),
+        ('customers', 'company'): ('view',),
+        ('customers', 'address'): ('view',),
+        ('customers', 'contact'): ('view',),
+        ('orders', 'order'): ('view',),
+        ('inventory', 'inventoryitem'): ('view', 'change'),
+        ('documents', 'document'): ('view',),
+        ('adminpanel', 'dashboard'): ('view',),
+        ('adminpanel', 'orders'): ('view',),
+        ('adminpanel', 'inventory'): ('view',),
+        ('adminpanel', 'logs'): ('view',),
+    },
+    'Accountant': {
+        ('customers', 'customer'): ('view',),
+        ('customers', 'company'): ('view',),
+        ('customers', 'address'): ('view',),
+        ('customers', 'contact'): ('view',),
+        ('orders', 'order'): ('view', 'change'),
+        ('documents', 'document'): ('view', 'change'),
+        ('adminpanel', 'dashboard'): ('view',),
+        ('adminpanel', 'orders'): ('view',),
+        ('adminpanel', 'customers'): ('view',),
+        ('adminpanel', 'documents'): ('view',),
+        ('adminpanel', 'logs'): ('view',),
+    },
+    'ContentManager': {
+        ('inventory', 'inventoryitem'): ('view',),
+        ('adminpanel', 'dashboard'): ('view',),
+        ('adminpanel', 'products'): ('view',),
+        ('adminpanel', 'documents'): ('view',),
+    },
+    'Driver': {
+        ('customers', 'customer'): ('view',),
+        ('orders', 'order'): ('view',),
+        ('inventory', 'inventoryitem'): ('view',),
+        ('adminpanel', 'dashboard'): ('view',),
+        ('adminpanel', 'orders'): ('view',),
+    },
+    'Loader': {
+        ('customers', 'customer'): ('view',),
+        ('orders', 'order'): ('view',),
+        ('inventory', 'inventoryitem'): ('view', 'change'),
+        ('adminpanel', 'dashboard'): ('view',),
+        ('adminpanel', 'orders'): ('view',),
+        ('adminpanel', 'inventory'): ('view',),
+    },
+    'Admin': {
+        ('adminpanel', 'dashboard'): ('view', 'change'),
+        ('adminpanel', 'products'): ('view', 'change'),
+        ('adminpanel', 'orders'): ('view', 'change'),
+        ('adminpanel', 'customers'): ('view', 'change'),
+        ('adminpanel', 'inventory'): ('view', 'change'),
+        ('adminpanel', 'documents'): ('view', 'change'),
+        ('adminpanel', 'integrations'): ('view', 'change'),
+        ('adminpanel', 'settings'): ('view', 'change'),
+        ('adminpanel', 'logs'): ('view', 'change'),
+    },
+}
+
+
+def flatten_required_permissions() -> dict[tuple[str, str], set[str]]:
+    accumulator: dict[tuple[str, str], set[str]] = defaultdict(set)
+    for mapping in ROLE_PERMISSION_MATRIX.values():
+        for (app_label, model), actions in mapping.items():
+            accumulator[(app_label, model)].update(actions)
+    return accumulator
 
 ACTION_LABELS = {
     'view': 'Can view',
@@ -50,11 +158,7 @@ def apply_group_permissions(group_model, permission_model, mapping):
 
 
 def forwards(apps, schema_editor):
-    from applications.users.rbac import (
-        ROLE_GROUP_MAP,
-        ROLE_PERMISSION_MATRIX,
-        flatten_required_permissions,
-    )
+    from applications.users.rbac import ROLE_GROUP_MAP
 
     group_model = apps.get_model('auth', 'Group')
     permission_model = apps.get_model('auth', 'Permission')
