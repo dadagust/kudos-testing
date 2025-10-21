@@ -1,0 +1,88 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: kudos
+      POSTGRES_USER: kudos
+      POSTGRES_PASSWORD: kudos
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://kudos:kudos@postgres:5432/kudos
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,backend,frontend,staff
+      DJANGO_DEBUG: "1"
+      DJANGO_SETTINGS_MODULE: settings.settings
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    command: ["pnpm", "dev", "--", "--hostname", "0.0.0.0"]
+    depends_on:
+      backend:
+        condition: service_started
+    environment:
+      NODE_ENV: development
+      KUDOS_BACKEND_ORIGIN: http://backend:8000
+      NEXT_PUBLIC_API_URL: http://backend:8000
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./frontend:/app/frontend
+      - frontend_node_modules:/app/frontend/node_modules
+
+  staff:
+    build:
+      context: .
+      dockerfile: staff/Dockerfile
+    command: ["pnpm", "dev", "--", "--hostname", "0.0.0.0"]
+    depends_on:
+      backend:
+        condition: service_started
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: http://backend:8000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./staff:/app/staff
+      - staff_node_modules:/app/staff/node_modules
+
+volumes:
+  frontend_node_modules:
+  staff_node_modules:
+  postgres_data:
