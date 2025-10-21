@@ -455,7 +455,7 @@ const OrderFormContent = ({
 };
 
 export default function OrdersPage() {
-  const canManageOrders = usePermission('orders', 'change');
+  const canManageOrders = usePermission('orders_change_order');
 
   const [statusGroup, setStatusGroup] = useState<OrderStatusGroup>('current');
   const [searchInput, setSearchInput] = useState('');
@@ -762,7 +762,7 @@ export default function OrdersPage() {
   );
 
   return (
-    <RoleGuard allow={[{ scope: 'admin_orders' }, { scope: 'orders' }]}>
+    <RoleGuard allow={['adminpanel_view_orders', 'orders_view_order']}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>

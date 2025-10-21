@@ -1,4 +1,4 @@
-import { PermissionMatrix } from '@/shared/config/permissions';
+import { PermissionCode } from '@/shared/config/permissions';
 import { Role } from '@/shared/config/roles';
 
 export interface UserProfile {
@@ -7,7 +7,7 @@ export interface UserProfile {
   full_name: string;
   role: Role;
   avatar?: string | null;
-  permissions: PermissionMatrix;
+  permissions: PermissionCode[];
 }
 
 export interface AuthResponse {

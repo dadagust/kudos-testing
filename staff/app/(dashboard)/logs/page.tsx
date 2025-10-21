@@ -85,7 +85,7 @@ export default function LogsPage() {
   ];
 
   return (
-    <RoleGuard allow={[{ scope: 'admin_logs' }, { scope: 'documents' }]}>
+    <RoleGuard allow={['adminpanel_view_logs', 'documents_view_document']}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           <h1>Аудит и логи</h1>

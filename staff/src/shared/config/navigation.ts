@@ -1,4 +1,4 @@
-import { PermissionScope } from './permissions';
+import { PermissionCode } from './permissions';
 import { AdminSection } from './roles';
 
 export interface NavigationItem {
@@ -6,7 +6,7 @@ export interface NavigationItem {
   label: string;
   href: string;
   icon: string;
-  permission: PermissionScope;
+  permission: PermissionCode;
 }
 
 export const NAVIGATION_ITEMS: NavigationItem[] = [
@@ -15,62 +15,62 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     label: 'Дашборд',
     href: '/dashboard',
     icon: 'dashboard',
-    permission: 'admin_dashboard',
+    permission: 'adminpanel_view_dashboard',
   },
   {
     id: 'products',
     label: 'Товары',
     href: '/products',
     icon: 'box',
-    permission: 'admin_products',
+    permission: 'adminpanel_view_products',
   },
   {
     id: 'orders',
     label: 'Заказы',
     href: '/orders',
     icon: 'orders',
-    permission: 'admin_orders',
+    permission: 'adminpanel_view_orders',
   },
   {
     id: 'customers',
     label: 'Клиенты',
     href: '/customers',
     icon: 'customers',
-    permission: 'admin_customers',
+    permission: 'adminpanel_view_customers',
   },
   {
     id: 'inventory',
     label: 'Склад',
     href: '/inventory',
     icon: 'inventory',
-    permission: 'admin_inventory',
+    permission: 'adminpanel_view_inventory',
   },
   {
     id: 'documents',
     label: 'Документы',
     href: '/documents',
     icon: 'documents',
-    permission: 'admin_documents',
+    permission: 'adminpanel_view_documents',
   },
   {
     id: 'integrations',
     label: 'Интеграции',
     href: '/integrations',
     icon: 'integrations',
-    permission: 'admin_integrations',
+    permission: 'adminpanel_view_integrations',
   },
   {
     id: 'settings',
     label: 'Настройки',
     href: '/settings',
     icon: 'settings',
-    permission: 'admin_settings',
+    permission: 'adminpanel_view_settings',
   },
   {
     id: 'logs',
     label: 'Логи',
     href: '/logs',
     icon: 'logs',
-    permission: 'admin_logs',
+    permission: 'adminpanel_view_logs',
   },
 ];

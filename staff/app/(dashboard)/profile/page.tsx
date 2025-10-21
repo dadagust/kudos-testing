@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 
 import { useAuth } from '@/features/auth';
-import { PermissionScope } from '@/shared/config/permissions';
+import { hasPermission } from '@/shared/config/permissions';
 import { ADMIN_SECTIONS, ROLE_TITLES } from '@/shared/config/roles';
 import { Table, Tag } from '@/shared/ui';
 
@@ -19,11 +19,19 @@ const sectionsLabels: Record<(typeof ADMIN_SECTIONS)[number], string> = {
   logs: 'Логи',
 };
 
-const domainScopes: Array<{ scope: PermissionScope; label: string }> = [
-  { scope: 'customers', label: 'Клиенты' },
-  { scope: 'orders', label: 'Заказы' },
-  { scope: 'inventory', label: 'Склад' },
-  { scope: 'documents', label: 'Документы' },
+const domainPermissions = [
+  {
+    label: 'Клиенты',
+    view: 'customers_view_customer',
+    change: 'customers_change_customer',
+  },
+  { label: 'Заказы', view: 'orders_view_order', change: 'orders_change_order' },
+  {
+    label: 'Склад',
+    view: 'inventory_view_inventoryitem',
+    change: 'inventory_change_inventoryitem',
+  },
+  { label: 'Документы', view: 'documents_view_document', change: 'documents_change_document' },
 ];
 
 export default function ProfilePage() {
@@ -31,13 +39,13 @@ export default function ProfilePage() {
   const adminRows = useMemo(
     () =>
       ADMIN_SECTIONS.map((section) => {
-        const scope = `admin_${section}` as PermissionScope;
-        const flags = user?.permissions?.[scope];
+        const view = `adminpanel_view_${section}`;
+        const change = `adminpanel_change_${section}`;
         return {
-          id: scope,
+          id: section,
           label: sectionsLabels[section],
-          view: Boolean(flags?.view),
-          change: Boolean(flags?.change),
+          view: hasPermission(user?.permissions, view),
+          change: hasPermission(user?.permissions, change),
         };
       }),
     [user]
@@ -45,15 +53,12 @@ export default function ProfilePage() {
 
   const domainRows = useMemo(
     () =>
-      domainScopes.map(({ scope, label }) => {
-        const flags = user?.permissions?.[scope];
-        return {
-          id: scope,
-          label,
-          view: Boolean(flags?.view),
-          change: Boolean(flags?.change),
-        };
-      }),
+      domainPermissions.map(({ label, view, change }) => ({
+        id: label,
+        label,
+        view: hasPermission(user?.permissions, view),
+        change: hasPermission(user?.permissions, change),
+      })),
     [user]
   );
 

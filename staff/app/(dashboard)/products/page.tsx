@@ -63,7 +63,7 @@ export default function ProductsPage() {
   );
 
   const { data, isLoading, isError, error, isFetching } = useProductsQuery(queryParams);
-  const canManageProducts = usePermission('inventory', 'change');
+  const canManageProducts = usePermission('inventory_change_inventoryitem');
 
   const rows: ProductSummary[] = data?.data ?? [];
   const filters = data?.filters;
@@ -149,7 +149,7 @@ export default function ProductsPage() {
   };
 
   return (
-    <RoleGuard allow={[{ scope: 'admin_products' }, { scope: 'inventory' }]}>
+    <RoleGuard allow={['adminpanel_view_products', 'inventory_view_inventoryitem']}>
       <header
         style={{
           display: 'flex',

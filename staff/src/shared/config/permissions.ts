@@ -1,29 +1,31 @@
-export const PERMISSION_SCOPES = [
-  'admin_dashboard',
-  'admin_products',
-  'admin_orders',
-  'admin_customers',
-  'admin_inventory',
-  'admin_documents',
-  'admin_integrations',
-  'admin_settings',
-  'admin_logs',
-  'customers',
-  'companies',
-  'addresses',
-  'contacts',
-  'orders',
-  'inventory',
-  'documents',
-] as const;
+export type PermissionCode = string;
 
-export type PermissionScope = (typeof PERMISSION_SCOPES)[number];
+const VIEW_SEGMENT = '_view_';
+const CHANGE_SEGMENT = '_change_';
 
-export type PermissionAction = 'view' | 'change';
+const isViewPermission = (permission: PermissionCode) => permission.includes(VIEW_SEGMENT);
 
-export interface PermissionFlags {
-  view: boolean;
-  change: boolean;
-}
+const inferChangePermission = (permission: PermissionCode) =>
+  isViewPermission(permission) ? permission.replace(VIEW_SEGMENT, CHANGE_SEGMENT) : null;
 
-export type PermissionMatrix = Record<PermissionScope, PermissionFlags>;
+export const hasPermission = (
+  permissions: PermissionCode[] | null | undefined,
+  required: PermissionCode
+) => {
+  if (!permissions?.length) {
+    return false;
+  }
+
+  if (permissions.includes(required)) {
+    return true;
+  }
+
+  if (isViewPermission(required)) {
+    const impliedChange = inferChangePermission(required);
+    if (impliedChange && permissions.includes(impliedChange)) {
+      return true;
+    }
+  }
+
+  return false;
+};
