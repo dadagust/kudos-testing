@@ -13,3 +13,15 @@ images: backend-image frontend-image staff-image
 
 clean-images:
 	-@docker rmi kudos-backend kudos-frontend kudos-staff 2>/dev/null || true
+
+up:
+	docker compose up -d
+
+up-build:
+	docker compose up --build -d
+
+up-rebuild:
+	docker compose up --build --force-recreate --no-deps -d
+
+down:
+	docker compose down

@@ -35,3 +35,6 @@ check: lint test
 
 test:
 	$(POETRY) run $(MANAGE) test
+
+lint:
+	ruff check applications
