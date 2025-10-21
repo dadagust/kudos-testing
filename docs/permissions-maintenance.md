@@ -7,6 +7,12 @@ all Django `auth.Permission` records we reference in the project and assigns the
 groups according to the `ROLE_PERMISSION_MATRIX` constant defined inside that migration.
 Every time a fresh environment is migrated, migration 0005 rebuilds the default mapping.
 
+> **API note:** the backend serialises granted permissions for the frontend as
+> underscore-delimited strings (for example `adminpanel_view_dashboard` or
+> `customers_change_customer`). Internally these values still come from standard
+> Django permissions such as `adminpanel.view_dashboard` and
+> `customers.change_customer` defined in migrations.
+
 ## Extending permissions with follow-up migrations
 
 You can layer additional changes on top of that baseline with a new migration (for
