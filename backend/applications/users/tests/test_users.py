@@ -1,3 +1,4 @@
+from importlib import import_module
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
@@ -9,7 +10,11 @@ from rest_framework import serializers, status
 from rest_framework.test import APITestCase
 
 from applications.users.models import RoleChoices, UserProfile
-from applications.users.rbac import ROLE_GROUP_MAP, ROLE_PERMISSION_MATRIX
+from applications.users.rbac import ROLE_GROUP_MAP
+
+ROLE_PERMISSION_MATRIX = import_module(
+    'applications.users.migrations.0006_sync_orders_permissions'
+).ROLE_PERMISSION_MATRIX
 from applications.users.serializers import LoginSerializer, UserProfileSerializer
 
 
@@ -40,8 +45,10 @@ class AuthTests(APITestCase):
         self.assertIn('refresh', data)
         self.assertEqual(data['user']['role'], RoleChoices.SALES_MANAGER)
         self.assertIn('permissions', data['user'])
-        self.assertTrue(data['user']['permissions']['admin_dashboard']['view'])
-        self.assertTrue(data['user']['permissions']['customers']['change'])
+        self.assertIsInstance(data['user']['permissions'], list)
+        self.assertIn('adminpanel_view_dashboard', data['user']['permissions'])
+        self.assertIn('customers_change_customer', data['user']['permissions'])
+        self.assertIn('customers_view_customer', data['user']['permissions'])
 
     def test_login_fail(self):
         response = self.client.post(
@@ -74,8 +81,9 @@ class AuthTests(APITestCase):
         self.assertEqual(data['email'], 'manager@kudos.ru')
         self.assertEqual(data['role'], RoleChoices.SALES_MANAGER)
         self.assertIn('permissions', data)
-        self.assertTrue(data['permissions']['admin_dashboard']['view'])
-        self.assertTrue(data['permissions']['customers']['view'])
+        self.assertIsInstance(data['permissions'], list)
+        self.assertIn('adminpanel_view_dashboard', data['permissions'])
+        self.assertIn('customers_view_customer', data['permissions'])
 
 
 class RolePermissionsTests(TestCase):
@@ -156,8 +164,10 @@ class RolePermissionsTests(TestCase):
 
         serialized = UserProfileSerializer(profile).data
         self.assertEqual(serialized['role'], RoleChoices.ADMIN)
-        self.assertTrue(serialized['permissions']['admin_settings']['view'])
-        self.assertTrue(serialized['permissions']['customers']['change'])
+        self.assertIn('adminpanel_view_settings', serialized['permissions'])
+        self.assertIn('adminpanel_change_settings', serialized['permissions'])
+        self.assertIn('customers_change_customer', serialized['permissions'])
+        self.assertIn('customers_view_customer', serialized['permissions'])
 
     def test_legacy_role_values_are_normalized(self):
         user = get_user_model().objects.create_user(
