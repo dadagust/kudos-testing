@@ -1,10 +1,10 @@
 'use client';
 
-import { PermissionAction, PermissionScope } from '@/shared/config/permissions';
+import { PermissionCode, hasPermission } from '@/shared/config/permissions';
 
 import { useAuth } from './use-auth';
 
-export const usePermission = (scope: PermissionScope, action: PermissionAction = 'view') => {
+export const usePermission = (permission: PermissionCode) => {
   const { user } = useAuth();
-  return Boolean(user?.permissions?.[scope]?.[action]);
+  return hasPermission(user?.permissions, permission);
 };

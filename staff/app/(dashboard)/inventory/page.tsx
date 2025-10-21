@@ -17,7 +17,7 @@ const inventory = [
 
 export default function InventoryPage() {
   return (
-    <RoleGuard allow={[{ scope: 'admin_inventory' }, { scope: 'inventory' }]}>
+    <RoleGuard allow={['adminpanel_view_inventory', 'inventory_view_inventoryitem']}>
       <h1>Склад</h1>
       <p style={{ color: 'var(--color-text-muted)', marginBottom: '16px' }}>
         На второй неделе сюда добавим календарь сборки и бронирования.

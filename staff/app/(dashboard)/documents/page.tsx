@@ -22,7 +22,7 @@ const documents = [
 
 export default function DocumentsPage() {
   return (
-    <RoleGuard allow={[{ scope: 'admin_documents' }, { scope: 'documents' }]}>
+    <RoleGuard allow={['adminpanel_view_documents', 'documents_view_document']}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1>Документы</h1>
         <Button iconLeft="upload">Загрузить</Button>

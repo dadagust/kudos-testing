@@ -36,7 +36,7 @@ export default function CustomerDetailsPage({ params }: CustomerDetailsPageProps
   const formattedCompanyPhone = formatPhoneDisplay(customer?.company?.phone);
 
   return (
-    <RoleGuard allow={[{ scope: 'admin_customers' }, { scope: 'customers' }]}>
+    <RoleGuard allow={['adminpanel_view_customers', 'customers_view_customer']}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Button variant="ghost" onClick={() => router.back()}>

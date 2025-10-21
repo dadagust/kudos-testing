@@ -45,7 +45,7 @@ export default function ProductDetailsPage({ params }: ProductDetailsPageProps) 
   const product = data?.data;
 
   return (
-    <RoleGuard allow={[{ scope: 'admin_products' }, { scope: 'inventory' }]}>
+    <RoleGuard allow={['adminpanel_view_products', 'inventory_view_inventoryitem']}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Button variant="ghost" onClick={() => router.back()}>

@@ -119,7 +119,7 @@ export default function CustomersPage() {
   const [isExporting, setIsExporting] = useState(false);
 
   const queryClient = useQueryClient();
-  const canManageCustomers = usePermission('customers', 'change');
+  const canManageCustomers = usePermission('customers_change_customer');
 
   const queryParams = useMemo(
     () => ({
@@ -451,7 +451,7 @@ export default function CustomersPage() {
   };
 
   return (
-    <RoleGuard allow={[{ scope: 'admin_customers' }, { scope: 'customers' }]}>
+    <RoleGuard allow={['adminpanel_view_customers', 'customers_view_customer']}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         <header
           style={{

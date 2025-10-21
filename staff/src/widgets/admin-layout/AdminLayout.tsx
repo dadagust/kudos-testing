@@ -7,6 +7,7 @@ import { FC, ReactNode } from 'react';
 import { UserProfile } from '@/entities/user';
 import { useAuth } from '@/features/auth';
 import { NAVIGATION_ITEMS } from '@/shared/config/navigation';
+import { hasPermission } from '@/shared/config/permissions';
 import { ROLE_TITLES } from '@/shared/config/roles';
 import { Button, Icon } from '@/shared/ui';
 
@@ -18,7 +19,7 @@ interface AdminLayoutProps {
 }
 
 const getAvailableNavItems = (user: UserProfile) =>
-  NAVIGATION_ITEMS.filter((item) => Boolean(user.permissions[item.permission]?.view));
+  NAVIGATION_ITEMS.filter((item) => hasPermission(user.permissions, item.permission));
 
 export const AdminLayout: FC<AdminLayoutProps> = ({ user, children }) => {
   const pathname = usePathname();

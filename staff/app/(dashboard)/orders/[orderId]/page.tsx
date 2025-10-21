@@ -61,7 +61,7 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
   const order = data?.data;
 
   return (
-    <RoleGuard allow={[{ scope: 'admin_orders' }, { scope: 'orders' }]}>
+    <RoleGuard allow={['adminpanel_view_orders', 'orders_view_order']}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Button variant="ghost" onClick={() => router.back()}>
