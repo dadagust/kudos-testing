@@ -1,3 +1,26 @@
+export type ProductStatus = 'draft' | 'active' | 'archived';
+
+export const PRODUCT_STATUS_LABELS: Record<ProductStatus, string> = {
+  draft: 'Черновик',
+  active: 'Активен',
+  archived: 'Архив',
+};
+
+export type AvailabilityStatus = 'in_stock' | 'reserved' | 'out_of_stock';
+
+export const AVAILABILITY_STATUS_LABELS: Record<AvailabilityStatus, string> = {
+  in_stock: 'В наличии',
+  reserved: 'В резерве',
+  out_of_stock: 'Нет в наличии',
+};
+
+export type RentalUnit = 'day' | 'hour';
+
+export const RENTAL_UNIT_LABELS: Record<RentalUnit, string> = {
+  day: 'За день',
+  hour: 'За час',
+};
+
 export type ProductColor =
   | 'white'
   | 'gray'
@@ -44,6 +67,25 @@ export interface ProductImage {
   id: string;
   url: string;
   position: number;
+}
+
+export interface ProductImage {
+  id: string;
+  url: string;
+  alt_text: string;
+  is_primary: boolean;
+  sort_order?: number | null;
+}
+
+export interface ProductOccupancy {
+  cleaning_days?: number | null;
+  insurance_reserve_percent?: number | null;
+}
+
+export interface ProductCategorySummary {
+  id: string;
+  name: string;
+  slug?: string;
 }
 
 export interface ProductOccupancy {
@@ -96,10 +138,29 @@ export interface ProductListItem {
   dimensions?: ProductDimensions;
   seo?: ProductSeo;
   images?: ProductImage[];
+  status?: ProductStatus;
+  availability_status?: AvailabilityStatus;
+  rental_unit?: RentalUnit;
+  base_price?: number;
+  security_deposit?: number | null;
+  short_description?: string;
+  updated_at?: string;
 }
 
 export interface ProductDetail extends ProductListItem {
-  features: string[];
+  category: ProductCategorySummary;
+  sku: string;
+  slug: string;
+  status: ProductStatus;
+  availability_status: AvailabilityStatus;
+  rental_unit: RentalUnit;
+  base_price: number;
+  security_deposit: number | null;
+  short_description: string;
+  full_description: string;
+  media: ProductMedia[];
+  attributes: ProductAttribute[];
+  features?: string[];
   loss_compensation_rub?: number | null;
   occupancy?: ProductOccupancy;
   delivery: ProductDelivery;
