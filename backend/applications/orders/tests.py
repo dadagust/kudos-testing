@@ -8,7 +8,8 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from applications.customers.models import Customer
-from applications.orders.models import DeliveryType, OrderProduct, OrderStatus
+from applications.orders.models import DeliveryType, OrderStatus
+from applications.products.models import Category, Product
 
 
 class OrderApiTests(APITestCase):
@@ -20,6 +21,16 @@ class OrderApiTests(APITestCase):
         )
         self.client.force_authenticate(self.user)
         self.customer = Customer.objects.create(display_name='Тестовый клиент')
+        self.category = Category.objects.create(name='Текстиль', slug='textile')
+        self.product = Product.objects.create(
+            name='Скатерть Амори',
+            category=self.category,
+            price_rub='2700.00',
+            dimensions_shape='line__length',
+            line_length_cm=100,
+            delivery_weight_kg='1.00',
+            delivery_volume_cm3=1000,
+        )
 
     def test_create_order(self):
         url = reverse('orders:order-list')
@@ -31,8 +42,7 @@ class OrderApiTests(APITestCase):
             'delivery_address': 'Москва, ул. Тестовая, д. 1',
             'comment': 'Проверочный заказ',
             'items': [
-                {'product': OrderProduct.PRODUCT_1, 'quantity': 2},
-                {'product': OrderProduct.PRODUCT_2, 'quantity': 1},
+                {'product_id': str(self.product.pk), 'quantity': 2},
             ],
         }
 
@@ -40,7 +50,7 @@ class OrderApiTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         data = response.json()['data']
         self.assertEqual(data['status'], OrderStatus.NEW)
-        self.assertEqual(len(data['items']), 2)
+        self.assertEqual(len(data['items']), 1)
         self.assertEqual(data['delivery_type'], DeliveryType.DELIVERY)
         self.assertEqual(data['customer']['id'], str(self.customer.pk))
         self.assertEqual(data['installation_date'], '2024-06-01')
@@ -53,7 +63,7 @@ class OrderApiTests(APITestCase):
             'installation_date': '2024-06-01',
             'dismantle_date': '2024-06-05',
             'delivery_type': DeliveryType.PICKUP,
-            'items': [{'product': OrderProduct.PRODUCT_1, 'quantity': 1}],
+            'items': [{'product_id': str(self.product.pk), 'quantity': 1}],
             'status': OrderStatus.ARCHIVED,
         }
         self.client.post(url, payload, format='json')
@@ -72,7 +82,7 @@ class OrderApiTests(APITestCase):
             'delivery_type': DeliveryType.PICKUP,
             'delivery_address': '',
             'comment': '',
-            'items': [{'product': OrderProduct.PRODUCT_2, 'quantity': 3}],
+            'items': [{'product_id': str(self.product.pk), 'quantity': 3}],
         }
 
         response = self.client.post(url, payload, format='json')

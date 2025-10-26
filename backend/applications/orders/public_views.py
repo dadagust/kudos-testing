@@ -3,32 +3,26 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from decimal import Decimal
 
-from django.http import Http404
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from .models import ORDER_PRODUCT_PRICES, OrderProduct
+from applications.products.models import Product
 
 
-def _serialize_product(product_id: str) -> dict[str, object]:
-    try:
-        label = OrderProduct(product_id).label
-    except ValueError as exc:
-        raise Http404('Product not found') from exc
-    price: Decimal = ORDER_PRODUCT_PRICES.get(product_id, Decimal('0.00'))
+def _serialize_product(product: Product) -> dict[str, object]:
     return {
-        'id': product_id,
-        'name': label,
-        'base_price': float(price),
+        'id': str(product.id),
+        'name': product.name,
+        'base_price': float(product.price_rub),
+        'color': product.color,
     }
 
 
 def _iter_products() -> Iterable[dict[str, object]]:
-    for product_id, _ in OrderProduct.choices:
-        yield _serialize_product(product_id)
+    for product in Product.objects.order_by('-created')[:100]:
+        yield _serialize_product(product)
 
 
 @api_view(['GET'])
@@ -44,4 +38,7 @@ def product_list(request):
 def product_detail(request, product_id: str):
     """Return the details for a single product."""
 
-    return Response({'data': _serialize_product(product_id)})
+    product = Product.objects.filter(pk=product_id).first()
+    if not product:
+        return Response({'detail': 'Product not found'}, status=404)
+    return Response({'data': _serialize_product(product)})

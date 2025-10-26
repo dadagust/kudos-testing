@@ -41,7 +41,11 @@ interface OrderDetailsPageProps {
 }
 
 const itemColumns: TableColumn<OrderDetail['items'][number]>[] = [
-  { key: 'product_label', header: 'Товар' },
+  {
+    key: 'product',
+    header: 'Товар',
+    render: (item) => item.product?.name ?? item.product_name ?? '—',
+  },
   { key: 'quantity', header: 'Количество' },
   {
     key: 'unit_price',
