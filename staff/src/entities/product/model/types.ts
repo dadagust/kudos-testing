@@ -100,6 +100,24 @@ export interface ProductDelivery {
   self_pickup_allowed: boolean;
 }
 
+export interface ProductCategorySummary {
+  id: string;
+  name: string;
+  slug?: string;
+}
+
+export interface ProductOccupancy {
+  cleaning_days?: number | null;
+  insurance_reserve_percent?: number | null;
+}
+
+export interface ProductDelivery {
+  volume_cm3?: number | null;
+  weight_kg?: string | number | null;
+  transport_restriction?: TransportRestriction | null;
+  self_pickup_allowed: boolean;
+}
+
 export interface ProductSetup {
   install_minutes?: number | null;
   uninstall_minutes?: number | null;
@@ -177,8 +195,6 @@ export interface ProductListResponse {
   results: ProductListItem[];
   next_cursor: string | null;
 }
-
-export interface ProductDetailResponse extends ProductDetail {}
 
 export interface ProductListQuery {
   limit?: number;

@@ -41,8 +41,7 @@ interface ProductDetailsPageProps {
 
 export default function ProductDetailsPage({ params }: ProductDetailsPageProps) {
   const router = useRouter();
-  const { data, isLoading, isError, error } = useProductQuery(params.productId);
-  const product = data?.data;
+  const { data: product, isLoading, isError, error } = useProductQuery(params.productId);
 
   return (
     <RoleGuard allow={['adminpanel_view_products', 'inventory_view_inventoryitem']}>
@@ -51,7 +50,7 @@ export default function ProductDetailsPage({ params }: ProductDetailsPageProps) 
           <Button variant="ghost" onClick={() => router.back()}>
             ← Назад к списку
           </Button>
-          {data?.trace_id ? <Tag>Trace ID: {data.trace_id}</Tag> : null}
+          {/* The API does not currently expose correlation trace identifiers for successful responses. */}
         </div>
 
         {isLoading ? <Spinner label="Загружаем карточку товара" /> : null}
