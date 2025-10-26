@@ -2,6 +2,8 @@ import { apiV1Client } from '@/shared/api/httpClient';
 
 import {
   ProductCategoriesResponseItem,
+  ProductCreatePayload,
+  ProductCreateResponse,
   ProductDetail,
   ProductEnumsResponse,
   ProductListQuery,
@@ -31,6 +33,10 @@ export const productsApi = {
     const { data } = await apiV1Client.get<ProductListResponse>('/products', {
       params: sanitizeParams(params),
     });
+    return data;
+  },
+  create: async (payload: ProductCreatePayload): Promise<ProductCreateResponse> => {
+    const { data } = await apiV1Client.post<ProductCreateResponse>('/products', payload);
     return data;
   },
   details: async (productId: string, include?: string): Promise<ProductDetail> => {
