@@ -245,3 +245,9 @@ export interface ProductCreateResponse {
   created_at: string;
   updated_at: string;
 }
+
+export type ProductUpdatePayload = Partial<ProductCreatePayload>;
+
+export interface ProductImagesReorderPayload {
+  order: { id: string; position: number }[];
+}
