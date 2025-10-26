@@ -216,7 +216,10 @@ const createFormFromProduct = (product: ProductDetail): CreateProductFormState =
     ...base,
     name: product.name ?? '',
     categoryId: product.category_id ?? product.category?.id ?? '',
-    priceRub: product.price_rub !== undefined && product.price_rub !== null ? String(product.price_rub) : '',
+    priceRub:
+      product.price_rub !== undefined && product.price_rub !== null
+        ? String(product.price_rub)
+        : '',
     lossCompensationRub:
       product.loss_compensation_rub !== undefined && product.loss_compensation_rub !== null
         ? String(product.loss_compensation_rub)
@@ -228,47 +231,56 @@ const createFormFromProduct = (product: ProductDetail): CreateProductFormState =
       shape,
       circle: {
         diameter_cm:
-          product.dimensions?.circle?.diameter_cm !== undefined && product.dimensions?.circle?.diameter_cm !== null
+          product.dimensions?.circle?.diameter_cm !== undefined &&
+          product.dimensions?.circle?.diameter_cm !== null
             ? String(product.dimensions.circle.diameter_cm)
             : '',
       },
       line: {
         length_cm:
-          product.dimensions?.line?.length_cm !== undefined && product.dimensions?.line?.length_cm !== null
+          product.dimensions?.line?.length_cm !== undefined &&
+          product.dimensions?.line?.length_cm !== null
             ? String(product.dimensions.line.length_cm)
             : '',
       },
       rectangle: {
         length_cm:
-          product.dimensions?.rectangle?.length_cm !== undefined && product.dimensions?.rectangle?.length_cm !== null
+          product.dimensions?.rectangle?.length_cm !== undefined &&
+          product.dimensions?.rectangle?.length_cm !== null
             ? String(product.dimensions.rectangle.length_cm)
             : '',
         width_cm:
-          product.dimensions?.rectangle?.width_cm !== undefined && product.dimensions?.rectangle?.width_cm !== null
+          product.dimensions?.rectangle?.width_cm !== undefined &&
+          product.dimensions?.rectangle?.width_cm !== null
             ? String(product.dimensions.rectangle.width_cm)
             : '',
       },
       cylinder: {
         diameter_cm:
-          product.dimensions?.cylinder?.diameter_cm !== undefined && product.dimensions?.cylinder?.diameter_cm !== null
+          product.dimensions?.cylinder?.diameter_cm !== undefined &&
+          product.dimensions?.cylinder?.diameter_cm !== null
             ? String(product.dimensions.cylinder.diameter_cm)
             : '',
         height_cm:
-          product.dimensions?.cylinder?.height_cm !== undefined && product.dimensions?.cylinder?.height_cm !== null
+          product.dimensions?.cylinder?.height_cm !== undefined &&
+          product.dimensions?.cylinder?.height_cm !== null
             ? String(product.dimensions.cylinder.height_cm)
             : '',
       },
       box: {
         height_cm:
-          product.dimensions?.box?.height_cm !== undefined && product.dimensions?.box?.height_cm !== null
+          product.dimensions?.box?.height_cm !== undefined &&
+          product.dimensions?.box?.height_cm !== null
             ? String(product.dimensions.box.height_cm)
             : '',
         width_cm:
-          product.dimensions?.box?.width_cm !== undefined && product.dimensions?.box?.width_cm !== null
+          product.dimensions?.box?.width_cm !== undefined &&
+          product.dimensions?.box?.width_cm !== null
             ? String(product.dimensions.box.width_cm)
             : '',
         depth_cm:
-          product.dimensions?.box?.depth_cm !== undefined && product.dimensions?.box?.depth_cm !== null
+          product.dimensions?.box?.depth_cm !== undefined &&
+          product.dimensions?.box?.depth_cm !== null
             ? String(product.dimensions.box.depth_cm)
             : '',
       },
@@ -290,11 +302,16 @@ const createFormFromProduct = (product: ProductDetail): CreateProductFormState =
           ? String(product.delivery.volume_cm3)
           : '',
       weight_kg:
-        product.delivery?.weight_kg !== undefined && product.delivery?.weight_kg !== null && product.delivery?.weight_kg !== ''
+        product.delivery?.weight_kg !== undefined &&
+        product.delivery?.weight_kg !== null &&
+        product.delivery?.weight_kg !== ''
           ? String(product.delivery.weight_kg)
           : '',
-      transport_restriction: (product.delivery?.transport_restriction ?? '') as TransportRestriction | '',
-      self_pickup_allowed: product.delivery?.self_pickup_allowed ?? base.delivery.self_pickup_allowed,
+      transport_restriction: (product.delivery?.transport_restriction ?? '') as
+        | TransportRestriction
+        | '',
+      self_pickup_allowed:
+        product.delivery?.self_pickup_allowed ?? base.delivery.self_pickup_allowed,
     },
     setup: {
       install_minutes:
@@ -305,7 +322,9 @@ const createFormFromProduct = (product: ProductDetail): CreateProductFormState =
         product.setup?.uninstall_minutes !== undefined && product.setup?.uninstall_minutes !== null
           ? String(product.setup.uninstall_minutes)
           : '',
-      installer_qualification: (product.setup?.installer_qualification ?? '') as InstallerQualification | '',
+      installer_qualification: (product.setup?.installer_qualification ?? '') as
+        | InstallerQualification
+        | '',
       min_installers:
         product.setup?.min_installers !== undefined && product.setup?.min_installers !== null
           ? String(product.setup.min_installers)
@@ -727,7 +746,8 @@ export default function ProductsPage() {
   const isDeletingProduct = deleteProductMutation.status === 'pending';
   const isSubmittingProduct = formMode === 'create' ? isCreatingProduct : isUpdatingProduct;
   const productFormErrorMessage = (() => {
-    const errorInstance = formMode === 'create' ? createProductMutation.error : updateProductMutation.error;
+    const errorInstance =
+      formMode === 'create' ? createProductMutation.error : updateProductMutation.error;
     if (errorInstance instanceof Error) {
       return errorInstance.message;
     }
@@ -1208,7 +1228,9 @@ export default function ProductsPage() {
       previewUrl: URL.createObjectURL(file),
       isPrimary: false,
     }));
-    setProductImages((prev) => normalizePrimary([...prev.map((image) => ({ ...image })), ...nextImages]));
+    setProductImages((prev) =>
+      normalizePrimary([...prev.map((image) => ({ ...image })), ...nextImages])
+    );
     event.target.value = '';
   };
 
@@ -1281,7 +1303,9 @@ export default function ProductsPage() {
         if (removedImages.length) {
           await Promise.all(
             removedImages.map((image) =>
-              image.remoteId ? productsApi.deleteImage(editingProductId, image.remoteId) : Promise.resolve()
+              image.remoteId
+                ? productsApi.deleteImage(editingProductId, image.remoteId)
+                : Promise.resolve()
             )
           );
         }
@@ -1512,9 +1536,7 @@ export default function ProductsPage() {
             <Alert
               tone="danger"
               title={
-                formMode === 'create'
-                  ? 'Не удалось создать товар'
-                  : 'Не удалось обновить товар'
+                formMode === 'create' ? 'Не удалось создать товар' : 'Не удалось обновить товар'
               }
             >
               {productFormErrorMessage}
@@ -1541,850 +1563,854 @@ export default function ProductsPage() {
                 paddingRight: '8px',
               }}
             >
-            <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <h3 style={{ margin: 0 }}>Основные данные</h3>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                  gap: '16px',
-                }}
-              >
-                <Input
-                  label="Название товара"
-                  placeholder="Например, Скатерть Амори бархатная"
-                  value={createForm.name}
-                  onChange={(event) =>
-                    setCreateForm((prev) => ({ ...prev, name: event.target.value }))
-                  }
-                  error={createNameError}
-                />
-                <Select
-                  label="Категория"
-                  value={createForm.categoryId}
-                  onChange={(event) =>
-                    setCreateForm((prev) => ({ ...prev, categoryId: event.target.value }))
-                  }
-                  error={createCategoryError}
-                >
-                  <option value="">Выберите категорию</option>
-                  {categoryOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </Select>
-                <Input
-                  label="Стоимость, ₽"
-                  type="number"
-                  inputMode="numeric"
-                  min={0}
-                  step={1}
-                  value={createForm.priceRub}
-                  onChange={(event) =>
-                    setCreateForm((prev) => ({ ...prev, priceRub: event.target.value }))
-                  }
-                  helperText="Минимальное значение — 0 ₽."
-                  error={createPriceError}
-                />
-                <Input
-                  label="Компенсация за потерю, ₽"
-                  type="number"
-                  inputMode="numeric"
-                  min={0}
-                  step={1}
-                  value={createForm.lossCompensationRub}
-                  onChange={(event) =>
-                    setCreateForm((prev) => ({
-                      ...prev,
-                      lossCompensationRub: event.target.value,
-                    }))
-                  }
-                  helperText="Необязательное поле."
-                  error={createLossCompensationError}
-                />
-                <Select
-                  label="Цвет"
-                  value={createForm.color ?? ''}
-                  onChange={(event) =>
-                    setCreateForm((prev) => ({
-                      ...prev,
-                      color: (event.target.value as ProductColor | '') || '',
-                    }))
-                  }
-                >
-                  <option value="">Без цвета</option>
-                  {colorOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </Select>
-              </div>
-              <FormField label="Особенности" description="Добавьте короткие преимущества товара.">
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {createForm.features.map((feature, index) => (
-                    <div
-                      key={`feature-${index}`}
-                      style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}
-                    >
-                      <Input
-                        value={feature}
-                        placeholder="Описание особенности"
-                        onChange={(event) => handleFeatureChange(index, event.target.value)}
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={() => handleRemoveFeature(index)}
-                      >
-                        Удалить
-                      </Button>
-                    </div>
-                  ))}
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-                    <Input
-                      value={createForm.featureDraft}
-                      onChange={handleFeatureDraftChange}
-                      placeholder="Новая особенность"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={handleAddFeature}
-                      disabled={!canAddFeature}
-                    >
-                      Добавить
-                    </Button>
-                  </div>
-                </div>
-              </FormField>
-            </section>
-
-            <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <h3 style={{ margin: 0 }}>Фотографии</h3>
-              <FormField
-                label="Загрузить изображения"
-                description="Добавьте одно или несколько фото. Первое фото станет обложкой."
-              >
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleImagesChange}
-                  disabled={isSubmittingProduct}
-                />
-              </FormField>
-              {productImages.some((image) => !image.removed) ? (
+              <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <h3 style={{ margin: 0 }}>Основные данные</h3>
                 <div
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
                     gap: '16px',
                   }}
                 >
-                  {productImages
-                    .filter((image) => !image.removed)
-                    .map((image) => (
+                  <Input
+                    label="Название товара"
+                    placeholder="Например, Скатерть Амори бархатная"
+                    value={createForm.name}
+                    onChange={(event) =>
+                      setCreateForm((prev) => ({ ...prev, name: event.target.value }))
+                    }
+                    error={createNameError}
+                  />
+                  <Select
+                    label="Категория"
+                    value={createForm.categoryId}
+                    onChange={(event) =>
+                      setCreateForm((prev) => ({ ...prev, categoryId: event.target.value }))
+                    }
+                    error={createCategoryError}
+                  >
+                    <option value="">Выберите категорию</option>
+                    {categoryOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </Select>
+                  <Input
+                    label="Стоимость, ₽"
+                    type="number"
+                    inputMode="numeric"
+                    min={0}
+                    step={1}
+                    value={createForm.priceRub}
+                    onChange={(event) =>
+                      setCreateForm((prev) => ({ ...prev, priceRub: event.target.value }))
+                    }
+                    helperText="Минимальное значение — 0 ₽."
+                    error={createPriceError}
+                  />
+                  <Input
+                    label="Компенсация за потерю, ₽"
+                    type="number"
+                    inputMode="numeric"
+                    min={0}
+                    step={1}
+                    value={createForm.lossCompensationRub}
+                    onChange={(event) =>
+                      setCreateForm((prev) => ({
+                        ...prev,
+                        lossCompensationRub: event.target.value,
+                      }))
+                    }
+                    helperText="Необязательное поле."
+                    error={createLossCompensationError}
+                  />
+                  <Select
+                    label="Цвет"
+                    value={createForm.color ?? ''}
+                    onChange={(event) =>
+                      setCreateForm((prev) => ({
+                        ...prev,
+                        color: (event.target.value as ProductColor | '') || '',
+                      }))
+                    }
+                  >
+                    <option value="">Без цвета</option>
+                    {colorOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+                <FormField label="Особенности" description="Добавьте короткие преимущества товара.">
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {createForm.features.map((feature, index) => (
                       <div
-                        key={image.id}
-                        style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
+                        key={`feature-${index}`}
+                        style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}
                       >
-                        <div
-                          style={{
-                            position: 'relative',
-                            borderRadius: '12px',
-                            overflow: 'hidden',
-                            border: image.isPrimary
-                              ? '2px solid var(--color-primary)'
-                              : '1px solid var(--color-border)',
-                            background: 'var(--color-surface-muted)',
-                            aspectRatio: '1 / 1',
-                          }}
+                        <Input
+                          value={feature}
+                          placeholder="Описание особенности"
+                          onChange={(event) => handleFeatureChange(index, event.target.value)}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          onClick={() => handleRemoveFeature(index)}
                         >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={image.previewUrl}
-                            alt={createForm.name ? `Фото ${createForm.name}` : 'Фото товара'}
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                          />
-                          {image.isPrimary ? (
-                            <span
-                              style={{
-                                position: 'absolute',
-                                bottom: '8px',
-                                left: '8px',
-                                padding: '4px 8px',
-                                borderRadius: '999px',
-                                background: 'rgba(0, 0, 0, 0.6)',
-                                color: '#fff',
-                                fontSize: '0.75rem',
-                              }}
-                            >
-                              Обложка
-                            </span>
-                          ) : null}
-                        </div>
-                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            onClick={() => handleSetPrimaryImage(image.id)}
-                            disabled={image.isPrimary || isSubmittingProduct}
-                          >
-                            Сделать обложкой
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            onClick={() => handleRemoveImage(image.id)}
-                            disabled={isSubmittingProduct}
-                          >
-                            Удалить
-                          </Button>
-                        </div>
+                          Удалить
+                        </Button>
                       </div>
                     ))}
-                </div>
-              ) : (
-                <span style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
-                  Фотографии пока не добавлены.
-                </span>
-              )}
-            </section>
-
-            <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <h3 style={{ margin: 0 }}>Габариты</h3>
-              <Select
-                label="Форма"
-                value={createForm.dimensions.shape}
-                onChange={handleDimensionShapeChange}
-                error={createDimensionsShapeError}
-              >
-                <option value="">Выберите форму</option>
-                {shapeOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Select>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-                  gap: '16px',
-                }}
-              >
-                {createForm.dimensions.shape === 'circle__diameter' ? (
-                  <Input
-                    label="Диаметр, см"
-                    type="number"
-                    min={0}
-                    step={1}
-                    value={createForm.dimensions.circle.diameter_cm}
-                    onChange={(event) =>
-                      setCreateForm((prev) => ({
-                        ...prev,
-                        dimensions: {
-                          ...prev.dimensions,
-                          circle: { diameter_cm: event.target.value },
-                        },
-                      }))
-                    }
-                    error={createCircleDiameterError}
-                  />
-                ) : null}
-                {createForm.dimensions.shape === 'line__length' ? (
-                  <Input
-                    label="Длина, см"
-                    type="number"
-                    min={0}
-                    step={1}
-                    value={createForm.dimensions.line.length_cm}
-                    onChange={(event) =>
-                      setCreateForm((prev) => ({
-                        ...prev,
-                        dimensions: {
-                          ...prev.dimensions,
-                          line: { length_cm: event.target.value },
-                        },
-                      }))
-                    }
-                    error={createLineLengthError}
-                  />
-                ) : null}
-                {createForm.dimensions.shape === 'rectangle__length_width' ? (
-                  <Input
-                    label="Длина, см"
-                    type="number"
-                    min={0}
-                    step={1}
-                    value={createForm.dimensions.rectangle.length_cm}
-                    onChange={(event) =>
-                      setCreateForm((prev) => ({
-                        ...prev,
-                        dimensions: {
-                          ...prev.dimensions,
-                          rectangle: {
-                            ...prev.dimensions.rectangle,
-                            length_cm: event.target.value,
-                          },
-                        },
-                      }))
-                    }
-                    error={createRectangleLengthError}
-                  />
-                ) : null}
-                {createForm.dimensions.shape === 'rectangle__length_width' ? (
-                  <Input
-                    label="Ширина, см"
-                    type="number"
-                    min={0}
-                    step={1}
-                    value={createForm.dimensions.rectangle.width_cm}
-                    onChange={(event) =>
-                      setCreateForm((prev) => ({
-                        ...prev,
-                        dimensions: {
-                          ...prev.dimensions,
-                          rectangle: {
-                            ...prev.dimensions.rectangle,
-                            width_cm: event.target.value,
-                          },
-                        },
-                      }))
-                    }
-                    error={createRectangleWidthError}
-                  />
-                ) : null}
-                {createForm.dimensions.shape === 'cylinder__diameter_height' ? (
-                  <Input
-                    label="Диаметр, см"
-                    type="number"
-                    min={0}
-                    step={1}
-                    value={createForm.dimensions.cylinder.diameter_cm}
-                    onChange={(event) =>
-                      setCreateForm((prev) => ({
-                        ...prev,
-                        dimensions: {
-                          ...prev.dimensions,
-                          cylinder: {
-                            ...prev.dimensions.cylinder,
-                            diameter_cm: event.target.value,
-                          },
-                        },
-                      }))
-                    }
-                    error={createCylinderDiameterError}
-                  />
-                ) : null}
-                {createForm.dimensions.shape === 'cylinder__diameter_height' ? (
-                  <Input
-                    label="Высота, см"
-                    type="number"
-                    min={0}
-                    step={1}
-                    value={createForm.dimensions.cylinder.height_cm}
-                    onChange={(event) =>
-                      setCreateForm((prev) => ({
-                        ...prev,
-                        dimensions: {
-                          ...prev.dimensions,
-                          cylinder: {
-                            ...prev.dimensions.cylinder,
-                            height_cm: event.target.value,
-                          },
-                        },
-                      }))
-                    }
-                    error={createCylinderHeightError}
-                  />
-                ) : null}
-                {createForm.dimensions.shape === 'box__height_width_depth' ? (
-                  <Input
-                    label="Высота, см"
-                    type="number"
-                    min={0}
-                    step={1}
-                    value={createForm.dimensions.box.height_cm}
-                    onChange={(event) =>
-                      setCreateForm((prev) => ({
-                        ...prev,
-                        dimensions: {
-                          ...prev.dimensions,
-                          box: {
-                            ...prev.dimensions.box,
-                            height_cm: event.target.value,
-                          },
-                        },
-                      }))
-                    }
-                    error={createBoxHeightError}
-                  />
-                ) : null}
-                {createForm.dimensions.shape === 'box__height_width_depth' ? (
-                  <Input
-                    label="Ширина, см"
-                    type="number"
-                    min={0}
-                    step={1}
-                    value={createForm.dimensions.box.width_cm}
-                    onChange={(event) =>
-                      setCreateForm((prev) => ({
-                        ...prev,
-                        dimensions: {
-                          ...prev.dimensions,
-                          box: {
-                            ...prev.dimensions.box,
-                            width_cm: event.target.value,
-                          },
-                        },
-                      }))
-                    }
-                    error={createBoxWidthError}
-                  />
-                ) : null}
-                {createForm.dimensions.shape === 'box__height_width_depth' ? (
-                  <Input
-                    label="Глубина, см"
-                    type="number"
-                    min={0}
-                    step={1}
-                    value={createForm.dimensions.box.depth_cm}
-                    onChange={(event) =>
-                      setCreateForm((prev) => ({
-                        ...prev,
-                        dimensions: {
-                          ...prev.dimensions,
-                          box: {
-                            ...prev.dimensions.box,
-                            depth_cm: event.target.value,
-                          },
-                        },
-                      }))
-                    }
-                    error={createBoxDepthError}
-                  />
-                ) : null}
-              </div>
-            </section>
-
-            <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <h3 style={{ margin: 0 }}>Занятость</h3>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                  gap: '16px',
-                }}
-              >
-                <Input
-                  label="Чистка, дней"
-                  type="number"
-                  min={0}
-                  step={1}
-                  value={createForm.occupancy.cleaning_days}
-                  onChange={(event) =>
-                    setCreateForm((prev) => ({
-                      ...prev,
-                      occupancy: { ...prev.occupancy, cleaning_days: event.target.value },
-                    }))
-                  }
-                  helperText="Необязательное поле."
-                  error={createOccupancyCleaningError}
-                />
-                <Input
-                  label="Страховой резерв, %"
-                  type="number"
-                  min={0}
-                  max={100}
-                  step={1}
-                  value={createForm.occupancy.insurance_reserve_percent}
-                  onChange={(event) =>
-                    setCreateForm((prev) => ({
-                      ...prev,
-                      occupancy: {
-                        ...prev.occupancy,
-                        insurance_reserve_percent: event.target.value,
-                      },
-                    }))
-                  }
-                  helperText="0–100%"
-                  error={createOccupancyInsuranceError}
-                />
-              </div>
-            </section>
-
-            <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <h3 style={{ margin: 0 }}>Доставка</h3>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                  gap: '16px',
-                }}
-              >
-                <Input
-                  label="Объём, см³"
-                  type="number"
-                  min={0}
-                  step={1}
-                  value={createForm.delivery.volume_cm3}
-                  onChange={(event) =>
-                    setCreateForm((prev) => ({
-                      ...prev,
-                      delivery: { ...prev.delivery, volume_cm3: event.target.value },
-                    }))
-                  }
-                  error={createDeliveryVolumeError}
-                />
-                <Input
-                  label="Масса, кг"
-                  type="number"
-                  min={0}
-                  step="0.1"
-                  value={createForm.delivery.weight_kg}
-                  onChange={(event) =>
-                    setCreateForm((prev) => ({
-                      ...prev,
-                      delivery: { ...prev.delivery, weight_kg: event.target.value },
-                    }))
-                  }
-                  error={createDeliveryWeightError}
-                />
-                <Select
-                  label="Ограничение по транспорту"
-                  value={createForm.delivery.transport_restriction}
-                  onChange={(event) =>
-                    setCreateForm((prev) => ({
-                      ...prev,
-                      delivery: {
-                        ...prev.delivery,
-                        transport_restriction: event.target.value as TransportRestriction | '',
-                      },
-                    }))
-                  }
-                  error={createDeliveryTransportError}
-                >
-                  <option value="">Выберите ограничение</option>
-                  {transportRestrictionOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </Select>
-              </div>
-              <label
-                style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.95rem' }}
-              >
-                <input
-                  type="checkbox"
-                  checked={createForm.delivery.self_pickup_allowed}
-                  onChange={(event) =>
-                    setCreateForm((prev) => ({
-                      ...prev,
-                      delivery: {
-                        ...prev.delivery,
-                        self_pickup_allowed: event.target.checked,
-                      },
-                    }))
-                  }
-                />
-                Самовывоз разрешён
-              </label>
-            </section>
-
-            <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <h3 style={{ margin: 0 }}>Сетап</h3>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                  gap: '16px',
-                }}
-              >
-                <Input
-                  label="Монтаж, минут"
-                  type="number"
-                  min={0}
-                  step={1}
-                  value={createForm.setup.install_minutes}
-                  onChange={(event) =>
-                    setCreateForm((prev) => ({
-                      ...prev,
-                      setup: { ...prev.setup, install_minutes: event.target.value },
-                    }))
-                  }
-                  error={createInstallMinutesError}
-                />
-                <Input
-                  label="Демонтаж, минут"
-                  type="number"
-                  min={0}
-                  step={1}
-                  value={createForm.setup.uninstall_minutes}
-                  onChange={(event) =>
-                    setCreateForm((prev) => ({
-                      ...prev,
-                      setup: { ...prev.setup, uninstall_minutes: event.target.value },
-                    }))
-                  }
-                  error={createUninstallMinutesError}
-                />
-                <Select
-                  label="Квалификация сетапёров"
-                  value={createForm.setup.installer_qualification}
-                  onChange={(event) =>
-                    setCreateForm((prev) => ({
-                      ...prev,
-                      setup: {
-                        ...prev.setup,
-                        installer_qualification: event.target.value as InstallerQualification | '',
-                      },
-                    }))
-                  }
-                  error={createInstallerQualificationError}
-                >
-                  <option value="">Выберите квалификацию</option>
-                  {installerQualificationOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </Select>
-                <Select
-                  label="Требуемое число сетапёров"
-                  value={createForm.setup.min_installers}
-                  onChange={(event) =>
-                    setCreateForm((prev) => ({
-                      ...prev,
-                      setup: { ...prev.setup, min_installers: event.target.value },
-                    }))
-                  }
-                  error={createMinInstallersError}
-                >
-                  <option value="">Выберите значение</option>
-                  {minInstallersOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </Select>
-              </div>
-              <label
-                style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.95rem' }}
-              >
-                <input
-                  type="checkbox"
-                  checked={createForm.setup.self_setup_allowed}
-                  onChange={(event) =>
-                    setCreateForm((prev) => ({
-                      ...prev,
-                      setup: { ...prev.setup, self_setup_allowed: event.target.checked },
-                    }))
-                  }
-                />
-                Самостоятельный сетап разрешён
-              </label>
-            </section>
-
-            <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <h3 style={{ margin: 0 }}>Аренда</h3>
-              <Select
-                label="Базовый период аренды"
-                value={createForm.rental.base_period}
-                onChange={(event) =>
-                  setCreateForm((prev) => ({
-                    ...prev,
-                    rental: { base_period: event.target.value as RentalBasePeriod | '' },
-                  }))
-                }
-                error={createRentalBasePeriodError}
-              >
-                <option value="">Выберите период</option>
-                {rentalBasePeriodOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Select>
-            </section>
-
-            <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <h3 style={{ margin: 0 }}>Видимость</h3>
-              <Select
-                label="Режим бронирования"
-                value={createForm.visibility.reservation_mode}
-                onChange={(event) =>
-                  setCreateForm((prev) => ({
-                    ...prev,
-                    visibility: {
-                      ...prev.visibility,
-                      reservation_mode: event.target.value as ReservationMode | '',
-                    },
-                  }))
-                }
-                error={createReservationModeError}
-              >
-                <option value="">Выберите режим</option>
-                {reservationModeOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Select>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'center' }}>
-                <label style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                  <input
-                    type="checkbox"
-                    checked={createForm.visibility.show_on_pifakit}
-                    onChange={(event) =>
-                      setCreateForm((prev) => ({
-                        ...prev,
-                        visibility: { ...prev.visibility, show_on_pifakit: event.target.checked },
-                      }))
-                    }
-                  />
-                  Показывать на pifakit.ru
-                </label>
-                <label style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                  <input
-                    type="checkbox"
-                    checked={createForm.visibility.show_on_site}
-                    onChange={(event) =>
-                      setCreateForm((prev) => ({
-                        ...prev,
-                        visibility: { ...prev.visibility, show_on_site: event.target.checked },
-                      }))
-                    }
-                  />
-                  Показывать на сайте
-                </label>
-                <label style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                  <input
-                    type="checkbox"
-                    checked={createForm.visibility.show_in_new}
-                    onChange={(event) =>
-                      setCreateForm((prev) => ({
-                        ...prev,
-                        visibility: { ...prev.visibility, show_in_new: event.target.checked },
-                      }))
-                    }
-                  />
-                  Показывать в «Новинках»
-                </label>
-                <label style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                  <input
-                    type="checkbox"
-                    checked={createForm.visibility.category_cover_on_home}
-                    onChange={(event) =>
-                      setCreateForm((prev) => ({
-                        ...prev,
-                        visibility: {
-                          ...prev.visibility,
-                          category_cover_on_home: event.target.checked,
-                        },
-                      }))
-                    }
-                  />
-                  Обложка категории на главной
-                </label>
-              </div>
-            </section>
-
-            <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <h3 style={{ margin: 0 }}>SEO</h3>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                  gap: '16px',
-                }}
-              >
-                <Input
-                  label="Slug"
-                  placeholder="skaterth-amori-barkhatnaya"
-                  value={createForm.seo.slug}
-                  onChange={(event) =>
-                    setCreateForm((prev) => ({
-                      ...prev,
-                      seo: { ...prev.seo, slug: event.target.value },
-                    }))
-                  }
-                />
-                <Input
-                  label="Meta title"
-                  value={createForm.seo.meta_title}
-                  onChange={(event) =>
-                    setCreateForm((prev) => ({
-                      ...prev,
-                      seo: { ...prev.seo, meta_title: event.target.value },
-                    }))
-                  }
-                />
-              </div>
-              <FormField label="Meta description">
-                <textarea
-                  value={createForm.seo.meta_description}
-                  onChange={(event) =>
-                    setCreateForm((prev) => ({
-                      ...prev,
-                      seo: { ...prev.seo, meta_description: event.target.value },
-                    }))
-                  }
-                  rows={4}
-                  placeholder="Описание для поисковых систем"
-                  style={{
-                    width: '100%',
-                    borderRadius: '12px',
-                    border: '1px solid var(--color-border)',
-                    padding: '12px',
-                    font: 'inherit',
-                    resize: 'vertical',
-                  }}
-                />
-              </FormField>
-              <FormField label="Meta keywords" description="Введите ключевые слова для SEO.">
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {createForm.seo.meta_keywords.map((keyword, index) => (
-                    <div
-                      key={`keyword-${index}`}
-                      style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}
-                    >
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
                       <Input
-                        value={keyword}
-                        placeholder="Ключевое слово"
-                        onChange={(event) => handleMetaKeywordChange(index, event.target.value)}
+                        value={createForm.featureDraft}
+                        onChange={handleFeatureDraftChange}
+                        placeholder="Новая особенность"
                       />
                       <Button
                         type="button"
                         variant="ghost"
-                        onClick={() => handleRemoveMetaKeyword(index)}
+                        onClick={handleAddFeature}
+                        disabled={!canAddFeature}
                       >
-                        Удалить
+                        Добавить
                       </Button>
                     </div>
-                  ))}
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-                    <Input
-                      value={createForm.metaKeywordDraft}
-                      onChange={handleMetaKeywordDraftChange}
-                      placeholder="Новое ключевое слово"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={handleAddMetaKeyword}
-                      disabled={!canAddMetaKeyword}
-                    >
-                      Добавить
-                    </Button>
                   </div>
+                </FormField>
+              </section>
+
+              <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <h3 style={{ margin: 0 }}>Фотографии</h3>
+                <FormField
+                  label="Загрузить изображения"
+                  description="Добавьте одно или несколько фото. Первое фото станет обложкой."
+                >
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImagesChange}
+                    disabled={isSubmittingProduct}
+                  />
+                </FormField>
+                {productImages.some((image) => !image.removed) ? (
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+                      gap: '16px',
+                    }}
+                  >
+                    {productImages
+                      .filter((image) => !image.removed)
+                      .map((image) => (
+                        <div
+                          key={image.id}
+                          style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
+                        >
+                          <div
+                            style={{
+                              position: 'relative',
+                              borderRadius: '12px',
+                              overflow: 'hidden',
+                              border: image.isPrimary
+                                ? '2px solid var(--color-primary)'
+                                : '1px solid var(--color-border)',
+                              background: 'var(--color-surface-muted)',
+                              aspectRatio: '1 / 1',
+                            }}
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={image.previewUrl}
+                              alt={createForm.name ? `Фото ${createForm.name}` : 'Фото товара'}
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                            {image.isPrimary ? (
+                              <span
+                                style={{
+                                  position: 'absolute',
+                                  bottom: '8px',
+                                  left: '8px',
+                                  padding: '4px 8px',
+                                  borderRadius: '999px',
+                                  background: 'rgba(0, 0, 0, 0.6)',
+                                  color: '#fff',
+                                  fontSize: '0.75rem',
+                                }}
+                              >
+                                Обложка
+                              </span>
+                            ) : null}
+                          </div>
+                          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              onClick={() => handleSetPrimaryImage(image.id)}
+                              disabled={image.isPrimary || isSubmittingProduct}
+                            >
+                              Сделать обложкой
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              onClick={() => handleRemoveImage(image.id)}
+                              disabled={isSubmittingProduct}
+                            >
+                              Удалить
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                ) : (
+                  <span style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
+                    Фотографии пока не добавлены.
+                  </span>
+                )}
+              </section>
+
+              <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <h3 style={{ margin: 0 }}>Габариты</h3>
+                <Select
+                  label="Форма"
+                  value={createForm.dimensions.shape}
+                  onChange={handleDimensionShapeChange}
+                  error={createDimensionsShapeError}
+                >
+                  <option value="">Выберите форму</option>
+                  {shapeOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </Select>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                    gap: '16px',
+                  }}
+                >
+                  {createForm.dimensions.shape === 'circle__diameter' ? (
+                    <Input
+                      label="Диаметр, см"
+                      type="number"
+                      min={0}
+                      step={1}
+                      value={createForm.dimensions.circle.diameter_cm}
+                      onChange={(event) =>
+                        setCreateForm((prev) => ({
+                          ...prev,
+                          dimensions: {
+                            ...prev.dimensions,
+                            circle: { diameter_cm: event.target.value },
+                          },
+                        }))
+                      }
+                      error={createCircleDiameterError}
+                    />
+                  ) : null}
+                  {createForm.dimensions.shape === 'line__length' ? (
+                    <Input
+                      label="Длина, см"
+                      type="number"
+                      min={0}
+                      step={1}
+                      value={createForm.dimensions.line.length_cm}
+                      onChange={(event) =>
+                        setCreateForm((prev) => ({
+                          ...prev,
+                          dimensions: {
+                            ...prev.dimensions,
+                            line: { length_cm: event.target.value },
+                          },
+                        }))
+                      }
+                      error={createLineLengthError}
+                    />
+                  ) : null}
+                  {createForm.dimensions.shape === 'rectangle__length_width' ? (
+                    <Input
+                      label="Длина, см"
+                      type="number"
+                      min={0}
+                      step={1}
+                      value={createForm.dimensions.rectangle.length_cm}
+                      onChange={(event) =>
+                        setCreateForm((prev) => ({
+                          ...prev,
+                          dimensions: {
+                            ...prev.dimensions,
+                            rectangle: {
+                              ...prev.dimensions.rectangle,
+                              length_cm: event.target.value,
+                            },
+                          },
+                        }))
+                      }
+                      error={createRectangleLengthError}
+                    />
+                  ) : null}
+                  {createForm.dimensions.shape === 'rectangle__length_width' ? (
+                    <Input
+                      label="Ширина, см"
+                      type="number"
+                      min={0}
+                      step={1}
+                      value={createForm.dimensions.rectangle.width_cm}
+                      onChange={(event) =>
+                        setCreateForm((prev) => ({
+                          ...prev,
+                          dimensions: {
+                            ...prev.dimensions,
+                            rectangle: {
+                              ...prev.dimensions.rectangle,
+                              width_cm: event.target.value,
+                            },
+                          },
+                        }))
+                      }
+                      error={createRectangleWidthError}
+                    />
+                  ) : null}
+                  {createForm.dimensions.shape === 'cylinder__diameter_height' ? (
+                    <Input
+                      label="Диаметр, см"
+                      type="number"
+                      min={0}
+                      step={1}
+                      value={createForm.dimensions.cylinder.diameter_cm}
+                      onChange={(event) =>
+                        setCreateForm((prev) => ({
+                          ...prev,
+                          dimensions: {
+                            ...prev.dimensions,
+                            cylinder: {
+                              ...prev.dimensions.cylinder,
+                              diameter_cm: event.target.value,
+                            },
+                          },
+                        }))
+                      }
+                      error={createCylinderDiameterError}
+                    />
+                  ) : null}
+                  {createForm.dimensions.shape === 'cylinder__diameter_height' ? (
+                    <Input
+                      label="Высота, см"
+                      type="number"
+                      min={0}
+                      step={1}
+                      value={createForm.dimensions.cylinder.height_cm}
+                      onChange={(event) =>
+                        setCreateForm((prev) => ({
+                          ...prev,
+                          dimensions: {
+                            ...prev.dimensions,
+                            cylinder: {
+                              ...prev.dimensions.cylinder,
+                              height_cm: event.target.value,
+                            },
+                          },
+                        }))
+                      }
+                      error={createCylinderHeightError}
+                    />
+                  ) : null}
+                  {createForm.dimensions.shape === 'box__height_width_depth' ? (
+                    <Input
+                      label="Высота, см"
+                      type="number"
+                      min={0}
+                      step={1}
+                      value={createForm.dimensions.box.height_cm}
+                      onChange={(event) =>
+                        setCreateForm((prev) => ({
+                          ...prev,
+                          dimensions: {
+                            ...prev.dimensions,
+                            box: {
+                              ...prev.dimensions.box,
+                              height_cm: event.target.value,
+                            },
+                          },
+                        }))
+                      }
+                      error={createBoxHeightError}
+                    />
+                  ) : null}
+                  {createForm.dimensions.shape === 'box__height_width_depth' ? (
+                    <Input
+                      label="Ширина, см"
+                      type="number"
+                      min={0}
+                      step={1}
+                      value={createForm.dimensions.box.width_cm}
+                      onChange={(event) =>
+                        setCreateForm((prev) => ({
+                          ...prev,
+                          dimensions: {
+                            ...prev.dimensions,
+                            box: {
+                              ...prev.dimensions.box,
+                              width_cm: event.target.value,
+                            },
+                          },
+                        }))
+                      }
+                      error={createBoxWidthError}
+                    />
+                  ) : null}
+                  {createForm.dimensions.shape === 'box__height_width_depth' ? (
+                    <Input
+                      label="Глубина, см"
+                      type="number"
+                      min={0}
+                      step={1}
+                      value={createForm.dimensions.box.depth_cm}
+                      onChange={(event) =>
+                        setCreateForm((prev) => ({
+                          ...prev,
+                          dimensions: {
+                            ...prev.dimensions,
+                            box: {
+                              ...prev.dimensions.box,
+                              depth_cm: event.target.value,
+                            },
+                          },
+                        }))
+                      }
+                      error={createBoxDepthError}
+                    />
+                  ) : null}
                 </div>
-              </FormField>
-            </section>
-          </div>
+              </section>
+
+              <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <h3 style={{ margin: 0 }}>Занятость</h3>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                    gap: '16px',
+                  }}
+                >
+                  <Input
+                    label="Чистка, дней"
+                    type="number"
+                    min={0}
+                    step={1}
+                    value={createForm.occupancy.cleaning_days}
+                    onChange={(event) =>
+                      setCreateForm((prev) => ({
+                        ...prev,
+                        occupancy: { ...prev.occupancy, cleaning_days: event.target.value },
+                      }))
+                    }
+                    helperText="Необязательное поле."
+                    error={createOccupancyCleaningError}
+                  />
+                  <Input
+                    label="Страховой резерв, %"
+                    type="number"
+                    min={0}
+                    max={100}
+                    step={1}
+                    value={createForm.occupancy.insurance_reserve_percent}
+                    onChange={(event) =>
+                      setCreateForm((prev) => ({
+                        ...prev,
+                        occupancy: {
+                          ...prev.occupancy,
+                          insurance_reserve_percent: event.target.value,
+                        },
+                      }))
+                    }
+                    helperText="0–100%"
+                    error={createOccupancyInsuranceError}
+                  />
+                </div>
+              </section>
+
+              <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <h3 style={{ margin: 0 }}>Доставка</h3>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                    gap: '16px',
+                  }}
+                >
+                  <Input
+                    label="Объём, см³"
+                    type="number"
+                    min={0}
+                    step={1}
+                    value={createForm.delivery.volume_cm3}
+                    onChange={(event) =>
+                      setCreateForm((prev) => ({
+                        ...prev,
+                        delivery: { ...prev.delivery, volume_cm3: event.target.value },
+                      }))
+                    }
+                    error={createDeliveryVolumeError}
+                  />
+                  <Input
+                    label="Масса, кг"
+                    type="number"
+                    min={0}
+                    step="0.1"
+                    value={createForm.delivery.weight_kg}
+                    onChange={(event) =>
+                      setCreateForm((prev) => ({
+                        ...prev,
+                        delivery: { ...prev.delivery, weight_kg: event.target.value },
+                      }))
+                    }
+                    error={createDeliveryWeightError}
+                  />
+                  <Select
+                    label="Ограничение по транспорту"
+                    value={createForm.delivery.transport_restriction}
+                    onChange={(event) =>
+                      setCreateForm((prev) => ({
+                        ...prev,
+                        delivery: {
+                          ...prev.delivery,
+                          transport_restriction: event.target.value as TransportRestriction | '',
+                        },
+                      }))
+                    }
+                    error={createDeliveryTransportError}
+                  >
+                    <option value="">Выберите ограничение</option>
+                    {transportRestrictionOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+                <label
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.95rem' }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={createForm.delivery.self_pickup_allowed}
+                    onChange={(event) =>
+                      setCreateForm((prev) => ({
+                        ...prev,
+                        delivery: {
+                          ...prev.delivery,
+                          self_pickup_allowed: event.target.checked,
+                        },
+                      }))
+                    }
+                  />
+                  Самовывоз разрешён
+                </label>
+              </section>
+
+              <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <h3 style={{ margin: 0 }}>Сетап</h3>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                    gap: '16px',
+                  }}
+                >
+                  <Input
+                    label="Монтаж, минут"
+                    type="number"
+                    min={0}
+                    step={1}
+                    value={createForm.setup.install_minutes}
+                    onChange={(event) =>
+                      setCreateForm((prev) => ({
+                        ...prev,
+                        setup: { ...prev.setup, install_minutes: event.target.value },
+                      }))
+                    }
+                    error={createInstallMinutesError}
+                  />
+                  <Input
+                    label="Демонтаж, минут"
+                    type="number"
+                    min={0}
+                    step={1}
+                    value={createForm.setup.uninstall_minutes}
+                    onChange={(event) =>
+                      setCreateForm((prev) => ({
+                        ...prev,
+                        setup: { ...prev.setup, uninstall_minutes: event.target.value },
+                      }))
+                    }
+                    error={createUninstallMinutesError}
+                  />
+                  <Select
+                    label="Квалификация сетапёров"
+                    value={createForm.setup.installer_qualification}
+                    onChange={(event) =>
+                      setCreateForm((prev) => ({
+                        ...prev,
+                        setup: {
+                          ...prev.setup,
+                          installer_qualification: event.target.value as
+                            | InstallerQualification
+                            | '',
+                        },
+                      }))
+                    }
+                    error={createInstallerQualificationError}
+                  >
+                    <option value="">Выберите квалификацию</option>
+                    {installerQualificationOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </Select>
+                  <Select
+                    label="Требуемое число сетапёров"
+                    value={createForm.setup.min_installers}
+                    onChange={(event) =>
+                      setCreateForm((prev) => ({
+                        ...prev,
+                        setup: { ...prev.setup, min_installers: event.target.value },
+                      }))
+                    }
+                    error={createMinInstallersError}
+                  >
+                    <option value="">Выберите значение</option>
+                    {minInstallersOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+                <label
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.95rem' }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={createForm.setup.self_setup_allowed}
+                    onChange={(event) =>
+                      setCreateForm((prev) => ({
+                        ...prev,
+                        setup: { ...prev.setup, self_setup_allowed: event.target.checked },
+                      }))
+                    }
+                  />
+                  Самостоятельный сетап разрешён
+                </label>
+              </section>
+
+              <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <h3 style={{ margin: 0 }}>Аренда</h3>
+                <Select
+                  label="Базовый период аренды"
+                  value={createForm.rental.base_period}
+                  onChange={(event) =>
+                    setCreateForm((prev) => ({
+                      ...prev,
+                      rental: { base_period: event.target.value as RentalBasePeriod | '' },
+                    }))
+                  }
+                  error={createRentalBasePeriodError}
+                >
+                  <option value="">Выберите период</option>
+                  {rentalBasePeriodOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </Select>
+              </section>
+
+              <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <h3 style={{ margin: 0 }}>Видимость</h3>
+                <Select
+                  label="Режим бронирования"
+                  value={createForm.visibility.reservation_mode}
+                  onChange={(event) =>
+                    setCreateForm((prev) => ({
+                      ...prev,
+                      visibility: {
+                        ...prev.visibility,
+                        reservation_mode: event.target.value as ReservationMode | '',
+                      },
+                    }))
+                  }
+                  error={createReservationModeError}
+                >
+                  <option value="">Выберите режим</option>
+                  {reservationModeOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </Select>
+                <div
+                  style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'center' }}
+                >
+                  <label style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <input
+                      type="checkbox"
+                      checked={createForm.visibility.show_on_pifakit}
+                      onChange={(event) =>
+                        setCreateForm((prev) => ({
+                          ...prev,
+                          visibility: { ...prev.visibility, show_on_pifakit: event.target.checked },
+                        }))
+                      }
+                    />
+                    Показывать на pifakit.ru
+                  </label>
+                  <label style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <input
+                      type="checkbox"
+                      checked={createForm.visibility.show_on_site}
+                      onChange={(event) =>
+                        setCreateForm((prev) => ({
+                          ...prev,
+                          visibility: { ...prev.visibility, show_on_site: event.target.checked },
+                        }))
+                      }
+                    />
+                    Показывать на сайте
+                  </label>
+                  <label style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <input
+                      type="checkbox"
+                      checked={createForm.visibility.show_in_new}
+                      onChange={(event) =>
+                        setCreateForm((prev) => ({
+                          ...prev,
+                          visibility: { ...prev.visibility, show_in_new: event.target.checked },
+                        }))
+                      }
+                    />
+                    Показывать в «Новинках»
+                  </label>
+                  <label style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <input
+                      type="checkbox"
+                      checked={createForm.visibility.category_cover_on_home}
+                      onChange={(event) =>
+                        setCreateForm((prev) => ({
+                          ...prev,
+                          visibility: {
+                            ...prev.visibility,
+                            category_cover_on_home: event.target.checked,
+                          },
+                        }))
+                      }
+                    />
+                    Обложка категории на главной
+                  </label>
+                </div>
+              </section>
+
+              <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <h3 style={{ margin: 0 }}>SEO</h3>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                    gap: '16px',
+                  }}
+                >
+                  <Input
+                    label="Slug"
+                    placeholder="skaterth-amori-barkhatnaya"
+                    value={createForm.seo.slug}
+                    onChange={(event) =>
+                      setCreateForm((prev) => ({
+                        ...prev,
+                        seo: { ...prev.seo, slug: event.target.value },
+                      }))
+                    }
+                  />
+                  <Input
+                    label="Meta title"
+                    value={createForm.seo.meta_title}
+                    onChange={(event) =>
+                      setCreateForm((prev) => ({
+                        ...prev,
+                        seo: { ...prev.seo, meta_title: event.target.value },
+                      }))
+                    }
+                  />
+                </div>
+                <FormField label="Meta description">
+                  <textarea
+                    value={createForm.seo.meta_description}
+                    onChange={(event) =>
+                      setCreateForm((prev) => ({
+                        ...prev,
+                        seo: { ...prev.seo, meta_description: event.target.value },
+                      }))
+                    }
+                    rows={4}
+                    placeholder="Описание для поисковых систем"
+                    style={{
+                      width: '100%',
+                      borderRadius: '12px',
+                      border: '1px solid var(--color-border)',
+                      padding: '12px',
+                      font: 'inherit',
+                      resize: 'vertical',
+                    }}
+                  />
+                </FormField>
+                <FormField label="Meta keywords" description="Введите ключевые слова для SEO.">
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {createForm.seo.meta_keywords.map((keyword, index) => (
+                      <div
+                        key={`keyword-${index}`}
+                        style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}
+                      >
+                        <Input
+                          value={keyword}
+                          placeholder="Ключевое слово"
+                          onChange={(event) => handleMetaKeywordChange(index, event.target.value)}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          onClick={() => handleRemoveMetaKeyword(index)}
+                        >
+                          Удалить
+                        </Button>
+                      </div>
+                    ))}
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+                      <Input
+                        value={createForm.metaKeywordDraft}
+                        onChange={handleMetaKeywordDraftChange}
+                        placeholder="Новое ключевое слово"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={handleAddMetaKeyword}
+                        disabled={!canAddMetaKeyword}
+                      >
+                        Добавить
+                      </Button>
+                    </div>
+                  </div>
+                </FormField>
+              </section>
+            </div>
           )}
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
@@ -2402,8 +2428,8 @@ export default function ProductsPage() {
                   ? 'Создаём…'
                   : 'Сохраняем…'
                 : formMode === 'create'
-                ? 'Создать товар'
-                : 'Сохранить изменения'}
+                  ? 'Создать товар'
+                  : 'Сохранить изменения'}
             </Button>
           </div>
         </form>
@@ -2420,10 +2446,20 @@ export default function ProductsPage() {
             </Alert>
           ) : null}
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-            <Button type="button" variant="ghost" onClick={closeDeleteModal} disabled={isDeletingProduct}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={closeDeleteModal}
+              disabled={isDeletingProduct}
+            >
               Отмена
             </Button>
-            <Button type="button" variant="danger" onClick={handleConfirmDelete} disabled={isDeletingProduct}>
+            <Button
+              type="button"
+              variant="danger"
+              onClick={handleConfirmDelete}
+              disabled={isDeletingProduct}
+            >
               {isDeletingProduct ? 'Удаляем…' : 'Удалить'}
             </Button>
           </div>

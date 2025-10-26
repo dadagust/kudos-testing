@@ -65,9 +65,13 @@ export const productsApi = {
       formData.append('positions', String(position));
     });
 
-    const { data } = await apiV1Client.post<ProductImage[]>(`/products/${productId}/images`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    const { data } = await apiV1Client.post<ProductImage[]>(
+      `/products/${productId}/images`,
+      formData,
+      {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }
+    );
     return data;
   },
   reorderImages: async (productId: string, payload: ProductImagesReorderPayload): Promise<void> => {
