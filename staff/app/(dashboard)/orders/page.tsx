@@ -80,6 +80,9 @@ const currencyFormatter = new Intl.NumberFormat('ru-RU', {
   maximumFractionDigits: 2,
 });
 
+const coerceProductColor = (value: unknown): ProductListItem['color'] =>
+  (value ?? null) as unknown as ProductListItem['color'];
+
 const formatCurrency = (value: number | string) => {
   const amount = typeof value === 'string' ? Number(value) : value;
   if (Number.isNaN(amount)) {
@@ -495,7 +498,10 @@ export default function OrdersPage() {
     () => productPages?.pages.flatMap((page) => page.results) ?? [],
     [productPages]
   );
-
+  const { data: editOrderResponse, isLoading: isEditLoading } = useOrderQuery(
+    editOrderId ?? '',
+    Boolean(isEditOpen && editOrderId !== null)
+  );
   const products: ProductListItem[] = useMemo(() => {
     if (!editOrderResponse?.data) {
       return fetchedProducts;
@@ -508,7 +514,7 @@ export default function OrdersPage() {
           id: item.product.id,
           name: item.product.name,
           price_rub: Number(item.unit_price),
-          color: item.product.color ?? null,
+          color: coerceProductColor(item.product.color),
           thumbnail_url: item.product.thumbnail_url ?? null,
           delivery: { transport_restriction: null, self_pickup_allowed: false },
         });
@@ -571,7 +577,7 @@ export default function OrdersPage() {
           id: item.product.id,
           name: item.product.name,
           price_rub: Number(item.unit_price),
-          color: item.product.color ?? null,
+          color: coerceProductColor(item.product.color),
           thumbnail_url: item.product.thumbnail_url ?? null,
           delivery: { transport_restriction: null, self_pickup_allowed: false },
         };
@@ -614,11 +620,6 @@ export default function OrdersPage() {
 
   const createMutation = useCreateOrderMutation();
   const updateMutation = useUpdateOrderMutation();
-
-  const { data: editOrderResponse, isLoading: isEditLoading } = useOrderQuery(
-    editOrderId ?? '',
-    Boolean(isEditOpen && editOrderId !== null)
-  );
 
   useEffect(() => {
     if (isEditOpen && editOrderResponse?.data) {

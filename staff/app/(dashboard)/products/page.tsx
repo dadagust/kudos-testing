@@ -251,9 +251,7 @@ export default function ProductsPage() {
               товары по категории, цвету и доступности самовывоза.
             </p>
           </div>
-          {canManageProducts ? (
-            <Button iconLeft="plus">Новый товар</Button>
-          ) : null}
+          {canManageProducts ? <Button iconLeft="plus">Новый товар</Button> : null}
         </header>
 
         <section
