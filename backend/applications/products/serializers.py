@@ -27,9 +27,20 @@ class EnumChoiceSerializer(serializers.Serializer):
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
+    url = serializers.SerializerMethodField()
+
     class Meta:
         model = ProductImage
         fields = ('id', 'url', 'position')
+
+    def get_url(self, obj: ProductImage) -> str:
+        url = obj.url
+        if not url:
+            return ''
+        request = self.context.get('request') if hasattr(self, 'context') else None
+        if request is not None:
+            return request.build_absolute_uri(url)
+        return url
 
 
 class ProductDimensionsSerializer(serializers.Serializer):
@@ -305,7 +316,11 @@ class ProductBaseSerializer(serializers.ModelSerializer):
         if 'seo' in include or self.context.get('detail'):
             data['seo'] = serialize_seo(instance)
         if 'images' in include or self.context.get('detail'):
-            data['images'] = ProductImageSerializer(instance.images.all(), many=True).data
+            data['images'] = ProductImageSerializer(
+                instance.images.all(),
+                many=True,
+                context=self.context,
+            ).data
         data['category_id'] = str(instance.category_id)
         data['created_at'] = DATETIME_FIELD.to_representation(instance.created)
         data['updated_at'] = DATETIME_FIELD.to_representation(instance.modified)
@@ -412,7 +427,11 @@ class ProductListItemSerializer(serializers.ModelSerializer):
         if 'seo' in include:
             data['seo'] = serialize_seo(instance)
         if 'images' in include:
-            data['images'] = ProductImageSerializer(instance.images.all(), many=True).data
+            data['images'] = ProductImageSerializer(
+                instance.images.all(),
+                many=True,
+                context=self.context,
+            ).data
         if data.get('price_rub') is not None:
             data['price_rub'] = decimal_to_float(data['price_rub'])
         if data.get('category_id') is not None:

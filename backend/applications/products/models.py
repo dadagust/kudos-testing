@@ -266,7 +266,7 @@ class ProductImage(Date):
     )
     file = models.ImageField(
         'Файл',
-        upload_to=PathAndRename('products'),
+        upload_to=PathAndRename(''),
         storage=product_image_storage,
     )
     position = models.PositiveIntegerField('Позиция', default=1)

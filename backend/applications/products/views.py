@@ -247,7 +247,11 @@ class ProductViewSet(viewsets.ModelViewSet):
                 ProductImage.objects.create(product=product, file=file, position=position_int)
             )
 
-        serializer = ProductImageSerializer(created_images, many=True)
+        serializer = ProductImageSerializer(
+            created_images,
+            many=True,
+            context=self.get_serializer_context(),
+        )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=['patch'], url_path='images/reorder')
