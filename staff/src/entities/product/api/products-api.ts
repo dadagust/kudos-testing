@@ -1,4 +1,4 @@
-import { apiV1Client } from '@/shared/api/httpClient';
+import { apiV1Client, API_ROOT } from '@/shared/api/httpClient';
 
 import {
   ProductCategoriesResponseItem,
@@ -31,12 +31,39 @@ const sanitizeParams = (params: ProductListQuery): Record<string, string | numbe
   return result;
 };
 
+const makeAbsoluteUrl = (url: string) => {
+  if (/^https?:\/\//i.test(url)) {
+    return url;
+  }
+  return `${API_ROOT}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
+const ensureAbsoluteUrl = (url: string | null | undefined): string | null | undefined => {
+  if (url === undefined || url === null) {
+    return url;
+  }
+  return makeAbsoluteUrl(url);
+};
+
+const normalizeImages = (images: ProductImage[]): ProductImage[] =>
+  images.map((image) => ({ ...image, url: makeAbsoluteUrl(image.url) }));
+
+const normalizeOptionalImages = (images?: ProductImage[]) =>
+  images ? normalizeImages(images) : undefined;
+
 export const productsApi = {
   list: async (params: ProductListQuery): Promise<ProductListResponse> => {
     const { data } = await apiV1Client.get<ProductListResponse>('/products', {
       params: sanitizeParams(params),
     });
-    return data;
+    return {
+      ...data,
+      results: data.results.map((product) => ({
+        ...product,
+        thumbnail_url: ensureAbsoluteUrl(product.thumbnail_url),
+        images: normalizeOptionalImages(product.images),
+      })),
+    };
   },
   create: async (payload: ProductCreatePayload): Promise<ProductCreateResponse> => {
     const { data } = await apiV1Client.post<ProductCreateResponse>('/products', payload);
@@ -44,13 +71,21 @@ export const productsApi = {
   },
   update: async (productId: string, payload: ProductUpdatePayload): Promise<ProductDetail> => {
     const { data } = await apiV1Client.patch<ProductDetail>(`/products/${productId}`, payload);
-    return data;
+    return {
+      ...data,
+      thumbnail_url: ensureAbsoluteUrl(data.thumbnail_url),
+      images: normalizeImages(data.images),
+    };
   },
   details: async (productId: string, include?: string): Promise<ProductDetail> => {
     const { data } = await apiV1Client.get<ProductDetail>(`/products/${productId}`, {
       params: include ? { include } : undefined,
     });
-    return data;
+    return {
+      ...data,
+      thumbnail_url: ensureAbsoluteUrl(data.thumbnail_url),
+      images: normalizeImages(data.images),
+    };
   },
   remove: async (productId: string): Promise<void> => {
     await apiV1Client.delete(`/products/${productId}`);
@@ -72,7 +107,7 @@ export const productsApi = {
         headers: { 'Content-Type': 'multipart/form-data' },
       }
     );
-    return data;
+    return normalizeImages(data);
   },
   reorderImages: async (productId: string, payload: ProductImagesReorderPayload): Promise<void> => {
     await apiV1Client.patch(`/products/${productId}/images/reorder`, payload);
