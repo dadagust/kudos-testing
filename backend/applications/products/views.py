@@ -254,6 +254,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    @action(detail=True, methods=['patch'], url_path='images/reorder')
     def reorder_images(self, request: Request, id=None):
         product = self.get_object()
         order = request.data.get('order')
