@@ -5,19 +5,15 @@ from dataclasses import dataclass
 
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from django.utils.text import slugify
-
 from applications.products.models import Category
+
+from ._slug import make_slug
 
 
 @dataclass(frozen=True)
 class Node:
     name: str
     children: tuple["Node", ...] = ()
-
-
-def make_slug(name: str) -> str:
-    return slugify(name, allow_unicode=False)
 
 CATEGORIES: tuple[Node, ...] = (
     Node("Мебель"),
