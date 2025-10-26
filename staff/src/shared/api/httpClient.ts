@@ -15,7 +15,7 @@ const resolveApiRoot = (value: string) => {
   return normalized;
 };
 
-const API_ROOT = resolveApiRoot(API_URL);
+export const API_ROOT = resolveApiRoot(API_URL);
 const CORE_API_URL = `${API_ROOT}/core`;
 const API_V1_URL = `${API_ROOT}/api/v1`;
 
