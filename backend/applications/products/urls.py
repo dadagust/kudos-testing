@@ -20,6 +20,9 @@ router = OptionalSlashRouter()
 router.register('products', ProductViewSet, basename='product')
 
 
+lookup_kwarg = ProductViewSet.lookup_url_kwarg or ProductViewSet.lookup_field
+lookup_regex = ProductViewSet.lookup_value_regex
+
 urlpatterns = [
     re_path(
         r'^products/categories/?$',
@@ -35,6 +38,11 @@ urlpatterns = [
         r'^products/enums/?$',
         EnumsAggregateView.as_view(),
         name='product-enums',
+    ),
+    re_path(
+        rf'^products/(?P<{lookup_kwarg}>{lookup_regex})/images/reorder/?$',
+        ProductViewSet.as_view({'patch': 'reorder_images'}),
+        name='product-reorder-images',
     ),
     path('', include(router.urls)),
 ]
