@@ -69,36 +69,21 @@ export interface ProductImage {
   position: number;
 }
 
-export interface ProductImage {
+export type ProductMedia = {
   id: string;
   url: string;
   alt_text: string;
   is_primary: boolean;
   sort_order?: number | null;
-}
+};
 
-export interface ProductOccupancy {
-  cleaning_days?: number | null;
-  insurance_reserve_percent?: number | null;
-}
-
-export interface ProductCategorySummary {
-  id: string;
+export type ProductAttribute = {
+  attribute_id: string;
+  code: string;
   name: string;
-  slug?: string;
-}
-
-export interface ProductOccupancy {
-  cleaning_days?: number | null;
-  insurance_reserve_percent?: number | null;
-}
-
-export interface ProductDelivery {
-  volume_cm3?: number | null;
-  weight_kg?: string | number | null;
-  transport_restriction?: TransportRestriction | null;
-  self_pickup_allowed: boolean;
-}
+  value: string;
+  unit: string | null;
+};
 
 export interface ProductCategorySummary {
   id: string;
