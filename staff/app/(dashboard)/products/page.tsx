@@ -16,6 +16,9 @@ import {
   TransportRestriction,
   ProductCreatePayload,
   ProductCreateResponse,
+  ProductDetail,
+  ProductImage,
+  ProductUpdatePayload,
   productsApi,
   useInfiniteProductsQuery,
 } from '@/entities/product';
@@ -135,6 +138,17 @@ type CreateProductFormState = {
   metaKeywordDraft: string;
 };
 
+type ProductFormMode = 'create' | 'edit';
+
+type ProductFormImage = {
+  id: string;
+  previewUrl: string;
+  isPrimary: boolean;
+  file?: File;
+  remoteId?: string;
+  removed?: boolean;
+};
+
 const createEmptyProductForm = (defaults?: {
   rentalBasePeriod?: RentalBasePeriod;
   reservationMode?: ReservationMode;
@@ -194,6 +208,144 @@ const createEmptyProductForm = (defaults?: {
   },
   metaKeywordDraft: '',
 });
+
+const createFormFromProduct = (product: ProductDetail): CreateProductFormState => {
+  const base = createEmptyProductForm();
+  const shape = (product.dimensions?.shape ?? '') as DimensionShape | '';
+  return {
+    ...base,
+    name: product.name ?? '',
+    categoryId: product.category_id ?? product.category?.id ?? '',
+    priceRub: product.price_rub !== undefined && product.price_rub !== null ? String(product.price_rub) : '',
+    lossCompensationRub:
+      product.loss_compensation_rub !== undefined && product.loss_compensation_rub !== null
+        ? String(product.loss_compensation_rub)
+        : '',
+    color: (product.color ?? '') as ProductColor | '',
+    features: product.features ?? [],
+    featureDraft: '',
+    dimensions: {
+      shape,
+      circle: {
+        diameter_cm:
+          product.dimensions?.circle?.diameter_cm !== undefined && product.dimensions?.circle?.diameter_cm !== null
+            ? String(product.dimensions.circle.diameter_cm)
+            : '',
+      },
+      line: {
+        length_cm:
+          product.dimensions?.line?.length_cm !== undefined && product.dimensions?.line?.length_cm !== null
+            ? String(product.dimensions.line.length_cm)
+            : '',
+      },
+      rectangle: {
+        length_cm:
+          product.dimensions?.rectangle?.length_cm !== undefined && product.dimensions?.rectangle?.length_cm !== null
+            ? String(product.dimensions.rectangle.length_cm)
+            : '',
+        width_cm:
+          product.dimensions?.rectangle?.width_cm !== undefined && product.dimensions?.rectangle?.width_cm !== null
+            ? String(product.dimensions.rectangle.width_cm)
+            : '',
+      },
+      cylinder: {
+        diameter_cm:
+          product.dimensions?.cylinder?.diameter_cm !== undefined && product.dimensions?.cylinder?.diameter_cm !== null
+            ? String(product.dimensions.cylinder.diameter_cm)
+            : '',
+        height_cm:
+          product.dimensions?.cylinder?.height_cm !== undefined && product.dimensions?.cylinder?.height_cm !== null
+            ? String(product.dimensions.cylinder.height_cm)
+            : '',
+      },
+      box: {
+        height_cm:
+          product.dimensions?.box?.height_cm !== undefined && product.dimensions?.box?.height_cm !== null
+            ? String(product.dimensions.box.height_cm)
+            : '',
+        width_cm:
+          product.dimensions?.box?.width_cm !== undefined && product.dimensions?.box?.width_cm !== null
+            ? String(product.dimensions.box.width_cm)
+            : '',
+        depth_cm:
+          product.dimensions?.box?.depth_cm !== undefined && product.dimensions?.box?.depth_cm !== null
+            ? String(product.dimensions.box.depth_cm)
+            : '',
+      },
+    },
+    occupancy: {
+      cleaning_days:
+        product.occupancy?.cleaning_days !== undefined && product.occupancy?.cleaning_days !== null
+          ? String(product.occupancy.cleaning_days)
+          : '',
+      insurance_reserve_percent:
+        product.occupancy?.insurance_reserve_percent !== undefined &&
+        product.occupancy?.insurance_reserve_percent !== null
+          ? String(product.occupancy.insurance_reserve_percent)
+          : '',
+    },
+    delivery: {
+      volume_cm3:
+        product.delivery?.volume_cm3 !== undefined && product.delivery?.volume_cm3 !== null
+          ? String(product.delivery.volume_cm3)
+          : '',
+      weight_kg:
+        product.delivery?.weight_kg !== undefined && product.delivery?.weight_kg !== null && product.delivery?.weight_kg !== ''
+          ? String(product.delivery.weight_kg)
+          : '',
+      transport_restriction: (product.delivery?.transport_restriction ?? '') as TransportRestriction | '',
+      self_pickup_allowed: product.delivery?.self_pickup_allowed ?? base.delivery.self_pickup_allowed,
+    },
+    setup: {
+      install_minutes:
+        product.setup?.install_minutes !== undefined && product.setup?.install_minutes !== null
+          ? String(product.setup.install_minutes)
+          : '',
+      uninstall_minutes:
+        product.setup?.uninstall_minutes !== undefined && product.setup?.uninstall_minutes !== null
+          ? String(product.setup.uninstall_minutes)
+          : '',
+      installer_qualification: (product.setup?.installer_qualification ?? '') as InstallerQualification | '',
+      min_installers:
+        product.setup?.min_installers !== undefined && product.setup?.min_installers !== null
+          ? String(product.setup.min_installers)
+          : '',
+      self_setup_allowed: product.setup?.self_setup_allowed ?? base.setup.self_setup_allowed,
+    },
+    rental: {
+      base_period: (product.rental?.base_period ?? '') as RentalBasePeriod | '',
+    },
+    visibility: {
+      reservation_mode: (product.visibility?.reservation_mode ?? '') as ReservationMode | '',
+      show_on_pifakit: product.visibility?.show_on_pifakit ?? base.visibility.show_on_pifakit,
+      show_on_site: product.visibility?.show_on_site ?? base.visibility.show_on_site,
+      show_in_new: product.visibility?.show_in_new ?? base.visibility.show_in_new,
+      category_cover_on_home:
+        product.visibility?.category_cover_on_home ?? base.visibility.category_cover_on_home,
+    },
+    seo: {
+      slug: product.seo?.slug ?? '',
+      meta_title: product.seo?.meta_title ?? '',
+      meta_description: product.seo?.meta_description ?? '',
+      meta_keywords: product.seo?.meta_keywords ?? [],
+    },
+    metaKeywordDraft: '',
+  };
+};
+
+const mapProductImagesToForm = (images?: ProductImage[]): ProductFormImage[] => {
+  if (!images?.length) {
+    return [];
+  }
+  return [...images]
+    .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
+    .map((image, index) => ({
+      id: `existing-${image.id}`,
+      previewUrl: image.url,
+      isPrimary: index === 0,
+      remoteId: image.id,
+    }));
+};
 
 const parseNumber = (value: string) => {
   if (value.trim() === '') {
@@ -368,11 +520,17 @@ const ProductCard = ({
   categoryName,
   colorLabel,
   transportLabel,
+  onEdit,
+  onDelete,
+  canManage,
 }: {
   product: ProductListItem;
   categoryName: string | undefined;
   colorLabel: string | undefined;
   transportLabel: string | undefined;
+  onEdit?: (product: ProductListItem) => void;
+  onDelete?: (product: ProductListItem) => void;
+  canManage: boolean;
 }) => {
   return (
     <article
@@ -425,6 +583,17 @@ const ProductCard = ({
             {product.delivery.self_pickup_allowed ? 'Самовывоз доступен' : 'Только доставка'}
           </Badge>
         </div>
+
+        {canManage ? (
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <Button type="button" variant="ghost" onClick={() => onEdit?.(product)}>
+              Редактировать
+            </Button>
+            <Button type="button" variant="danger" onClick={() => onDelete?.(product)}>
+              Удалить
+            </Button>
+          </div>
+        ) : null}
       </div>
     </article>
   );
@@ -437,12 +606,17 @@ export default function ProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selfPickup, setSelfPickup] = useState('');
   const [ordering, setOrdering] = useState<ProductListQuery['ordering']>('-created_at');
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [createForm, setCreateForm] = useState<CreateProductFormState>(() =>
     createEmptyProductForm()
   );
   const [createTouched, setCreateTouched] = useState(false);
-  const [createNotification, setCreateNotification] = useState<string | null>(null);
+  const [pageNotification, setPageNotification] = useState<string | null>(null);
+  const [formMode, setFormMode] = useState<ProductFormMode>('create');
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  const [productImages, setProductImages] = useState<ProductFormImage[]>([]);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<ProductListItem | null>(null);
 
   const canManageProducts = usePermission('products_add_product');
   const queryClient = useQueryClient();
@@ -496,6 +670,21 @@ export default function ProductsPage() {
     () => createEnumMap(enumsData?.transport_restrictions),
     [enumsData]
   );
+  const {
+    data: editingProduct,
+    isLoading: isEditingProductLoading,
+    isError: isEditingProductError,
+    error: editingProductError,
+  } = useQuery({
+    queryKey: ['products', 'detail', editingProductId, 'form'],
+    queryFn: () => {
+      if (!editingProductId) {
+        throw new Error('productId is not set');
+      }
+      return productsApi.details(editingProductId, 'images,seo,dimensions');
+    },
+    enabled: formMode === 'edit' && Boolean(editingProductId) && isProductModalOpen,
+  });
   const createFormDefaults = useMemo(
     () => ({
       rentalBasePeriod: enumsData?.rental_base_periods?.[0]?.value as RentalBasePeriod | undefined,
@@ -516,11 +705,45 @@ export default function ProductsPage() {
       queryClient.invalidateQueries({ queryKey: ['products'] });
     },
   });
+  const updateProductMutation = useMutation<
+    ProductDetail,
+    Error,
+    { productId: string; payload: ProductUpdatePayload }
+  >({
+    mutationFn: ({ productId, payload }) => productsApi.update(productId, payload),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['products', 'detail', variables.productId] });
+    },
+  });
+  const deleteProductMutation = useMutation<void, Error, string>({
+    mutationFn: (productId: string) => productsApi.remove(productId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+    },
+  });
   const isCreatingProduct = createProductMutation.status === 'pending';
-  const createProductErrorMessage =
-    createProductMutation.error instanceof Error
-      ? createProductMutation.error.message
-      : 'Не удалось создать товар. Попробуйте позже.';
+  const isUpdatingProduct = updateProductMutation.status === 'pending';
+  const isDeletingProduct = deleteProductMutation.status === 'pending';
+  const isSubmittingProduct = formMode === 'create' ? isCreatingProduct : isUpdatingProduct;
+  const productFormErrorMessage = (() => {
+    const errorInstance = formMode === 'create' ? createProductMutation.error : updateProductMutation.error;
+    if (errorInstance instanceof Error) {
+      return errorInstance.message;
+    }
+    return formMode === 'create'
+      ? 'Не удалось создать товар. Попробуйте позже.'
+      : 'Не удалось обновить товар. Попробуйте позже.';
+  })();
+  const productMutation = formMode === 'create' ? createProductMutation : updateProductMutation;
+  const isEditReady =
+    formMode === 'edit'
+      ? Boolean(editingProduct) && !isEditingProductLoading && !isEditingProductError
+      : true;
+  const deleteProductErrorMessage =
+    deleteProductMutation.error instanceof Error
+      ? deleteProductMutation.error.message
+      : 'Не удалось удалить товар. Попробуйте позже.';
 
   const products = useMemo(() => data?.pages.flatMap((page) => page.results) ?? [], [data]);
 
@@ -782,21 +1005,111 @@ export default function ProductsPage() {
     setOrdering('-created_at');
   };
 
+  const cleanupImagePreviews = (images: ProductFormImage[]) => {
+    images.forEach((image) => {
+      if (image.file) {
+        URL.revokeObjectURL(image.previewUrl);
+      }
+    });
+  };
+
+  const normalizePrimary = (images: ProductFormImage[]): ProductFormImage[] => {
+    if (images.length === 0) {
+      return [];
+    }
+    const firstActiveIndex = images.findIndex((img) => !img.removed);
+    if (firstActiveIndex === -1) {
+      return images.map((img) => ({ ...img, isPrimary: false }));
+    }
+    const primaryIndex = images.findIndex((img) => !img.removed && img.isPrimary);
+    const targetIndex = primaryIndex !== -1 ? primaryIndex : firstActiveIndex;
+    return images.map((img, index) => ({
+      ...img,
+      isPrimary: !img.removed && index === targetIndex,
+    }));
+  };
+
+  const createImageId = () =>
+    typeof crypto !== 'undefined' && 'randomUUID' in crypto
+      ? crypto.randomUUID()
+      : `image-${Date.now().toString(16)}-${Math.random().toString(16).slice(2)}`;
+
   const openCreateModal = () => {
     if (!canManageProducts) {
       return;
     }
+    cleanupImagePreviews(productImages);
+    setProductImages([]);
+    setFormMode('create');
+    setEditingProductId(null);
     setCreateForm(createEmptyProductForm(createFormDefaults));
     setCreateTouched(false);
     createProductMutation.reset();
-    setIsCreateModalOpen(true);
+    updateProductMutation.reset();
+    setIsProductModalOpen(true);
   };
 
-  const closeCreateModal = () => {
-    setIsCreateModalOpen(false);
+  const openEditModal = (product: ProductListItem) => {
+    if (!canManageProducts) {
+      return;
+    }
+    cleanupImagePreviews(productImages);
+    setProductImages([]);
+    setFormMode('edit');
+    setEditingProductId(product.id);
     setCreateTouched(false);
-    setCreateForm(createEmptyProductForm(createFormDefaults));
     createProductMutation.reset();
+    updateProductMutation.reset();
+    setIsProductModalOpen(true);
+  };
+
+  const openDeleteModal = (product: ProductListItem) => {
+    if (!canManageProducts) {
+      return;
+    }
+    setProductToDelete(product);
+    setIsDeleteModalOpen(true);
+    deleteProductMutation.reset();
+  };
+
+  const closeDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setProductToDelete(null);
+    deleteProductMutation.reset();
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!productToDelete) {
+      return;
+    }
+    try {
+      await deleteProductMutation.mutateAsync(productToDelete.id);
+      setPageNotification(`Товар «${productToDelete.name}» удалён.`);
+      closeDeleteModal();
+    } catch (error) {
+      // Ошибка отобразится в модальном окне удаления
+    }
+  };
+
+  useEffect(() => {
+    if (formMode !== 'edit' || !editingProduct) {
+      return;
+    }
+    setCreateForm(createFormFromProduct(editingProduct));
+    setCreateTouched(false);
+    setProductImages(mapProductImagesToForm(editingProduct.images));
+  }, [formMode, editingProduct]);
+
+  const closeProductModal = () => {
+    setIsProductModalOpen(false);
+    setCreateTouched(false);
+    cleanupImagePreviews(productImages);
+    setProductImages([]);
+    setCreateForm(createEmptyProductForm(createFormDefaults));
+    setFormMode('create');
+    setEditingProductId(null);
+    createProductMutation.reset();
+    updateProductMutation.reset();
   };
 
   const handleDimensionShapeChange = (event: ChangeEvent<HTMLSelectElement>) => {
@@ -884,19 +1197,126 @@ export default function ProductsPage() {
     }));
   };
 
-  const handleCreateSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleImagesChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { files } = event.target;
+    if (!files || files.length === 0) {
+      return;
+    }
+    const nextImages = Array.from(files).map((file) => ({
+      id: createImageId(),
+      file,
+      previewUrl: URL.createObjectURL(file),
+      isPrimary: false,
+    }));
+    setProductImages((prev) => normalizePrimary([...prev.map((image) => ({ ...image })), ...nextImages]));
+    event.target.value = '';
+  };
+
+  const handleRemoveImage = (id: string) => {
+    setProductImages((prev) => {
+      const next: ProductFormImage[] = [];
+      prev.forEach((image) => {
+        if (image.id !== id) {
+          next.push({ ...image });
+          return;
+        }
+        if (image.remoteId) {
+          next.push({ ...image, removed: true, isPrimary: false });
+        } else {
+          if (image.file) {
+            URL.revokeObjectURL(image.previewUrl);
+          }
+        }
+      });
+      return normalizePrimary(next);
+    });
+  };
+
+  const handleSetPrimaryImage = (id: string) => {
+    setProductImages((prev) => {
+      const targetIndex = prev.findIndex((image) => image.id === id && !image.removed);
+      if (targetIndex === -1) {
+        return prev;
+      }
+      const target = { ...prev[targetIndex], isPrimary: true };
+      const before = prev.slice(0, targetIndex).map((image) => ({ ...image, isPrimary: false }));
+      const after = prev.slice(targetIndex + 1).map((image) => ({ ...image, isPrimary: false }));
+      const activeAfter = after.filter((image) => !image.removed);
+      const activeBefore = before.filter((image) => !image.removed);
+      const removed = [...before, ...after].filter((image) => image.removed);
+      const ordered: ProductFormImage[] = [target, ...activeBefore, ...activeAfter, ...removed];
+      return normalizePrimary(ordered);
+    });
+  };
+
+  const handleProductSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setCreateTouched(true);
     if (!isCreateFormValid) {
       return;
     }
+    if (formMode === 'edit' && !isEditReady) {
+      return;
+    }
     const payload = buildCreatePayload(createForm);
+    const normalizedImages = normalizePrimary(productImages);
+    const activeImages = normalizedImages.filter((image) => !image.removed);
+
     try {
-      const response = await createProductMutation.mutateAsync(payload);
-      setCreateNotification(`Товар «${payload.name}» создан. ID: ${response.id}.`);
-      closeCreateModal();
+      if (formMode === 'create') {
+        const response = await createProductMutation.mutateAsync(payload);
+        if (activeImages.length) {
+          const uploadPayload = activeImages
+            .filter((image): image is ProductFormImage & { file: File } => Boolean(image.file))
+            .map((image, index) => ({ file: image.file!, position: index + 1 }));
+          if (uploadPayload.length) {
+            await productsApi.uploadImages(response.id, uploadPayload);
+          }
+        }
+        setPageNotification(`Товар «${payload.name}» создан. ID: ${response.id}.`);
+      } else if (formMode === 'edit' && editingProductId) {
+        await updateProductMutation.mutateAsync({ productId: editingProductId, payload });
+
+        const removedImages = normalizedImages.filter((image) => image.removed && image.remoteId);
+        if (removedImages.length) {
+          await Promise.all(
+            removedImages.map((image) =>
+              image.remoteId ? productsApi.deleteImage(editingProductId, image.remoteId) : Promise.resolve()
+            )
+          );
+        }
+
+        const newImages = activeImages.filter((image) => image.file);
+        const uploadedIds = new Map<string, string>();
+        if (newImages.length) {
+          const uploadPayload = newImages.map((image) => ({
+            file: image.file!,
+            position: activeImages.findIndex((item) => item.id === image.id) + 1,
+          }));
+          const uploaded = await productsApi.uploadImages(editingProductId, uploadPayload);
+          uploaded.forEach((item, index) => {
+            const source = newImages[index];
+            uploadedIds.set(source.id, item.id);
+          });
+        }
+
+        const finalOrder = activeImages
+          .map((image, index) => ({
+            id: image.remoteId ?? uploadedIds.get(image.id),
+            position: index + 1,
+          }))
+          .filter((item): item is { id: string; position: number } => Boolean(item.id));
+
+        if (finalOrder.length) {
+          await productsApi.reorderImages(editingProductId, { order: finalOrder });
+        }
+
+        setPageNotification(`Товар «${payload.name}» обновлён.`);
+      }
+
+      closeProductModal();
     } catch (error) {
-      // Ошибка отобразится в модальном окне через состояние мутации
+      // Ошибка отображается через состояние мутации
     }
   };
 
@@ -925,11 +1345,11 @@ export default function ProductsPage() {
           ) : null}
         </header>
 
-        {createNotification ? (
+        {pageNotification ? (
           <Alert tone="success" title="Товар создан">
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-              <span>{createNotification}</span>
-              <Button variant="ghost" type="button" onClick={() => setCreateNotification(null)}>
+              <span>{pageNotification}</span>
+              <Button variant="ghost" type="button" onClick={() => setPageNotification(null)}>
                 Скрыть
               </Button>
             </div>
@@ -1048,6 +1468,9 @@ export default function ProductsPage() {
                   ? transportLabelMap[product.delivery.transport_restriction]
                   : undefined
               }
+              onEdit={openEditModal}
+              onDelete={openDeleteModal}
+              canManage={canManageProducts}
             />
           ))}
 
@@ -1070,9 +1493,13 @@ export default function ProductsPage() {
         </section>
       </div>
 
-      <Modal open={isCreateModalOpen} title="Новый товар" onClose={closeCreateModal}>
+      <Modal
+        open={isProductModalOpen}
+        title={formMode === 'create' ? 'Новый товар' : 'Редактирование товара'}
+        onClose={closeProductModal}
+      >
         <form
-          onSubmit={handleCreateSubmit}
+          onSubmit={handleProductSubmit}
           style={{
             display: 'flex',
             flexDirection: 'column',
@@ -1081,21 +1508,39 @@ export default function ProductsPage() {
             padding: '8px 0 0',
           }}
         >
-          {createProductMutation.isError ? (
-            <Alert tone="danger" title="Не удалось создать товар">
-              {createProductErrorMessage}
+          {productMutation.isError ? (
+            <Alert
+              tone="danger"
+              title={
+                formMode === 'create'
+                  ? 'Не удалось создать товар'
+                  : 'Не удалось обновить товар'
+              }
+            >
+              {productFormErrorMessage}
             </Alert>
           ) : null}
 
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '24px',
-              overflowY: 'auto',
-              paddingRight: '8px',
-            }}
-          >
+          {formMode === 'edit' && isEditingProductLoading ? (
+            <div style={{ padding: '16px' }}>
+              <Spinner label="Загружаем данные товара" />
+            </div>
+          ) : formMode === 'edit' && isEditingProductError ? (
+            <Alert tone="danger" title="Не удалось загрузить данные товара">
+              {editingProductError instanceof Error
+                ? editingProductError.message
+                : 'Попробуйте закрыть окно и повторить попытку.'}
+            </Alert>
+          ) : (
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '24px',
+                overflowY: 'auto',
+                paddingRight: '8px',
+              }}
+            >
             <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <h3 style={{ margin: 0 }}>Основные данные</h3>
               <div
@@ -1214,6 +1659,98 @@ export default function ProductsPage() {
                   </div>
                 </div>
               </FormField>
+            </section>
+
+            <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <h3 style={{ margin: 0 }}>Фотографии</h3>
+              <FormField
+                label="Загрузить изображения"
+                description="Добавьте одно или несколько фото. Первое фото станет обложкой."
+              >
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleImagesChange}
+                  disabled={isSubmittingProduct}
+                />
+              </FormField>
+              {productImages.some((image) => !image.removed) ? (
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+                    gap: '16px',
+                  }}
+                >
+                  {productImages
+                    .filter((image) => !image.removed)
+                    .map((image) => (
+                      <div
+                        key={image.id}
+                        style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
+                      >
+                        <div
+                          style={{
+                            position: 'relative',
+                            borderRadius: '12px',
+                            overflow: 'hidden',
+                            border: image.isPrimary
+                              ? '2px solid var(--color-primary)'
+                              : '1px solid var(--color-border)',
+                            background: 'var(--color-surface-muted)',
+                            aspectRatio: '1 / 1',
+                          }}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={image.previewUrl}
+                            alt={createForm.name ? `Фото ${createForm.name}` : 'Фото товара'}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
+                          {image.isPrimary ? (
+                            <span
+                              style={{
+                                position: 'absolute',
+                                bottom: '8px',
+                                left: '8px',
+                                padding: '4px 8px',
+                                borderRadius: '999px',
+                                background: 'rgba(0, 0, 0, 0.6)',
+                                color: '#fff',
+                                fontSize: '0.75rem',
+                              }}
+                            >
+                              Обложка
+                            </span>
+                          ) : null}
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => handleSetPrimaryImage(image.id)}
+                            disabled={image.isPrimary || isSubmittingProduct}
+                          >
+                            Сделать обложкой
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => handleRemoveImage(image.id)}
+                            disabled={isSubmittingProduct}
+                          >
+                            Удалить
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              ) : (
+                <span style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
+                  Фотографии пока не добавлены.
+                </span>
+              )}
             </section>
 
             <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -1848,21 +2385,49 @@ export default function ProductsPage() {
               </FormField>
             </section>
           </div>
+          )}
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
             <Button
               type="button"
               variant="ghost"
-              onClick={closeCreateModal}
-              disabled={isCreatingProduct}
+              onClick={closeProductModal}
+              disabled={isSubmittingProduct}
             >
               Отмена
             </Button>
-            <Button type="submit" variant="primary" disabled={isCreatingProduct}>
-              {isCreatingProduct ? 'Создаём…' : 'Создать товар'}
+            <Button type="submit" variant="primary" disabled={isSubmittingProduct || !isEditReady}>
+              {isSubmittingProduct
+                ? formMode === 'create'
+                  ? 'Создаём…'
+                  : 'Сохраняем…'
+                : formMode === 'create'
+                ? 'Создать товар'
+                : 'Сохранить изменения'}
             </Button>
           </div>
         </form>
+      </Modal>
+
+      <Modal open={isDeleteModalOpen} title="Удаление товара" onClose={closeDeleteModal}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <p style={{ margin: 0, lineHeight: 1.5 }}>
+            Удалить товар «{productToDelete?.name ?? 'Без названия'}»? Это действие нельзя отменить.
+          </p>
+          {deleteProductMutation.isError ? (
+            <Alert tone="danger" title="Не удалось удалить товар">
+              {deleteProductErrorMessage}
+            </Alert>
+          ) : null}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+            <Button type="button" variant="ghost" onClick={closeDeleteModal} disabled={isDeletingProduct}>
+              Отмена
+            </Button>
+            <Button type="button" variant="danger" onClick={handleConfirmDelete} disabled={isDeletingProduct}>
+              {isDeletingProduct ? 'Удаляем…' : 'Удалить'}
+            </Button>
+          </div>
+        </div>
       </Modal>
     </RoleGuard>
   );
