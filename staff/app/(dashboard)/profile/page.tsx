@@ -9,7 +9,7 @@ import { Table, Tag } from '@/shared/ui';
 
 const sectionsLabels: Record<(typeof ADMIN_SECTIONS)[number], string> = {
   dashboard: 'Дашборд',
-  products: 'Товары',
+  products: 'Прайс-лист',
   orders: 'Заказы',
   customers: 'Клиенты',
   inventory: 'Склад',

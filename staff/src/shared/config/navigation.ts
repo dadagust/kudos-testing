@@ -19,7 +19,7 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
   },
   {
     id: 'products',
-    label: 'Товары',
+    label: 'Прайс-лист',
     href: '/products',
     icon: 'box',
     permission: 'adminpanel_view_products',

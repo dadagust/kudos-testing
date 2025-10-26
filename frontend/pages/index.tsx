@@ -400,7 +400,7 @@ export default function Home() {
               </div>
 
               <div className={styles.fieldGroup}>
-                <p className={styles.label}>Товары</p>
+                <p className={styles.label}>Прайс-лист</p>
                 {isLoadingProducts ? (
                   <p className={styles.helperText}>Загружаем товары…</p>
                 ) : (
@@ -470,7 +470,7 @@ export default function Home() {
                 </p>
                 <p>Комментарий: {orderSuccess.comment ? orderSuccess.comment : '—'}</p>
                 <div className={styles.summaryItems}>
-                  <h3>Товары:</h3>
+                  <h3>Прайс-лист:</h3>
                   <ul>
                     {orderSuccess.items.map((item) => (
                       <li key={item.id}>
