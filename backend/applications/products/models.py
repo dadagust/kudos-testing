@@ -11,6 +11,8 @@ from django.db import models
 
 from applications.core.models import Date, PathAndRename
 
+from .storage import product_image_storage
+
 from .choices import (
     Color,
     DimensionShape,
@@ -262,7 +264,11 @@ class ProductImage(Date):
         related_name='images',
         verbose_name='Товар',
     )
-    file = models.ImageField('Файл', upload_to=PathAndRename('products'))
+    file = models.ImageField(
+        'Файл',
+        upload_to=PathAndRename('products'),
+        storage=product_image_storage,
+    )
     position = models.PositiveIntegerField('Позиция', default=1)
 
     class Meta(Date.Meta):

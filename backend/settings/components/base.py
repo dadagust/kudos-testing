@@ -87,4 +87,12 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+MEDIA_URL = env('DJANGO_MEDIA_URL', default='/media/')
+MEDIA_ROOT = Path(env('DJANGO_MEDIA_ROOT', default=str(BASE_DIR)))
+PRODUCTS_MEDIA_ROOT = Path(
+    env('DJANGO_PRODUCTS_MEDIA_ROOT', default=str(MEDIA_ROOT / 'products'))
+)
+PRODUCTS_MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
+PRODUCTS_MEDIA_URL = env('DJANGO_PRODUCTS_MEDIA_URL', default='/products/')
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
