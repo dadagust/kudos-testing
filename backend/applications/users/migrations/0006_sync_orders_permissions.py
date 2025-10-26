@@ -15,6 +15,9 @@ ACTION_LABELS = {
 ROLE_PERMISSION_MATRIX = {
     'Guest': {
         ('inventory', 'inventoryitem'): ('view',),
+        ('products', 'product'): ('view',),
+        ('products', 'productimage'): ('view',),
+        ('products', 'category'): ('view',),
     },
     'Customer': {
         ('customers', 'customer'): ('view', 'change'),
@@ -24,6 +27,9 @@ ROLE_PERMISSION_MATRIX = {
         ('orders', 'order'): ('view',),
         ('inventory', 'inventoryitem'): ('view',),
         ('documents', 'document'): ('view',),
+        ('products', 'product'): ('view',),
+        ('products', 'productimage'): ('view',),
+        ('products', 'category'): ('view',),
     },
     'B2B': {
         ('customers', 'customer'): ('view', 'change'),
@@ -33,6 +39,9 @@ ROLE_PERMISSION_MATRIX = {
         ('orders', 'order'): ('view',),
         ('inventory', 'inventoryitem'): ('view',),
         ('documents', 'document'): ('view',),
+        ('products', 'product'): ('view',),
+        ('products', 'productimage'): ('view',),
+        ('products', 'category'): ('view',),
     },
     'SalesManager': {
         ('customers', 'customer'): ('view', 'add', 'change', 'delete'),
@@ -49,6 +58,9 @@ ROLE_PERMISSION_MATRIX = {
         ('adminpanel', 'inventory'): ('view',),
         ('adminpanel', 'documents'): ('view',),
         ('adminpanel', 'logs'): ('view',),
+        ('products', 'product'): ('view',),
+        ('products', 'productimage'): ('view',),
+        ('products', 'category'): ('view',),
     },
     'Warehouse': {
         ('customers', 'customer'): ('view',),
@@ -62,6 +74,9 @@ ROLE_PERMISSION_MATRIX = {
         ('adminpanel', 'orders'): ('view',),
         ('adminpanel', 'inventory'): ('view',),
         ('adminpanel', 'logs'): ('view',),
+        ('products', 'product'): ('view',),
+        ('products', 'productimage'): ('view',),
+        ('products', 'category'): ('view',),
     },
     'Accountant': {
         ('customers', 'customer'): ('view',),
@@ -75,12 +90,18 @@ ROLE_PERMISSION_MATRIX = {
         ('adminpanel', 'customers'): ('view',),
         ('adminpanel', 'documents'): ('view',),
         ('adminpanel', 'logs'): ('view',),
+        ('products', 'product'): ('view',),
+        ('products', 'productimage'): ('view',),
+        ('products', 'category'): ('view',),
     },
     'ContentManager': {
         ('inventory', 'inventoryitem'): ('view',),
         ('adminpanel', 'dashboard'): ('view',),
         ('adminpanel', 'products'): ('view',),
         ('adminpanel', 'documents'): ('view',),
+        ('products', 'product'): ('view', 'add', 'change', 'delete'),
+        ('products', 'productimage'): ('view', 'add', 'change', 'delete'),
+        ('products', 'category'): ('view', 'add', 'change', 'delete'),
     },
     'Driver': {
         ('customers', 'customer'): ('view',),
@@ -88,6 +109,9 @@ ROLE_PERMISSION_MATRIX = {
         ('inventory', 'inventoryitem'): ('view',),
         ('adminpanel', 'dashboard'): ('view',),
         ('adminpanel', 'orders'): ('view',),
+        ('products', 'product'): ('view',),
+        ('products', 'productimage'): ('view',),
+        ('products', 'category'): ('view',),
     },
     'Loader': {
         ('customers', 'customer'): ('view',),
@@ -96,6 +120,9 @@ ROLE_PERMISSION_MATRIX = {
         ('adminpanel', 'dashboard'): ('view',),
         ('adminpanel', 'orders'): ('view',),
         ('adminpanel', 'inventory'): ('view',),
+        ('products', 'product'): ('view',),
+        ('products', 'productimage'): ('view',),
+        ('products', 'category'): ('view',),
     },
     'Admin': {
         ('adminpanel', 'dashboard'): ('view', 'change'),
@@ -107,6 +134,9 @@ ROLE_PERMISSION_MATRIX = {
         ('adminpanel', 'integrations'): ('view', 'change'),
         ('adminpanel', 'settings'): ('view', 'change'),
         ('adminpanel', 'logs'): ('view', 'change'),
+        ('products', 'product'): ('view', 'add', 'change', 'delete'),
+        ('products', 'productimage'): ('view', 'add', 'change', 'delete'),
+        ('products', 'category'): ('view', 'add', 'change', 'delete'),
     },
 }
 
