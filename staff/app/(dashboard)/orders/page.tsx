@@ -9,6 +9,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 
@@ -17,10 +18,7 @@ import {
   CreateOrderPayload,
   CustomerSummary,
   DeliveryType,
-  getOrderProductInfo,
-  ORDER_PRODUCTS,
   ORDER_STATUS_LABELS,
-  OrderProductId,
   OrderStatus,
   OrderStatusGroup,
   OrderSummary,
@@ -29,6 +27,7 @@ import {
   useOrdersQuery,
   useUpdateOrderMutation,
 } from '@/entities/order';
+import { ProductListItem, useInfiniteProductsQuery } from '@/entities/product';
 import { RoleGuard, usePermission } from '@/features/auth';
 import type { TableColumn } from '@/shared/ui';
 import {
@@ -54,7 +53,7 @@ type OrderFormState = {
   delivery_type: DeliveryType;
   delivery_address: string;
   comment: string;
-  productQuantities: Record<OrderProductId, number>;
+  productQuantities: Record<string, number>;
 };
 
 type OrderFormSetter = Dispatch<React.SetStateAction<OrderFormState>>;
@@ -100,15 +99,6 @@ const formatDate = (value: string) => {
   return date.toLocaleDateString('ru-RU');
 };
 
-const createEmptyQuantities = (): Record<OrderProductId, number> =>
-  ORDER_PRODUCTS.reduce(
-    (accumulator, product) => ({
-      ...accumulator,
-      [product.id]: 0,
-    }),
-    {} as Record<OrderProductId, number>
-  );
-
 const createInitialFormState = (): OrderFormState => ({
   status: 'new',
   installation_date: '',
@@ -117,29 +107,7 @@ const createInitialFormState = (): OrderFormState => ({
   delivery_type: 'delivery',
   delivery_address: '',
   comment: '',
-  productQuantities: createEmptyQuantities(),
-});
-
-const calculateFormTotal = (form: OrderFormState) =>
-  ORDER_PRODUCTS.reduce((sum, product) => {
-    const quantity = form.productQuantities[product.id] ?? 0;
-    return sum + quantity * product.price;
-  }, 0);
-
-const buildPayloadFromForm = (form: OrderFormState): CreateOrderPayload => ({
-  status: form.status,
-  installation_date: form.installation_date,
-  dismantle_date: form.dismantle_date,
-  customer_id: form.customer?.id ?? null,
-  delivery_type: form.delivery_type,
-  delivery_address: form.delivery_type === 'pickup' ? null : form.delivery_address.trim() || null,
-  comment: form.comment.trim() || null,
-  items: ORDER_PRODUCTS.filter((product) => (form.productQuantities[product.id] ?? 0) > 0).map(
-    (product) => ({
-      product: product.id,
-      quantity: form.productQuantities[product.id],
-    })
-  ),
+  productQuantities: {},
 });
 
 interface OrderFormContentProps {
@@ -158,8 +126,13 @@ interface OrderFormContentProps {
   onSelectCustomer: (customer: CustomerOption | null) => void;
   productSearch: string;
   onProductSearchChange: (value: string) => void;
-  onIncrementProduct: (productId: OrderProductId) => void;
-  onDecrementProduct: (productId: OrderProductId) => void;
+  products: ProductListItem[];
+  isLoadingProducts: boolean;
+  hasMoreProducts: boolean;
+  onLoadMoreProducts: () => void;
+  isFetchingMoreProducts: boolean;
+  onIncrementProduct: (productId: string) => void;
+  onDecrementProduct: (productId: string) => void;
   totalAmount: number;
 }
 
@@ -179,19 +152,35 @@ const OrderFormContent = ({
   onSelectCustomer,
   productSearch,
   onProductSearchChange,
+  products,
+  isLoadingProducts,
+  hasMoreProducts,
+  onLoadMoreProducts,
+  isFetchingMoreProducts,
   onIncrementProduct,
   onDecrementProduct,
   totalAmount,
 }: OrderFormContentProps) => {
-  const filteredProducts = useMemo(
-    () =>
-      ORDER_PRODUCTS.filter((product) =>
-        product.name.toLowerCase().includes(productSearch.toLowerCase())
-      ),
-    [productSearch]
-  );
-
   const totalFormatted = formatCurrency(totalAmount);
+
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!hasMoreProducts) {
+      return;
+    }
+    const element = loadMoreRef.current;
+    if (!element) {
+      return;
+    }
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0]?.isIntersecting && !isFetchingMoreProducts) {
+        onLoadMoreProducts();
+      }
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [hasMoreProducts, onLoadMoreProducts, isFetchingMoreProducts]);
 
   const handleStatusChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value as OrderStatus;
@@ -358,52 +347,67 @@ const OrderFormContent = ({
           value={productSearch}
           onChange={(event) => onProductSearchChange(event.target.value)}
         />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {filteredProducts.map((product) => {
-            const quantity = form.productQuantities[product.id] ?? 0;
-            const productInfo = getOrderProductInfo(product.id);
-            return (
-              <div
-                key={product.id}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '12px 16px',
-                  border: '1px solid var(--color-border)',
-                  borderRadius: '10px',
-                }}
-              >
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <strong style={{ fontSize: '1rem' }}>{productInfo.name}</strong>
-                  <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
-                    {formatCurrency(productInfo.price)} за единицу
-                  </span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', minHeight: 120 }}>
+          {isLoadingProducts ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 0' }}>
+              <Spinner />
+            </div>
+          ) : products.length ? (
+            products.map((product) => {
+              const quantity = form.productQuantities[product.id] ?? 0;
+              return (
+                <div
+                  key={product.id}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '12px 16px',
+                    border: '1px solid var(--color-border)',
+                    borderRadius: '10px',
+                  }}
+                >
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <strong style={{ fontSize: '1rem' }}>{product.name}</strong>
+                    <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                      {formatCurrency(product.price_rub)} за единицу
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => onDecrementProduct(product.id)}
+                      disabled={quantity === 0}
+                    >
+                      −
+                    </Button>
+                    <span style={{ minWidth: 24, textAlign: 'center', fontWeight: 600 }}>
+                      {quantity}
+                    </span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => onIncrementProduct(product.id)}
+                    >
+                      +
+                    </Button>
+                  </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => onDecrementProduct(product.id)}
-                    disabled={quantity === 0}
-                  >
-                    −
-                  </Button>
-                  <span style={{ minWidth: 24, textAlign: 'center', fontWeight: 600 }}>
-                    {quantity}
-                  </span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => onIncrementProduct(product.id)}
-                  >
-                    +
-                  </Button>
-                </div>
-              </div>
-            );
-          })}
+              );
+            })
+          ) : (
+            <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+              Товары не найдены.
+            </span>
+          )}
+          <div ref={loadMoreRef} />
+          {isFetchingMoreProducts ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0' }}>
+              <Spinner />
+            </div>
+          ) : null}
         </div>
       </Accordion>
 
@@ -471,6 +475,111 @@ export default function OrdersPage() {
   const [customerSearch, setCustomerSearch] = useState('');
   const [productSearch, setProductSearch] = useState('');
 
+  const productQueryParams = useMemo(
+    () => ({
+      limit: 12,
+      q: productSearch.trim() || undefined,
+    }),
+    [productSearch]
+  );
+
+  const {
+    data: productPages,
+    fetchNextPage: fetchNextProducts,
+    hasNextPage: hasMoreProducts = false,
+    isFetchingNextPage: isFetchingMoreProducts,
+    isLoading: isLoadingProducts,
+  } = useInfiniteProductsQuery(productQueryParams);
+
+  const fetchedProducts: ProductListItem[] = useMemo(
+    () => productPages?.pages.flatMap((page) => page.results) ?? [],
+    [productPages]
+  );
+
+  const products: ProductListItem[] = useMemo(() => {
+    if (!editOrderResponse?.data) {
+      return fetchedProducts;
+    }
+    const existingIds = new Set(fetchedProducts.map((product) => product.id));
+    const extras: ProductListItem[] = [];
+    editOrderResponse.data.items.forEach((item) => {
+      if (item.product?.id && !existingIds.has(item.product.id)) {
+        extras.push({
+          id: item.product.id,
+          name: item.product.name,
+          price_rub: Number(item.unit_price),
+          color: item.product.color ?? null,
+          thumbnail_url: item.product.thumbnail_url ?? null,
+          delivery: { transport_restriction: null, self_pickup_allowed: false },
+        });
+      }
+    });
+    return extras.length ? [...extras, ...fetchedProducts] : fetchedProducts;
+  }, [fetchedProducts, editOrderResponse]);
+
+  const productsMap = useMemo(() => {
+    const map: Record<string, ProductListItem> = {};
+    products.forEach((product) => {
+      map[product.id] = product;
+    });
+    return map;
+  }, [products]);
+
+  const loadMoreProducts = useCallback(() => {
+    if (hasMoreProducts) {
+      void fetchNextProducts();
+    }
+  }, [fetchNextProducts, hasMoreProducts]);
+
+  const calculateTotal = useCallback(
+    (form: OrderFormState, map?: Record<string, ProductListItem>) =>
+      Object.entries(form.productQuantities).reduce((sum, [productId, quantity]) => {
+        const product = (map ?? productsMap)[productId];
+        if (!product || quantity <= 0) {
+          return sum;
+        }
+        return sum + product.price_rub * quantity;
+      }, 0),
+    [productsMap]
+  );
+
+  const buildPayloadFromForm = useCallback(
+    (form: OrderFormState): CreateOrderPayload => ({
+      status: form.status,
+      installation_date: form.installation_date,
+      dismantle_date: form.dismantle_date,
+      customer_id: form.customer?.id ?? null,
+      delivery_type: form.delivery_type,
+      delivery_address:
+        form.delivery_type === 'pickup' ? null : form.delivery_address.trim() || null,
+      comment: form.comment.trim() || null,
+      items: Object.entries(form.productQuantities)
+        .filter(([, quantity]) => quantity > 0)
+        .map(([productId, quantity]) => ({ product_id: productId, quantity })),
+    }),
+    []
+  );
+
+  const editProductsMap = useMemo(() => {
+    if (!editOrderResponse?.data) {
+      return productsMap;
+    }
+    const map: Record<string, ProductListItem> = { ...productsMap };
+    editOrderResponse.data.items.forEach((item) => {
+      if (item.product?.id && !map[item.product.id]) {
+        map[item.product.id] = {
+          id: item.product.id,
+          name: item.product.name,
+          price_rub: Number(item.unit_price),
+          color: item.product.color ?? null,
+          thumbnail_url: item.product.thumbnail_url ?? null,
+          delivery: { transport_restriction: null, self_pickup_allowed: false },
+        };
+      }
+    });
+    return map;
+  }, [productsMap, editOrderResponse]);
+
   const queryParams = useMemo(
     () => ({
       status_group: statusGroup,
@@ -514,9 +623,11 @@ export default function OrdersPage() {
   useEffect(() => {
     if (isEditOpen && editOrderResponse?.data) {
       const order = editOrderResponse.data;
-      const quantities = createEmptyQuantities();
+      const quantities: Record<string, number> = {};
       order.items.forEach((item) => {
-        quantities[item.product] = item.quantity;
+        if (item.product?.id) {
+          quantities[item.product.id] = item.quantity;
+        }
       });
       setEditForm({
         status: order.status,
@@ -599,8 +710,8 @@ export default function OrdersPage() {
     if (form.delivery_type === 'delivery' && !form.delivery_address.trim()) {
       return 'Введите адрес доставки или выберите самовывоз.';
     }
-    const items = ORDER_PRODUCTS.filter((product) => (form.productQuantities[product.id] ?? 0) > 0);
-    if (!items.length) {
+    const hasItems = Object.values(form.productQuantities).some((quantity) => quantity > 0);
+    if (!hasItems) {
       return 'Добавьте хотя бы один товар в заказ.';
     }
     return null;
@@ -668,7 +779,7 @@ export default function OrdersPage() {
   };
 
   const updateProductQuantity = useCallback(
-    (setter: OrderFormSetter, productId: OrderProductId, delta: number) => {
+    (setter: OrderFormSetter, productId: string, delta: number) => {
       setter((prev) => {
         const current = prev.productQuantities[productId] ?? 0;
         const next = Math.max(0, current + delta);
@@ -684,13 +795,13 @@ export default function OrdersPage() {
     []
   );
 
-  const handleCreateIncrement = (productId: OrderProductId) =>
+  const handleCreateIncrement = (productId: string) =>
     updateProductQuantity(setCreateForm, productId, 1);
-  const handleCreateDecrement = (productId: OrderProductId) =>
+  const handleCreateDecrement = (productId: string) =>
     updateProductQuantity(setCreateForm, productId, -1);
-  const handleEditIncrement = (productId: OrderProductId) =>
+  const handleEditIncrement = (productId: string) =>
     updateProductQuantity(setEditForm, productId, 1);
-  const handleEditDecrement = (productId: OrderProductId) =>
+  const handleEditDecrement = (productId: string) =>
     updateProductQuantity(setEditForm, productId, -1);
 
   const handleSelectCreateCustomer = (customer: CustomerOption | null) => {
@@ -895,9 +1006,14 @@ export default function OrdersPage() {
             onSelectCustomer={handleSelectCreateCustomer}
             productSearch={productSearch}
             onProductSearchChange={setProductSearch}
+            products={products}
+            isLoadingProducts={isLoadingProducts}
+            hasMoreProducts={hasMoreProducts}
+            onLoadMoreProducts={loadMoreProducts}
+            isFetchingMoreProducts={isFetchingMoreProducts}
             onIncrementProduct={handleCreateIncrement}
             onDecrementProduct={handleCreateDecrement}
-            totalAmount={calculateFormTotal(createForm)}
+            totalAmount={calculateTotal(createForm)}
           />
         </Drawer>
 
@@ -918,9 +1034,14 @@ export default function OrdersPage() {
             onSelectCustomer={handleSelectEditCustomer}
             productSearch={productSearch}
             onProductSearchChange={setProductSearch}
+            products={products}
+            isLoadingProducts={isLoadingProducts}
+            hasMoreProducts={hasMoreProducts}
+            onLoadMoreProducts={loadMoreProducts}
+            isFetchingMoreProducts={isFetchingMoreProducts}
             onIncrementProduct={handleEditIncrement}
             onDecrementProduct={handleEditDecrement}
-            totalAmount={calculateFormTotal(editForm)}
+            totalAmount={calculateTotal(editForm, editProductsMap)}
           />
         </Drawer>
       </div>

@@ -9,15 +9,9 @@ from django.db import transaction
 from rest_framework import serializers
 
 from applications.customers.models import Customer
+from applications.products.models import Product
 
-from .models import (
-    ORDER_PRODUCT_PRICES,
-    DeliveryType,
-    Order,
-    OrderItem,
-    OrderProduct,
-    OrderStatus,
-)
+from .models import DeliveryType, Order, OrderItem, OrderStatus
 
 
 class CustomerSummarySerializer(serializers.ModelSerializer):
@@ -32,8 +26,20 @@ class CustomerSummarySerializer(serializers.ModelSerializer):
         return obj.display_name or obj.full_name or obj.email or str(obj.pk)
 
 
+class OrderProductSummarySerializer(serializers.ModelSerializer):
+    thumbnail_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Product
+        fields = ('id', 'name', 'price_rub', 'color', 'thumbnail_url')
+
+    def get_thumbnail_url(self, obj: Product) -> str | None:
+        thumbnail = obj.thumbnail
+        return thumbnail.url if thumbnail else None
+
+
 class OrderItemSerializer(serializers.ModelSerializer):
-    product_label = serializers.CharField(source='get_product_display', read_only=True)
+    product = OrderProductSummarySerializer(read_only=True)
     subtotal = serializers.SerializerMethodField()
 
     class Meta:
@@ -41,12 +47,12 @@ class OrderItemSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'product',
-            'product_label',
+            'product_name',
             'quantity',
             'unit_price',
             'subtotal',
         )
-        read_only_fields = ('id', 'product_label', 'unit_price', 'subtotal')
+        read_only_fields = ('id', 'product', 'product_name', 'unit_price', 'subtotal')
 
     def get_subtotal(self, obj: OrderItem) -> Decimal:
         return obj.subtotal
@@ -85,12 +91,14 @@ class OrderDetailSerializer(OrderSummarySerializer):
 
 
 class OrderItemInputSerializer(serializers.Serializer):
-    product = serializers.ChoiceField(choices=OrderProduct.choices)
+    product_id = serializers.UUIDField()
     quantity = serializers.IntegerField(min_value=1)
 
-    def validate_product(self, value: str) -> str:
-        if value not in ORDER_PRODUCT_PRICES:
-            raise serializers.ValidationError('Неизвестный товар')
+    def validate_product_id(self, value):
+        try:
+            product = Product.objects.get(pk=value)
+        except Product.DoesNotExist as exc:  # pragma: no cover - validated via serializer
+            raise serializers.ValidationError('Товар не найден') from exc
         return value
 
 
@@ -179,15 +187,16 @@ class OrderWriteSerializer(serializers.ModelSerializer):
     def _replace_items(self, order: Order, items_data: list[dict[str, Any]]) -> None:
         order_items: list[OrderItem] = []
         for item in items_data:
-            product = item['product']
+            product_id = item['product_id']
             quantity = int(item['quantity'])
-            unit_price = ORDER_PRODUCT_PRICES[product]
+            product = Product.objects.get(pk=product_id)
             order_items.append(
                 OrderItem(
                     order=order,
                     product=product,
+                    product_name=product.name,
                     quantity=quantity,
-                    unit_price=unit_price,
+                    unit_price=product.price_rub,
                 )
             )
         OrderItem.objects.bulk_create(order_items)

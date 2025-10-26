@@ -8,6 +8,7 @@ from django.core.validators import MinValueValidator
 from django.db import models
 
 from applications.core.models import Date
+from applications.products.models import Product
 
 
 class OrderStatus(models.TextChoices):
@@ -22,17 +23,6 @@ class OrderStatus(models.TextChoices):
 class DeliveryType(models.TextChoices):
     DELIVERY = 'delivery', 'Доставка'
     PICKUP = 'pickup', 'Самовывоз'
-
-
-class OrderProduct(models.TextChoices):
-    PRODUCT_1 = 'product_1', 'Товар 1'
-    PRODUCT_2 = 'product_2', 'Товар 2'
-
-
-ORDER_PRODUCT_PRICES: dict[str, Decimal] = {
-    OrderProduct.PRODUCT_1: Decimal('1500.00'),
-    OrderProduct.PRODUCT_2: Decimal('2500.00'),
-}
 
 
 STATUS_GROUP_MAP: dict[str, tuple[str, ...]] = {
@@ -110,7 +100,15 @@ class OrderItem(Date):
         related_name='items',
         verbose_name='Заказ',
     )
-    product = models.CharField('Товар', max_length=64, choices=OrderProduct.choices)
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.PROTECT,
+        related_name='order_items',
+        verbose_name='Товар',
+        null=True,
+        blank=True,
+    )
+    product_name = models.CharField('Название товара', max_length=255, blank=True)
     quantity = models.PositiveIntegerField(
         'Количество', default=1, validators=[MinValueValidator(1)]
     )
@@ -127,7 +125,7 @@ class OrderItem(Date):
         ordering = ['created']
 
     def __str__(self) -> str:  # pragma: no cover - human readable representation
-        return f'{self.get_product_display()} x {self.quantity}'
+        return f'{self.product_name} x {self.quantity}'
 
     @property
     def subtotal(self) -> Decimal:

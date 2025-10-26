@@ -1,33 +1,50 @@
-import { mockClient } from '@/shared/api/httpClient';
+import { apiV1Client } from '@/shared/api/httpClient';
 
-import { ProductDetailResponse, ProductListQuery, ProductListResponse } from '../model/types';
+import {
+  ProductCategoriesResponseItem,
+  ProductDetail,
+  ProductEnumsResponse,
+  ProductListQuery,
+  ProductListResponse,
+} from '../model/types';
 
-const sanitizeParams = (params: ProductListQuery): Record<string, string | number> => {
-  const entries = Object.entries(params).filter(([, value]) => {
+const sanitizeParams = (params: ProductListQuery): Record<string, string | number | boolean> => {
+  const result: Record<string, string | number | boolean> = {};
+  Object.entries(params).forEach(([key, value]) => {
     if (value === undefined || value === null) {
-      return false;
+      return;
     }
-    if (typeof value === 'string') {
-      return value.trim().length > 0;
+    if (typeof value === 'string' && value.trim().length === 0) {
+      return;
     }
-    if (typeof value === 'number') {
-      return Number.isFinite(value);
+    if (key === 'self_pickup') {
+      result[key] = value ? 'true' : 'false';
+      return;
     }
-    return false;
+    result[key] = value as string | number | boolean;
   });
-
-  return Object.fromEntries(entries) as Record<string, string | number>;
+  return result;
 };
 
 export const productsApi = {
   list: async (params: ProductListQuery): Promise<ProductListResponse> => {
-    const { data } = await mockClient.get<ProductListResponse>('/products', {
+    const { data } = await apiV1Client.get<ProductListResponse>('/products', {
       params: sanitizeParams(params),
     });
     return data;
   },
-  details: async (productId: string): Promise<ProductDetailResponse> => {
-    const { data } = await mockClient.get<ProductDetailResponse>(`/products/${productId}`);
+  details: async (productId: string, include?: string): Promise<ProductDetail> => {
+    const { data } = await apiV1Client.get<ProductDetail>(`/products/${productId}`, {
+      params: include ? { include } : undefined,
+    });
+    return data;
+  },
+  categories: async (): Promise<ProductCategoriesResponseItem[]> => {
+    const { data } = await apiV1Client.get<ProductCategoriesResponseItem[]>('/products/categories');
+    return data;
+  },
+  enums: async (): Promise<ProductEnumsResponse> => {
+    const { data } = await apiV1Client.get<ProductEnumsResponse>('/products/enums');
     return data;
   },
 };
