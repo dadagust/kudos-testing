@@ -61,8 +61,8 @@ export const productsApi = {
   ): Promise<ProductImage[]> => {
     const formData = new FormData();
     files.forEach(({ file, position }) => {
-      formData.append('files[]', file);
-      formData.append('positions[]', String(position));
+      formData.append('files', file);
+      formData.append('positions', String(position));
     });
 
     const { data } = await apiV1Client.post<ProductImage[]>(`/products/${productId}/images`, formData, {
