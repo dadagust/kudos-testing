@@ -150,7 +150,7 @@ export default function ProductsPage() {
   const [selfPickup, setSelfPickup] = useState('');
   const [ordering, setOrdering] = useState<ProductListQuery['ordering']>('-created_at');
 
-  const canManageProducts = usePermission('inventory_change_inventoryitem');
+  const canManageProducts = usePermission('products_add_product');
 
   const baseParams = useMemo<ProductListQuery>(
     () => ({
@@ -252,9 +252,7 @@ export default function ProductsPage() {
             </p>
           </div>
           {canManageProducts ? (
-            <Button iconLeft="plus" disabled title="Создание товара появится позже">
-              Новый товар
-            </Button>
+            <Button iconLeft="plus">Новый товар</Button>
           ) : null}
         </header>
 
