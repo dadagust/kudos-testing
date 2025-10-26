@@ -81,7 +81,9 @@ class ProductApiTests(APITestCase):
         self.assertIn('id', body)
         product_id = UUID(body['id'])
 
-        detail_url = reverse('products:product-detail', args=[product_id]) + '?include=images,seo,dimensions'
+        detail_url = (
+            reverse('products:product-detail', args=[product_id]) + '?include=images,seo,dimensions'
+        )
         response = self.client.get(detail_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         product = response.json()
@@ -159,7 +161,9 @@ class ProductApiTests(APITestCase):
         image_id = data[0]['id']
 
         reorder_url = reverse('products:product-reorder-images', args=[product.id])
-        response = self.client.patch(reorder_url, {'order': [{'id': image_id, 'position': 2}]}, format='json')
+        response = self.client.patch(
+            reorder_url, {'order': [{'id': image_id, 'position': 2}]}, format='json'
+        )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         delete_url = reverse('products:product-delete-image', args=[product.id, image_id])

@@ -231,7 +231,7 @@ class Product(Date):
         ]
 
     @property
-    def thumbnail(self) -> 'ProductImage | None':
+    def thumbnail(self) -> ProductImage | None:
         return self.images.order_by('position').first()
 
     def calculate_volume(self) -> int | None:
@@ -276,4 +276,6 @@ class ProductImage(Date):
     @property
     def url(self) -> str:
         return self.file.url if self.file else ''
+
+
 __all__ = ['Category', 'Product', 'ProductImage']

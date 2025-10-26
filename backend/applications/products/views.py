@@ -9,10 +9,10 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.fields import DateTimeField
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.fields import DateTimeField
 
 from .choices import (
     Color,
@@ -32,7 +32,6 @@ from .serializers import (
     ProductListItemSerializer,
     prefetch_for_include,
 )
-
 
 DATETIME_FIELD = DateTimeField()
 
@@ -66,7 +65,9 @@ class ProductViewSet(viewsets.ModelViewSet):
             codes = exc.get_codes()
             if _has_error_code(codes, 'unprocessable_entity'):
                 status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
-            return Response({'detail': 'Validation error', 'errors': exc.detail}, status=status_code)
+            return Response(
+                {'detail': 'Validation error', 'errors': exc.detail}, status=status_code
+            )
         return super().handle_exception(exc)
 
     def create(self, request: Request, *args, **kwargs):  # type: ignore[override]
@@ -258,13 +259,20 @@ class ProductViewSet(viewsets.ModelViewSet):
         existing_ids = {str(image.id) for image in product.images.all()}
         for item in order:
             if not isinstance(item, dict) or 'id' not in item or 'position' not in item:
-                return Response({'detail': 'Each entry must have id and position'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {'detail': 'Each entry must have id and position'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             if str(item['id']) not in existing_ids:
-                return Response({'detail': f"Image {item['id']} not found"}, status=status.HTTP_404_NOT_FOUND)
+                return Response(
+                    {'detail': f'Image {item["id"]} not found'}, status=status.HTTP_404_NOT_FOUND
+                )
             try:
                 position = int(item['position'])
             except (TypeError, ValueError):
-                return Response({'detail': 'Position must be integer'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {'detail': 'Position must be integer'}, status=status.HTTP_400_BAD_REQUEST
+                )
             ProductImage.objects.filter(id=item['id'], product=product).update(position=position)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -310,12 +318,16 @@ class EnumsAggregateView(APIView):
         return Response(
             {
                 'colors': [{'value': choice.value, 'label': choice.label} for choice in Color],
-                'shapes': [{'value': choice.value, 'label': choice.label} for choice in DimensionShape],
+                'shapes': [
+                    {'value': choice.value, 'label': choice.label} for choice in DimensionShape
+                ],
                 'transport_restrictions': [
-                    {'value': choice.value, 'label': choice.label} for choice in TransportRestriction
+                    {'value': choice.value, 'label': choice.label}
+                    for choice in TransportRestriction
                 ],
                 'installer_qualifications': [
-                    {'value': choice.value, 'label': choice.label} for choice in InstallerQualification
+                    {'value': choice.value, 'label': choice.label}
+                    for choice in InstallerQualification
                 ],
                 'reservation_modes': [
                     {'value': choice.value, 'label': choice.label} for choice in ReservationMode

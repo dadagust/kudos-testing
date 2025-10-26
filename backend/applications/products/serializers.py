@@ -10,7 +10,6 @@ from django.db.models import Prefetch
 from rest_framework import serializers
 
 from .choices import (
-    Color,
     DimensionShape,
     InstallerQualification,
     RentalBasePeriod,
@@ -18,7 +17,6 @@ from .choices import (
     TransportRestriction,
 )
 from .models import Category, Product, ProductImage
-
 
 DATETIME_FIELD = serializers.DateTimeField()
 
@@ -36,11 +34,21 @@ class ProductImageSerializer(serializers.ModelSerializer):
 
 class ProductDimensionsSerializer(serializers.Serializer):
     shape = serializers.ChoiceField(choices=DimensionShape.choices)
-    circle = serializers.DictField(child=serializers.DecimalField(max_digits=8, decimal_places=2), required=False)
-    line = serializers.DictField(child=serializers.DecimalField(max_digits=8, decimal_places=2), required=False)
-    rectangle = serializers.DictField(child=serializers.DecimalField(max_digits=8, decimal_places=2), required=False)
-    cylinder = serializers.DictField(child=serializers.DecimalField(max_digits=8, decimal_places=2), required=False)
-    box = serializers.DictField(child=serializers.DecimalField(max_digits=8, decimal_places=2), required=False)
+    circle = serializers.DictField(
+        child=serializers.DecimalField(max_digits=8, decimal_places=2), required=False
+    )
+    line = serializers.DictField(
+        child=serializers.DecimalField(max_digits=8, decimal_places=2), required=False
+    )
+    rectangle = serializers.DictField(
+        child=serializers.DecimalField(max_digits=8, decimal_places=2), required=False
+    )
+    cylinder = serializers.DictField(
+        child=serializers.DecimalField(max_digits=8, decimal_places=2), required=False
+    )
+    box = serializers.DictField(
+        child=serializers.DecimalField(max_digits=8, decimal_places=2), required=False
+    )
 
     def validate(self, attrs):  # type: ignore[override]
         shape = attrs.get('shape')
@@ -188,7 +196,11 @@ class ProductBaseSerializer(serializers.ModelSerializer):
                 delivery['volume_cm3'] = computed_volume
             elif not volume and computed_volume is None:
                 raise serializers.ValidationError(
-                    {'delivery': {'volume_cm3': ['volume_cm3 is required for selected dimensions']}},
+                    {
+                        'delivery': {
+                            'volume_cm3': ['volume_cm3 is required for selected dimensions']
+                        }
+                    },
                     code='unprocessable_entity',
                 )
         elif computed_volume is not None:
@@ -209,7 +221,9 @@ class ProductBaseSerializer(serializers.ModelSerializer):
         if shape == DimensionShape.BOX_HEIGHT_WIDTH_DEPTH:
             box = dimensions.get('box') or {}
             try:
-                return int(Decimal(box['height_cm']) * Decimal(box['width_cm']) * Decimal(box['depth_cm']))
+                return int(
+                    Decimal(box['height_cm']) * Decimal(box['width_cm']) * Decimal(box['depth_cm'])
+                )
             except (KeyError, TypeError, InvalidOperation):
                 return None
         if shape == DimensionShape.CYLINDER_DIAMETER_HEIGHT:

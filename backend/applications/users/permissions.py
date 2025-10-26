@@ -29,9 +29,7 @@ def _ensure_view_permission(permission_code: str) -> set[str]:
     app_label, codename = permission_code.split('.', 1)
     if codename.startswith('change_'):
         model_name = codename.removeprefix('change_')
-        implied_permissions.add(
-            _normalize_permission_code(f'{app_label}.view_{model_name}')
-        )
+        implied_permissions.add(_normalize_permission_code(f'{app_label}.view_{model_name}'))
 
     return implied_permissions
 

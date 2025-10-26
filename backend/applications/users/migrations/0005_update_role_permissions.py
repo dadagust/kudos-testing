@@ -108,6 +108,7 @@ def flatten_required_permissions() -> dict[tuple[str, str], set[str]]:
             accumulator[(app_label, model)].update(actions)
     return accumulator
 
+
 ACTION_LABELS = {
     'view': 'Can view',
     'add': 'Can add',

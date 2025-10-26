@@ -170,7 +170,9 @@ const createEmptyProductForm = (defaults?: {
   setup: {
     install_minutes: '',
     uninstall_minutes: '',
-    installer_qualification: (defaults?.installerQualification ?? '') as InstallerQualification | '',
+    installer_qualification: (defaults?.installerQualification ?? '') as
+      | InstallerQualification
+      | '',
     min_installers: defaults?.minInstallers ? String(defaults.minInstallers) : '',
     self_setup_allowed: false,
   },
@@ -293,15 +295,21 @@ const buildCreatePayload = (form: CreateProductFormState): ProductCreatePayload 
   const volume = parseNumber(form.delivery.volume_cm3);
   const weight = parseNumber(form.delivery.weight_kg);
   if (volume !== undefined) {
-    payload.delivery = payload.delivery ?? { self_pickup_allowed: form.delivery.self_pickup_allowed };
+    payload.delivery = payload.delivery ?? {
+      self_pickup_allowed: form.delivery.self_pickup_allowed,
+    };
     payload.delivery.volume_cm3 = volume;
   }
   if (weight !== undefined) {
-    payload.delivery = payload.delivery ?? { self_pickup_allowed: form.delivery.self_pickup_allowed };
+    payload.delivery = payload.delivery ?? {
+      self_pickup_allowed: form.delivery.self_pickup_allowed,
+    };
     payload.delivery.weight_kg = weight;
   }
   if (form.delivery.transport_restriction) {
-    payload.delivery = payload.delivery ?? { self_pickup_allowed: form.delivery.self_pickup_allowed };
+    payload.delivery = payload.delivery ?? {
+      self_pickup_allowed: form.delivery.self_pickup_allowed,
+    };
     payload.delivery.transport_restriction = form.delivery.transport_restriction;
   }
 
@@ -430,7 +438,9 @@ export default function ProductsPage() {
   const [selfPickup, setSelfPickup] = useState('');
   const [ordering, setOrdering] = useState<ProductListQuery['ordering']>('-created_at');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [createForm, setCreateForm] = useState<CreateProductFormState>(() => createEmptyProductForm());
+  const [createForm, setCreateForm] = useState<CreateProductFormState>(() =>
+    createEmptyProductForm()
+  );
   const [createTouched, setCreateTouched] = useState(false);
   const [createNotification, setCreateNotification] = useState<string | null>(null);
 
@@ -490,8 +500,12 @@ export default function ProductsPage() {
     () => ({
       rentalBasePeriod: enumsData?.rental_base_periods?.[0]?.value as RentalBasePeriod | undefined,
       reservationMode: enumsData?.reservation_modes?.[0]?.value as ReservationMode | undefined,
-      transportRestriction: enumsData?.transport_restrictions?.[0]?.value as TransportRestriction | undefined,
-      installerQualification: enumsData?.installer_qualifications?.[0]?.value as InstallerQualification | undefined,
+      transportRestriction: enumsData?.transport_restrictions?.[0]?.value as
+        | TransportRestriction
+        | undefined,
+      installerQualification: enumsData?.installer_qualifications?.[0]?.value as
+        | InstallerQualification
+        | undefined,
       minInstallers: 1,
     }),
     [enumsData]
@@ -569,13 +583,19 @@ export default function ProductsPage() {
   const boxDepthValue = Number(createForm.dimensions.box.depth_cm);
   const isBoxHeightValid =
     dimensionsShape !== 'box__height_width_depth' ||
-    (createForm.dimensions.box.height_cm.trim() !== '' && !Number.isNaN(boxHeightValue) && boxHeightValue > 0);
+    (createForm.dimensions.box.height_cm.trim() !== '' &&
+      !Number.isNaN(boxHeightValue) &&
+      boxHeightValue > 0);
   const isBoxWidthValid =
     dimensionsShape !== 'box__height_width_depth' ||
-    (createForm.dimensions.box.width_cm.trim() !== '' && !Number.isNaN(boxWidthValue) && boxWidthValue > 0);
+    (createForm.dimensions.box.width_cm.trim() !== '' &&
+      !Number.isNaN(boxWidthValue) &&
+      boxWidthValue > 0);
   const isBoxDepthValid =
     dimensionsShape !== 'box__height_width_depth' ||
-    (createForm.dimensions.box.depth_cm.trim() !== '' && !Number.isNaN(boxDepthValue) && boxDepthValue > 0);
+    (createForm.dimensions.box.depth_cm.trim() !== '' &&
+      !Number.isNaN(boxDepthValue) &&
+      boxDepthValue > 0);
   const isDimensionsValid =
     Boolean(dimensionsShape) &&
     isCircleDiameterValid &&
@@ -611,7 +631,8 @@ export default function ProductsPage() {
     deliveryWeightValue !== undefined &&
     deliveryWeightValue > 0;
   const isDeliveryTransportValid = createForm.delivery.transport_restriction !== '';
-  const isDeliveryValid = isDeliveryVolumeValid && isDeliveryWeightValid && isDeliveryTransportValid;
+  const isDeliveryValid =
+    isDeliveryVolumeValid && isDeliveryWeightValid && isDeliveryTransportValid;
 
   const installMinutesValue = parseNumber(createForm.setup.install_minutes);
   const isInstallMinutesValid =
@@ -630,7 +651,10 @@ export default function ProductsPage() {
     minInstallersOptions.includes(minInstallersValue);
   const isInstallerQualificationValid = createForm.setup.installer_qualification !== '';
   const isSetupValid =
-    isInstallMinutesValid && isUninstallMinutesValid && isMinInstallersValid && isInstallerQualificationValid;
+    isInstallMinutesValid &&
+    isUninstallMinutesValid &&
+    isMinInstallersValid &&
+    isInstallerQualificationValid;
 
   const isRentalBasePeriodValid = Boolean(createForm.rental.base_period);
   const isReservationModeValid = Boolean(createForm.visibility.reservation_mode);
@@ -699,7 +723,9 @@ export default function ProductsPage() {
       ? 'Введите количество дней (0 или больше)'
       : undefined;
   const createOccupancyInsuranceError =
-    createTouched && createForm.occupancy.insurance_reserve_percent.trim() !== '' && !isOccupancyInsuranceValid
+    createTouched &&
+    createForm.occupancy.insurance_reserve_percent.trim() !== '' &&
+    !isOccupancyInsuranceValid
       ? 'Введите страховой резерв в диапазоне 0–100%'
       : undefined;
   const createDeliveryVolumeError =
@@ -709,9 +735,13 @@ export default function ProductsPage() {
   const createDeliveryTransportError =
     createTouched && !isDeliveryTransportValid ? 'Выберите ограничение по транспорту' : undefined;
   const createInstallMinutesError =
-    createTouched && !isInstallMinutesValid ? 'Введите время монтажа в минутах (0 или больше)' : undefined;
+    createTouched && !isInstallMinutesValid
+      ? 'Введите время монтажа в минутах (0 или больше)'
+      : undefined;
   const createUninstallMinutesError =
-    createTouched && !isUninstallMinutesValid ? 'Введите время демонтажа в минутах (0 или больше)' : undefined;
+    createTouched && !isUninstallMinutesValid
+      ? 'Введите время демонтажа в минутах (0 или больше)'
+      : undefined;
   const createInstallerQualificationError =
     createTouched && !isInstallerQualificationValid ? 'Выберите квалификацию сетапёров' : undefined;
   const createMinInstallersError =
@@ -863,9 +893,7 @@ export default function ProductsPage() {
     const payload = buildCreatePayload(createForm);
     try {
       const response = await createProductMutation.mutateAsync(payload);
-      setCreateNotification(
-        `Товар «${payload.name}» создан. ID: ${response.id}.`
-      );
+      setCreateNotification(`Товар «${payload.name}» создан. ID: ${response.id}.`);
       closeCreateModal();
     } catch (error) {
       // Ошибка отобразится в модальном окне через состояние мутации
@@ -1148,10 +1176,7 @@ export default function ProductsPage() {
                   ))}
                 </Select>
               </div>
-              <FormField
-                label="Особенности"
-                description="Добавьте короткие преимущества товара."
-              >
+              <FormField label="Особенности" description="Добавьте короткие преимущества товара.">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {createForm.features.map((feature, index) => (
                     <div
@@ -1825,7 +1850,12 @@ export default function ProductsPage() {
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-            <Button type="button" variant="ghost" onClick={closeCreateModal} disabled={isCreatingProduct}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={closeCreateModal}
+              disabled={isCreatingProduct}
+            >
               Отмена
             </Button>
             <Button type="submit" variant="primary" disabled={isCreatingProduct}>

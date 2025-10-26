@@ -32,4 +32,3 @@ class ProductAdmin(admin.ModelAdmin):
     search_fields = ('name', 'seo_slug')
     list_filter = ('category', 'color')
     inlines = [ProductImageInline]
-

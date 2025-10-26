@@ -35,7 +35,10 @@ class TransportRestriction(models.TextChoices):
 
 class InstallerQualification(models.TextChoices):
     ANY = 'any', 'Любой'
-    WORKER_WITH_STEAM_GENERATOR = 'worker_with_steam_generator', 'Только «Работник с парогенератором»'
+    WORKER_WITH_STEAM_GENERATOR = (
+        'worker_with_steam_generator',
+        'Только «Работник с парогенератором»',
+    )
 
 
 class ReservationMode(models.TextChoices):
