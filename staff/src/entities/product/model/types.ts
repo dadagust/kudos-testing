@@ -69,21 +69,17 @@ export interface ProductImage {
   position: number;
 }
 
-export interface ProductMedia {
+export interface ProductImage {
   id: string;
-  type: string;
   url: string;
   alt_text: string;
   is_primary: boolean;
   sort_order?: number | null;
 }
 
-export interface ProductAttribute {
-  attribute_id: string;
-  code: string;
-  name: string;
-  value: string;
-  unit: string | null;
+export interface ProductOccupancy {
+  cleaning_days?: number | null;
+  insurance_reserve_percent?: number | null;
 }
 
 export interface ProductCategorySummary {
