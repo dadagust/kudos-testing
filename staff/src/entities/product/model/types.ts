@@ -71,7 +71,6 @@ export interface ProductImage {
 
 export type ProductMedia = {
   id: string;
-  type: string;
   url: string;
   alt_text: string;
   is_primary: boolean;
