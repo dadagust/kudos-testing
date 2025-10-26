@@ -23,31 +23,18 @@ export interface CustomerSummary {
   display_name: string;
 }
 
-export type OrderProductId = 'product_1' | 'product_2';
-
-export interface OrderProductInfo {
-  id: OrderProductId;
+export interface OrderItemProductSummary {
+  id: string;
   name: string;
-  price: number;
+  price_rub: number;
+  color?: string | null;
+  thumbnail_url?: string | null;
 }
-
-export const ORDER_PRODUCTS: OrderProductInfo[] = [
-  { id: 'product_1', name: 'Товар 1', price: 1500 },
-  { id: 'product_2', name: 'Товар 2', price: 2500 },
-];
-
-export const getOrderProductInfo = (productId: OrderProductId): OrderProductInfo => {
-  const product = ORDER_PRODUCTS.find((item) => item.id === productId);
-  if (!product) {
-    return { id: productId, name: productId, price: 0 } as OrderProductInfo;
-  }
-  return product;
-};
 
 export interface OrderItem {
   id: number;
-  product: OrderProductId;
-  product_label: string;
+  product: OrderItemProductSummary | null;
+  product_name: string;
   quantity: number;
   unit_price: string;
   subtotal: string;
@@ -88,7 +75,7 @@ export interface OrderListQuery {
 }
 
 export interface OrderItemPayload {
-  product: OrderProductId;
+  product_id: string;
   quantity: number;
 }
 
