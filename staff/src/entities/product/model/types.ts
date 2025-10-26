@@ -222,3 +222,26 @@ export interface ProductEnumsResponse {
   reservation_modes: EnumOption[];
   rental_base_periods: EnumOption[];
 }
+
+export interface ProductCreatePayload {
+  name: string;
+  features?: string[];
+  category_id: string;
+  price_rub: number;
+  loss_compensation_rub?: number;
+  color?: ProductColor | null;
+  dimensions: ProductDimensions;
+  images?: ProductImage[];
+  occupancy?: ProductOccupancy;
+  delivery?: ProductDelivery;
+  setup?: ProductSetup;
+  rental?: ProductRental;
+  visibility?: ProductVisibility;
+  seo?: ProductSeo;
+}
+
+export interface ProductCreateResponse {
+  id: string;
+  created_at: string;
+  updated_at: string;
+}
