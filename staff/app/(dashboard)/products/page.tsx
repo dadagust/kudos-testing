@@ -366,6 +366,39 @@ const mapProductImagesToForm = (images?: ProductImage[]): ProductFormImage[] => 
     }));
 };
 
+const sanitizeNumericInput = (
+  value: string,
+  { allowDecimal = false }: { allowDecimal?: boolean } = {}
+) => {
+  if (allowDecimal) {
+    const normalized = value.replace(/,/g, '.');
+    const filtered = normalized.replace(/[^0-9.]/g, '');
+
+    if (filtered === '') {
+      return '';
+    }
+
+    const [integerPartRaw = '', ...decimalParts] = filtered.split('.');
+    const integerPart = integerPartRaw.replace(/\D+/g, '');
+    const decimalPart = decimalParts.join('').replace(/\D+/g, '');
+    const hasTrailingDot = normalized.endsWith('.');
+
+    if (!hasTrailingDot && decimalPart === '') {
+      return integerPart;
+    }
+
+    const integerForOutput = integerPart === '' ? '0' : integerPart;
+
+    if (hasTrailingDot && decimalPart === '') {
+      return `${integerForOutput}.`;
+    }
+
+    return `${integerForOutput}.${decimalPart}`;
+  }
+
+  return value.replace(/\D+/g, '');
+};
+
 const parseNumber = (value: string) => {
   if (value.trim() === '') {
     return undefined;
@@ -1603,9 +1636,10 @@ export default function ProductsPage() {
                     min={0}
                     step={1}
                     value={createForm.priceRub}
-                    onChange={(event) =>
-                      setCreateForm((prev) => ({ ...prev, priceRub: event.target.value }))
-                    }
+                    onChange={(event) => {
+                      const value = sanitizeNumericInput(event.target.value);
+                      setCreateForm((prev) => ({ ...prev, priceRub: value }));
+                    }}
                     helperText="Минимальное значение — 0 ₽."
                     error={createPriceError}
                   />
@@ -1616,12 +1650,13 @@ export default function ProductsPage() {
                     min={0}
                     step={1}
                     value={createForm.lossCompensationRub}
-                    onChange={(event) =>
+                    onChange={(event) => {
+                      const value = sanitizeNumericInput(event.target.value);
                       setCreateForm((prev) => ({
                         ...prev,
-                        lossCompensationRub: event.target.value,
-                      }))
-                    }
+                        lossCompensationRub: value,
+                      }));
+                    }}
                     helperText="Необязательное поле."
                     error={createLossCompensationError}
                   />
@@ -1804,15 +1839,16 @@ export default function ProductsPage() {
                       min={0}
                       step={1}
                       value={createForm.dimensions.circle.diameter_cm}
-                      onChange={(event) =>
+                      onChange={(event) => {
+                        const value = sanitizeNumericInput(event.target.value);
                         setCreateForm((prev) => ({
                           ...prev,
                           dimensions: {
                             ...prev.dimensions,
-                            circle: { diameter_cm: event.target.value },
+                            circle: { diameter_cm: value },
                           },
-                        }))
-                      }
+                        }));
+                      }}
                       error={createCircleDiameterError}
                     />
                   ) : null}
@@ -1823,15 +1859,16 @@ export default function ProductsPage() {
                       min={0}
                       step={1}
                       value={createForm.dimensions.line.length_cm}
-                      onChange={(event) =>
+                      onChange={(event) => {
+                        const value = sanitizeNumericInput(event.target.value);
                         setCreateForm((prev) => ({
                           ...prev,
                           dimensions: {
                             ...prev.dimensions,
-                            line: { length_cm: event.target.value },
+                            line: { length_cm: value },
                           },
-                        }))
-                      }
+                        }));
+                      }}
                       error={createLineLengthError}
                     />
                   ) : null}
@@ -1842,18 +1879,19 @@ export default function ProductsPage() {
                       min={0}
                       step={1}
                       value={createForm.dimensions.rectangle.length_cm}
-                      onChange={(event) =>
+                      onChange={(event) => {
+                        const value = sanitizeNumericInput(event.target.value);
                         setCreateForm((prev) => ({
                           ...prev,
                           dimensions: {
                             ...prev.dimensions,
                             rectangle: {
                               ...prev.dimensions.rectangle,
-                              length_cm: event.target.value,
+                              length_cm: value,
                             },
                           },
-                        }))
-                      }
+                        }));
+                      }}
                       error={createRectangleLengthError}
                     />
                   ) : null}
@@ -1864,18 +1902,19 @@ export default function ProductsPage() {
                       min={0}
                       step={1}
                       value={createForm.dimensions.rectangle.width_cm}
-                      onChange={(event) =>
+                      onChange={(event) => {
+                        const value = sanitizeNumericInput(event.target.value);
                         setCreateForm((prev) => ({
                           ...prev,
                           dimensions: {
                             ...prev.dimensions,
                             rectangle: {
                               ...prev.dimensions.rectangle,
-                              width_cm: event.target.value,
+                              width_cm: value,
                             },
                           },
-                        }))
-                      }
+                        }));
+                      }}
                       error={createRectangleWidthError}
                     />
                   ) : null}
@@ -1886,18 +1925,19 @@ export default function ProductsPage() {
                       min={0}
                       step={1}
                       value={createForm.dimensions.cylinder.diameter_cm}
-                      onChange={(event) =>
+                      onChange={(event) => {
+                        const value = sanitizeNumericInput(event.target.value);
                         setCreateForm((prev) => ({
                           ...prev,
                           dimensions: {
                             ...prev.dimensions,
                             cylinder: {
                               ...prev.dimensions.cylinder,
-                              diameter_cm: event.target.value,
+                              diameter_cm: value,
                             },
                           },
-                        }))
-                      }
+                        }));
+                      }}
                       error={createCylinderDiameterError}
                     />
                   ) : null}
@@ -1908,18 +1948,19 @@ export default function ProductsPage() {
                       min={0}
                       step={1}
                       value={createForm.dimensions.cylinder.height_cm}
-                      onChange={(event) =>
+                      onChange={(event) => {
+                        const value = sanitizeNumericInput(event.target.value);
                         setCreateForm((prev) => ({
                           ...prev,
                           dimensions: {
                             ...prev.dimensions,
                             cylinder: {
                               ...prev.dimensions.cylinder,
-                              height_cm: event.target.value,
+                              height_cm: value,
                             },
                           },
-                        }))
-                      }
+                        }));
+                      }}
                       error={createCylinderHeightError}
                     />
                   ) : null}
@@ -1930,18 +1971,19 @@ export default function ProductsPage() {
                       min={0}
                       step={1}
                       value={createForm.dimensions.box.height_cm}
-                      onChange={(event) =>
+                      onChange={(event) => {
+                        const value = sanitizeNumericInput(event.target.value);
                         setCreateForm((prev) => ({
                           ...prev,
                           dimensions: {
                             ...prev.dimensions,
                             box: {
                               ...prev.dimensions.box,
-                              height_cm: event.target.value,
+                              height_cm: value,
                             },
                           },
-                        }))
-                      }
+                        }));
+                      }}
                       error={createBoxHeightError}
                     />
                   ) : null}
@@ -1952,18 +1994,19 @@ export default function ProductsPage() {
                       min={0}
                       step={1}
                       value={createForm.dimensions.box.width_cm}
-                      onChange={(event) =>
+                      onChange={(event) => {
+                        const value = sanitizeNumericInput(event.target.value);
                         setCreateForm((prev) => ({
                           ...prev,
                           dimensions: {
                             ...prev.dimensions,
                             box: {
                               ...prev.dimensions.box,
-                              width_cm: event.target.value,
+                              width_cm: value,
                             },
                           },
-                        }))
-                      }
+                        }));
+                      }}
                       error={createBoxWidthError}
                     />
                   ) : null}
@@ -1974,18 +2017,19 @@ export default function ProductsPage() {
                       min={0}
                       step={1}
                       value={createForm.dimensions.box.depth_cm}
-                      onChange={(event) =>
+                      onChange={(event) => {
+                        const value = sanitizeNumericInput(event.target.value);
                         setCreateForm((prev) => ({
                           ...prev,
                           dimensions: {
                             ...prev.dimensions,
                             box: {
                               ...prev.dimensions.box,
-                              depth_cm: event.target.value,
+                              depth_cm: value,
                             },
                           },
-                        }))
-                      }
+                        }));
+                      }}
                       error={createBoxDepthError}
                     />
                   ) : null}
@@ -2007,12 +2051,13 @@ export default function ProductsPage() {
                     min={0}
                     step={1}
                     value={createForm.occupancy.cleaning_days}
-                    onChange={(event) =>
+                    onChange={(event) => {
+                      const value = sanitizeNumericInput(event.target.value);
                       setCreateForm((prev) => ({
                         ...prev,
-                        occupancy: { ...prev.occupancy, cleaning_days: event.target.value },
-                      }))
-                    }
+                        occupancy: { ...prev.occupancy, cleaning_days: value },
+                      }));
+                    }}
                     helperText="Необязательное поле."
                     error={createOccupancyCleaningError}
                   />
@@ -2023,15 +2068,16 @@ export default function ProductsPage() {
                     max={100}
                     step={1}
                     value={createForm.occupancy.insurance_reserve_percent}
-                    onChange={(event) =>
+                    onChange={(event) => {
+                      const value = sanitizeNumericInput(event.target.value);
                       setCreateForm((prev) => ({
                         ...prev,
                         occupancy: {
                           ...prev.occupancy,
-                          insurance_reserve_percent: event.target.value,
+                          insurance_reserve_percent: value,
                         },
-                      }))
-                    }
+                      }));
+                    }}
                     helperText="0–100%"
                     error={createOccupancyInsuranceError}
                   />
@@ -2050,29 +2096,37 @@ export default function ProductsPage() {
                   <Input
                     label="Объём, см³"
                     type="number"
+                    inputMode="decimal"
                     min={0}
-                    step={1}
+                    step="0.001"
                     value={createForm.delivery.volume_cm3}
-                    onChange={(event) =>
+                    onChange={(event) => {
+                      const value = sanitizeNumericInput(event.target.value, {
+                        allowDecimal: true,
+                      });
                       setCreateForm((prev) => ({
                         ...prev,
-                        delivery: { ...prev.delivery, volume_cm3: event.target.value },
-                      }))
-                    }
+                        delivery: { ...prev.delivery, volume_cm3: value },
+                      }));
+                    }}
                     error={createDeliveryVolumeError}
                   />
                   <Input
                     label="Масса, кг"
                     type="number"
+                    inputMode="decimal"
                     min={0}
-                    step="0.1"
+                    step="0.001"
                     value={createForm.delivery.weight_kg}
-                    onChange={(event) =>
+                    onChange={(event) => {
+                      const value = sanitizeNumericInput(event.target.value, {
+                        allowDecimal: true,
+                      });
                       setCreateForm((prev) => ({
                         ...prev,
-                        delivery: { ...prev.delivery, weight_kg: event.target.value },
-                      }))
-                    }
+                        delivery: { ...prev.delivery, weight_kg: value },
+                      }));
+                    }}
                     error={createDeliveryWeightError}
                   />
                   <Select
@@ -2132,12 +2186,13 @@ export default function ProductsPage() {
                     min={0}
                     step={1}
                     value={createForm.setup.install_minutes}
-                    onChange={(event) =>
+                    onChange={(event) => {
+                      const value = sanitizeNumericInput(event.target.value);
                       setCreateForm((prev) => ({
                         ...prev,
-                        setup: { ...prev.setup, install_minutes: event.target.value },
-                      }))
-                    }
+                        setup: { ...prev.setup, install_minutes: value },
+                      }));
+                    }}
                     error={createInstallMinutesError}
                   />
                   <Input
@@ -2146,12 +2201,13 @@ export default function ProductsPage() {
                     min={0}
                     step={1}
                     value={createForm.setup.uninstall_minutes}
-                    onChange={(event) =>
+                    onChange={(event) => {
+                      const value = sanitizeNumericInput(event.target.value);
                       setCreateForm((prev) => ({
                         ...prev,
-                        setup: { ...prev.setup, uninstall_minutes: event.target.value },
-                      }))
-                    }
+                        setup: { ...prev.setup, uninstall_minutes: value },
+                      }));
+                    }}
                     error={createUninstallMinutesError}
                   />
                   <Select
