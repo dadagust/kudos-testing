@@ -71,10 +71,11 @@ export const productsApi = {
   },
   update: async (productId: string, payload: ProductUpdatePayload): Promise<ProductDetail> => {
     const { data } = await apiV1Client.patch<ProductDetail>(`/products/${productId}`, payload);
+    const normalizedImages = normalizeOptionalImages(data.images) ?? [];
     return {
       ...data,
       thumbnail_url: ensureAbsoluteUrl(data.thumbnail_url),
-      images: normalizeImages(data.images),
+      images: normalizedImages,
     };
   },
   details: async (productId: string, include?: string): Promise<ProductDetail> => {

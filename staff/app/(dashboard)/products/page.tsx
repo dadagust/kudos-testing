@@ -470,8 +470,8 @@ const parseNumber = (value: string) => {
   return Number.isFinite(parsed) ? parsed : undefined;
 };
 
-const sanitizeStringList = (items: string[]) =>
-  items.map((item) => item.trim()).filter((item) => item.length > 0);
+const sanitizeStringList = (items?: string[]) =>
+  (items ?? []).map((item) => item.trim()).filter((item) => item.length > 0);
 
 const buildCreatePayload = (form: CreateProductFormState): ProductCreatePayload => {
   const payload: ProductCreatePayload = {
@@ -498,7 +498,7 @@ const buildCreatePayload = (form: CreateProductFormState): ProductCreatePayload 
   };
 
   const complementaryIds = Array.from(
-    new Set(form.complementaryProducts.map((item) => item.id))
+    new Set((form.complementaryProducts ?? []).map((item) => item.id))
   );
   payload.complementary_product_ids = complementaryIds;
 
@@ -615,7 +615,7 @@ const buildCreatePayload = (form: CreateProductFormState): ProductCreatePayload 
   const slug = form.seo.slug.trim();
   const metaTitle = form.seo.meta_title.trim();
   const metaDescription = form.seo.meta_description.trim();
-  const metaKeywords = sanitizeStringList(form.seo.meta_keywords);
+  const metaKeywords = sanitizeStringList(form.seo?.meta_keywords);
   if (slug || metaTitle || metaDescription || metaKeywords.length) {
     payload.seo = {};
     if (slug) {
