@@ -12,7 +12,8 @@ import {
   DimensionShape,
   InstallerQualification,
   ReservationMode,
-  RentalBasePeriod,
+  RentalMode,
+  RentalTier,
   TransportRestriction,
   ProductCreatePayload,
   ProductCreateResponse,
@@ -97,6 +98,12 @@ const createEnumMap = (options?: EnumOption[]) =>
     return acc;
   }, {}) ?? {};
 
+type RentalTierFormState = {
+  id: string;
+  end_day: string;
+  price_per_day: string;
+};
+
 type CreateProductFormState = {
   name: string;
   categoryId: string;
@@ -132,7 +139,8 @@ type CreateProductFormState = {
     self_setup_allowed: boolean;
   };
   rental: {
-    base_period: RentalBasePeriod | '';
+    mode: RentalMode | '';
+    tiers: RentalTierFormState[];
   };
   visibility: {
     reservation_mode: ReservationMode | '';
@@ -162,7 +170,7 @@ type ProductFormImage = {
 };
 
 const createEmptyProductForm = (defaults?: {
-  rentalBasePeriod?: RentalBasePeriod;
+  rentalMode?: RentalMode;
   reservationMode?: ReservationMode;
   transportRestriction?: TransportRestriction;
   installerQualification?: InstallerQualification;
@@ -204,7 +212,8 @@ const createEmptyProductForm = (defaults?: {
     self_setup_allowed: false,
   },
   rental: {
-    base_period: (defaults?.rentalBasePeriod ?? '') as RentalBasePeriod | '',
+    mode: (defaults?.rentalMode ?? 'standard') as RentalMode | '',
+    tiers: [],
   },
   visibility: {
     reservation_mode: (defaults?.reservationMode ?? '') as ReservationMode | '',
@@ -349,7 +358,15 @@ const createFormFromProduct = (product: ProductDetail): CreateProductFormState =
       self_setup_allowed: product.setup?.self_setup_allowed ?? base.setup.self_setup_allowed,
     },
     rental: {
-      base_period: (product.rental?.base_period ?? '') as RentalBasePeriod | '',
+      mode: (product.rental?.mode ?? base.rental.mode ?? '') as RentalMode | '',
+      tiers: (product.rental?.tiers ?? []).map((tier, index) => ({
+        id: `existing-tier-${index}`,
+        end_day: tier?.end_day !== undefined && tier?.end_day !== null ? String(tier.end_day) : '',
+        price_per_day:
+          tier?.price_per_day !== undefined && tier?.price_per_day !== null
+            ? String(tier.price_per_day)
+            : '',
+      })),
     },
     visibility: {
       reservation_mode: (product.visibility?.reservation_mode ?? '') as ReservationMode | '',
@@ -367,6 +384,82 @@ const createFormFromProduct = (product: ProductDetail): CreateProductFormState =
     },
     metaKeywordDraft: '',
   };
+};
+
+const generateTierId = () =>
+  `tier-${Math.random().toString(36).slice(2, 8)}${Date.now().toString(36)}`;
+
+const createRentalTierDraft = (): RentalTierFormState => ({
+  id: generateTierId(),
+  end_day: '',
+  price_per_day: '',
+});
+
+type RentalTierErrorState = { endDay?: string; price?: string };
+
+const validateRental = (
+  rental: CreateProductFormState['rental']
+): {
+  isValid: boolean;
+  modeError?: string;
+  generalError?: string;
+  tierErrors: RentalTierErrorState[];
+} => {
+  const tierErrors: RentalTierErrorState[] = rental.tiers.map(() => ({}));
+  let isValid = true;
+  let modeError: string | undefined;
+  let generalError: string | undefined;
+
+  if (!rental.mode) {
+    isValid = false;
+    modeError = 'Выберите режим аренды';
+  }
+
+  if (rental.mode === 'special') {
+    if (rental.tiers.length === 0) {
+      isValid = false;
+      generalError = 'Добавьте хотя бы один уровень тарифа';
+    }
+    if (rental.tiers.length > 3) {
+      isValid = false;
+      generalError = 'Допустимо максимум 3 уровня тарифа';
+    }
+    let previousEndDay: number | null = null;
+    rental.tiers.forEach((tier, index) => {
+      const errors = tierErrors[index];
+      const trimmedEndDay = tier.end_day.trim();
+      if (!trimmedEndDay) {
+        errors.endDay = 'Укажите день окончания';
+        isValid = false;
+      } else {
+        const endDayNumber = Number(trimmedEndDay);
+        if (!Number.isInteger(endDayNumber) || endDayNumber < 2) {
+          errors.endDay = 'Целое число ≥ 2';
+          isValid = false;
+        } else {
+          if (previousEndDay !== null && endDayNumber <= previousEndDay) {
+            errors.endDay = 'Должно быть больше предыдущего уровня';
+            isValid = false;
+          }
+          previousEndDay = endDayNumber;
+        }
+      }
+
+      const trimmedPrice = tier.price_per_day.trim();
+      if (!trimmedPrice) {
+        errors.price = 'Укажите цену';
+        isValid = false;
+      } else {
+        const priceNumber = Number(trimmedPrice);
+        if (!Number.isFinite(priceNumber) || priceNumber < 0) {
+          errors.price = 'Цена должна быть ≥ 0';
+          isValid = false;
+        }
+      }
+    });
+  }
+
+  return { isValid, modeError, generalError, tierErrors };
 };
 
 const mapProductImagesToForm = (images?: ProductImage[]): ProductFormImage[] => {
@@ -497,7 +590,7 @@ const buildCreatePayload = (form: CreateProductFormState): ProductCreatePayload 
       self_setup_allowed: form.setup.self_setup_allowed,
     },
     rental: {
-      base_period: form.rental.base_period || undefined,
+      mode: (form.rental.mode || 'standard') as RentalMode,
     },
     visibility: {
       reservation_mode: form.visibility.reservation_mode || undefined,
@@ -617,8 +710,27 @@ const buildCreatePayload = (form: CreateProductFormState): ProductCreatePayload 
     }
   }
 
-  if (payload.rental?.base_period === undefined && form.rental.base_period) {
-    payload.rental = { base_period: form.rental.base_period };
+  if (payload.rental?.mode === 'special') {
+    const tiers = form.rental.tiers
+      .map((tier) => {
+        const endDay = parseNumber(tier.end_day);
+        const price = parseNumber(tier.price_per_day);
+        if (
+          endDay === undefined ||
+          !Number.isInteger(endDay) ||
+          endDay < 2 ||
+          price === undefined ||
+          price < 0
+        ) {
+          return null;
+        }
+        return { end_day: endDay, price_per_day: price } satisfies RentalTier;
+      })
+      .filter((tier): tier is RentalTier => tier !== null)
+      .sort((a, b) => a.end_day - b.end_day);
+    if (tiers.length) {
+      payload.rental = { mode: payload.rental.mode, tiers };
+    }
   }
 
   const slug = form.seo.slug.trim();
@@ -851,13 +963,16 @@ export default function ProductsPage() {
       if (!editingProductId) {
         throw new Error('productId is not set');
       }
-      return productsApi.details(editingProductId, 'images,seo,dimensions,complementary_products');
+      return productsApi.details(
+        editingProductId,
+        'images,seo,dimensions,complementary_products,rental'
+      );
     },
     enabled: formMode === 'edit' && Boolean(editingProductId) && isProductModalOpen,
   });
   const createFormDefaults = useMemo(
     () => ({
-      rentalBasePeriod: enumsData?.rental_base_periods?.[0]?.value as RentalBasePeriod | undefined,
+      rentalMode: enumsData?.rental_modes?.[0]?.value as RentalMode | undefined,
       reservationMode: enumsData?.reservation_modes?.[0]?.value as ReservationMode | undefined,
       transportRestriction: enumsData?.transport_restrictions?.[0]?.value as
         | TransportRestriction
@@ -921,9 +1036,13 @@ export default function ProductsPage() {
   const shapeOptions = enumsData?.shapes ?? [];
   const installerQualificationOptions = enumsData?.installer_qualifications ?? [];
   const reservationModeOptions = enumsData?.reservation_modes ?? [];
-  const rentalBasePeriodOptions = enumsData?.rental_base_periods ?? [];
+  const rentalModeOptions = enumsData?.rental_modes ?? [];
   const transportRestrictionOptions = enumsData?.transport_restrictions ?? [];
   const minInstallersOptions = [1, 2, 3, 4];
+  const createRentalValidation = useMemo(
+    () => validateRental(createForm.rental),
+    [createForm.rental]
+  );
 
   const trimmedCreateName = createForm.name.trim();
   const createPriceValue = Number(createForm.priceRub);
@@ -1050,7 +1169,6 @@ export default function ProductsPage() {
     isMinInstallersValid &&
     isInstallerQualificationValid;
 
-  const isRentalBasePeriodValid = Boolean(createForm.rental.base_period);
   const isReservationModeValid = Boolean(createForm.visibility.reservation_mode);
 
   const isCreateFormValid =
@@ -1061,7 +1179,7 @@ export default function ProductsPage() {
     isOccupancyValid &&
     isDeliveryValid &&
     isSetupValid &&
-    isRentalBasePeriodValid &&
+    createRentalValidation.isValid &&
     isReservationModeValid;
 
   const createNameError =
@@ -1140,8 +1258,17 @@ export default function ProductsPage() {
     createTouched && !isInstallerQualificationValid ? 'Выберите квалификацию сетапёров' : undefined;
   const createMinInstallersError =
     createTouched && !isMinInstallersValid ? 'Выберите требуемое число сетапёров' : undefined;
-  const createRentalBasePeriodError =
-    createTouched && !isRentalBasePeriodValid ? 'Выберите базовый период аренды' : undefined;
+  const rentalTierErrors: RentalTierErrorState[] = createTouched
+    ? createRentalValidation.tierErrors
+    : createForm.rental.tiers.map(() => ({}));
+  const createRentalModeError =
+    createTouched && createRentalValidation.modeError
+      ? createRentalValidation.modeError
+      : undefined;
+  const createRentalGeneralError =
+    createTouched && createRentalValidation.generalError
+      ? createRentalValidation.generalError
+      : undefined;
   const createReservationModeError =
     createTouched && !isReservationModeValid ? 'Выберите режим бронирования' : undefined;
   const canAddFeature = createForm.featureDraft.trim().length > 0;
@@ -1204,6 +1331,47 @@ export default function ProductsPage() {
     typeof crypto !== 'undefined' && 'randomUUID' in crypto
       ? crypto.randomUUID()
       : `image-${Date.now().toString(16)}-${Math.random().toString(16).slice(2)}`;
+
+  const handleAddRentalTier = () => {
+    setCreateForm((prev) => {
+      if (prev.rental.tiers.length >= 3) {
+        return prev;
+      }
+      return {
+        ...prev,
+        rental: {
+          ...prev.rental,
+          tiers: [...prev.rental.tiers, createRentalTierDraft()],
+        },
+      };
+    });
+  };
+
+  const handleRemoveRentalTier = (id: string) => {
+    setCreateForm((prev) => ({
+      ...prev,
+      rental: {
+        ...prev.rental,
+        tiers: prev.rental.tiers.filter((tier) => tier.id !== id),
+      },
+    }));
+  };
+
+  const handleRentalTierChange = (
+    id: string,
+    field: 'end_day' | 'price_per_day',
+    value: string
+  ) => {
+    setCreateForm((prev) => ({
+      ...prev,
+      rental: {
+        ...prev.rental,
+        tiers: prev.rental.tiers.map((tier) =>
+          tier.id === id ? { ...tier, [field]: value } : tier
+        ),
+      },
+    }));
+  };
 
   const openCreateModal = () => {
     if (!canManageProducts) {
@@ -2517,23 +2685,92 @@ export default function ProductsPage() {
               <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <h3 style={{ margin: 0 }}>Аренда</h3>
                 <Select
-                  label="Базовый период аренды"
-                  value={createForm.rental.base_period}
+                  label="Режим аренды"
+                  value={createForm.rental.mode}
                   onChange={(event) =>
                     setCreateForm((prev) => ({
                       ...prev,
-                      rental: { base_period: event.target.value as RentalBasePeriod | '' },
+                      rental: { ...prev.rental, mode: event.target.value as RentalMode | '' },
                     }))
                   }
-                  error={createRentalBasePeriodError}
+                  error={createRentalModeError}
                 >
-                  <option value="">Выберите период</option>
-                  {rentalBasePeriodOptions.map((option) => (
+                  <option value="">Выберите режим</option>
+                  {rentalModeOptions.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
                     </option>
                   ))}
                 </Select>
+                {createForm.rental.mode === 'special' ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <span style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
+                      1-й день = «Стоимость, ₽». Уровни задают цену за день после первого.
+                    </span>
+                    {createForm.rental.tiers.map((tier, index) => {
+                      const tierErrors = rentalTierErrors[index] ?? {};
+                      return (
+                        <div
+                          key={tier.id}
+                          style={{
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            gap: '12px',
+                            alignItems: 'flex-end',
+                          }}
+                        >
+                          <Input
+                            label={`До какого дня включительно${
+                              createForm.rental.tiers.length > 1 ? ` (${index + 1})` : ''
+                            }`}
+                            type="text"
+                            {...makeIntegerMask(tier.end_day, (next) =>
+                              handleRentalTierChange(tier.id, 'end_day', next)
+                            )}
+                            error={tierErrors.endDay}
+                          />
+                          <Input
+                            label="Цена за день, ₽"
+                            type="text"
+                            {...makeDecimalMask(tier.price_per_day, (next) =>
+                              handleRentalTierChange(tier.id, 'price_per_day', next)
+                            )}
+                            error={tierErrors.price}
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => handleRemoveRentalTier(tier.id)}
+                          >
+                            Удалить
+                          </Button>
+                        </div>
+                      );
+                    })}
+                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={handleAddRentalTier}
+                        disabled={createForm.rental.tiers.length >= 3}
+                      >
+                        Добавить уровень
+                      </Button>
+                      <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
+                        Максимум 3 уровня
+                      </span>
+                    </div>
+                    {createRentalGeneralError ? (
+                      <span style={{ color: 'var(--color-danger)', fontSize: '0.9rem' }}>
+                        {createRentalGeneralError}
+                      </span>
+                    ) : null}
+                  </div>
+                ) : (
+                  <span style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
+                    1-й день = «Стоимость, ₽». Последующие дни по базовой цене.
+                  </span>
+                )}
               </section>
 
               <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>

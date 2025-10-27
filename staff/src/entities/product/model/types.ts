@@ -52,7 +52,12 @@ export type InstallerQualification = 'any' | 'worker_with_steam_generator';
 
 export type ReservationMode = 'operator_only' | 'online_allowed' | 'disabled';
 
-export type RentalBasePeriod = 'standard';
+export type RentalMode = 'standard' | 'special';
+
+export interface RentalTier {
+  end_day: number;
+  price_per_day: number;
+}
 
 export interface ProductDimensions {
   shape: DimensionShape;
@@ -117,7 +122,8 @@ export interface ProductSetup {
 }
 
 export interface ProductRental {
-  base_period?: RentalBasePeriod | null;
+  mode: RentalMode;
+  tiers?: RentalTier[];
 }
 
 export interface ProductVisibility {
@@ -154,6 +160,7 @@ export interface ProductListItem {
   short_description?: string;
   updated_at?: string;
   complementary_product_ids?: string[];
+  rental?: ProductRental;
 }
 
 export interface ProductDetail extends ProductListItem {
@@ -227,7 +234,7 @@ export interface ProductEnumsResponse {
   transport_restrictions: EnumOption[];
   installer_qualifications: EnumOption[];
   reservation_modes: EnumOption[];
-  rental_base_periods: EnumOption[];
+  rental_modes: EnumOption[];
 }
 
 export interface ProductCreatePayload {

@@ -12,7 +12,7 @@ from rest_framework import serializers
 from .choices import (
     DimensionShape,
     InstallerQualification,
-    RentalBasePeriod,
+    RentalMode,
     ReservationMode,
     TransportRestriction,
 )
@@ -126,8 +126,46 @@ class ProductSetupSerializer(serializers.Serializer):
     self_setup_allowed = serializers.BooleanField(required=False)
 
 
+class RentalTierSerializer(serializers.Serializer):
+    end_day = serializers.IntegerField(min_value=2)
+    price_per_day = serializers.DecimalField(
+        max_digits=12, decimal_places=2, min_value=Decimal('0')
+    )
+
+
 class ProductRentalSerializer(serializers.Serializer):
-    base_period = serializers.ChoiceField(choices=RentalBasePeriod.choices, required=False)
+    mode = serializers.ChoiceField(
+        choices=RentalMode.choices,
+        required=False,
+        default=RentalMode.STANDARD,
+    )
+    tiers = RentalTierSerializer(many=True, required=False)
+
+    def validate(self, attrs):  # type: ignore[override]
+        mode = attrs.get('mode') or RentalMode.STANDARD
+        tiers = attrs.get('tiers') or []
+
+        if mode == RentalMode.SPECIAL:
+            if not tiers:
+                raise serializers.ValidationError(
+                    {'tiers': ['Добавьте хотя бы один уровень тарифа.']}
+                )
+            if len(tiers) > 3:
+                raise serializers.ValidationError(
+                    {'tiers': ['Можно указать не более трёх уровней тарифа.']}
+                )
+            tiers_sorted = sorted(tiers, key=lambda tier: tier['end_day'])
+            for index in range(1, len(tiers_sorted)):
+                if tiers_sorted[index]['end_day'] <= tiers_sorted[index - 1]['end_day']:
+                    raise serializers.ValidationError(
+                        {'tiers': ['Значение "До какого дня" должно строго расти.']}
+                    )
+            attrs['tiers'] = tiers_sorted
+        else:
+            attrs['tiers'] = []
+
+        attrs['mode'] = mode
+        return attrs
 
 
 class ProductVisibilitySerializer(serializers.Serializer):
@@ -383,7 +421,22 @@ class ProductBaseSerializer(serializers.ModelSerializer):
         product.setup_self_setup_allowed = setup.get('self_setup_allowed', False)
 
     def _apply_rental(self, product: Product, rental: dict) -> None:
-        product.rental_base_period = rental.get('base_period') or ''
+        mode = rental.get('mode') or RentalMode.STANDARD
+        product.rental_mode = mode
+        if mode == RentalMode.SPECIAL:
+            tiers = []
+            for tier in rental.get('tiers', []):
+                end_day = int(tier['end_day'])
+                price_per_day = tier['price_per_day']
+                if isinstance(price_per_day, Decimal):
+                    price_value = format(price_per_day, '.2f')
+                else:
+                    price_value = format(Decimal(str(price_per_day)), '.2f')
+                tiers.append({'end_day': end_day, 'price_per_day': price_value})
+            tiers.sort(key=lambda tier: tier['end_day'])
+            product.rental_special_tiers = tiers
+        else:
+            product.rental_special_tiers = []
 
     def _apply_visibility(self, product: Product, visibility: dict) -> None:
         product.visibility_reservation_mode = visibility.get('reservation_mode') or ''
@@ -444,6 +497,8 @@ class ProductListItemSerializer(serializers.ModelSerializer):
             data['dimensions'] = serialize_dimensions(instance)
         if 'seo' in include:
             data['seo'] = serialize_seo(instance)
+        if 'rental' in include:
+            data['rental'] = serialize_rental(instance)
         if 'images' in include:
             data['images'] = ProductImageSerializer(
                 instance.images.all(),
@@ -509,7 +564,27 @@ def serialize_setup(product: Product) -> dict:
 
 
 def serialize_rental(product: Product) -> dict:
-    return {'base_period': product.rental_base_period or None}
+    mode = product.rental_mode or RentalMode.STANDARD
+    data: dict[str, object] = {'mode': mode}
+    if mode == RentalMode.SPECIAL:
+        tiers: list[dict[str, object]] = []
+        raw_tiers = product.rental_special_tiers or []
+        for tier in raw_tiers:
+            try:
+                end_day = int(tier.get('end_day'))
+                price_per_day = Decimal(str(tier.get('price_per_day')))
+            except (TypeError, ValueError, InvalidOperation):
+                continue
+            tiers.append(
+                {
+                    'end_day': end_day,
+                    'price_per_day': decimal_to_float(price_per_day),
+                }
+            )
+        tiers.sort(key=lambda tier: tier['end_day'])
+        if tiers:
+            data['tiers'] = tiers
+    return data
 
 
 def serialize_visibility(product: Product) -> dict:

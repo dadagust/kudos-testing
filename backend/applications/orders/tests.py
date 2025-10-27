@@ -42,7 +42,7 @@ class OrderApiTests(APITestCase):
             'delivery_address': 'Москва, ул. Тестовая, д. 1',
             'comment': 'Проверочный заказ',
             'items': [
-                {'product_id': str(self.product.pk), 'quantity': 2},
+                {'product_id': str(self.product.pk), 'quantity': 2, 'rental_days': 1},
             ],
         }
 
@@ -56,6 +56,11 @@ class OrderApiTests(APITestCase):
         self.assertEqual(data['installation_date'], '2024-06-01')
         self.assertEqual(data['dismantle_date'], '2024-06-05')
         self.assertGreater(float(data['total_amount']), 0)
+        item = data['items'][0]
+        self.assertEqual(item['rental_days'], 1)
+        self.assertEqual(item['rental_mode'], 'standard')
+        self.assertIsNone(item['rental_tiers'])
+        self.assertAlmostEqual(float(item['unit_price']), 2700.0, places=2)
 
     def test_list_orders_filtered_by_group(self):
         url = reverse('orders:order-list')
@@ -63,7 +68,7 @@ class OrderApiTests(APITestCase):
             'installation_date': '2024-06-01',
             'dismantle_date': '2024-06-05',
             'delivery_type': DeliveryType.PICKUP,
-            'items': [{'product_id': str(self.product.pk), 'quantity': 1}],
+            'items': [{'product_id': str(self.product.pk), 'quantity': 1, 'rental_days': 1}],
             'status': OrderStatus.ARCHIVED,
         }
         self.client.post(url, payload, format='json')
@@ -82,7 +87,7 @@ class OrderApiTests(APITestCase):
             'delivery_type': DeliveryType.PICKUP,
             'delivery_address': '',
             'comment': '',
-            'items': [{'product_id': str(self.product.pk), 'quantity': 3}],
+            'items': [{'product_id': str(self.product.pk), 'quantity': 3, 'rental_days': 1}],
         }
 
         response = self.client.post(url, payload, format='json')
@@ -91,3 +96,36 @@ class OrderApiTests(APITestCase):
         self.assertEqual(data['delivery_type'], DeliveryType.PICKUP)
         self.assertEqual(data['delivery_address'], '')
         self.assertEqual(data['comment'], '')
+
+    def test_create_order_with_special_rental(self):
+        self.product.rental_mode = 'special'
+        self.product.rental_special_tiers = [
+            {'end_day': 3, 'price_per_day': '2500.00'},
+            {'end_day': 7, 'price_per_day': '2200.00'},
+        ]
+        self.product.save()
+
+        url = reverse('orders:order-list')
+        payload = {
+            'installation_date': '2024-08-01',
+            'dismantle_date': '2024-08-05',
+            'delivery_type': DeliveryType.DELIVERY,
+            'items': [
+                {
+                    'product_id': str(self.product.pk),
+                    'quantity': 1,
+                    'rental_days': 5,
+                }
+            ],
+        }
+
+        response = self.client.post(url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        data = response.json()['data']
+        item = data['items'][0]
+        self.assertEqual(item['rental_mode'], 'special')
+        self.assertEqual(item['rental_days'], 5)
+        self.assertEqual(len(item['rental_tiers']), 2)
+        self.assertEqual(item['rental_tiers'][0]['end_day'], 3)
+        self.assertAlmostEqual(float(item['unit_price']), 11900.0, places=2)
+        self.assertAlmostEqual(float(data['total_amount']), 11900.0, places=2)

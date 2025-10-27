@@ -12,7 +12,7 @@ from PIL import Image
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from applications.products.choices import DimensionShape, RentalBasePeriod, ReservationMode
+from applications.products.choices import DimensionShape, RentalMode, ReservationMode
 from applications.products.models import Category, Product
 
 
@@ -55,7 +55,13 @@ class ProductApiTests(APITestCase):
                 'min_installers': 1,
                 'self_setup_allowed': True,
             },
-            'rental': {'base_period': RentalBasePeriod.STANDARD},
+            'rental': {
+                'mode': RentalMode.SPECIAL,
+                'tiers': [
+                    {'end_day': 3, 'price_per_day': '2500.00'},
+                    {'end_day': 7, 'price_per_day': '2200.00'},
+                ],
+            },
             'visibility': {
                 'reservation_mode': ReservationMode.OPERATOR_ONLY,
                 'show_on_pifakit': True,
@@ -92,6 +98,9 @@ class ProductApiTests(APITestCase):
         self.assertEqual(product['seo']['slug'], payload['seo']['slug'])
         self.assertIn('created_at', product)
         self.assertIn('updated_at', product)
+        self.assertEqual(product['rental']['mode'], RentalMode.SPECIAL)
+        self.assertEqual(len(product['rental']['tiers']), 2)
+        self.assertEqual(product['rental']['tiers'][0]['end_day'], 3)
 
     def test_list_with_filters_and_cursor(self):
         product = Product.objects.create(
