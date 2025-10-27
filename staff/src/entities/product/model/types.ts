@@ -77,6 +77,11 @@ export type ProductMedia = {
   sort_order?: number | null;
 };
 
+export type ProductComplementarySummary = {
+  id: string;
+  name: string;
+};
+
 export type ProductAttribute = {
   attribute_id: string;
   code: string;
@@ -148,6 +153,7 @@ export interface ProductListItem {
   security_deposit?: number | null;
   short_description?: string;
   updated_at?: string;
+  complementary_product_ids?: string[];
 }
 
 export interface ProductDetail extends ProductListItem {
@@ -174,6 +180,7 @@ export interface ProductDetail extends ProductListItem {
   images: ProductImage[];
   created_at: string;
   updated_at: string;
+  complementary_products?: ProductComplementarySummary[];
 }
 
 export interface ProductListResponse {
@@ -227,6 +234,7 @@ export interface ProductCreatePayload {
   name: string;
   features?: string[];
   category_id: string;
+  complementary_product_ids?: string[];
   price_rub: number;
   loss_compensation_rub?: number;
   color?: ProductColor | null;

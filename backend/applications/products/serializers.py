@@ -168,6 +168,11 @@ class ProductBaseSerializer(serializers.ModelSerializer):
     rental = ProductRentalSerializer(write_only=True, required=False)
     visibility = ProductVisibilitySerializer(write_only=True, required=False)
     seo = ProductSeoSerializer(write_only=True, required=False)
+    complementary_product_ids = serializers.ListField(
+        child=serializers.UUIDField(),
+        required=False,
+        allow_empty=True,
+    )
 
     class Meta:
         model = Product
@@ -177,6 +182,7 @@ class ProductBaseSerializer(serializers.ModelSerializer):
             'features',
             'category',
             'category_id',
+            'complementary_product_ids',
             'price_rub',
             'loss_compensation_rub',
             'color',
@@ -249,6 +255,7 @@ class ProductBaseSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):  # type: ignore[override]
         dimensions = validated_data.pop('dimensions')
+        complementary_ids = validated_data.pop('complementary_product_ids', [])
         occupancy = validated_data.pop('occupancy', {}) or {}
         delivery = validated_data.pop('delivery', {}) or {}
         setup = validated_data.pop('setup', {}) or {}
@@ -265,11 +272,14 @@ class ProductBaseSerializer(serializers.ModelSerializer):
             self._apply_rental(product, rental)
             self._apply_visibility(product, visibility)
             self._apply_seo(product, seo)
+            if complementary_ids:
+                product.complementary_products.set(complementary_ids)
             product.save()
         return product
 
     def update(self, instance: Product, validated_data):  # type: ignore[override]
         dimensions = validated_data.pop('dimensions', None)
+        complementary_ids = validated_data.pop('complementary_product_ids', None)
         occupancy = validated_data.pop('occupancy', None)
         delivery = validated_data.pop('delivery', None)
         setup = validated_data.pop('setup', None)
@@ -294,6 +304,8 @@ class ProductBaseSerializer(serializers.ModelSerializer):
             self._apply_visibility(instance, visibility)
         if seo is not None:
             self._apply_seo(instance, seo)
+        if complementary_ids is not None:
+            instance.complementary_products.set(complementary_ids)
 
         instance.save()
         return instance
@@ -328,6 +340,12 @@ class ProductBaseSerializer(serializers.ModelSerializer):
             data['price_rub'] = decimal_to_float(data['price_rub'])
         if data.get('loss_compensation_rub') is not None:
             data['loss_compensation_rub'] = decimal_to_float(data['loss_compensation_rub'])
+        data['complementary_product_ids'] = [
+            str(product_id)
+            for product_id in instance.complementary_products.values_list('id', flat=True)
+        ]
+        if 'complementary_products' in include or self.context.get('detail'):
+            data['complementary_products'] = serialize_complementary_products(instance)
         data.pop('created', None)
         data.pop('modified', None)
         data.pop('category', None)
@@ -513,6 +531,16 @@ def serialize_seo(product: Product) -> dict:
     }
 
 
+def serialize_complementary_products(product: Product) -> list[dict]:
+    return [
+        {
+            'id': str(complementary.id),
+            'name': complementary.name,
+        }
+        for complementary in product.complementary_products.all()
+    ]
+
+
 def decimal_to_float(value):
     if value in (None, ''):
         return None
@@ -526,6 +554,13 @@ def prefetch_for_include(include: Iterable[str]):
     prefetches = []
     if 'images' in include:
         prefetches.append(Prefetch('images', queryset=ProductImage.objects.order_by('position')))
+    if 'complementary_products' in include:
+        prefetches.append(
+            Prefetch(
+                'complementary_products',
+                queryset=Product.objects.only('id', 'name'),
+            )
+        )
     return prefetches
 
 
@@ -539,6 +574,7 @@ __all__ = [
     'serialize_delivery',
     'serialize_dimensions',
     'serialize_occupancy',
+    'serialize_complementary_products',
     'serialize_rental',
     'serialize_seo',
     'serialize_setup',

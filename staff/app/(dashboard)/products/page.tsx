@@ -18,12 +18,13 @@ import {
   ProductCreateResponse,
   ProductDetail,
   ProductImage,
+  ProductComplementarySummary,
   ProductUpdatePayload,
   productsApi,
   useInfiniteProductsQuery,
 } from '@/entities/product';
 import { RoleGuard, usePermission } from '@/features/auth';
-import { Alert, Badge, Button, FormField, Input, Modal, Select, Spinner } from '@/shared/ui';
+import { Alert, Badge, Button, FormField, Input, Modal, Select, Spinner, Accordion } from '@/shared/ui';
 
 const currencyFormatter = new Intl.NumberFormat('ru-RU', {
   style: 'currency',
@@ -94,6 +95,7 @@ type CreateProductFormState = {
   color: ProductColor | '';
   features: string[];
   featureDraft: string;
+  complementaryProducts: ProductComplementarySummary[];
   dimensions: {
     shape: DimensionShape | '';
     circle: { diameter_cm: string };
@@ -163,6 +165,7 @@ const createEmptyProductForm = (defaults?: {
   color: '' as ProductColor | '',
   features: [],
   featureDraft: '',
+  complementaryProducts: [],
   dimensions: {
     shape: '' as DimensionShape | '',
     circle: { diameter_cm: '' },
@@ -227,6 +230,9 @@ const createFormFromProduct = (product: ProductDetail): CreateProductFormState =
     color: (product.color ?? '') as ProductColor | '',
     features: product.features ?? [],
     featureDraft: '',
+    complementaryProducts:
+      product.complementary_products?.map((item) => ({ id: item.id, name: item.name })) ??
+      (product.complementary_product_ids?.map((id) => ({ id, name: id })) ?? []),
     dimensions: {
       shape,
       circle: {
@@ -491,6 +497,11 @@ const buildCreatePayload = (form: CreateProductFormState): ProductCreatePayload 
     },
   };
 
+  const complementaryIds = Array.from(
+    new Set(form.complementaryProducts.map((item) => item.id))
+  );
+  payload.complementary_product_ids = complementaryIds;
+
   const features = sanitizeStringList(form.features);
   if (features.length) {
     payload.features = features;
@@ -726,6 +737,9 @@ export default function ProductsPage() {
   const [productImages, setProductImages] = useState<ProductFormImage[]>([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<ProductListItem | null>(null);
+  const [isComplementaryPickerVisible, setIsComplementaryPickerVisible] = useState(false);
+  const [complementarySearch, setComplementarySearch] = useState('');
+  const complementaryLoadMoreRef = useRef<HTMLDivElement | null>(null);
 
   const canManageProducts = usePermission('products_add_product');
   const queryClient = useQueryClient();
@@ -752,6 +766,44 @@ export default function ProductsPage() {
     isFetchingNextPage,
     isFetching,
   } = useInfiniteProductsQuery(baseParams);
+
+  const complementaryQueryParams = useMemo<ProductListQuery>(
+    () => ({
+      limit: 20,
+      q: complementarySearch.trim() || undefined,
+      ordering: 'name',
+    }),
+    [complementarySearch]
+  );
+
+  const {
+    data: complementaryProductPages,
+    fetchNextPage: fetchNextComplementaryProducts,
+    hasNextPage: hasMoreComplementaryProducts = false,
+    isFetchingNextPage: isFetchingMoreComplementaryProducts,
+    isLoading: isLoadingComplementaryProducts,
+  } = useInfiniteProductsQuery(complementaryQueryParams);
+
+  const complementaryProductsOptions = useMemo(() => {
+    const fetched = complementaryProductPages?.pages.flatMap((page) => page.results) ?? [];
+    const currentId = formMode === 'edit' ? editingProductId : null;
+    const seen = new Set<string>();
+    return fetched.filter((product) => {
+      if (product.id === currentId) {
+        return false;
+      }
+      if (seen.has(product.id)) {
+        return false;
+      }
+      seen.add(product.id);
+      return true;
+    });
+  }, [complementaryProductPages, formMode, editingProductId]);
+
+  const selectedComplementaryIds = useMemo(
+    () => new Set(createForm.complementaryProducts.map((item) => item.id)),
+    [createForm.complementaryProducts]
+  );
 
   const { data: enumsData } = useQuery({
     queryKey: ['products', 'enums'],
@@ -790,7 +842,10 @@ export default function ProductsPage() {
       if (!editingProductId) {
         throw new Error('productId is not set');
       }
-      return productsApi.details(editingProductId, 'images,seo,dimensions');
+      return productsApi.details(
+        editingProductId,
+        'images,seo,dimensions,complementary_products'
+      );
     },
     enabled: formMode === 'edit' && Boolean(editingProductId) && isProductModalOpen,
   });
@@ -1156,6 +1211,8 @@ export default function ProductsPage() {
     setCreateTouched(false);
     createProductMutation.reset();
     updateProductMutation.reset();
+    setComplementarySearch('');
+    setIsComplementaryPickerVisible(false);
     setIsProductModalOpen(true);
   };
 
@@ -1170,6 +1227,8 @@ export default function ProductsPage() {
     setCreateTouched(false);
     createProductMutation.reset();
     updateProductMutation.reset();
+    setComplementarySearch('');
+    setIsComplementaryPickerVisible(false);
     setIsProductModalOpen(true);
   };
 
@@ -1210,6 +1269,28 @@ export default function ProductsPage() {
     setProductImages(mapProductImagesToForm(editingProduct.images));
   }, [formMode, editingProduct]);
 
+  useEffect(() => {
+    if (!isComplementaryPickerVisible || !hasMoreComplementaryProducts) {
+      return;
+    }
+    const element = complementaryLoadMoreRef.current;
+    if (!element) {
+      return;
+    }
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0]?.isIntersecting && !isFetchingMoreComplementaryProducts) {
+        fetchNextComplementaryProducts();
+      }
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [
+    isComplementaryPickerVisible,
+    hasMoreComplementaryProducts,
+    fetchNextComplementaryProducts,
+    isFetchingMoreComplementaryProducts,
+  ]);
+
   const closeProductModal = () => {
     setIsProductModalOpen(false);
     setCreateTouched(false);
@@ -1220,6 +1301,8 @@ export default function ProductsPage() {
     setEditingProductId(null);
     createProductMutation.reset();
     updateProductMutation.reset();
+    setComplementarySearch('');
+    setIsComplementaryPickerVisible(false);
   };
 
   const handleDimensionShapeChange = (event: ChangeEvent<HTMLSelectElement>) => {
@@ -1239,6 +1322,52 @@ export default function ProductsPage() {
 
   const handleFeatureDraftChange = (event: ChangeEvent<HTMLInputElement>) => {
     setCreateForm((prev) => ({ ...prev, featureDraft: event.target.value }));
+  };
+
+  const handleComplementarySearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setComplementarySearch(event.target.value);
+  };
+
+  const toggleComplementaryPicker = () => {
+    setIsComplementaryPickerVisible((prev) => {
+      const next = !prev;
+      if (!prev) {
+        setComplementarySearch('');
+      }
+      return next;
+    });
+  };
+
+  const handleToggleComplementaryProduct = (product: ProductListItem) => {
+    if (formMode === 'edit' && editingProductId && product.id === editingProductId) {
+      return;
+    }
+    setCreateForm((prev) => {
+      const exists = prev.complementaryProducts.some((item) => item.id === product.id);
+      if (exists) {
+        return {
+          ...prev,
+          complementaryProducts: prev.complementaryProducts.filter(
+            (item) => item.id !== product.id
+          ),
+        };
+      }
+      return {
+        ...prev,
+        complementaryProducts: [...prev.complementaryProducts, { id: product.id, name: product.name }],
+      };
+    });
+  };
+
+  const handleRemoveComplementaryProduct = (productId: string) => {
+    setCreateForm((prev) => ({
+      ...prev,
+      complementaryProducts: prev.complementaryProducts.filter((item) => item.id !== productId),
+    }));
+  };
+
+  const handleClearComplementaryProducts = () => {
+    setCreateForm((prev) => ({ ...prev, complementaryProducts: [] }));
   };
 
   const handleAddFeature = () => {
@@ -1768,6 +1897,113 @@ export default function ProductsPage() {
                         Добавить
                       </Button>
                     </div>
+                  </div>
+                </FormField>
+
+                <FormField
+                  label="Дополняющие изделия"
+                  description="Выберите товары, которые будут рекомендованы вместе с этим изделием."
+                >
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {createForm.complementaryProducts.length ? (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                        {createForm.complementaryProducts.map((product) => (
+                          <div
+                            key={product.id}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              padding: '6px 12px',
+                              borderRadius: '999px',
+                              background: 'var(--color-surface-muted)',
+                            }}
+                          >
+                            <span style={{ fontSize: '0.875rem' }}>{product.name}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveComplementaryProduct(product.id)}
+                              style={{
+                                border: 'none',
+                                background: 'transparent',
+                                color: 'var(--color-text-muted)',
+                                cursor: 'pointer',
+                                fontSize: '0.875rem',
+                                lineHeight: 1,
+                              }}
+                              aria-label={`Удалить ${product.name}`}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                        Дополняющие изделия не выбраны.
+                      </span>
+                    )}
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      <Button type="button" variant="ghost" onClick={toggleComplementaryPicker}>
+                        {isComplementaryPickerVisible ? 'Скрыть' : 'Добавить'}
+                      </Button>
+                      {createForm.complementaryProducts.length ? (
+                        <Button type="button" variant="ghost" onClick={handleClearComplementaryProducts}>
+                          Очистить
+                        </Button>
+                      ) : null}
+                    </div>
+                    {isComplementaryPickerVisible ? (
+                      <Accordion title="Выбор дополняющих изделий" defaultOpen>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                          <Input
+                            placeholder="Поиск изделия"
+                            value={complementarySearch}
+                            onChange={handleComplementarySearchChange}
+                          />
+                          <div
+                            style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '8px',
+                              maxHeight: 260,
+                              overflow: 'auto',
+                            }}
+                          >
+                            {isLoadingComplementaryProducts ? (
+                              <div style={{ display: 'flex', justifyContent: 'center', padding: '16px 0' }}>
+                                <Spinner />
+                              </div>
+                            ) : complementaryProductsOptions.length ? (
+                              complementaryProductsOptions.map((product) => {
+                                const isSelected = selectedComplementaryIds.has(product.id);
+                                return (
+                                  <Button
+                                    key={product.id}
+                                    type="button"
+                                    variant={isSelected ? 'primary' : 'ghost'}
+                                    onClick={() => handleToggleComplementaryProduct(product)}
+                                    style={{ justifyContent: 'flex-start' }}
+                                  >
+                                    {product.name}
+                                  </Button>
+                                );
+                              })
+                            ) : (
+                              <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                                Товары не найдены.
+                              </span>
+                            )}
+                            <div ref={complementaryLoadMoreRef} />
+                            {isFetchingMoreComplementaryProducts ? (
+                              <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0' }}>
+                                <Spinner />
+                              </div>
+                            ) : null}
+                          </div>
+                        </div>
+                      </Accordion>
+                    ) : null}
                   </div>
                 </FormField>
               </section>
