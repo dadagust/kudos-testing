@@ -1828,18 +1828,13 @@ export default function ProductsPage() {
                   />
                   <Input
                     label="Компенсация за потерю, ₽"
-                    type="number"
-                    inputMode="numeric"
-                    min={0}
-                    step={1}
-                    value={createForm.lossCompensationRub}
-                    onChange={(event) => {
-                      const value = sanitizeNumericInput(event.target.value);
+                    type="text"
+                    {...makeIntegerMask(createForm.lossCompensationRub, (next) =>
                       setCreateForm((prev) => ({
                         ...prev,
-                        lossCompensationRub: value,
-                      }));
-                    }}
+                        lossCompensationRub: next,
+                      }))
+                    )}
                     helperText="Необязательное поле."
                     error={createLossCompensationError}
                   />
@@ -2125,201 +2120,165 @@ export default function ProductsPage() {
                   {createForm.dimensions.shape === 'circle__diameter' ? (
                     <Input
                       label="Диаметр, см"
-                      type="number"
-                      min={0}
-                      step={1}
-                      value={createForm.dimensions.circle.diameter_cm}
-                      onChange={(event) => {
-                        const value = sanitizeNumericInput(event.target.value);
+                      type="text"
+                      {...makeIntegerMask(createForm.dimensions.circle.diameter_cm, (next) =>
                         setCreateForm((prev) => ({
                           ...prev,
                           dimensions: {
                             ...prev.dimensions,
-                            circle: { diameter_cm: value },
+                            circle: { diameter_cm: next },
                           },
-                        }));
-                      }}
+                        }))
+                      )}
                       error={createCircleDiameterError}
                     />
                   ) : null}
                   {createForm.dimensions.shape === 'line__length' ? (
                     <Input
                       label="Длина, см"
-                      type="number"
-                      min={0}
-                      step={1}
-                      value={createForm.dimensions.line.length_cm}
-                      onChange={(event) => {
-                        const value = sanitizeNumericInput(event.target.value);
+                      type="text"
+                      {...makeIntegerMask(createForm.dimensions.line.length_cm, (next) =>
                         setCreateForm((prev) => ({
                           ...prev,
                           dimensions: {
                             ...prev.dimensions,
-                            line: { length_cm: value },
+                            line: { length_cm: next },
                           },
-                        }));
-                      }}
+                        }))
+                      )}
                       error={createLineLengthError}
                     />
                   ) : null}
                   {createForm.dimensions.shape === 'rectangle__length_width' ? (
                     <Input
                       label="Длина, см"
-                      type="number"
-                      min={0}
-                      step={1}
-                      value={createForm.dimensions.rectangle.length_cm}
-                      onChange={(event) => {
-                        const value = sanitizeNumericInput(event.target.value);
+                      type="text"
+                      {...makeIntegerMask(createForm.dimensions.rectangle.length_cm, (next) =>
                         setCreateForm((prev) => ({
                           ...prev,
                           dimensions: {
                             ...prev.dimensions,
                             rectangle: {
                               ...prev.dimensions.rectangle,
-                              length_cm: value,
+                              length_cm: next,
                             },
                           },
-                        }));
-                      }}
+                        }))
+                      )}
                       error={createRectangleLengthError}
                     />
                   ) : null}
                   {createForm.dimensions.shape === 'rectangle__length_width' ? (
                     <Input
                       label="Ширина, см"
-                      type="number"
-                      min={0}
-                      step={1}
-                      value={createForm.dimensions.rectangle.width_cm}
-                      onChange={(event) => {
-                        const value = sanitizeNumericInput(event.target.value);
+                      type="text"
+                      {...makeIntegerMask(createForm.dimensions.rectangle.width_cm, (next) =>
                         setCreateForm((prev) => ({
                           ...prev,
                           dimensions: {
                             ...prev.dimensions,
                             rectangle: {
                               ...prev.dimensions.rectangle,
-                              width_cm: value,
+                              width_cm: next,
                             },
                           },
-                        }));
-                      }}
+                        }))
+                      )}
                       error={createRectangleWidthError}
                     />
                   ) : null}
                   {createForm.dimensions.shape === 'cylinder__diameter_height' ? (
                     <Input
                       label="Диаметр, см"
-                      type="number"
-                      min={0}
-                      step={1}
-                      value={createForm.dimensions.cylinder.diameter_cm}
-                      onChange={(event) => {
-                        const value = sanitizeNumericInput(event.target.value);
+                      type="text"
+                      {...makeIntegerMask(createForm.dimensions.cylinder.diameter_cm, (next) =>
                         setCreateForm((prev) => ({
                           ...prev,
                           dimensions: {
                             ...prev.dimensions,
                             cylinder: {
                               ...prev.dimensions.cylinder,
-                              diameter_cm: value,
+                              diameter_cm: next,
                             },
                           },
-                        }));
-                      }}
+                        }))
+                      )}
                       error={createCylinderDiameterError}
                     />
                   ) : null}
                   {createForm.dimensions.shape === 'cylinder__diameter_height' ? (
                     <Input
                       label="Высота, см"
-                      type="number"
-                      min={0}
-                      step={1}
-                      value={createForm.dimensions.cylinder.height_cm}
-                      onChange={(event) => {
-                        const value = sanitizeNumericInput(event.target.value);
+                      type="text"
+                      {...makeIntegerMask(createForm.dimensions.cylinder.height_cm, (next) =>
                         setCreateForm((prev) => ({
                           ...prev,
                           dimensions: {
                             ...prev.dimensions,
                             cylinder: {
                               ...prev.dimensions.cylinder,
-                              height_cm: value,
+                              height_cm: next,
                             },
                           },
-                        }));
-                      }}
+                        }))
+                      )}
                       error={createCylinderHeightError}
                     />
                   ) : null}
                   {createForm.dimensions.shape === 'box__height_width_depth' ? (
                     <Input
                       label="Высота, см"
-                      type="number"
-                      min={0}
-                      step={1}
-                      value={createForm.dimensions.box.height_cm}
-                      onChange={(event) => {
-                        const value = sanitizeNumericInput(event.target.value);
+                      type="text"
+                      {...makeIntegerMask(createForm.dimensions.box.height_cm, (next) =>
                         setCreateForm((prev) => ({
                           ...prev,
                           dimensions: {
                             ...prev.dimensions,
                             box: {
                               ...prev.dimensions.box,
-                              height_cm: value,
+                              height_cm: next,
                             },
                           },
-                        }));
-                      }}
+                        }))
+                      )}
                       error={createBoxHeightError}
                     />
                   ) : null}
                   {createForm.dimensions.shape === 'box__height_width_depth' ? (
                     <Input
                       label="Ширина, см"
-                      type="number"
-                      min={0}
-                      step={1}
-                      value={createForm.dimensions.box.width_cm}
-                      onChange={(event) => {
-                        const value = sanitizeNumericInput(event.target.value);
+                      type="text"
+                      {...makeIntegerMask(createForm.dimensions.box.width_cm, (next) =>
                         setCreateForm((prev) => ({
                           ...prev,
                           dimensions: {
                             ...prev.dimensions,
                             box: {
                               ...prev.dimensions.box,
-                              width_cm: value,
+                              width_cm: next,
                             },
                           },
-                        }));
-                      }}
+                        }))
+                      )}
                       error={createBoxWidthError}
                     />
                   ) : null}
                   {createForm.dimensions.shape === 'box__height_width_depth' ? (
                     <Input
                       label="Глубина, см"
-                      type="number"
-                      min={0}
-                      step={1}
-                      value={createForm.dimensions.box.depth_cm}
-                      onChange={(event) => {
-                        const value = sanitizeNumericInput(event.target.value);
+                      type="text"
+                      {...makeIntegerMask(createForm.dimensions.box.depth_cm, (next) =>
                         setCreateForm((prev) => ({
                           ...prev,
                           dimensions: {
                             ...prev.dimensions,
                             box: {
                               ...prev.dimensions.box,
-                              depth_cm: value,
+                              depth_cm: next,
                             },
                           },
-                        }));
-                      }}
+                        }))
+                      )}
                       error={createBoxDepthError}
                     />
                   ) : null}
@@ -2337,37 +2296,28 @@ export default function ProductsPage() {
                 >
                   <Input
                     label="Чистка, дней"
-                    type="number"
-                    min={0}
-                    step={1}
-                    value={createForm.occupancy.cleaning_days}
-                    onChange={(event) => {
-                      const value = sanitizeNumericInput(event.target.value);
+                    type="text"
+                    {...makeIntegerMask(createForm.occupancy.cleaning_days, (next) =>
                       setCreateForm((prev) => ({
                         ...prev,
-                        occupancy: { ...prev.occupancy, cleaning_days: value },
-                      }));
-                    }}
+                        occupancy: { ...prev.occupancy, cleaning_days: next },
+                      }))
+                    )}
                     helperText="Необязательное поле."
                     error={createOccupancyCleaningError}
                   />
                   <Input
                     label="Страховой резерв, %"
-                    type="number"
-                    min={0}
-                    max={100}
-                    step={1}
-                    value={createForm.occupancy.insurance_reserve_percent}
-                    onChange={(event) => {
-                      const value = sanitizeNumericInput(event.target.value);
+                    type="text"
+                    {...makeIntegerMask(createForm.occupancy.insurance_reserve_percent, (next) =>
                       setCreateForm((prev) => ({
                         ...prev,
                         occupancy: {
                           ...prev.occupancy,
-                          insurance_reserve_percent: value,
+                          insurance_reserve_percent: next,
                         },
-                      }));
-                    }}
+                      }))
+                    )}
                     helperText="0–100%"
                     error={createOccupancyInsuranceError}
                   />
@@ -2385,38 +2335,24 @@ export default function ProductsPage() {
                 >
                   <Input
                     label="Объём, см³"
-                    type="number"
-                    inputMode="decimal"
-                    min={0}
-                    step="0.001"
-                    value={createForm.delivery.volume_cm3}
-                    onChange={(event) => {
-                      const value = sanitizeNumericInput(event.target.value, {
-                        allowDecimal: true,
-                      });
+                    type="text"
+                    {...makeDecimalMask(createForm.delivery.volume_cm3, (next) =>
                       setCreateForm((prev) => ({
                         ...prev,
-                        delivery: { ...prev.delivery, volume_cm3: value },
-                      }));
-                    }}
+                        delivery: { ...prev.delivery, volume_cm3: next },
+                      }))
+                    )}
                     error={createDeliveryVolumeError}
                   />
                   <Input
                     label="Масса, кг"
-                    type="number"
-                    inputMode="decimal"
-                    min={0}
-                    step="0.001"
-                    value={createForm.delivery.weight_kg}
-                    onChange={(event) => {
-                      const value = sanitizeNumericInput(event.target.value, {
-                        allowDecimal: true,
-                      });
+                    type="text"
+                    {...makeDecimalMask(createForm.delivery.weight_kg, (next) =>
                       setCreateForm((prev) => ({
                         ...prev,
-                        delivery: { ...prev.delivery, weight_kg: value },
-                      }));
-                    }}
+                        delivery: { ...prev.delivery, weight_kg: next },
+                      }))
+                    )}
                     error={createDeliveryWeightError}
                   />
                   <Select
@@ -2472,32 +2408,24 @@ export default function ProductsPage() {
                 >
                   <Input
                     label="Монтаж, минут"
-                    type="number"
-                    min={0}
-                    step={1}
-                    value={createForm.setup.install_minutes}
-                    onChange={(event) => {
-                      const value = sanitizeNumericInput(event.target.value);
+                    type="text"
+                    {...makeIntegerMask(createForm.setup.install_minutes, (next) =>
                       setCreateForm((prev) => ({
                         ...prev,
-                        setup: { ...prev.setup, install_minutes: value },
-                      }));
-                    }}
+                        setup: { ...prev.setup, install_minutes: next },
+                      }))
+                    )}
                     error={createInstallMinutesError}
                   />
                   <Input
                     label="Демонтаж, минут"
-                    type="number"
-                    min={0}
-                    step={1}
-                    value={createForm.setup.uninstall_minutes}
-                    onChange={(event) => {
-                      const value = sanitizeNumericInput(event.target.value);
+                    type="text"
+                    {...makeIntegerMask(createForm.setup.uninstall_minutes, (next) =>
                       setCreateForm((prev) => ({
                         ...prev,
-                        setup: { ...prev.setup, uninstall_minutes: value },
-                      }));
-                    }}
+                        setup: { ...prev.setup, uninstall_minutes: next },
+                      }))
+                    )}
                     error={createUninstallMinutesError}
                   />
                   <Select
