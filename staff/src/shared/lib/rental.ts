@@ -12,11 +12,11 @@ export const calculateRentalTotal = (
     return 0;
   }
   const safeDays = Number.isFinite(days) && days > 0 ? Math.floor(days) : 0;
+  if (rentalMode !== 'special') {
+    return safeDays > 0 ? basePrice : 0;
+  }
   if (safeDays <= 0) {
     return 0;
-  }
-  if (rentalMode !== 'special') {
-    return basePrice * safeDays;
   }
 
   const sortedTiers = [...(tiers ?? [])].sort((a, b) => a.end_day - b.end_day);
