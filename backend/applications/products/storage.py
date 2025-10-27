@@ -3,7 +3,6 @@
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 
-
 product_image_storage = FileSystemStorage(
     location=settings.PRODUCTS_MEDIA_ROOT,
     base_url=settings.PRODUCTS_MEDIA_URL,

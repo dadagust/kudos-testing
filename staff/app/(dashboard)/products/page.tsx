@@ -24,7 +24,17 @@ import {
   useInfiniteProductsQuery,
 } from '@/entities/product';
 import { RoleGuard, usePermission } from '@/features/auth';
-import { Alert, Badge, Button, FormField, Input, Modal, Select, Spinner, Accordion } from '@/shared/ui';
+import {
+  Alert,
+  Badge,
+  Button,
+  FormField,
+  Input,
+  Modal,
+  Select,
+  Spinner,
+  Accordion,
+} from '@/shared/ui';
 
 const currencyFormatter = new Intl.NumberFormat('ru-RU', {
   style: 'currency',
@@ -232,7 +242,8 @@ const createFormFromProduct = (product: ProductDetail): CreateProductFormState =
     featureDraft: '',
     complementaryProducts:
       product.complementary_products?.map((item) => ({ id: item.id, name: item.name })) ??
-      (product.complementary_product_ids?.map((id) => ({ id, name: id })) ?? []),
+      product.complementary_product_ids?.map((id) => ({ id, name: id })) ??
+      [],
     dimensions: {
       shape,
       circle: {
@@ -421,19 +432,6 @@ const normalizeOnBlurInteger = (value: string) => {
   return v === '' ? '' : String(Number(v));
 };
 
-const normalizeOnBlurDecimal = (value: string) => {
-  if (value.trim() === '') return '';
-  let v = value.replace(/,/g, '.').replace(/[^0-9.]/g, '');
-
-  // срезаем висящую точку в конце
-  if (v.endsWith('.')) v = v.slice(0, -1);
-
-  if (v === '' || v === '.') return '';
-  const [i = '0', d = ''] = v.split('.');
-  const intNorm = String(Number(i)); // убираем ведущие нули
-  return d === '' ? intNorm : `${intNorm}.${d}`;
-};
-
 type MaskProps = {
   inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
   pattern?: string;
@@ -451,6 +449,19 @@ const makeIntegerMask = (value: string, setValue: (next: string) => void): MaskP
   onChange: (e) => setValue(sanitizeNumericInput(e.target.value, { allowDecimal: false })),
   onBlur: (e) => setValue(normalizeOnBlurInteger(e.target.value)),
 });
+
+const normalizeOnBlurDecimal = (value: string) => {
+  if (value.trim() === '') return '';
+  let v = value.replace(/,/g, '.').replace(/[^0-9.]/g, '');
+
+  // срезаем висящую точку в конце
+  if (v.endsWith('.')) v = v.slice(0, -1);
+
+  if (v === '' || v === '.') return '';
+  const [i = '0', d = ''] = v.split('.');
+  const intNorm = String(Number(i));
+  return d === '' ? intNorm : `${intNorm}.${d}`;
+};
 
 const makeDecimalMask = (value: string, setValue: (next: string) => void): MaskProps => ({
   inputMode: 'decimal',
@@ -470,8 +481,8 @@ const parseNumber = (value: string) => {
   return Number.isFinite(parsed) ? parsed : undefined;
 };
 
-const sanitizeStringList = (items?: string[]) =>
-  (items ?? []).map((item) => item.trim()).filter((item) => item.length > 0);
+const sanitizeStringList = (items: string[]) =>
+  items.map((item) => item.trim()).filter((item) => item.length > 0);
 
 const buildCreatePayload = (form: CreateProductFormState): ProductCreatePayload => {
   const payload: ProductCreatePayload = {
@@ -497,9 +508,7 @@ const buildCreatePayload = (form: CreateProductFormState): ProductCreatePayload 
     },
   };
 
-  const complementaryIds = Array.from(
-    new Set((form.complementaryProducts ?? []).map((item) => item.id))
-  );
+  const complementaryIds = Array.from(new Set(form.complementaryProducts.map((item) => item.id)));
   payload.complementary_product_ids = complementaryIds;
 
   const features = sanitizeStringList(form.features);
@@ -615,7 +624,7 @@ const buildCreatePayload = (form: CreateProductFormState): ProductCreatePayload 
   const slug = form.seo.slug.trim();
   const metaTitle = form.seo.meta_title.trim();
   const metaDescription = form.seo.meta_description.trim();
-  const metaKeywords = sanitizeStringList(form.seo?.meta_keywords);
+  const metaKeywords = sanitizeStringList(form.seo.meta_keywords);
   if (slug || metaTitle || metaDescription || metaKeywords.length) {
     payload.seo = {};
     if (slug) {
@@ -842,10 +851,7 @@ export default function ProductsPage() {
       if (!editingProductId) {
         throw new Error('productId is not set');
       }
-      return productsApi.details(
-        editingProductId,
-        'images,seo,dimensions,complementary_products'
-      );
+      return productsApi.details(editingProductId, 'images,seo,dimensions,complementary_products');
     },
     enabled: formMode === 'edit' && Boolean(editingProductId) && isProductModalOpen,
   });
@@ -1354,7 +1360,10 @@ export default function ProductsPage() {
       }
       return {
         ...prev,
-        complementaryProducts: [...prev.complementaryProducts, { id: product.id, name: product.name }],
+        complementaryProducts: [
+          ...prev.complementaryProducts,
+          { id: product.id, name: product.name },
+        ],
       };
     });
   };
@@ -1943,7 +1952,11 @@ export default function ProductsPage() {
                         {isComplementaryPickerVisible ? 'Скрыть' : 'Добавить'}
                       </Button>
                       {createForm.complementaryProducts.length ? (
-                        <Button type="button" variant="ghost" onClick={handleClearComplementaryProducts}>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          onClick={handleClearComplementaryProducts}
+                        >
                           Очистить
                         </Button>
                       ) : null}
@@ -1966,7 +1979,13 @@ export default function ProductsPage() {
                             }}
                           >
                             {isLoadingComplementaryProducts ? (
-                              <div style={{ display: 'flex', justifyContent: 'center', padding: '16px 0' }}>
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  justifyContent: 'center',
+                                  padding: '16px 0',
+                                }}
+                              >
                                 <Spinner />
                               </div>
                             ) : complementaryProductsOptions.length ? (
@@ -1985,13 +2004,21 @@ export default function ProductsPage() {
                                 );
                               })
                             ) : (
-                              <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                              <span
+                                style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}
+                              >
                                 Товары не найдены.
                               </span>
                             )}
                             <div ref={complementaryLoadMoreRef} />
                             {isFetchingMoreComplementaryProducts ? (
-                              <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0' }}>
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  justifyContent: 'center',
+                                  padding: '12px 0',
+                                }}
+                              >
                                 <Spinner />
                               </div>
                             ) : null}

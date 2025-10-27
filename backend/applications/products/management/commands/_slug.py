@@ -5,44 +5,44 @@ from __future__ import annotations
 from django.utils.text import slugify
 
 _RU_TO_LATIN = {
-    "а": "a",
-    "б": "b",
-    "в": "v",
-    "г": "g",
-    "д": "d",
-    "е": "e",
-    "ё": "yo",
-    "ж": "zh",
-    "з": "z",
-    "и": "i",
-    "й": "y",
-    "к": "k",
-    "л": "l",
-    "м": "m",
-    "н": "n",
-    "о": "o",
-    "п": "p",
-    "р": "r",
-    "с": "s",
-    "т": "t",
-    "у": "u",
-    "ф": "f",
-    "х": "h",
-    "ц": "ts",
-    "ч": "ch",
-    "ш": "sh",
-    "щ": "shch",
-    "ъ": "",
-    "ы": "y",
-    "ь": "",
-    "э": "e",
-    "ю": "yu",
-    "я": "ya",
+    'а': 'a',
+    'б': 'b',
+    'в': 'v',
+    'г': 'g',
+    'д': 'd',
+    'е': 'e',
+    'ё': 'yo',
+    'ж': 'zh',
+    'з': 'z',
+    'и': 'i',
+    'й': 'y',
+    'к': 'k',
+    'л': 'l',
+    'м': 'm',
+    'н': 'n',
+    'о': 'o',
+    'п': 'p',
+    'р': 'r',
+    'с': 's',
+    'т': 't',
+    'у': 'u',
+    'ф': 'f',
+    'х': 'h',
+    'ц': 'ts',
+    'ч': 'ch',
+    'ш': 'sh',
+    'щ': 'shch',
+    'ъ': '',
+    'ы': 'y',
+    'ь': '',
+    'э': 'e',
+    'ю': 'yu',
+    'я': 'ya',
 }
 
 
 def _transliterate(value: str) -> str:
-    return "".join(_RU_TO_LATIN.get(char, char) for char in value.lower())
+    return ''.join(_RU_TO_LATIN.get(char, char) for char in value.lower())
 
 
 def make_slug(name: str) -> str:
@@ -53,4 +53,4 @@ def make_slug(name: str) -> str:
     return slug
 
 
-__all__ = ["make_slug"]
+__all__ = ['make_slug']

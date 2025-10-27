@@ -11,8 +11,6 @@ from django.db import models
 
 from applications.core.models import Date, PathAndRename
 
-from .storage import product_image_storage
-
 from .choices import (
     Color,
     DimensionShape,
@@ -21,6 +19,7 @@ from .choices import (
     ReservationMode,
     TransportRestriction,
 )
+from .storage import product_image_storage
 
 
 class Category(Date):

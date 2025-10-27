@@ -13,10 +13,10 @@ from applications.products.management.commands._slug import make_slug
 
 
 def test_make_slug_transliterates_russian_letters():
-    assert make_slug("Мебель") == "mebel"
-    assert make_slug("Скатерти круглые") == "skaterti-kruglye"
+    assert make_slug('Мебель') == 'mebel'
+    assert make_slug('Скатерти круглые') == 'skaterti-kruglye'
 
 
 def test_make_slug_handles_compound_words():
-    assert make_slug("Освещение") == "osveshchenie"
-    assert make_slug("Сервисные тарелки") == "servisnye-tarelki"
+    assert make_slug('Освещение') == 'osveshchenie'
+    assert make_slug('Сервисные тарелки') == 'servisnye-tarelki'
