@@ -29,6 +29,7 @@ import {
 } from '@/entities/order';
 import { ProductListItem, useInfiniteProductsQuery } from '@/entities/product';
 import { RoleGuard, usePermission } from '@/features/auth';
+import { calculateRentalTotal } from '@/shared/lib/rental';
 import type { TableColumn } from '@/shared/ui';
 import {
   Accordion,
@@ -54,6 +55,7 @@ type OrderFormState = {
   delivery_address: string;
   comment: string;
   productQuantities: Record<string, number>;
+  productRentalDays: Record<string, number>;
 };
 
 type OrderFormSetter = Dispatch<React.SetStateAction<OrderFormState>>;
@@ -111,6 +113,7 @@ const createInitialFormState = (): OrderFormState => ({
   delivery_address: '',
   comment: '',
   productQuantities: {},
+  productRentalDays: {},
 });
 
 interface OrderFormContentProps {
@@ -136,6 +139,7 @@ interface OrderFormContentProps {
   isFetchingMoreProducts: boolean;
   onIncrementProduct: (productId: string) => void;
   onDecrementProduct: (productId: string) => void;
+  onRentalDaysChange: (productId: string, value: number) => void;
   totalAmount: number;
 }
 
@@ -162,6 +166,7 @@ const OrderFormContent = ({
   isFetchingMoreProducts,
   onIncrementProduct,
   onDecrementProduct,
+  onRentalDaysChange,
   totalAmount,
 }: OrderFormContentProps) => {
   const totalFormatted = formatCurrency(totalAmount);
@@ -217,6 +222,13 @@ const OrderFormContent = ({
   const handleCommentChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = event.target;
     setForm((prev) => ({ ...prev, comment: value }));
+  };
+
+  const handleRentalDaysInput = (productId: string) => (event: ChangeEvent<HTMLInputElement>) => {
+    const digits = event.target.value.replace(/[^0-9]/g, '');
+    const parsed = digits ? Number(digits) : NaN;
+    const nextValue = Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 1;
+    onRentalDaysChange(productId, nextValue);
   };
 
   const content: ReactNode = isLoading ? (
@@ -358,6 +370,14 @@ const OrderFormContent = ({
           ) : products.length ? (
             products.map((product) => {
               const quantity = form.productQuantities[product.id] ?? 0;
+              const rentalDays = form.productRentalDays[product.id] ?? 1;
+              const unitTotal = calculateRentalTotal(
+                product.price_rub,
+                product.rental?.mode ?? 'standard',
+                product.rental?.tiers,
+                rentalDays
+              );
+              const lineTotal = unitTotal * quantity;
               return (
                 <div
                   key={product.id}
@@ -371,11 +391,39 @@ const OrderFormContent = ({
                     borderRadius: '10px',
                   }}
                 >
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <strong style={{ fontSize: '1rem' }}>{product.name}</strong>
-                    <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
-                      {formatCurrency(product.price_rub)} за единицу
-                    </span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <strong style={{ fontSize: '1rem' }}>{product.name}</strong>
+                      <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                        {formatCurrency(product.price_rub)} за первый день
+                      </span>
+                    </div>
+                    {quantity > 0 ? (
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          gap: '12px',
+                          alignItems: 'flex-end',
+                        }}
+                      >
+                        <div style={{ width: 140 }}>
+                          <Input
+                            label="Дней аренды"
+                            type="text"
+                            inputMode="numeric"
+                            value={String(rentalDays)}
+                            onChange={handleRentalDaysInput(product.id)}
+                          />
+                        </div>
+                        <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
+                          Итог за единицу: {formatCurrency(unitTotal)}
+                        </span>
+                        <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>
+                          Сумма: {formatCurrency(lineTotal)}
+                        </span>
+                      </div>
+                    ) : null}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <Button
@@ -482,6 +530,7 @@ export default function OrdersPage() {
     () => ({
       limit: 12,
       q: productSearch.trim() || undefined,
+      include: 'rental',
     }),
     [productSearch]
   );
@@ -517,6 +566,10 @@ export default function OrdersPage() {
           color: coerceProductColor(item.product.color),
           thumbnail_url: item.product.thumbnail_url ?? null,
           delivery: { transport_restriction: null, self_pickup_allowed: false },
+          rental: {
+            mode: item.rental_mode,
+            tiers: item.rental_tiers ?? undefined,
+          },
         });
       }
     });
@@ -538,14 +591,23 @@ export default function OrdersPage() {
   }, [fetchNextProducts, hasMoreProducts]);
 
   const calculateTotal = useCallback(
-    (form: OrderFormState, map?: Record<string, ProductListItem>) =>
-      Object.entries(form.productQuantities).reduce((sum, [productId, quantity]) => {
-        const product = (map ?? productsMap)[productId];
+    (form: OrderFormState, map?: Record<string, ProductListItem>) => {
+      const source = map ?? productsMap;
+      return Object.entries(form.productQuantities).reduce((sum, [productId, quantity]) => {
+        const product = source[productId];
         if (!product || quantity <= 0) {
           return sum;
         }
-        return sum + product.price_rub * quantity;
-      }, 0),
+        const rentalDays = form.productRentalDays[productId] ?? 1;
+        const unitTotal = calculateRentalTotal(
+          product.price_rub,
+          product.rental?.mode ?? 'standard',
+          product.rental?.tiers,
+          rentalDays
+        );
+        return sum + unitTotal * quantity;
+      }, 0);
+    },
     [productsMap]
   );
 
@@ -561,9 +623,24 @@ export default function OrdersPage() {
       comment: form.comment.trim() || null,
       items: Object.entries(form.productQuantities)
         .filter(([, quantity]) => quantity > 0)
-        .map(([productId, quantity]) => ({ product_id: productId, quantity })),
+        .map(([productId, quantity]) => {
+          const rentalDays = form.productRentalDays[productId] ?? 1;
+          const product = productsMap[productId];
+          const item: OrderItemPayload = {
+            product_id: productId,
+            quantity,
+            rental_days: rentalDays,
+          };
+          if (product?.rental?.mode) {
+            item.rental_mode = product.rental.mode;
+            if (product.rental.mode === 'special' && product.rental.tiers?.length) {
+              item.rental_tiers = product.rental.tiers;
+            }
+          }
+          return item;
+        }),
     }),
-    []
+    [productsMap]
   );
 
   const editProductsMap = useMemo(() => {
@@ -580,6 +657,10 @@ export default function OrdersPage() {
           color: coerceProductColor(item.product.color),
           thumbnail_url: item.product.thumbnail_url ?? null,
           delivery: { transport_restriction: null, self_pickup_allowed: false },
+          rental: {
+            mode: item.rental_mode,
+            tiers: item.rental_tiers ?? undefined,
+          },
         };
       }
     });
@@ -625,9 +706,11 @@ export default function OrdersPage() {
     if (isEditOpen && editOrderResponse?.data) {
       const order = editOrderResponse.data;
       const quantities: Record<string, number> = {};
+      const rentalDays: Record<string, number> = {};
       order.items.forEach((item) => {
         if (item.product?.id) {
           quantities[item.product.id] = item.quantity;
+          rentalDays[item.product.id] = item.rental_days ?? 1;
         }
       });
       setEditForm({
@@ -639,6 +722,7 @@ export default function OrdersPage() {
         delivery_address: order.delivery_address ?? '',
         comment: order.comment ?? '',
         productQuantities: quantities,
+        productRentalDays: rentalDays,
       });
       setCustomerSearch(order.customer?.display_name ?? '');
       setProductSearch('');
@@ -715,6 +799,12 @@ export default function OrdersPage() {
     if (!hasItems) {
       return 'Добавьте хотя бы один товар в заказ.';
     }
+    const hasInvalidRental = Object.entries(form.productQuantities).some(
+      ([productId, quantity]) => quantity > 0 && (form.productRentalDays[productId] ?? 0) <= 0
+    );
+    if (hasInvalidRental) {
+      return 'Укажите длительность аренды для каждого товара.';
+    }
     return null;
   };
 
@@ -784,12 +874,21 @@ export default function OrdersPage() {
       setter((prev) => {
         const current = prev.productQuantities[productId] ?? 0;
         const next = Math.max(0, current + delta);
+        const nextRentalDays = { ...prev.productRentalDays };
+        if (next > 0) {
+          if (!nextRentalDays[productId]) {
+            nextRentalDays[productId] = prev.productRentalDays[productId] ?? 1;
+          }
+        } else {
+          delete nextRentalDays[productId];
+        }
         return {
           ...prev,
           productQuantities: {
             ...prev.productQuantities,
             [productId]: next,
           },
+          productRentalDays: nextRentalDays,
         };
       });
     },
@@ -804,6 +903,26 @@ export default function OrdersPage() {
     updateProductQuantity(setEditForm, productId, 1);
   const handleEditDecrement = (productId: string) =>
     updateProductQuantity(setEditForm, productId, -1);
+
+  const handleCreateRentalDaysChange = (productId: string, value: number) => {
+    setCreateForm((prev) => ({
+      ...prev,
+      productRentalDays: {
+        ...prev.productRentalDays,
+        [productId]: Math.max(1, value),
+      },
+    }));
+  };
+
+  const handleEditRentalDaysChange = (productId: string, value: number) => {
+    setEditForm((prev) => ({
+      ...prev,
+      productRentalDays: {
+        ...prev.productRentalDays,
+        [productId]: Math.max(1, value),
+      },
+    }));
+  };
 
   const handleSelectCreateCustomer = (customer: CustomerOption | null) => {
     setCreateForm((prev) => ({ ...prev, customer }));
@@ -1014,6 +1133,7 @@ export default function OrdersPage() {
             isFetchingMoreProducts={isFetchingMoreProducts}
             onIncrementProduct={handleCreateIncrement}
             onDecrementProduct={handleCreateDecrement}
+            onRentalDaysChange={handleCreateRentalDaysChange}
             totalAmount={calculateTotal(createForm)}
           />
         </Drawer>
@@ -1042,6 +1162,7 @@ export default function OrdersPage() {
             isFetchingMoreProducts={isFetchingMoreProducts}
             onIncrementProduct={handleEditIncrement}
             onDecrementProduct={handleEditDecrement}
+            onRentalDaysChange={handleEditRentalDaysChange}
             totalAmount={calculateTotal(editForm, editProductsMap)}
           />
         </Drawer>

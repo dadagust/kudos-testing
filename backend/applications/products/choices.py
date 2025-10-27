@@ -47,5 +47,6 @@ class ReservationMode(models.TextChoices):
     DISABLED = 'disabled', 'Запрещено'
 
 
-class RentalBasePeriod(models.TextChoices):
+class RentalMode(models.TextChoices):
     STANDARD = 'standard', 'Стандартный'
+    SPECIAL = 'special', 'Особый'

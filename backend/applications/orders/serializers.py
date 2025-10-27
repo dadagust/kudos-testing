@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from typing import Any
 
 from django.db import transaction
 from rest_framework import serializers
 
 from applications.customers.models import Customer
+from applications.products.choices import RentalMode
 from applications.products.models import Product
 
 from .models import DeliveryType, Order, OrderItem, OrderStatus
@@ -38,9 +39,63 @@ class OrderProductSummarySerializer(serializers.ModelSerializer):
         return thumbnail.url if thumbnail else None
 
 
+def _load_product_rental_tiers(product: Product) -> list[tuple[int, Decimal]]:
+    tiers: list[tuple[int, Decimal]] = []
+    for tier in product.rental_special_tiers or []:
+        try:
+            end_day = int(tier.get('end_day'))
+            price = Decimal(str(tier.get('price_per_day')))
+        except (TypeError, ValueError, InvalidOperation):
+            continue
+        tiers.append((end_day, price))
+    tiers.sort(key=lambda item: item[0])
+    return tiers
+
+
+def _snapshot_rental_tiers(tiers: list[tuple[int, Decimal]]) -> list[dict[str, str]]:
+    return [
+        {'end_day': end_day, 'price_per_day': format(price, '.2f')}
+        for end_day, price in tiers
+    ]
+
+
+def _calculate_rental_total(
+    base_price: Decimal, mode: str, tiers: list[tuple[int, Decimal]], days: int
+) -> Decimal:
+    if days <= 0:
+        raise ValueError('rental_days must be positive')
+    if mode != RentalMode.SPECIAL:
+        return base_price * days
+    total = base_price
+    if days == 1:
+        return total
+    previous_end = 1
+    last_price = tiers[-1][1] if tiers else base_price
+    for end_day, price_per_day in tiers:
+        if end_day <= previous_end:
+            last_price = price_per_day
+            continue
+        span_start = previous_end + 1
+        span_end = min(end_day, days)
+        if span_end < span_start:
+            previous_end = end_day
+            last_price = price_per_day
+            continue
+        days_in_span = span_end - span_start + 1
+        total += price_per_day * days_in_span
+        previous_end = end_day
+        last_price = price_per_day
+        if span_end == days:
+            break
+    if previous_end < days:
+        total += last_price * (days - previous_end)
+    return total
+
+
 class OrderItemSerializer(serializers.ModelSerializer):
     product = OrderProductSummarySerializer(read_only=True)
     subtotal = serializers.SerializerMethodField()
+    rental_tiers = serializers.SerializerMethodField()
 
     class Meta:
         model = OrderItem
@@ -49,13 +104,39 @@ class OrderItemSerializer(serializers.ModelSerializer):
             'product',
             'product_name',
             'quantity',
+            'rental_days',
+            'rental_mode',
+            'rental_tiers',
             'unit_price',
             'subtotal',
         )
-        read_only_fields = ('id', 'product', 'product_name', 'unit_price', 'subtotal')
+        read_only_fields = (
+            'id',
+            'product',
+            'product_name',
+            'rental_days',
+            'rental_mode',
+            'rental_tiers',
+            'unit_price',
+            'subtotal',
+        )
 
     def get_subtotal(self, obj: OrderItem) -> Decimal:
         return obj.subtotal
+
+    def get_rental_tiers(self, obj: OrderItem):
+        if obj.rental_mode != RentalMode.SPECIAL:
+            return None
+        tiers = []
+        for tier in obj.rental_tiers_snapshot or []:
+            try:
+                end_day = int(tier.get('end_day'))
+                price = float(Decimal(str(tier.get('price_per_day'))))
+            except (TypeError, ValueError, InvalidOperation):
+                continue
+            tiers.append({'end_day': end_day, 'price_per_day': price})
+        tiers.sort(key=lambda item: item['end_day'])
+        return tiers
 
 
 class OrderSummarySerializer(serializers.ModelSerializer):
@@ -93,6 +174,9 @@ class OrderDetailSerializer(OrderSummarySerializer):
 class OrderItemInputSerializer(serializers.Serializer):
     product_id = serializers.UUIDField()
     quantity = serializers.IntegerField(min_value=1)
+    rental_days = serializers.IntegerField(min_value=1, required=False, default=1)
+    rental_mode = serializers.ChoiceField(choices=RentalMode.choices, required=False)
+    rental_tiers = serializers.ListField(child=serializers.DictField(), required=False)
 
     def validate_product_id(self, value):
         try:
@@ -190,13 +274,23 @@ class OrderWriteSerializer(serializers.ModelSerializer):
             product_id = item['product_id']
             quantity = int(item['quantity'])
             product = Product.objects.get(pk=product_id)
+            rental_days = int(item.get('rental_days') or 1)
+            mode = product.rental_mode or RentalMode.STANDARD
+            tiers = _load_product_rental_tiers(product) if mode == RentalMode.SPECIAL else []
+            unit_price = _calculate_rental_total(
+                Decimal(product.price_rub), mode, tiers, rental_days
+            ).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            tiers_snapshot = _snapshot_rental_tiers(tiers) if mode == RentalMode.SPECIAL else []
             order_items.append(
                 OrderItem(
                     order=order,
                     product=product,
                     product_name=product.name,
                     quantity=quantity,
-                    unit_price=product.price_rub,
+                    unit_price=unit_price,
+                    rental_days=rental_days,
+                    rental_mode=mode,
+                    rental_tiers_snapshot=tiers_snapshot,
                 )
             )
         OrderItem.objects.bulk_create(order_items)

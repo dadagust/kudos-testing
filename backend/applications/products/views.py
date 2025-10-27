@@ -18,7 +18,7 @@ from .choices import (
     Color,
     DimensionShape,
     InstallerQualification,
-    RentalBasePeriod,
+    RentalMode,
     ReservationMode,
     TransportRestriction,
 )
@@ -336,8 +336,8 @@ class EnumsAggregateView(APIView):
                 'reservation_modes': [
                     {'value': choice.value, 'label': choice.label} for choice in ReservationMode
                 ],
-                'rental_base_periods': [
-                    {'value': choice.value, 'label': choice.label} for choice in RentalBasePeriod
+                'rental_modes': [
+                    {'value': choice.value, 'label': choice.label} for choice in RentalMode
                 ],
             }
         )

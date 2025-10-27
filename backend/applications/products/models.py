@@ -15,7 +15,7 @@ from .choices import (
     Color,
     DimensionShape,
     InstallerQualification,
-    RentalBasePeriod,
+    RentalMode,
     ReservationMode,
     TransportRestriction,
 )
@@ -205,10 +205,15 @@ class Product(Date):
     )
     setup_self_setup_allowed = models.BooleanField('Самостоятельный сетап', default=False)
 
-    rental_base_period = models.CharField(
-        'Базовый период аренды',
+    rental_mode = models.CharField(
+        'Режим аренды',
         max_length=32,
-        choices=RentalBasePeriod.choices,
+        choices=RentalMode.choices,
+        default=RentalMode.STANDARD,
+    )
+    rental_special_tiers = models.JSONField(
+        'Тарифы аренды (особый)',
+        default=list,
         blank=True,
     )
 

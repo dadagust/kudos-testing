@@ -1,3 +1,5 @@
+import type { RentalMode, RentalTier } from '@/entities/product';
+
 export type OrderStatus = 'new' | 'reserved' | 'rented' | 'in_work' | 'archived' | 'declined';
 
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
@@ -36,6 +38,9 @@ export interface OrderItem {
   product: OrderItemProductSummary | null;
   product_name: string;
   quantity: number;
+  rental_days: number;
+  rental_mode: RentalMode;
+  rental_tiers?: RentalTier[] | null;
   unit_price: string;
   subtotal: string;
 }
@@ -77,6 +82,9 @@ export interface OrderListQuery {
 export interface OrderItemPayload {
   product_id: string;
   quantity: number;
+  rental_days: number;
+  rental_mode?: RentalMode;
+  rental_tiers?: RentalTier[];
 }
 
 export interface CreateOrderPayload {

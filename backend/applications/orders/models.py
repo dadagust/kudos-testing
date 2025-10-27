@@ -8,6 +8,7 @@ from django.core.validators import MinValueValidator
 from django.db import models
 
 from applications.core.models import Date
+from applications.products.choices import RentalMode
 from applications.products.models import Product
 
 
@@ -117,6 +118,20 @@ class OrderItem(Date):
         max_digits=12,
         decimal_places=2,
         validators=[MinValueValidator(Decimal('0.00'))],
+    )
+    rental_days = models.PositiveIntegerField(
+        'Дней аренды', default=1, validators=[MinValueValidator(1)]
+    )
+    rental_mode = models.CharField(
+        'Режим аренды',
+        max_length=32,
+        choices=RentalMode.choices,
+        default=RentalMode.STANDARD,
+    )
+    rental_tiers_snapshot = models.JSONField(
+        'Снимок тарифов аренды',
+        default=list,
+        blank=True,
     )
 
     class Meta(Date.Meta):
