@@ -58,6 +58,13 @@ class Product(Date):
         related_name='products',
         verbose_name='Категория',
     )
+    complementary_products = models.ManyToManyField(
+        'self',
+        verbose_name='Дополняющие изделия',
+        symmetrical=False,
+        related_name='complemented_by',
+        blank=True,
+    )
     price_rub = models.DecimalField(
         'Стоимость, руб',
         max_digits=12,
