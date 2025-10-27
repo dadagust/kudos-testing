@@ -366,38 +366,95 @@ const mapProductImagesToForm = (images?: ProductImage[]): ProductFormImage[] => 
     }));
 };
 
+// ЗАПРЕЩАЕМ служебные символы в number-полях (e, +, -), чтобы браузер не давал ввод в экспоненциальной форме
+const blockExpAndSigns = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  if (['e', 'E', '+', '-'].includes(e.key)) {
+    e.preventDefault();
+  }
+};
+
+// Улучшаем: поддержка запятой, нескольких точек, ведущих нулей, "висящей" точки в конце
 const sanitizeNumericInput = (
   value: string,
   { allowDecimal = false }: { allowDecimal?: boolean } = {}
 ) => {
-  if (allowDecimal) {
-    const normalized = value.replace(/,/g, '.');
-    const filtered = normalized.replace(/[^0-9.]/g, '');
-
-    if (filtered === '') {
-      return '';
-    }
-
-    const [integerPartRaw = '', ...decimalParts] = filtered.split('.');
-    const integerPart = integerPartRaw.replace(/\D+/g, '');
-    const decimalPart = decimalParts.join('').replace(/\D+/g, '');
-    const hasTrailingDot = normalized.endsWith('.');
-
-    if (!hasTrailingDot && decimalPart === '') {
-      return integerPart;
-    }
-
-    const integerForOutput = integerPart === '' ? '0' : integerPart;
-
-    if (hasTrailingDot && decimalPart === '') {
-      return `${integerForOutput}.`;
-    }
-
-    return `${integerForOutput}.${decimalPart}`;
+  if (!allowDecimal) {
+    // только целые
+    return value.replace(/\D+/g, '');
   }
 
-  return value.replace(/\D+/g, '');
+  // дробные: меняем запятую на точку, сносим всё кроме цифр и точки
+  const normalized = value.replace(/,/g, '.').replace(/[^0-9.]/g, '');
+
+  if (normalized === '') return '';
+
+  // Разбиваем на целую/дробную часть, но допускаем промежуточное состояние "123."
+  const parts = normalized.split('.');
+  const integerPart = (parts.shift() ?? '').replace(/\D+/g, '');
+  const decimalPartRaw = parts.join(''); // склеиваем все остаточные точки в дробную часть
+  const decimalPart = decimalPartRaw.replace(/\D+/g, '');
+  const endsWithDot = normalized.endsWith('.');
+
+  // Не даём уходить в пустую строку, если человек уже ввёл что-то
+  const safeInt = integerPart === '' ? '0' : integerPart;
+
+  if (endsWithDot && decimalPart === '') {
+    // позволяем "123." во время ввода
+    return `${safeInt}.`;
+  }
+  if (decimalPart === '') {
+    // нет дробной части -> просто целая
+    return safeInt;
+  }
+  return `${safeInt}.${decimalPart}`;
 };
+
+// Подчистка по blur: убираем висящую точку и ведущие нули вроде "0001.20" -> "1.20", "000" -> ""
+const normalizeOnBlurInteger = (value: string) => {
+  const v = value.replace(/\D+/g, '');
+  return v === '' ? '' : String(Number(v));
+};
+
+const normalizeOnBlurDecimal = (value: string) => {
+  if (value.trim() === '') return '';
+  let v = value.replace(/,/g, '.').replace(/[^0-9.]/g, '');
+
+  // срезаем висящую точку в конце
+  if (v.endsWith('.')) v = v.slice(0, -1);
+
+  if (v === '' || v === '.') return '';
+  const [i = '0', d = ''] = v.split('.');
+  const intNorm = String(Number(i)); // убираем ведущие нули
+  return d === '' ? intNorm : `${intNorm}.${d}`;
+};
+
+type MaskProps = {
+  inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
+  pattern?: string;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  value: string;
+};
+
+const makeIntegerMask = (value: string, setValue: (next: string) => void): MaskProps => ({
+  inputMode: 'numeric',
+  pattern: '[0-9]*',
+  onKeyDown: blockExpAndSigns,
+  value,
+  onChange: (e) => setValue(sanitizeNumericInput(e.target.value, { allowDecimal: false })),
+  onBlur: (e) => setValue(normalizeOnBlurInteger(e.target.value)),
+});
+
+const makeDecimalMask = (value: string, setValue: (next: string) => void): MaskProps => ({
+  inputMode: 'decimal',
+  // паттерн позволяет "." и цифры
+  pattern: '[0-9.]*',
+  onKeyDown: blockExpAndSigns,
+  value,
+  onChange: (e) => setValue(sanitizeNumericInput(e.target.value, { allowDecimal: true })),
+  onBlur: (e) => setValue(normalizeOnBlurDecimal(e.target.value)),
+});
 
 const parseNumber = (value: string) => {
   if (value.trim() === '') {
@@ -1631,15 +1688,12 @@ export default function ProductsPage() {
                   </Select>
                   <Input
                     label="Стоимость, ₽"
-                    type="number"
-                    inputMode="numeric"
-                    min={0}
-                    step={1}
-                    value={createForm.priceRub}
-                    onChange={(event) => {
-                      const value = sanitizeNumericInput(event.target.value);
-                      setCreateForm((prev) => ({ ...prev, priceRub: value }));
-                    }}
+                    /* type можно оставить number, но лучше text, чтобы убрать спиннеры:
+                         type="text" */
+                    type="text"
+                    {...makeIntegerMask(createForm.priceRub, (next) =>
+                      setCreateForm((prev) => ({ ...prev, priceRub: next }))
+                    )}
                     helperText="Минимальное значение — 0 ₽."
                     error={createPriceError}
                   />
