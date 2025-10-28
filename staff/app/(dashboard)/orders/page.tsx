@@ -181,30 +181,64 @@ const flattenErrorPayload = (
   return [];
 };
 
-const extractOrderErrorMessages = (error: unknown): string[] => {
-  if (axios.isAxiosError(error)) {
-    const data = error.response?.data;
-    if (data !== undefined) {
-      const flattened = flattenErrorPayload(data);
-      const uniqueMessages = Array.from(
-        new Set(flattened.map((message) => message.trim()).filter((message) => message.length > 0)),
-      );
-      if (uniqueMessages.length > 0) {
-        return uniqueMessages;
-      }
-    }
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
 
-    const statusText = error.response?.statusText;
-    if (typeof statusText === 'string' && statusText.trim().length > 0) {
-      return [statusText];
-    }
-    if (typeof error.message === 'string' && error.message.trim().length > 0) {
-      return [error.message];
-    }
+const hasResponse = (
+  value: unknown,
+): value is { response: { data?: unknown; statusText?: unknown } } =>
+  isRecord(value) && 'response' in value && isRecord(value.response);
+
+const parseJsonIfString = (value: unknown): unknown => {
+  if (typeof value !== 'string') {
+    return value;
   }
 
-  if (error instanceof Error && error.message.trim().length > 0) {
-    return [error.message];
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return value;
+  }
+
+  try {
+    return JSON.parse(trimmed);
+  } catch {
+    return value;
+  }
+};
+
+const extractOrderErrorMessages = (error: unknown): string[] => {
+  const maybeAxiosResponse = axios.isAxiosError(error) ? error.response : undefined;
+  const fallbackMessage = axios.isAxiosError(error)
+    ? typeof error.message === 'string'
+      ? error.message.trim()
+      : ''
+    : error instanceof Error
+      ? error.message.trim()
+      : '';
+
+  const responseLike = maybeAxiosResponse ?? (hasResponse(error) ? error.response : undefined);
+
+  const rawData = isRecord(responseLike) && 'data' in responseLike ? responseLike.data : maybeAxiosResponse?.data;
+  const parsedData = parseJsonIfString(rawData);
+  const flattened = flattenErrorPayload(parsedData);
+  const normalizedMessages = Array.from(
+    new Set(flattened.map((message) => message.trim()).filter((message) => message.length > 0)),
+  );
+
+  if (normalizedMessages.length > 0) {
+    return normalizedMessages;
+  }
+
+  const statusText = isRecord(responseLike) && typeof responseLike.statusText === 'string'
+    ? responseLike.statusText.trim()
+    : maybeAxiosResponse?.statusText?.trim();
+
+  if (statusText) {
+    return [statusText];
+  }
+
+  if (fallbackMessage) {
+    return [fallbackMessage];
   }
 
   return [];
