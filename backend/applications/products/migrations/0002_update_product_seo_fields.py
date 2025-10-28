@@ -21,7 +21,7 @@ def generate_url_name(apps, schema_editor):
             slug = base
             suffix = 2
             while slug in existing:
-                slug = f"{base}-{suffix}"
+                slug = f'{base}-{suffix}'
                 suffix += 1
         existing.add(slug)
         Product.objects.filter(pk=product.pk).update(seo_url_name=slug)
@@ -33,7 +33,6 @@ def reverse_noop(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('products', '0001_initial'),
     ]

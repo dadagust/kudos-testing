@@ -57,7 +57,6 @@ def noop_reverse(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('products', '0002_update_product_seo_fields'),
     ]
@@ -73,7 +72,12 @@ class Migration(migrations.Migration):
             fields=[
                 ('created', models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')),
                 ('modified', models.DateTimeField(auto_now=True, verbose_name='Дата изменения')),
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                (
+                    'id',
+                    models.UUIDField(
+                        default=uuid.uuid4, editable=False, primary_key=True, serialize=False
+                    ),
+                ),
                 ('name', models.CharField(max_length=255, unique=True, verbose_name='Название')),
                 (
                     'price_rub',

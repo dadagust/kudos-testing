@@ -8,7 +8,6 @@ from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import Any
 
 from django.db import transaction
-
 from rest_framework import serializers
 
 from applications.customers.models import Customer
@@ -205,7 +204,7 @@ def _calculate_items_pricing(
 
     missing = [pid for pid in product_ids if pid not in products]
     if missing:
-        raise serializers.ValidationError({'items': f"Товар {missing[0]} не найден"})
+        raise serializers.ValidationError({'items': f'Товар {missing[0]} не найден'})
 
     calculated: OrderedDict[tuple[str, int], dict[str, Any]] = OrderedDict()
     qualification_total = Decimal('0.00')
@@ -218,9 +217,7 @@ def _calculate_items_pricing(
 
         mode = product.rental_mode or RentalMode.STANDARD
         tiers = _load_product_rental_tiers(product) if mode == RentalMode.SPECIAL else []
-        unit_total = _calculate_rental_total(
-            Decimal(product.price_rub), mode, tiers, rental_days
-        )
+        unit_total = _calculate_rental_total(Decimal(product.price_rub), mode, tiers, rental_days)
         unit_price = unit_total.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
         subtotal_increment = unit_price * quantity
         tiers_snapshot = _snapshot_rental_tiers(tiers) if mode == RentalMode.SPECIAL else []
@@ -253,7 +250,7 @@ def _calculate_items_pricing(
         product_id = str(item['product_id'])
         product = products.get(product_id)
         if product is None:  # pragma: no cover - safeguarded by pre-check above
-            raise serializers.ValidationError({'items': f"Товар {product_id} не найден"})
+            raise serializers.ValidationError({'items': f'Товар {product_id} не найден'})
 
         try:
             quantity = int(item['quantity'])

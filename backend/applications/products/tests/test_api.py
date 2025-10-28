@@ -148,7 +148,10 @@ class ProductApiTests(APITestCase):
         self.assertIn('shapes', enums)
         installer_qualifications = enums.get('installer_qualifications', [])
         self.assertTrue(
-            any(item['value'] == str(self.installer_qualification.id) for item in installer_qualifications)
+            any(
+                item['value'] == str(self.installer_qualification.id)
+                for item in installer_qualifications
+            )
         )
 
     def test_image_upload_and_reorder(self):

@@ -288,7 +288,7 @@ class Product(Date):
         model = self.__class__
         queryset = model.objects.exclude(pk=self.pk) if self.pk else model.objects.all()
         while queryset.filter(seo_url_name=slug_candidate).exists():
-            slug_candidate = f"{base_slug}-{suffix}"
+            slug_candidate = f'{base_slug}-{suffix}'
             suffix += 1
         return slug_candidate
 

@@ -218,6 +218,7 @@ class CategoryPrimaryKeyOrSlugField(serializers.PrimaryKeyRelatedField):
         except (TypeError, ValueError):
             self.fail('invalid')
 
+
 class ProductBaseSerializer(serializers.ModelSerializer):
     price_rub = serializers.DecimalField(max_digits=12, decimal_places=2)
     loss_compensation_rub = serializers.DecimalField(
