@@ -1,5 +1,6 @@
 'use client';
 
+import axios from 'axios';
 import Link from 'next/link';
 import {
   ChangeEvent,
@@ -30,7 +31,6 @@ import {
 } from '@/entities/order';
 import { ProductListItem, useInfiniteProductsQuery } from '@/entities/product';
 import { RoleGuard, usePermission } from '@/features/auth';
-import { calculateRentalTotal } from '@/shared/lib/rental';
 import type { TableColumn } from '@/shared/ui';
 import {
   Accordion,
@@ -59,6 +59,12 @@ type OrderFormState = {
 };
 
 type OrderFormSetter = Dispatch<React.SetStateAction<OrderFormState>>;
+
+type CalculatedItemTotals = {
+  unitPrice: number;
+  subtotal: number;
+  rentalDays: number;
+};
 
 const STATUS_GROUP_TABS: { id: OrderStatusGroup; label: string }[] = [
   { id: 'current', label: 'Текущие' },
@@ -161,7 +167,9 @@ interface OrderFormContentProps {
   isFetchingMoreProducts: boolean;
   onIncrementProduct: (productId: string) => void;
   onDecrementProduct: (productId: string) => void;
-  totalAmount: number;
+  totalAmount: number | null;
+  isCalculatingTotal: boolean;
+  calculatedItems: Record<string, CalculatedItemTotals>;
 }
 
 const OrderFormContent = ({
@@ -188,13 +196,10 @@ const OrderFormContent = ({
   onIncrementProduct,
   onDecrementProduct,
   totalAmount,
+  isCalculatingTotal,
+  calculatedItems,
 }: OrderFormContentProps) => {
-  const totalFormatted = formatCurrency(totalAmount);
-  const orderRentalDays = useMemo(
-    () => calculateRentalDays(form.installation_date, form.dismantle_date),
-    [form.installation_date, form.dismantle_date]
-  );
-  const totalLabel = orderRentalDays === null ? '—' : totalFormatted;
+  const totalFormatted = totalAmount === null ? '—' : formatCurrency(totalAmount);
 
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
@@ -371,7 +376,7 @@ const OrderFormContent = ({
         title="Товары"
         actions={
           <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
-            {totalLabel}
+            {totalFormatted}
           </span>
         }
       >
@@ -388,16 +393,11 @@ const OrderFormContent = ({
           ) : products.length ? (
             products.map((product) => {
               const quantity = form.productQuantities[product.id] ?? 0;
-              const canShowTotals = orderRentalDays !== null;
-              const unitTotal = canShowTotals
-                ? calculateRentalTotal(
-                    product.price_rub,
-                    product.rental?.mode ?? 'standard',
-                    product.rental?.tiers,
-                    orderRentalDays
-                  )
-                : 0;
-              const lineTotal = canShowTotals ? unitTotal * quantity : 0;
+              const calculation = calculatedItems[product.id];
+              const canShowTotals = Boolean(calculation);
+              const rentalDays = calculation?.rentalDays ?? 0;
+              const unitTotal = calculation?.unitPrice ?? 0;
+              const lineTotal = calculation?.subtotal ?? 0;
               return (
                 <div
                   key={product.id}
@@ -429,7 +429,7 @@ const OrderFormContent = ({
                           }}
                         >
                           <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
-                            Дней аренды: {orderRentalDays}
+                            Дней аренды: {rentalDays}
                           </span>
                           <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
                             Итог за единицу: {formatCurrency(unitTotal)}
@@ -438,6 +438,10 @@ const OrderFormContent = ({
                             Сумма: {formatCurrency(lineTotal)}
                           </span>
                         </div>
+                      ) : isCalculatingTotal ? (
+                        <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
+                          Расчёт стоимости...
+                        </span>
                       ) : (
                         <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
                           Укажите даты монтажа и демонтажа, чтобы рассчитать стоимость.
@@ -512,7 +516,16 @@ const OrderFormContent = ({
           <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
             Сумма заказа
           </span>
-          <div style={{ fontSize: '1.5rem', fontWeight: 600 }}>{totalLabel}</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: 600, minHeight: '1.75rem' }}>
+            {isCalculatingTotal ? (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Spinner size="sm" />
+                Расчёт...
+              </span>
+            ) : (
+              totalFormatted
+            )}
+          </div>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
           <Button type="button" variant="ghost" onClick={onClose} disabled={isSubmitting}>
@@ -545,6 +558,16 @@ export default function OrdersPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [customerSearch, setCustomerSearch] = useState('');
   const [productSearch, setProductSearch] = useState('');
+  const [createTotalAmount, setCreateTotalAmount] = useState<number | null>(null);
+  const [editTotalAmount, setEditTotalAmount] = useState<number | null>(null);
+  const [isCalculatingCreateTotal, setIsCalculatingCreateTotal] = useState(false);
+  const [isCalculatingEditTotal, setIsCalculatingEditTotal] = useState(false);
+  const [createCalculatedItems, setCreateCalculatedItems] = useState<
+    Record<string, CalculatedItemTotals>
+  >({});
+  const [editCalculatedItems, setEditCalculatedItems] = useState<
+    Record<string, CalculatedItemTotals>
+  >({});
 
   const productQueryParams = useMemo(
     () => ({
@@ -596,43 +619,11 @@ export default function OrdersPage() {
     return extras.length ? [...extras, ...fetchedProducts] : fetchedProducts;
   }, [fetchedProducts, editOrderResponse]);
 
-  const productsMap = useMemo(() => {
-    const map: Record<string, ProductListItem> = {};
-    products.forEach((product) => {
-      map[product.id] = product;
-    });
-    return map;
-  }, [products]);
-
   const loadMoreProducts = useCallback(() => {
     if (hasMoreProducts) {
       void fetchNextProducts();
     }
   }, [fetchNextProducts, hasMoreProducts]);
-
-  const calculateTotal = useCallback(
-    (form: OrderFormState, map?: Record<string, ProductListItem>) => {
-      const source = map ?? productsMap;
-      const rentalDays = calculateRentalDays(form.installation_date, form.dismantle_date);
-      if (!rentalDays) {
-        return 0;
-      }
-      return Object.entries(form.productQuantities).reduce((sum, [productId, quantity]) => {
-        const product = source[productId];
-        if (!product || quantity <= 0) {
-          return sum;
-        }
-        const unitTotal = calculateRentalTotal(
-          product.price_rub,
-          product.rental?.mode ?? 'standard',
-          product.rental?.tiers,
-          rentalDays
-        );
-        return sum + unitTotal * quantity;
-      }, 0);
-    },
-    [productsMap]
-  );
 
   const buildPayloadFromForm = useCallback(
     (form: OrderFormState): CreateOrderPayload => {
@@ -648,49 +639,45 @@ export default function OrdersPage() {
         comment: form.comment.trim() || null,
         items: Object.entries(form.productQuantities)
           .filter(([, quantity]) => quantity > 0)
-          .map(([productId, quantity]) => {
-            const product = productsMap[productId];
-            const item: OrderItemPayload = {
-              product_id: productId,
-              quantity,
-              rental_days: rentalDays,
-            };
-            if (product?.rental?.mode) {
-              item.rental_mode = product.rental.mode;
-              if (product.rental.mode === 'special' && product.rental.tiers?.length) {
-                item.rental_tiers = product.rental.tiers;
-              }
-            }
-            return item;
-          }),
+          .map(([productId, quantity]) => ({
+            product_id: productId,
+            quantity,
+            rental_days: rentalDays,
+          })),
       };
     },
-    [productsMap]
+    []
   );
 
-  const editProductsMap = useMemo(() => {
-    if (!editOrderResponse?.data) {
-      return productsMap;
+  const createCalculationPayload = useMemo(() => {
+    const rentalDays = calculateRentalDays(
+      createForm.installation_date,
+      createForm.dismantle_date
+    );
+    if (!rentalDays) {
+      return null;
     }
-    const map: Record<string, ProductListItem> = { ...productsMap };
-    editOrderResponse.data.items.forEach((item) => {
-      if (item.product?.id && !map[item.product.id]) {
-        map[item.product.id] = {
-          id: item.product.id,
-          name: item.product.name,
-          price_rub: Number(item.unit_price),
-          color: coerceProductColor(item.product.color),
-          thumbnail_url: item.product.thumbnail_url ?? null,
-          delivery: { transport_restriction: null, self_pickup_allowed: false },
-          rental: {
-            mode: item.rental_mode,
-            tiers: item.rental_tiers ?? undefined,
-          },
-        };
-      }
-    });
-    return map;
-  }, [productsMap, editOrderResponse]);
+    const hasItems = Object.values(createForm.productQuantities).some((quantity) => quantity > 0);
+    if (!hasItems) {
+      return null;
+    }
+    return buildPayloadFromForm(createForm);
+  }, [buildPayloadFromForm, createForm]);
+
+  const editCalculationPayload = useMemo(() => {
+    const rentalDays = calculateRentalDays(
+      editForm.installation_date,
+      editForm.dismantle_date
+    );
+    if (!rentalDays) {
+      return null;
+    }
+    const hasItems = Object.values(editForm.productQuantities).some((quantity) => quantity > 0);
+    if (!hasItems) {
+      return null;
+    }
+    return buildPayloadFromForm(editForm);
+  }, [buildPayloadFromForm, editForm]);
 
   const queryParams = useMemo(
     () => ({
@@ -750,6 +737,106 @@ export default function OrdersPage() {
       setProductSearch('');
     }
   }, [editOrderResponse, isEditOpen]);
+
+  useEffect(() => {
+    if (!isCreateOpen) {
+      setCreateTotalAmount(null);
+      setCreateCalculatedItems({});
+      setIsCalculatingCreateTotal(false);
+      return;
+    }
+    if (!createCalculationPayload) {
+      setCreateTotalAmount(null);
+      setCreateCalculatedItems({});
+      setIsCalculatingCreateTotal(false);
+      return;
+    }
+    const controller = new AbortController();
+    setIsCalculatingCreateTotal(true);
+    ordersApi
+      .calculateTotal(createCalculationPayload, controller.signal)
+      .then((response) => {
+        const { items, total_amount: totalAmount } = response.data;
+        const parsedTotal = Number(totalAmount);
+        setCreateTotalAmount(Number.isFinite(parsedTotal) ? parsedTotal : null);
+        const map: Record<string, CalculatedItemTotals> = {};
+        items.forEach((item) => {
+          const unitPrice = Number(item.unit_price);
+          const subtotal = Number(item.subtotal);
+          const rentalDays = Number(item.rental_days);
+          map[item.product_id] = {
+            unitPrice: Number.isFinite(unitPrice) ? unitPrice : 0,
+            subtotal: Number.isFinite(subtotal) ? subtotal : 0,
+            rentalDays: Number.isFinite(rentalDays) ? rentalDays : 0,
+          };
+        });
+        setCreateCalculatedItems(map);
+      })
+      .catch((error: unknown) => {
+        if (axios.isCancel(error)) {
+          return;
+        }
+        setCreateTotalAmount(null);
+        setCreateCalculatedItems({});
+      })
+      .finally(() => {
+        setIsCalculatingCreateTotal(false);
+      });
+
+    return () => {
+      controller.abort();
+    };
+  }, [createCalculationPayload, isCreateOpen]);
+
+  useEffect(() => {
+    if (!isEditOpen) {
+      setEditTotalAmount(null);
+      setEditCalculatedItems({});
+      setIsCalculatingEditTotal(false);
+      return;
+    }
+    if (!editCalculationPayload) {
+      setEditTotalAmount(null);
+      setEditCalculatedItems({});
+      setIsCalculatingEditTotal(false);
+      return;
+    }
+    const controller = new AbortController();
+    setIsCalculatingEditTotal(true);
+    ordersApi
+      .calculateTotal(editCalculationPayload, controller.signal)
+      .then((response) => {
+        const { items, total_amount: totalAmount } = response.data;
+        const parsedTotal = Number(totalAmount);
+        setEditTotalAmount(Number.isFinite(parsedTotal) ? parsedTotal : null);
+        const map: Record<string, CalculatedItemTotals> = {};
+        items.forEach((item) => {
+          const unitPrice = Number(item.unit_price);
+          const subtotal = Number(item.subtotal);
+          const rentalDays = Number(item.rental_days);
+          map[item.product_id] = {
+            unitPrice: Number.isFinite(unitPrice) ? unitPrice : 0,
+            subtotal: Number.isFinite(subtotal) ? subtotal : 0,
+            rentalDays: Number.isFinite(rentalDays) ? rentalDays : 0,
+          };
+        });
+        setEditCalculatedItems(map);
+      })
+      .catch((error: unknown) => {
+        if (axios.isCancel(error)) {
+          return;
+        }
+        setEditTotalAmount(null);
+        setEditCalculatedItems({});
+      })
+      .finally(() => {
+        setIsCalculatingEditTotal(false);
+      });
+
+    return () => {
+      controller.abort();
+    };
+  }, [editCalculationPayload, isEditOpen]);
 
   useEffect(() => {
     const normalizedInput = searchInput.trim();
@@ -1124,7 +1211,9 @@ export default function OrdersPage() {
             isFetchingMoreProducts={isFetchingMoreProducts}
             onIncrementProduct={handleCreateIncrement}
             onDecrementProduct={handleCreateDecrement}
-            totalAmount={calculateTotal(createForm)}
+            totalAmount={createTotalAmount}
+            isCalculatingTotal={isCalculatingCreateTotal}
+            calculatedItems={createCalculatedItems}
           />
         </Drawer>
 
@@ -1152,7 +1241,9 @@ export default function OrdersPage() {
             isFetchingMoreProducts={isFetchingMoreProducts}
             onIncrementProduct={handleEditIncrement}
             onDecrementProduct={handleEditDecrement}
-            totalAmount={calculateTotal(editForm, editProductsMap)}
+            totalAmount={editTotalAmount}
+            isCalculatingTotal={isCalculatingEditTotal}
+            calculatedItems={editCalculatedItems}
           />
         </Drawer>
       </div>

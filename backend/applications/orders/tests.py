@@ -153,3 +153,22 @@ class OrderApiTests(APITestCase):
         data = response.json()['data']
         # unit price 2700 * (1 + 2) = 8100, qualification price 500 added once
         self.assertAlmostEqual(float(data['total_amount']), 8600.0, places=2)
+
+    def test_calculate_total_endpoint(self):
+        url = reverse('orders:order-calculate-total')
+        payload = {
+            'installation_date': '2024-06-01',
+            'dismantle_date': '2024-06-05',
+            'delivery_type': DeliveryType.DELIVERY,
+            'items': [
+                {'product_id': str(self.product.pk), 'quantity': 2, 'rental_days': 1},
+            ],
+        }
+
+        response = self.client.post(url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()['data']
+        self.assertIn('total_amount', data)
+        self.assertAlmostEqual(float(data['total_amount']), 5900.0, places=2)
+        self.assertIn('items', data)
+        self.assertEqual(len(data['items']), 1)

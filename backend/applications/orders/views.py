@@ -6,10 +6,16 @@ from django.db.models import Q
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .models import Order
 from .permissions import OrderAccessPolicy
-from .serializers import OrderDetailSerializer, OrderSummarySerializer, OrderWriteSerializer
+from .serializers import (
+    OrderCalculationSerializer,
+    OrderDetailSerializer,
+    OrderSummarySerializer,
+    OrderWriteSerializer,
+)
 
 
 class OrderViewSet(viewsets.ModelViewSet):
@@ -89,3 +95,13 @@ class OrderViewSet(viewsets.ModelViewSet):
     def partial_update(self, request, *args, **kwargs):
         kwargs['partial'] = True
         return self.update(request, *args, **kwargs)
+
+
+class OrderCalculationView(APIView):
+    permission_classes = [IsAuthenticated, OrderAccessPolicy]
+
+    def post(self, request, *args, **kwargs):
+        serializer = OrderCalculationSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        result = serializer.calculate()
+        return Response({'data': result}, status=status.HTTP_200_OK)
