@@ -11,6 +11,7 @@ RUN apk add --no-cache libc6-compat \
     && corepack enable
 
 COPY pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY .prettierrc ./
 COPY staff/package.json ./staff/package.json
 COPY frontend ./frontend
 
