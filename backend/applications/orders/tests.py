@@ -9,7 +9,7 @@ from rest_framework.test import APITestCase
 
 from applications.customers.models import Customer
 from applications.orders.models import DeliveryType, OrderStatus
-from applications.products.models import Category, Product
+from applications.products.models import Category, InstallerQualification, Product
 
 
 class OrderApiTests(APITestCase):
@@ -22,6 +22,10 @@ class OrderApiTests(APITestCase):
         self.client.force_authenticate(self.user)
         self.customer = Customer.objects.create(display_name='Тестовый клиент')
         self.category = Category.objects.create(name='Текстиль', slug='textile')
+        self.installer_qualification = InstallerQualification.objects.create(
+            name='Квалификация A',
+            price_rub='500.00',
+        )
         self.product = Product.objects.create(
             name='Скатерть Амори',
             category=self.category,
@@ -31,6 +35,8 @@ class OrderApiTests(APITestCase):
             delivery_weight_kg='1.00',
             delivery_volume_cm3=1000,
         )
+        self.product.setup_installer_qualification = self.installer_qualification
+        self.product.save(update_fields=['setup_installer_qualification'])
 
     def test_create_order(self):
         url = reverse('orders:order-list')
@@ -61,6 +67,7 @@ class OrderApiTests(APITestCase):
         self.assertEqual(item['rental_mode'], 'standard')
         self.assertIsNone(item['rental_tiers'])
         self.assertAlmostEqual(float(item['unit_price']), 2700.0, places=2)
+        self.assertAlmostEqual(float(data['total_amount']), 5900.0, places=2)
 
     def test_list_orders_filtered_by_group(self):
         url = reverse('orders:order-list')
@@ -128,4 +135,21 @@ class OrderApiTests(APITestCase):
         self.assertEqual(len(item['rental_tiers']), 2)
         self.assertEqual(item['rental_tiers'][0]['end_day'], 3)
         self.assertAlmostEqual(float(item['unit_price']), 11900.0, places=2)
-        self.assertAlmostEqual(float(data['total_amount']), 11900.0, places=2)
+        self.assertAlmostEqual(float(data['total_amount']), 12400.0, places=2)
+
+    def test_installer_qualification_counted_once(self):
+        url = reverse('orders:order-list')
+        payload = {
+            'installation_date': '2024-09-01',
+            'dismantle_date': '2024-09-05',
+            'items': [
+                {'product_id': str(self.product.pk), 'quantity': 1, 'rental_days': 1},
+                {'product_id': str(self.product.pk), 'quantity': 2, 'rental_days': 1},
+            ],
+        }
+
+        response = self.client.post(url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        data = response.json()['data']
+        # unit price 2700 * (1 + 2) = 8100, qualification price 500 added once
+        self.assertAlmostEqual(float(data['total_amount']), 8600.0, places=2)

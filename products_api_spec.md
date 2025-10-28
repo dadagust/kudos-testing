@@ -77,11 +77,18 @@
 
 ### 2.4 Квалификация сетапёров (Setup.installer_qualification)
 Источник: «Для расчёта стоимости сетапа → Квалификация сетапёров».
+
+> Справочник квалификаций теперь управляется в админке. Каждая запись содержит
+> наименование и стоимость, которая добавляется к сумме заказа один раз при
+> наличии товаров, требующих эту квалификацию.
+
 ```json
 {
-  "installer_qualification": [
-    "any",                         // Любой
-    "worker_with_steam_generator"  // Только «Работник с парогенератором»
+  "installer_qualifications": [
+    {
+      "value": "4fbb0c1d-7b47-4c8b-9a5c-9c4c64f79d2a",
+      "label": "Только «Работник с парогенератором»"
+    }
   ]
 }
 ```
@@ -219,7 +226,7 @@
 {
   "install_minutes": 20,                    // «Монтаж», минуты
   "uninstall_minutes": 10,                  // «Демонтаж», минуты
-  "installer_qualification": "any",         // enum Setup.qualification
+  "installer_qualification": "4fbb0c1d-7b47-4c8b-9a5c-9c4c64f79d2a",  // UUID справочника квалификаций
   "min_installers": 1,                      // 1..4
   "self_setup_allowed": true                // «Самостоятельный сетап»: Разрешен/Не разрешен
 }
@@ -340,7 +347,7 @@
   "setup": {
     "install_minutes": 20,
     "uninstall_minutes": 10,
-    "installer_qualification": "worker_with_steam_generator",
+    "installer_qualification": "4fbb0c1d-7b47-4c8b-9a5c-9c4c64f79d2a",
     "min_installers": 1,
     "self_setup_allowed": true
   },
@@ -429,7 +436,7 @@
    - `delivery.weight_kg`, `delivery.volume_cm3` — `> 0` (если не вычисляется).
 3. **Сетап**:
    - `min_installers` ∈ {1,2,3,4}.
-   - `installer_qualification` ∈ перечисления (см. 2.4).
+  - `installer_qualification` — UUID из справочника (см. 2.4).
    - `self_setup_allowed` — булево.
 4. **Доставка**:
    - `transport_restriction` ∈ перечисления (см. 2.3).
@@ -499,7 +506,7 @@
   ],
   "occupancy": {"cleaning_days":1,"insurance_reserve_percent":0},
   "delivery": {"volume_cm3":3500,"weight_kg":2,"transport_restriction":"any","self_pickup_allowed":true},
-  "setup": {"install_minutes":20,"uninstall_minutes":10,"installer_qualification":"worker_with_steam_generator","min_installers":1,"self_setup_allowed":true},
+  "setup": {"install_minutes":20,"uninstall_minutes":10,"installer_qualification":"4fbb0c1d-7b47-4c8b-9a5c-9c4c64f79d2a","min_installers":1,"self_setup_allowed":true},
   "rental": {"base_period":"standard"},
   "visibility": {"reservation_mode":"operator_only","show_on_pifakit":true,"show_on_site":true,"show_in_new":true,"category_cover_on_home":false},
   "seo": {"url_name":"skaterth-amori-barkhatnaya-molochnaya-kruglaya","meta_title":"Скатерть Амори — молочная, круглая","meta_description":"Качественная бархатная скатерть..."},

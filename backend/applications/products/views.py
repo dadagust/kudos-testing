@@ -17,12 +17,11 @@ from rest_framework.views import APIView
 from .choices import (
     Color,
     DimensionShape,
-    InstallerQualification,
     RentalMode,
     ReservationMode,
     TransportRestriction,
 )
-from .models import Category, Product, ProductImage
+from .models import Category, InstallerQualification, Product, ProductImage
 from .pagination import ProductCursorPagination
 from .serializers import (
     EnumChoiceSerializer,
@@ -330,8 +329,8 @@ class EnumsAggregateView(APIView):
                     for choice in TransportRestriction
                 ],
                 'installer_qualifications': [
-                    {'value': choice.value, 'label': choice.label}
-                    for choice in InstallerQualification
+                    {'value': str(item.id), 'label': item.name}
+                    for item in InstallerQualification.objects.all().order_by('name')
                 ],
                 'reservation_modes': [
                     {'value': choice.value, 'label': choice.label} for choice in ReservationMode

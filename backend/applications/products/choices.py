@@ -33,14 +33,6 @@ class TransportRestriction(models.TextChoices):
     SPECIAL2_ONLY = 'special2_only', 'Только «Особый 2»'
 
 
-class InstallerQualification(models.TextChoices):
-    ANY = 'any', 'Любой'
-    WORKER_WITH_STEAM_GENERATOR = (
-        'worker_with_steam_generator',
-        'Только «Работник с парогенератором»',
-    )
-
-
 class ReservationMode(models.TextChoices):
     OPERATOR_ONLY = 'operator_only', 'Только через оператора'
     ONLINE_ALLOWED = 'online_allowed', 'Разрешено онлайн'
