@@ -91,18 +91,20 @@ class Order(Date):
         total = sum((item.subtotal for item in items), Decimal('0.00'))
 
         qualification_total = Decimal('0.00')
-        seen_qualifications: set[str] = set()
+        seen_products: set[int] = set()
         for item in items:
             product = item.product
             if not product:
                 continue
+            product_id = product.pk
+            if product_id is None:
+                continue
+            if product_id in seen_products:
+                continue
+            seen_products.add(product_id)
             qualification = product.setup_installer_qualification
             if not qualification:
                 continue
-            qualification_id = str(qualification.pk)
-            if qualification_id in seen_qualifications:
-                continue
-            seen_qualifications.add(qualification_id)
             qualification_total += qualification.price_rub or Decimal('0.00')
 
         total += qualification_total
