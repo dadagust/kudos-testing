@@ -1,5 +1,6 @@
 const DEFAULT_CORE_PATH = '/core';
 const DEFAULT_API_V1_PATH = '/api/v1';
+const DEFAULT_BACKEND_ORIGIN = 'http://localhost:8000';
 
 const normalizeBaseUrl = (value: string) => value.replace(/\/$/, '');
 
@@ -14,14 +15,17 @@ const resolveApiRoot = (value: string) => {
   return normalized;
 };
 
-const resolveApiUrls = (): { core: string; apiV1: string } => {
-  const rawValue = process.env.NEXT_PUBLIC_API_URL;
-
+const resolveApiUrls = (rawValue?: string | null): { core: string; apiV1: string } => {
   if (!rawValue) {
     return { core: DEFAULT_CORE_PATH, apiV1: DEFAULT_API_V1_PATH };
   }
 
   const normalized = normalizeBaseUrl(rawValue);
+
+  if (!normalized) {
+    return { core: DEFAULT_CORE_PATH, apiV1: DEFAULT_API_V1_PATH };
+  }
+
   const isAbsolute = /^https?:\/\//i.test(normalized);
 
   if (isAbsolute) {
@@ -54,7 +58,57 @@ const resolveApiUrls = (): { core: string; apiV1: string } => {
   };
 };
 
-const { core: CORE_API_URL, apiV1: API_V1_URL } = resolveApiUrls();
+const looksLikeInternalHostname = (hostname: string) => {
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return false;
+  }
+  return !hostname.includes('.');
+};
+
+const shouldUseRelativeUrlsInBrowser = (value: string | undefined) => {
+  if (!value) {
+    return true;
+  }
+
+  const normalized = normalizeBaseUrl(value);
+
+  if (!normalized) {
+    return true;
+  }
+
+  if (!/^https?:\/\//i.test(normalized)) {
+    return false;
+  }
+
+  try {
+    const url = new URL(normalized);
+    return looksLikeInternalHostname(url.hostname);
+  } catch (error) {
+    return true;
+  }
+};
+
+const resolveBrowserApiUrls = () => {
+  const rawValue = process.env.NEXT_PUBLIC_API_URL;
+
+  if (shouldUseRelativeUrlsInBrowser(rawValue)) {
+    return resolveApiUrls(null);
+  }
+
+  return resolveApiUrls(rawValue);
+};
+
+const resolveServerApiUrls = () => {
+  const rawValue =
+    process.env.KUDOS_BACKEND_ORIGIN ??
+    process.env.NEXT_PUBLIC_API_URL ??
+    DEFAULT_BACKEND_ORIGIN;
+
+  return resolveApiUrls(rawValue);
+};
+
+const { core: CORE_API_URL, apiV1: API_V1_URL } =
+  typeof window === 'undefined' ? resolveServerApiUrls() : resolveBrowserApiUrls();
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS';
 

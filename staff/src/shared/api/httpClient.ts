@@ -3,7 +3,9 @@ import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { auditLogger } from '../lib/logger';
 import { useAuthStore } from '../state/auth-store';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/core';
+const DEFAULT_CORE_PATH = '/core';
+const DEFAULT_API_V1_PATH = '/api/v1';
+const DEFAULT_BACKEND_ORIGIN = 'http://localhost:8000';
 
 const normalizeBaseUrl = (value: string) => value.replace(/\/$/, '');
 
@@ -12,12 +14,118 @@ const resolveApiRoot = (value: string) => {
   if (normalized.endsWith('/core')) {
     return normalized.slice(0, -'/core'.length);
   }
+  if (normalized.endsWith('/api/v1')) {
+    return normalized.slice(0, -'/api/v1'.length);
+  }
   return normalized;
 };
 
-export const API_ROOT = resolveApiRoot(API_URL);
-const CORE_API_URL = `${API_ROOT}/core`;
-const API_V1_URL = `${API_ROOT}/api/v1`;
+const looksLikeInternalHostname = (hostname: string) => {
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return false;
+  }
+  return !hostname.includes('.');
+};
+
+const shouldUseRelativeUrlsInBrowser = (value?: string | null) => {
+  if (!value) {
+    return true;
+  }
+
+  const normalized = normalizeBaseUrl(value);
+
+  if (!normalized) {
+    return true;
+  }
+
+  if (!/^https?:\/\//i.test(normalized)) {
+    return false;
+  }
+
+  try {
+    const url = new URL(normalized);
+    return looksLikeInternalHostname(url.hostname);
+  } catch (error) {
+    return true;
+  }
+};
+
+const resolveApiUrls = (rawValue?: string | null) => {
+  if (!rawValue) {
+    return {
+      root: '',
+      core: DEFAULT_CORE_PATH,
+      apiV1: DEFAULT_API_V1_PATH,
+    };
+  }
+
+  const normalized = normalizeBaseUrl(rawValue);
+
+  if (!normalized) {
+    return {
+      root: '',
+      core: DEFAULT_CORE_PATH,
+      apiV1: DEFAULT_API_V1_PATH,
+    };
+  }
+
+  const isAbsolute = /^https?:\/\//i.test(normalized);
+
+  if (isAbsolute) {
+    const apiRoot = resolveApiRoot(normalized);
+    return {
+      root: apiRoot,
+      core: `${apiRoot}/core`,
+      apiV1: `${apiRoot}/api/v1`,
+    };
+  }
+
+  if (normalized.endsWith('/core')) {
+    const prefix = normalized.slice(0, -'/core'.length);
+    return {
+      root: prefix,
+      core: normalized,
+      apiV1: prefix ? `${prefix}/api/v1` : DEFAULT_API_V1_PATH,
+    };
+  }
+
+  if (normalized.endsWith('/api/v1')) {
+    const prefix = normalized.slice(0, -'/api/v1'.length);
+    return {
+      root: prefix,
+      core: `${prefix}/core`,
+      apiV1: normalized,
+    };
+  }
+
+  return {
+    root: normalized,
+    core: `${normalized}/core`,
+    apiV1: `${normalized}/api/v1`,
+  };
+};
+
+const resolveBrowserApiUrls = () => {
+  const rawValue = process.env.NEXT_PUBLIC_API_URL;
+
+  if (shouldUseRelativeUrlsInBrowser(rawValue)) {
+    return resolveApiUrls(null);
+  }
+
+  return resolveApiUrls(rawValue);
+};
+
+const resolveServerApiUrls = () => {
+  const rawValue =
+    process.env.KUDOS_BACKEND_ORIGIN ??
+    process.env.NEXT_PUBLIC_API_URL ??
+    DEFAULT_BACKEND_ORIGIN;
+
+  return resolveApiUrls(rawValue);
+};
+
+const { root: API_ROOT, core: CORE_API_URL, apiV1: API_V1_URL } =
+  typeof window === 'undefined' ? resolveServerApiUrls() : resolveBrowserApiUrls();
 
 type ExtendedAxiosRequestConfig = AxiosRequestConfig & { kudosTraceId?: string };
 
