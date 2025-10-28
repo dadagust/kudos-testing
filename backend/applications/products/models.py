@@ -14,7 +14,6 @@ from applications.core.models import Date, PathAndRename
 from .choices import (
     Color,
     DimensionShape,
-    InstallerQualification,
     RentalMode,
     ReservationMode,
     TransportRestriction,
@@ -39,6 +38,28 @@ class Category(Date):
     class Meta(Date.Meta):
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
+        ordering = ['name']
+
+    def __str__(self) -> str:  # pragma: no cover - human readable repr
+        return self.name
+
+
+class InstallerQualification(Date):
+    """Qualification required for product installation."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField('Название', max_length=255, unique=True)
+    price_rub = models.DecimalField(
+        'Стоимость, руб',
+        max_digits=12,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal('0'))],
+        default=Decimal('0.00'),
+    )
+
+    class Meta(Date.Meta):
+        verbose_name = 'Квалификация монтажников'
+        verbose_name_plural = 'Квалификации монтажников'
         ordering = ['name']
 
     def __str__(self) -> str:  # pragma: no cover - human readable repr
@@ -191,10 +212,12 @@ class Product(Date):
 
     setup_install_minutes = models.PositiveIntegerField('Монтаж, мин', null=True, blank=True)
     setup_uninstall_minutes = models.PositiveIntegerField('Демонтаж, мин', null=True, blank=True)
-    setup_installer_qualification = models.CharField(
-        'Квалификация сетапёров',
-        max_length=64,
-        choices=InstallerQualification.choices,
+    setup_installer_qualification = models.ForeignKey(
+        InstallerQualification,
+        on_delete=models.SET_NULL,
+        related_name='products',
+        verbose_name='Квалификация сетапёров',
+        null=True,
         blank=True,
     )
     setup_min_installers = models.PositiveIntegerField(

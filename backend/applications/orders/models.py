@@ -87,7 +87,25 @@ class Order(Date):
         return f'Заказ #{self.pk}'
 
     def recalculate_total_amount(self) -> Decimal:
-        total = sum((item.subtotal for item in self.items.all()), Decimal('0.00'))
+        items = list(self.items.select_related('product__setup_installer_qualification'))
+        total = sum((item.subtotal for item in items), Decimal('0.00'))
+
+        qualification_total = Decimal('0.00')
+        seen_qualifications: set[str] = set()
+        for item in items:
+            product = item.product
+            if not product:
+                continue
+            qualification = product.setup_installer_qualification
+            if not qualification:
+                continue
+            qualification_id = str(qualification.pk)
+            if qualification_id in seen_qualifications:
+                continue
+            seen_qualifications.add(qualification_id)
+            qualification_total += qualification.price_rub or Decimal('0.00')
+
+        total += qualification_total
         self.total_amount = total
         return total
 

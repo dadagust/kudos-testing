@@ -11,12 +11,11 @@ from rest_framework import serializers
 
 from .choices import (
     DimensionShape,
-    InstallerQualification,
     RentalMode,
     ReservationMode,
     TransportRestriction,
 )
-from .models import Category, Product, ProductImage
+from .models import Category, InstallerQualification, Product, ProductImage
 
 DATETIME_FIELD = serializers.DateTimeField()
 
@@ -24,6 +23,17 @@ DATETIME_FIELD = serializers.DateTimeField()
 class EnumChoiceSerializer(serializers.Serializer):
     value = serializers.CharField()
     label = serializers.CharField()
+
+
+class OptionalInstallerQualificationField(serializers.PrimaryKeyRelatedField):
+    """Primary key field that treats empty values as null."""
+
+    def to_internal_value(self, data):  # type: ignore[override]
+        if data in (None, '', []):
+            return None
+        if isinstance(data, str) and not data.strip():
+            return None
+        return super().to_internal_value(data)
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
@@ -115,9 +125,10 @@ class ProductDeliverySerializer(serializers.Serializer):
 class ProductSetupSerializer(serializers.Serializer):
     install_minutes = serializers.IntegerField(min_value=0, required=False)
     uninstall_minutes = serializers.IntegerField(min_value=0, required=False)
-    installer_qualification = serializers.ChoiceField(
-        choices=InstallerQualification.choices,
+    installer_qualification = OptionalInstallerQualificationField(
+        queryset=InstallerQualification.objects.all(),
         required=False,
+        allow_null=True,
     )
     min_installers = serializers.ChoiceField(
         choices=[(value, value) for value in range(1, 5)],
@@ -442,7 +453,8 @@ class ProductBaseSerializer(serializers.ModelSerializer):
     def _apply_setup(self, product: Product, setup: dict) -> None:
         product.setup_install_minutes = setup.get('install_minutes')
         product.setup_uninstall_minutes = setup.get('uninstall_minutes')
-        product.setup_installer_qualification = setup.get('installer_qualification') or ''
+        if 'installer_qualification' in setup:
+            product.setup_installer_qualification = setup.get('installer_qualification')
         product.setup_min_installers = setup.get('min_installers')
         product.setup_self_setup_allowed = setup.get('self_setup_allowed', False)
 
@@ -583,7 +595,11 @@ def serialize_setup(product: Product) -> dict:
     return {
         'install_minutes': product.setup_install_minutes,
         'uninstall_minutes': product.setup_uninstall_minutes,
-        'installer_qualification': product.setup_installer_qualification or None,
+        'installer_qualification': (
+            str(product.setup_installer_qualification_id)
+            if product.setup_installer_qualification_id
+            else None
+        ),
         'min_installers': product.setup_min_installers,
         'self_setup_allowed': product.setup_self_setup_allowed,
     }

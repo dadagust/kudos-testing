@@ -48,7 +48,7 @@ export type TransportRestriction =
   | 'heavy16_only'
   | 'special2_only';
 
-export type InstallerQualification = 'any' | 'worker_with_steam_generator';
+export type InstallerQualification = string;
 
 export type ReservationMode = 'operator_only' | 'online_allowed' | 'disabled';
 

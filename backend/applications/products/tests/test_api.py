@@ -13,7 +13,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from applications.products.choices import DimensionShape, RentalMode, ReservationMode
-from applications.products.models import Category, Product
+from applications.products.models import Category, InstallerQualification, Product
 
 
 class ProductApiTests(APITestCase):
@@ -25,6 +25,10 @@ class ProductApiTests(APITestCase):
         )
         self.client.force_authenticate(self.user)
         self.category = Category.objects.create(name='Текстиль', slug='textile')
+        self.installer_qualification = InstallerQualification.objects.create(
+            name='Только «Работник с парогенератором»',
+            price_rub='1500.00',
+        )
 
     def _create_payload(self):
         return {
@@ -51,7 +55,7 @@ class ProductApiTests(APITestCase):
             'setup': {
                 'install_minutes': 20,
                 'uninstall_minutes': 10,
-                'installer_qualification': 'worker_with_steam_generator',
+                'installer_qualification': str(self.installer_qualification.id),
                 'min_installers': 1,
                 'self_setup_allowed': True,
             },
@@ -142,6 +146,10 @@ class ProductApiTests(APITestCase):
         enums = response.json()
         self.assertIn('colors', enums)
         self.assertIn('shapes', enums)
+        installer_qualifications = enums.get('installer_qualifications', [])
+        self.assertTrue(
+            any(item['value'] == str(self.installer_qualification.id) for item in installer_qualifications)
+        )
 
     def test_image_upload_and_reorder(self):
         product = Product.objects.create(
