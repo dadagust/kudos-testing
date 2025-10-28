@@ -17,6 +17,7 @@ COPY frontend ./frontend
 
 WORKDIR /app/frontend
 RUN pnpm install --frozen-lockfile \
+    && npx prettier --write . \
     && pnpm build
 
 EXPOSE 4000
