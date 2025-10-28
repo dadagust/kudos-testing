@@ -2,11 +2,12 @@
 set -euo pipefail
 
 # --- ждём БД (pg_isready удобнее всего) ---
-: "${DB_HOST:=localhost}"
+: "${DB_HOST:=postgres}"
 : "${DB_PORT:=5432}"
-
-echo "Waiting for Postgres at $DB_HOST:$DB_PORT ..."
-until pg_isready -h "$DB_HOST" -p "$DB_PORT" -q; do
+: "${DB_USER:=kudos}"
+: "${DB_NAME:=kudos}"
+echo "Waiting for Postgres at $DB_HOST:$DB_PORT (user: $DB_USER, db: $DB_NAME) ..."
+until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -q; do
   sleep 1
 done
 echo "Postgres is ready."
