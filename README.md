@@ -9,8 +9,8 @@
 
 ## 2. Клонирование репозитория
 ```bash
-git clone <repo-url>
-cd kudos-testing
+git clone https://gitlab.com/ilstudio/kudos
+cd kudos
 ```
 
 ## 3. Запуск через Docker Compose (рекомендуемый)
