@@ -17,6 +17,7 @@ COPY staff ./staff
 
 WORKDIR /app/staff
 RUN pnpm install --frozen-lockfile \
+    && npx prettier --write . \
     && pnpm build
 
 EXPOSE 3000
