@@ -51,7 +51,7 @@ services:
     build:
       context: .
       dockerfile: frontend/Dockerfile
-    command: ["pnpm", "dev", "--", "--hostname", "0.0.0.0"]
+    command: ["pnpm", "dev"]
     depends_on:
       backend:
         condition: service_started
@@ -69,7 +69,7 @@ services:
     build:
       context: .
       dockerfile: staff/Dockerfile
-    command: ["pnpm", "dev", "--", "--hostname", "0.0.0.0"]
+    command: ["pnpm", "dev"]
     depends_on:
       backend:
         condition: service_started
