@@ -106,8 +106,8 @@ class ProductViewSet(viewsets.ModelViewSet):
     def _slug_conflict_response(self) -> Response:
         return Response(
             {
-                'detail': 'Slug already exists',
-                'errors': {'seo': {'slug': ['Slug already exists']}},
+                'detail': 'URL name already exists',
+                'errors': {'seo': {'url_name': ['URL name already exists']}},
             },
             status=status.HTTP_409_CONFLICT,
         )
@@ -115,7 +115,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     @staticmethod
     def _is_slug_conflict(exc: IntegrityError) -> bool:
         message = str(exc).lower()
-        return 'seo_slug' in message or 'slug' in message
+        return 'seo_url_name' in message or 'slug' in message
 
     def get_serializer_class(self):  # type: ignore[override]
         if self.action == 'list':

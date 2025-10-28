@@ -135,10 +135,9 @@ export interface ProductVisibility {
 }
 
 export interface ProductSeo {
-  slug?: string | null;
+  url_name?: string | null;
   meta_title?: string | null;
   meta_description?: string | null;
-  meta_keywords?: string[];
 }
 
 export interface ProductListItem {

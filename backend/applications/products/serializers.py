@@ -177,13 +177,8 @@ class ProductVisibilitySerializer(serializers.Serializer):
 
 
 class ProductSeoSerializer(serializers.Serializer):
-    slug = serializers.SlugField(required=False, allow_null=True, allow_blank=True)
     meta_title = serializers.CharField(required=False, allow_blank=True)
     meta_description = serializers.CharField(required=False, allow_blank=True)
-    meta_keywords = serializers.ListField(
-        child=serializers.CharField(allow_blank=False),
-        required=False,
-    )
 
 
 class CategoryPrimaryKeyOrSlugField(serializers.PrimaryKeyRelatedField):
@@ -472,10 +467,8 @@ class ProductBaseSerializer(serializers.ModelSerializer):
         product.visibility_category_cover_on_home = visibility.get('category_cover_on_home', False)
 
     def _apply_seo(self, product: Product, seo: dict) -> None:
-        product.seo_slug = seo.get('slug') or None
         product.seo_meta_title = seo.get('meta_title', '')
         product.seo_meta_description = seo.get('meta_description', '')
-        product.seo_meta_keywords = seo.get('meta_keywords') or []
 
 
 class ProductDetailSerializer(ProductBaseSerializer):
@@ -625,10 +618,9 @@ def serialize_visibility(product: Product) -> dict:
 
 def serialize_seo(product: Product) -> dict:
     return {
-        'slug': product.seo_slug,
+        'url_name': product.seo_url_name,
         'meta_title': product.seo_meta_title,
         'meta_description': product.seo_meta_description,
-        'meta_keywords': product.seo_meta_keywords,
     }
 
 

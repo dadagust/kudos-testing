@@ -150,12 +150,10 @@ type CreateProductFormState = {
     category_cover_on_home: boolean;
   };
   seo: {
-    slug: string;
+    url_name: string;
     meta_title: string;
     meta_description: string;
-    meta_keywords: string[];
   };
-  metaKeywordDraft: string;
 };
 
 type ProductFormMode = 'create' | 'edit';
@@ -223,12 +221,10 @@ const createEmptyProductForm = (defaults?: {
     category_cover_on_home: false,
   },
   seo: {
-    slug: '',
+    url_name: '',
     meta_title: '',
     meta_description: '',
-    meta_keywords: [],
   },
-  metaKeywordDraft: '',
 });
 
 const createFormFromProduct = (product: ProductDetail): CreateProductFormState => {
@@ -368,21 +364,19 @@ const createFormFromProduct = (product: ProductDetail): CreateProductFormState =
             : '',
       })),
     },
-    visibility: {
-      reservation_mode: (product.visibility?.reservation_mode ?? '') as ReservationMode | '',
-      show_on_pifakit: product.visibility?.show_on_pifakit ?? base.visibility.show_on_pifakit,
-      show_on_site: product.visibility?.show_on_site ?? base.visibility.show_on_site,
-      show_in_new: product.visibility?.show_in_new ?? base.visibility.show_in_new,
-      category_cover_on_home:
-        product.visibility?.category_cover_on_home ?? base.visibility.category_cover_on_home,
-    },
-    seo: {
-      slug: product.seo?.slug ?? '',
-      meta_title: product.seo?.meta_title ?? '',
-      meta_description: product.seo?.meta_description ?? '',
-      meta_keywords: product.seo?.meta_keywords ?? [],
-    },
-    metaKeywordDraft: '',
+  visibility: {
+    reservation_mode: (product.visibility?.reservation_mode ?? '') as ReservationMode | '',
+    show_on_pifakit: product.visibility?.show_on_pifakit ?? base.visibility.show_on_pifakit,
+    show_on_site: product.visibility?.show_on_site ?? base.visibility.show_on_site,
+    show_in_new: product.visibility?.show_in_new ?? base.visibility.show_in_new,
+    category_cover_on_home:
+      product.visibility?.category_cover_on_home ?? base.visibility.category_cover_on_home,
+  },
+  seo: {
+    url_name: product.seo?.url_name ?? '',
+    meta_title: product.seo?.meta_title ?? '',
+    meta_description: product.seo?.meta_description ?? '',
+  },
   };
 };
 
@@ -733,23 +727,15 @@ const buildCreatePayload = (form: CreateProductFormState): ProductCreatePayload 
     }
   }
 
-  const slug = form.seo.slug.trim();
   const metaTitle = form.seo.meta_title.trim();
   const metaDescription = form.seo.meta_description.trim();
-  const metaKeywords = sanitizeStringList(form.seo.meta_keywords);
-  if (slug || metaTitle || metaDescription || metaKeywords.length) {
+  if (metaTitle || metaDescription) {
     payload.seo = {};
-    if (slug) {
-      payload.seo.slug = slug;
-    }
     if (metaTitle) {
       payload.seo.meta_title = metaTitle;
     }
     if (metaDescription) {
       payload.seo.meta_description = metaDescription;
-    }
-    if (metaKeywords.length) {
-      payload.seo.meta_keywords = metaKeywords;
     }
   }
 
@@ -1268,7 +1254,6 @@ export default function ProductsPage() {
   const createReservationModeError =
     createTouched && !isReservationModeValid ? 'Выберите режим бронирования' : undefined;
   const canAddFeature = createForm.featureDraft.trim().length > 0;
-  const canAddMetaKeyword = createForm.metaKeywordDraft.trim().length > 0;
 
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
@@ -1568,44 +1553,6 @@ export default function ProductsPage() {
     setCreateForm((prev) => ({
       ...prev,
       features: prev.features.filter((_, featureIndex) => featureIndex !== index),
-    }));
-  };
-
-  const handleMetaKeywordDraftChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setCreateForm((prev) => ({ ...prev, metaKeywordDraft: event.target.value }));
-  };
-
-  const handleAddMetaKeyword = () => {
-    const keyword = createForm.metaKeywordDraft.trim();
-    if (!keyword) {
-      return;
-    }
-    setCreateForm((prev) => ({
-      ...prev,
-      seo: { ...prev.seo, meta_keywords: [...prev.seo.meta_keywords, keyword] },
-      metaKeywordDraft: '',
-    }));
-  };
-
-  const handleMetaKeywordChange = (index: number, value: string) => {
-    setCreateForm((prev) => ({
-      ...prev,
-      seo: {
-        ...prev.seo,
-        meta_keywords: prev.seo.meta_keywords.map((keyword, keywordIndex) =>
-          keywordIndex === index ? value : keyword
-        ),
-      },
-    }));
-  };
-
-  const handleRemoveMetaKeyword = (index: number) => {
-    setCreateForm((prev) => ({
-      ...prev,
-      seo: {
-        ...prev.seo,
-        meta_keywords: prev.seo.meta_keywords.filter((_, keywordIndex) => keywordIndex !== index),
-      },
     }));
   };
 
@@ -2879,15 +2826,10 @@ export default function ProductsPage() {
                   }}
                 >
                   <Input
-                    label="Slug"
-                    placeholder="skaterth-amori-barkhatnaya"
-                    value={createForm.seo.slug}
-                    onChange={(event) =>
-                      setCreateForm((prev) => ({
-                        ...prev,
-                        seo: { ...prev.seo, slug: event.target.value },
-                      }))
-                    }
+                    label="URL-имя"
+                    value={createForm.seo.url_name}
+                    readOnly
+                    disabled
                   />
                   <Input
                     label="Meta title"
@@ -2920,44 +2862,6 @@ export default function ProductsPage() {
                       resize: 'vertical',
                     }}
                   />
-                </FormField>
-                <FormField label="Meta keywords" description="Введите ключевые слова для SEO.">
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {createForm.seo.meta_keywords.map((keyword, index) => (
-                      <div
-                        key={`keyword-${index}`}
-                        style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}
-                      >
-                        <Input
-                          value={keyword}
-                          placeholder="Ключевое слово"
-                          onChange={(event) => handleMetaKeywordChange(index, event.target.value)}
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          onClick={() => handleRemoveMetaKeyword(index)}
-                        >
-                          Удалить
-                        </Button>
-                      </div>
-                    ))}
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-                      <Input
-                        value={createForm.metaKeywordDraft}
-                        onChange={handleMetaKeywordDraftChange}
-                        placeholder="Новое ключевое слово"
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={handleAddMetaKeyword}
-                        disabled={!canAddMetaKeyword}
-                      >
-                        Добавить
-                      </Button>
-                    </div>
-                  </div>
                 </FormField>
               </section>
             </div>

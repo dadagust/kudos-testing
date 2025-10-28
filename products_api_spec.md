@@ -249,10 +249,9 @@
 
 ```json
 {
-  "slug": "skaterth-amori-barkhatnaya-molochnaya-kruglaya",
+  "url_name": "skaterth-amori-barkhatnaya-molochnaya-kruglaya",
   "meta_title": "Скатерть Амори — молочная, круглая",
-  "meta_description": "Качественная бархатная скатерть...",
-  "meta_keywords": ["скатерть","амори","бархат"]
+  "meta_description": "Качественная бархатная скатерть..."
 }
 ```
 
@@ -354,10 +353,9 @@
     "category_cover_on_home": false
   },
   "seo": {
-    "slug": "skaterth-amori-barkhatnaya-molochnaya-kruglaya",
+    "url_name": "skaterth-amori-barkhatnaya-molochnaya-kruglaya",
     "meta_title": "Скатерть Амори — молочная, круглая",
-    "meta_description": "Качественная бархатная скатерть...",
-    "meta_keywords": ["скатерть","амори","бархат"]
+    "meta_description": "Качественная бархатная скатерть..."
   }
 }
 ```
@@ -504,7 +502,7 @@
   "setup": {"install_minutes":20,"uninstall_minutes":10,"installer_qualification":"worker_with_steam_generator","min_installers":1,"self_setup_allowed":true},
   "rental": {"base_period":"standard"},
   "visibility": {"reservation_mode":"operator_only","show_on_pifakit":true,"show_on_site":true,"show_in_new":true,"category_cover_on_home":false},
-  "seo": {"slug":"skaterth-amori-barkhatnaya-molochnaya-kruglaya","meta_title":"Скатерть Амори — молочная, круглая","meta_description":"Качественная бархатная скатерть...","meta_keywords":["скатерть","амори","бархат"]},
+  "seo": {"url_name":"skaterth-amori-barkhatnaya-molochnaya-kruglaya","meta_title":"Скатерть Амори — молочная, круглая","meta_description":"Качественная бархатная скатерть..."},
   "created_at": "2025-10-26T17:00:00Z",
   "updated_at": "2025-10-26T17:10:00Z"
 }

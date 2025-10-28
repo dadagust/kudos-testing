@@ -29,6 +29,6 @@ class CategoryAdmin(admin.ModelAdmin):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('name', 'category', 'price_rub', 'color', 'created')
-    search_fields = ('name', 'seo_slug')
+    search_fields = ('name', 'seo_url_name')
     list_filter = ('category', 'color')
     inlines = [ProductImageInline]
