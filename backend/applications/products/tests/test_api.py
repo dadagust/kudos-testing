@@ -8,6 +8,7 @@ from uuid import UUID
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
+from django.utils.text import slugify
 from PIL import Image
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -70,10 +71,8 @@ class ProductApiTests(APITestCase):
                 'category_cover_on_home': False,
             },
             'seo': {
-                'slug': 'skaterth-amori-barkhatnaya-molochnaya-kruglaya',
                 'meta_title': 'Скатерть Амори — молочная, круглая',
                 'meta_description': 'Качественная бархатная скатерть',
-                'meta_keywords': ['скатерть', 'амори', 'бархат'],
             },
         }
 
@@ -95,7 +94,8 @@ class ProductApiTests(APITestCase):
         product = response.json()
         self.assertEqual(product['name'], payload['name'])
         self.assertEqual(product['dimensions']['shape'], payload['dimensions']['shape'])
-        self.assertEqual(product['seo']['slug'], payload['seo']['slug'])
+        expected_url_name = slugify(payload['name'], allow_unicode=True)
+        self.assertEqual(product['seo']['url_name'], expected_url_name)
         self.assertIn('created_at', product)
         self.assertIn('updated_at', product)
         self.assertEqual(product['rental']['mode'], RentalMode.SPECIAL)

@@ -8,6 +8,7 @@ from decimal import Decimal
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.utils.text import slugify
 
 from applications.core.models import Date, PathAndRename
 
@@ -228,10 +229,9 @@ class Product(Date):
     visibility_show_in_new = models.BooleanField('Новинки', default=False)
     visibility_category_cover_on_home = models.BooleanField('Обложка категории', default=False)
 
-    seo_slug = models.SlugField('Slug', max_length=255, unique=True, null=True, blank=True)
+    seo_url_name = models.SlugField('URL имя', max_length=255, unique=True)
     seo_meta_title = models.CharField('Meta title', max_length=255, blank=True)
     seo_meta_description = models.CharField('Meta description', max_length=500, blank=True)
-    seo_meta_keywords = models.JSONField('Meta keywords', default=list, blank=True)
 
     class Meta(Date.Meta):
         verbose_name = 'Товар'
@@ -246,6 +246,28 @@ class Product(Date):
     @property
     def thumbnail(self) -> ProductImage | None:
         return self.images.order_by('position').first()
+
+    def save(self, *args, **kwargs):  # type: ignore[override]
+        self.seo_url_name = self._generate_url_name()
+        update_fields = kwargs.get('update_fields')
+        if update_fields is not None:
+            update_fields = set(update_fields)
+            update_fields.add('seo_url_name')
+            kwargs['update_fields'] = list(update_fields)
+        super().save(*args, **kwargs)
+
+    def _generate_url_name(self) -> str:
+        base_slug = slugify(self.name, allow_unicode=True)
+        if not base_slug:
+            raise ValueError(f"Не удалось построить URL-имя для товара '{self.name}'")
+        slug_candidate = base_slug
+        suffix = 2
+        model = self.__class__
+        queryset = model.objects.exclude(pk=self.pk) if self.pk else model.objects.all()
+        while queryset.filter(seo_url_name=slug_candidate).exists():
+            slug_candidate = f"{base_slug}-{suffix}"
+            suffix += 1
+        return slug_candidate
 
     def calculate_volume(self) -> int | None:
         """Attempt to calculate volume in cubic centimetres from dimensions."""
