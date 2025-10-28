@@ -20,7 +20,7 @@ import {
   CustomerSummary,
   DeliveryType,
   ORDER_STATUS_LABELS,
-  OrderItemPayload,
+  ordersApi,
   OrderStatus,
   OrderStatusGroup,
   OrderSummary,
@@ -132,10 +132,7 @@ const formatErrorPath = (segments: Array<string | number>): string =>
     .filter((value): value is string => Boolean(value && value.trim().length > 0))
     .join(' → ');
 
-const flattenErrorPayload = (
-  value: unknown,
-  path: Array<string | number> = [],
-): string[] => {
+const flattenErrorPayload = (value: unknown, path: Array<string | number> = []): string[] => {
   if (value == null) {
     return [];
   }
@@ -156,7 +153,7 @@ const flattenErrorPayload = (
         item == null ||
         typeof item === 'string' ||
         typeof item === 'number' ||
-        typeof item === 'boolean',
+        typeof item === 'boolean'
     );
 
     if (isPrimitiveArray) {
@@ -185,7 +182,7 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
 
 const hasResponse = (
-  value: unknown,
+  value: unknown
 ): value is { response: { data?: unknown; statusText?: unknown } } =>
   isRecord(value) && 'response' in value && isRecord(value.response);
 
@@ -218,20 +215,22 @@ const extractOrderErrorMessages = (error: unknown): string[] => {
 
   const responseLike = maybeAxiosResponse ?? (hasResponse(error) ? error.response : undefined);
 
-  const rawData = isRecord(responseLike) && 'data' in responseLike ? responseLike.data : maybeAxiosResponse?.data;
+  const rawData =
+    isRecord(responseLike) && 'data' in responseLike ? responseLike.data : maybeAxiosResponse?.data;
   const parsedData = parseJsonIfString(rawData);
   const flattened = flattenErrorPayload(parsedData);
   const normalizedMessages = Array.from(
-    new Set(flattened.map((message) => message.trim()).filter((message) => message.length > 0)),
+    new Set(flattened.map((message) => message.trim()).filter((message) => message.length > 0))
   );
 
   if (normalizedMessages.length > 0) {
     return normalizedMessages;
   }
 
-  const statusText = isRecord(responseLike) && typeof responseLike.statusText === 'string'
-    ? responseLike.statusText.trim()
-    : maybeAxiosResponse?.statusText?.trim();
+  const statusText =
+    isRecord(responseLike) && typeof responseLike.statusText === 'string'
+      ? responseLike.statusText.trim()
+      : maybeAxiosResponse?.statusText?.trim();
 
   if (statusText) {
     return [statusText];
@@ -693,7 +692,7 @@ const OrderFormContent = ({
           <div style={{ fontSize: '1.5rem', fontWeight: 600, minHeight: '1.75rem' }}>
             {isCalculatingTotal ? (
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Spinner size="sm" />
+                <Spinner />
                 Расчёт...
               </span>
             ) : (
@@ -799,35 +798,29 @@ export default function OrdersPage() {
     }
   }, [fetchNextProducts, hasMoreProducts]);
 
-  const buildPayloadFromForm = useCallback(
-    (form: OrderFormState): CreateOrderPayload => {
-      const rentalDays = calculateRentalDays(form.installation_date, form.dismantle_date) ?? 1;
-      return {
-        status: form.status,
-        installation_date: form.installation_date,
-        dismantle_date: form.dismantle_date,
-        customer_id: form.customer?.id ?? null,
-        delivery_type: form.delivery_type,
-        delivery_address:
-          form.delivery_type === 'pickup' ? null : form.delivery_address.trim() || null,
-        comment: form.comment.trim() || null,
-        items: Object.entries(form.productQuantities)
-          .filter(([, quantity]) => quantity > 0)
-          .map(([productId, quantity]) => ({
-            product_id: productId,
-            quantity,
-            rental_days: rentalDays,
-          })),
-      };
-    },
-    []
-  );
+  const buildPayloadFromForm = useCallback((form: OrderFormState): CreateOrderPayload => {
+    const rentalDays = calculateRentalDays(form.installation_date, form.dismantle_date) ?? 1;
+    return {
+      status: form.status,
+      installation_date: form.installation_date,
+      dismantle_date: form.dismantle_date,
+      customer_id: form.customer?.id ?? null,
+      delivery_type: form.delivery_type,
+      delivery_address:
+        form.delivery_type === 'pickup' ? null : form.delivery_address.trim() || null,
+      comment: form.comment.trim() || null,
+      items: Object.entries(form.productQuantities)
+        .filter(([, quantity]) => quantity > 0)
+        .map(([productId, quantity]) => ({
+          product_id: productId,
+          quantity,
+          rental_days: rentalDays,
+        })),
+    };
+  }, []);
 
   const createCalculationPayload = useMemo(() => {
-    const rentalDays = calculateRentalDays(
-      createForm.installation_date,
-      createForm.dismantle_date
-    );
+    const rentalDays = calculateRentalDays(createForm.installation_date, createForm.dismantle_date);
     if (!rentalDays) {
       return null;
     }
@@ -839,10 +832,7 @@ export default function OrdersPage() {
   }, [buildPayloadFromForm, createForm]);
 
   const editCalculationPayload = useMemo(() => {
-    const rentalDays = calculateRentalDays(
-      editForm.installation_date,
-      editForm.dismantle_date
-    );
+    const rentalDays = calculateRentalDays(editForm.installation_date, editForm.dismantle_date);
     if (!rentalDays) {
       return null;
     }
@@ -1111,9 +1101,7 @@ export default function OrdersPage() {
       onError: (mutationError) => {
         const messages = extractOrderErrorMessages(mutationError);
         setCreateError(
-          messages.length > 0
-            ? messages
-            : ['Не удалось создать заказ. Попробуйте снова.'],
+          messages.length > 0 ? messages : ['Не удалось создать заказ. Попробуйте снова.']
         );
       },
     });
@@ -1143,9 +1131,7 @@ export default function OrdersPage() {
         onError: (mutationError) => {
           const messages = extractOrderErrorMessages(mutationError);
           setEditError(
-            messages.length > 0
-              ? messages
-              : ['Не удалось обновить заказ. Попробуйте снова.'],
+            messages.length > 0 ? messages : ['Не удалось обновить заказ. Попробуйте снова.']
           );
         },
       }

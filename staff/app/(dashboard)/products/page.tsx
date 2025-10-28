@@ -364,19 +364,19 @@ const createFormFromProduct = (product: ProductDetail): CreateProductFormState =
             : '',
       })),
     },
-  visibility: {
-    reservation_mode: (product.visibility?.reservation_mode ?? '') as ReservationMode | '',
-    show_on_pifakit: product.visibility?.show_on_pifakit ?? base.visibility.show_on_pifakit,
-    show_on_site: product.visibility?.show_on_site ?? base.visibility.show_on_site,
-    show_in_new: product.visibility?.show_in_new ?? base.visibility.show_in_new,
-    category_cover_on_home:
-      product.visibility?.category_cover_on_home ?? base.visibility.category_cover_on_home,
-  },
-  seo: {
-    url_name: product.seo?.url_name ?? '',
-    meta_title: product.seo?.meta_title ?? '',
-    meta_description: product.seo?.meta_description ?? '',
-  },
+    visibility: {
+      reservation_mode: (product.visibility?.reservation_mode ?? '') as ReservationMode | '',
+      show_on_pifakit: product.visibility?.show_on_pifakit ?? base.visibility.show_on_pifakit,
+      show_on_site: product.visibility?.show_on_site ?? base.visibility.show_on_site,
+      show_in_new: product.visibility?.show_in_new ?? base.visibility.show_in_new,
+      category_cover_on_home:
+        product.visibility?.category_cover_on_home ?? base.visibility.category_cover_on_home,
+    },
+    seo: {
+      url_name: product.seo?.url_name ?? '',
+      meta_title: product.seo?.meta_title ?? '',
+      meta_description: product.seo?.meta_description ?? '',
+    },
   };
 };
 
@@ -1651,7 +1651,9 @@ export default function ProductsPage() {
         if (removedImages.length) {
           await Promise.all(
             removedImages.map((image) =>
-              image.remoteId ? productsApi.deleteImage(productId, image.remoteId) : Promise.resolve()
+              image.remoteId
+                ? productsApi.deleteImage(productId, image.remoteId)
+                : Promise.resolve()
             )
           );
         }
@@ -2825,12 +2827,7 @@ export default function ProductsPage() {
                     gap: '16px',
                   }}
                 >
-                  <Input
-                    label="URL-имя"
-                    value={createForm.seo.url_name}
-                    readOnly
-                    disabled
-                  />
+                  <Input label="URL-имя" value={createForm.seo.url_name} readOnly disabled />
                   <Input
                     label="Meta title"
                     value={createForm.seo.meta_title}

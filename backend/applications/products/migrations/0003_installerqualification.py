@@ -59,7 +59,7 @@ def noop_reverse(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('products', '0001_initial'),
+        ('products', '0002_update_product_seo_fields'),
     ]
 
     operations = [

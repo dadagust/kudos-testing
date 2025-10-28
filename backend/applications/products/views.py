@@ -279,7 +279,11 @@ class ProductViewSet(viewsets.ModelViewSet):
             ProductImage.objects.filter(id=item['id'], product=product).update(position=position)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=['delete'], url_path='images/(?P<image_id>[^/.]+)')
+    @action(
+        detail=True,
+        methods=['delete'],
+        url_path=r'images/(?P<image_id>[0-9a-fA-F-]{32,36})',
+    )
     def delete_image(self, request: Request, image_id: str, id=None):
         product = self.get_object()
         image = get_object_or_404(product.images, id=image_id)
