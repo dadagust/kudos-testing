@@ -249,7 +249,7 @@ def _calculate_items_pricing(
     for item in items_data:
         product_id = str(item['product_id'])
         product = products.get(product_id)
-        if product is None:  # pragma: no cover - safeguarded by pre-check above
+        if product is None:
             raise serializers.ValidationError({'items': f'Товар {product_id} не найден'})
 
         try:

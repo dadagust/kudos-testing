@@ -45,7 +45,7 @@ def parse_include_param(request: Request) -> tuple[str, ...]:
 def _has_error_code(codes, target: str) -> bool:
     if isinstance(codes, str):
         return codes == target
-    if isinstance(codes, (list, tuple, set)):
+    if isinstance(codes, (list | tuple | set)):
         return any(_has_error_code(item, target) for item in codes)
     if isinstance(codes, dict):
         return any(_has_error_code(value, target) for value in codes.values())

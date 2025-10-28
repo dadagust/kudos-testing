@@ -63,7 +63,7 @@ class InstallerQualification(Date):
         verbose_name_plural = 'Квалификации монтажников'
         ordering = ['name']
 
-    def __str__(self) -> str:  # pragma: no cover - human readable repr
+    def __str__(self) -> str:
         return self.name
 
 
@@ -270,7 +270,7 @@ class Product(Date):
     def thumbnail(self) -> ProductImage | None:
         return self.images.order_by('position').first()
 
-    def save(self, *args, **kwargs):  # type: ignore[override]
+    def save(self, *args, **kwargs):
         self.seo_url_name = self._generate_url_name()
         update_fields = kwargs.get('update_fields')
         if update_fields is not None:

@@ -1,4 +1,5 @@
 # syntax=docker/dockerfile:1
+
 FROM python:3.12-slim AS base
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -18,8 +19,7 @@ RUN pip install --no-cache-dir "poetry==1.8.3" \
 
 COPY backend/ ./
 COPY backend/entrypoint.sh ./entrypoint.sh
-# если на Windows редактировал файл, убери CRLF:
-# RUN sed -i 's/\r$//' ./entrypoint.sh
+
 RUN chmod +x ./entrypoint.sh
 
 EXPOSE 8000

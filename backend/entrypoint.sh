@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# --- ждём БД (pg_isready удобнее всего) ---
 : "${DB_HOST:=postgres}"
 : "${DB_PORT:=5432}"
 : "${DB_USER:=kudos}"

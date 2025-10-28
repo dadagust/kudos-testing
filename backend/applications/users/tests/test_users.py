@@ -11,11 +11,11 @@ from rest_framework.test import APITestCase
 
 from applications.users.models import RoleChoices, UserProfile
 from applications.users.rbac import ROLE_GROUP_MAP
+from applications.users.serializers import LoginSerializer, UserProfileSerializer
 
 ROLE_PERMISSION_MATRIX = import_module(
     'applications.users.migrations.0006_sync_orders_permissions'
 ).ROLE_PERMISSION_MATRIX
-from applications.users.serializers import LoginSerializer, UserProfileSerializer
 
 
 class AuthTests(APITestCase):

@@ -5,11 +5,11 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+from applications.products.management.commands._slug import make_slug
+
 ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
-
-from applications.products.management.commands._slug import make_slug
 
 
 def test_make_slug_transliterates_russian_letters():
