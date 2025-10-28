@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+from datetime import date
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import Any
 
 from django.db import transaction
+
 from rest_framework import serializers
 
 from applications.customers.models import Customer
@@ -175,12 +177,99 @@ class OrderItemInputSerializer(serializers.Serializer):
     rental_mode = serializers.ChoiceField(choices=RentalMode.choices, required=False)
     rental_tiers = serializers.ListField(child=serializers.DictField(), required=False)
 
-    def validate_product_id(self, value):
+
+def _derive_rental_days(installation: date | None, dismantle: date | None) -> int | None:
+    if not installation or not dismantle:
+        return None
+    delta = (dismantle - installation).days + 1
+    if delta <= 0:
+        return None
+    return delta
+
+
+def _calculate_items_pricing(
+    items_data: list[dict[str, Any]],
+    default_rental_days: int | None,
+) -> tuple[list[dict[str, Any]], Decimal]:
+    if not items_data:
+        return [], Decimal('0.00')
+
+    product_ids = {str(item['product_id']) for item in items_data}
+    products = {
+        str(product.pk): product
+        for product in Product.objects.filter(pk__in=product_ids).select_related(
+            'setup_installer_qualification'
+        )
+    }
+
+    missing = [pid for pid in product_ids if pid not in products]
+    if missing:
+        raise serializers.ValidationError({'items': f"Товар {missing[0]} не найден"})
+
+    calculated: list[dict[str, Any]] = []
+    qualification_total = Decimal('0.00')
+    seen_qualifications: set[str] = set()
+
+    for item in items_data:
+        product_id = str(item['product_id'])
+        product = products.get(product_id)
+        if product is None:  # pragma: no cover - safeguarded by pre-check above
+            raise serializers.ValidationError({'items': f"Товар {product_id} не найден"})
+
         try:
-            product = Product.objects.get(pk=value)
-        except Product.DoesNotExist as exc:  # pragma: no cover - validated via serializer
-            raise serializers.ValidationError('Товар не найден') from exc
-        return value
+            quantity = int(item['quantity'])
+        except (TypeError, ValueError):
+            raise serializers.ValidationError({'items': 'Количество должно быть числом.'})
+
+        if quantity <= 0:
+            raise serializers.ValidationError({'items': 'Количество должно быть больше нуля.'})
+
+        raw_rental_days = item.get('rental_days')
+        if raw_rental_days in (None, '') and default_rental_days is not None:
+            rental_days = default_rental_days
+        else:
+            try:
+                rental_days = int(raw_rental_days or default_rental_days or 1)
+            except (TypeError, ValueError):
+                raise serializers.ValidationError(
+                    {'items': 'Количество дней аренды должно быть числом.'}
+                )
+
+        if rental_days <= 0:
+            raise serializers.ValidationError(
+                {'items': 'Количество дней аренды должно быть больше нуля.'}
+            )
+
+        mode = product.rental_mode or RentalMode.STANDARD
+        tiers = _load_product_rental_tiers(product) if mode == RentalMode.SPECIAL else []
+        unit_total = _calculate_rental_total(
+            Decimal(product.price_rub), mode, tiers, rental_days
+        )
+        unit_price = unit_total.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        subtotal = unit_price * quantity
+        tiers_snapshot = _snapshot_rental_tiers(tiers) if mode == RentalMode.SPECIAL else []
+
+        calculated.append(
+            {
+                'product': product,
+                'product_name': product.name,
+                'quantity': quantity,
+                'unit_price': unit_price,
+                'rental_days': rental_days,
+                'rental_mode': mode,
+                'rental_tiers_snapshot': tiers_snapshot,
+                'subtotal': subtotal,
+            }
+        )
+
+        qualification = product.setup_installer_qualification
+        if qualification:
+            qualification_id = str(qualification.pk)
+            if qualification_id not in seen_qualifications:
+                seen_qualifications.add(qualification_id)
+                qualification_total += qualification.price_rub or Decimal('0.00')
+
+    return calculated, qualification_total
 
 
 class OrderWriteSerializer(serializers.ModelSerializer):
@@ -206,6 +295,10 @@ class OrderWriteSerializer(serializers.ModelSerializer):
             'comment',
             'items',
         )
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self._default_rental_days: int | None = None
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         delivery_type = attrs.get('delivery_type') or getattr(self.instance, 'delivery_type', None)
@@ -233,6 +326,8 @@ class OrderWriteSerializer(serializers.ModelSerializer):
                 {'dismantle_date': 'Дата демонтажа должна быть не раньше даты монтажа.'}
             )
 
+        self._default_rental_days = _derive_rental_days(installation_date, dismantle_date)
+
         items = attrs.get('items')
         if items is not None and len(items) == 0:
             raise serializers.ValidationError({'items': 'Добавьте хотя бы один товар.'})
@@ -247,7 +342,7 @@ class OrderWriteSerializer(serializers.ModelSerializer):
     def create(self, validated_data: dict[str, Any]) -> Order:
         items_data = validated_data.pop('items', [])
         order = Order.objects.create(**validated_data)
-        self._replace_items(order, items_data)
+        self._replace_items(order, items_data, self._default_rental_days)
         order.recalculate_total_amount()
         order.save(update_fields=['total_amount'])
         return order
@@ -260,34 +355,60 @@ class OrderWriteSerializer(serializers.ModelSerializer):
         instance.save()
         if items_data is not None:
             instance.items.all().delete()
-            self._replace_items(instance, items_data)
+            self._replace_items(instance, items_data, self._default_rental_days)
         instance.recalculate_total_amount()
         instance.save(update_fields=['total_amount'])
         return instance
 
-    def _replace_items(self, order: Order, items_data: list[dict[str, Any]]) -> None:
-        order_items: list[OrderItem] = []
-        for item in items_data:
-            product_id = item['product_id']
-            quantity = int(item['quantity'])
-            product = Product.objects.get(pk=product_id)
-            rental_days = int(item.get('rental_days') or 1)
-            mode = product.rental_mode or RentalMode.STANDARD
-            tiers = _load_product_rental_tiers(product) if mode == RentalMode.SPECIAL else []
-            unit_price = _calculate_rental_total(
-                Decimal(product.price_rub), mode, tiers, rental_days
-            ).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-            tiers_snapshot = _snapshot_rental_tiers(tiers) if mode == RentalMode.SPECIAL else []
-            order_items.append(
-                OrderItem(
-                    order=order,
-                    product=product,
-                    product_name=product.name,
-                    quantity=quantity,
-                    unit_price=unit_price,
-                    rental_days=rental_days,
-                    rental_mode=mode,
-                    rental_tiers_snapshot=tiers_snapshot,
-                )
+    def _replace_items(
+        self,
+        order: Order,
+        items_data: list[dict[str, Any]],
+        default_rental_days: int | None,
+    ) -> None:
+        calculated_items, _ = _calculate_items_pricing(items_data, default_rental_days)
+        order_items = [
+            OrderItem(
+                order=order,
+                product=item['product'],
+                product_name=item['product_name'],
+                quantity=item['quantity'],
+                unit_price=item['unit_price'],
+                rental_days=item['rental_days'],
+                rental_mode=item['rental_mode'],
+                rental_tiers_snapshot=item['rental_tiers_snapshot'],
             )
+            for item in calculated_items
+        ]
         OrderItem.objects.bulk_create(order_items)
+
+
+class OrderCalculationSerializer(OrderWriteSerializer):
+    class Meta(OrderWriteSerializer.Meta):
+        pass
+
+    def calculate(self) -> dict[str, Any]:
+        items_data = self.validated_data.get('items', [])
+        calculated_items, qualification_total = _calculate_items_pricing(
+            items_data, self._default_rental_days
+        )
+        total = sum((item['subtotal'] for item in calculated_items), Decimal('0.00'))
+        total += qualification_total
+
+        def _format_decimal(value: Decimal) -> str:
+            return format(value.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP), '.2f')
+
+        return {
+            'total_amount': _format_decimal(total),
+            'qualification_total': _format_decimal(qualification_total),
+            'items': [
+                {
+                    'product_id': str(item['product'].pk),
+                    'quantity': item['quantity'],
+                    'rental_days': item['rental_days'],
+                    'unit_price': _format_decimal(item['unit_price']),
+                    'subtotal': _format_decimal(item['subtotal']),
+                }
+                for item in calculated_items
+            ],
+        }

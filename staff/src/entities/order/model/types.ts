@@ -73,6 +73,24 @@ export interface OrderDetailResponse {
   data: OrderDetail;
 }
 
+export interface OrderCalculationItem {
+  product_id: string;
+  quantity: number;
+  rental_days: number;
+  unit_price: string;
+  subtotal: string;
+}
+
+export interface OrderCalculationSummary {
+  total_amount: string;
+  qualification_total: string;
+  items: OrderCalculationItem[];
+}
+
+export interface OrderCalculationResponse {
+  data: OrderCalculationSummary;
+}
+
 export interface OrderListQuery {
   status_group?: OrderStatusGroup;
   status?: OrderStatus;

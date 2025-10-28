@@ -2,6 +2,7 @@ import { apiV1Client } from '@/shared/api/httpClient';
 
 import {
   CreateOrderPayload,
+  OrderCalculationResponse,
   OrderDetailResponse,
   OrderListQuery,
   OrderListResponse,
@@ -47,6 +48,17 @@ export const ordersApi = {
     payload: UpdateOrderPayload
   ): Promise<OrderDetailResponse> => {
     const { data } = await apiV1Client.put<OrderDetailResponse>(`/order/${orderId}/`, payload);
+    return data;
+  },
+  calculateTotal: async (
+    payload: CreateOrderPayload,
+    signal?: AbortSignal
+  ): Promise<OrderCalculationResponse> => {
+    const { data } = await apiV1Client.post<OrderCalculationResponse>(
+      '/order/calculate-total/',
+      payload,
+      { signal }
+    );
     return data;
   },
 };
