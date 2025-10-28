@@ -986,9 +986,6 @@ export default function ProductsPage() {
   );
   const createProductMutation = useMutation<ProductCreateResponse, Error, ProductCreatePayload>({
     mutationFn: (payload: ProductCreatePayload) => productsApi.create(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-    },
   });
   const updateProductMutation = useMutation<
     ProductDetail,
@@ -996,15 +993,14 @@ export default function ProductsPage() {
     { productId: string; payload: ProductUpdatePayload }
   >({
     mutationFn: ({ productId, payload }) => productsApi.update(productId, payload),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-      queryClient.invalidateQueries({ queryKey: ['products', 'detail', variables.productId] });
-    },
   });
   const deleteProductMutation = useMutation<void, Error, string>({
     mutationFn: (productId: string) => productsApi.remove(productId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({
+        queryKey: ['products'],
+        refetchType: 'active',
+      });
     },
   });
   const isCreatingProduct = createProductMutation.status === 'pending';
@@ -1692,16 +1688,23 @@ export default function ProductsPage() {
           }
         }
         setPageNotification(`Товар «${payload.name}» создан. ID: ${response.id}.`);
-      } else if (formMode === 'edit' && editingProductId) {
-        await updateProductMutation.mutateAsync({ productId: editingProductId, payload });
+        closeProductModal();
+        await queryClient.invalidateQueries({
+          queryKey: ['products'],
+          refetchType: 'active',
+        });
+        return;
+      }
+
+      if (formMode === 'edit' && editingProductId) {
+        const productId = editingProductId;
+        await updateProductMutation.mutateAsync({ productId, payload });
 
         const removedImages = normalizedImages.filter((image) => image.removed && image.remoteId);
         if (removedImages.length) {
           await Promise.all(
             removedImages.map((image) =>
-              image.remoteId
-                ? productsApi.deleteImage(editingProductId, image.remoteId)
-                : Promise.resolve()
+              image.remoteId ? productsApi.deleteImage(productId, image.remoteId) : Promise.resolve()
             )
           );
         }
@@ -1713,7 +1716,7 @@ export default function ProductsPage() {
             file: image.file!,
             position: activeImages.findIndex((item) => item.id === image.id) + 1,
           }));
-          const uploaded = await productsApi.uploadImages(editingProductId, uploadPayload);
+          const uploaded = await productsApi.uploadImages(productId, uploadPayload);
           uploaded.forEach((item, index) => {
             const source = newImages[index];
             uploadedIds.set(source.id, item.id);
@@ -1728,13 +1731,22 @@ export default function ProductsPage() {
           .filter((item): item is { id: string; position: number } => Boolean(item.id));
 
         if (finalOrder.length) {
-          await productsApi.reorderImages(editingProductId, { order: finalOrder });
+          await productsApi.reorderImages(productId, { order: finalOrder });
         }
 
         setPageNotification(`Товар «${payload.name}» обновлён.`);
+        closeProductModal();
+        await Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: ['products'],
+            refetchType: 'active',
+          }),
+          queryClient.invalidateQueries({
+            queryKey: ['products', 'detail', productId],
+            refetchType: 'active',
+          }),
+        ]);
       }
-
-      closeProductModal();
     } catch (error) {
       // Ошибка отображается через состояние мутации
     }
