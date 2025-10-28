@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections import OrderedDict
 from datetime import date
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import Any
@@ -195,20 +196,58 @@ def _calculate_items_pricing(
         return [], Decimal('0.00')
 
     product_ids = {str(item['product_id']) for item in items_data}
-    products = {
-        str(product.pk): product
-        for product in Product.objects.filter(pk__in=product_ids).select_related(
-            'setup_installer_qualification'
-        )
-    }
+    products_qs = (
+        Product.objects.filter(pk__in=product_ids)
+        .select_related('setup_installer_qualification')
+        .prefetch_related('complementary_products__setup_installer_qualification')
+    )
+    products = {str(product.pk): product for product in products_qs}
 
     missing = [pid for pid in product_ids if pid not in products]
     if missing:
         raise serializers.ValidationError({'items': f"Товар {missing[0]} не найден"})
 
-    calculated: list[dict[str, Any]] = []
+    calculated: OrderedDict[tuple[str, int], dict[str, Any]] = OrderedDict()
     qualification_total = Decimal('0.00')
-    seen_qualifications: set[str] = set()
+    seen_products: set[str] = set()
+
+    def _add_product_item(product: Product, quantity: int, rental_days: int) -> None:
+        nonlocal qualification_total
+        if quantity <= 0:
+            return
+
+        mode = product.rental_mode or RentalMode.STANDARD
+        tiers = _load_product_rental_tiers(product) if mode == RentalMode.SPECIAL else []
+        unit_total = _calculate_rental_total(
+            Decimal(product.price_rub), mode, tiers, rental_days
+        )
+        unit_price = unit_total.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        subtotal_increment = unit_price * quantity
+        tiers_snapshot = _snapshot_rental_tiers(tiers) if mode == RentalMode.SPECIAL else []
+
+        key = (str(product.pk), rental_days)
+        existing = calculated.get(key)
+        if existing:
+            existing['quantity'] += quantity
+            existing['subtotal'] += subtotal_increment
+        else:
+            calculated[key] = {
+                'product': product,
+                'product_name': product.name,
+                'quantity': quantity,
+                'unit_price': unit_price,
+                'rental_days': rental_days,
+                'rental_mode': mode,
+                'rental_tiers_snapshot': tiers_snapshot,
+                'subtotal': subtotal_increment,
+            }
+
+        product_key = str(product.pk)
+        if product_key not in seen_products:
+            seen_products.add(product_key)
+            qualification = product.setup_installer_qualification
+            if qualification:
+                qualification_total += qualification.price_rub or Decimal('0.00')
 
     for item in items_data:
         product_id = str(item['product_id'])
@@ -240,36 +279,14 @@ def _calculate_items_pricing(
                 {'items': 'Количество дней аренды должно быть больше нуля.'}
             )
 
-        mode = product.rental_mode or RentalMode.STANDARD
-        tiers = _load_product_rental_tiers(product) if mode == RentalMode.SPECIAL else []
-        unit_total = _calculate_rental_total(
-            Decimal(product.price_rub), mode, tiers, rental_days
-        )
-        unit_price = unit_total.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-        subtotal = unit_price * quantity
-        tiers_snapshot = _snapshot_rental_tiers(tiers) if mode == RentalMode.SPECIAL else []
+        _add_product_item(product, quantity, rental_days)
 
-        calculated.append(
-            {
-                'product': product,
-                'product_name': product.name,
-                'quantity': quantity,
-                'unit_price': unit_price,
-                'rental_days': rental_days,
-                'rental_mode': mode,
-                'rental_tiers_snapshot': tiers_snapshot,
-                'subtotal': subtotal,
-            }
-        )
+        for complementary in product.complementary_products.all():
+            if complementary.pk == product.pk:
+                continue
+            _add_product_item(complementary, quantity, rental_days)
 
-        qualification = product.setup_installer_qualification
-        if qualification:
-            qualification_id = str(qualification.pk)
-            if qualification_id not in seen_qualifications:
-                seen_qualifications.add(qualification_id)
-                qualification_total += qualification.price_rub or Decimal('0.00')
-
-    return calculated, qualification_total
+    return list(calculated.values()), qualification_total
 
 
 class OrderWriteSerializer(serializers.ModelSerializer):
