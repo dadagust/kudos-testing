@@ -38,7 +38,7 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://kudos:kudos@postgres:5432/kudos
-      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,backend,frontend,staff
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,frontend,staff
       DJANGO_DEBUG: "1"
       DJANGO_SETTINGS_MODULE: settings.settings
       REDIS_URL: redis://redis:6379/0
@@ -57,8 +57,8 @@ services:
         condition: service_started
     environment:
       NODE_ENV: development
-      KUDOS_BACKEND_ORIGIN: http://backend:8000
-      NEXT_PUBLIC_API_URL: http://backend:8000
+      KUDOS_BACKEND_ORIGIN: http://localhost:8000
+      NEXT_PUBLIC_API_URL: http://localhost:8000
     ports:
       - "4000:4000"
     volumes:
@@ -75,7 +75,7 @@ services:
         condition: service_started
     environment:
       NODE_ENV: development
-      NEXT_PUBLIC_API_URL: http://backend:8000
+      NEXT_PUBLIC_API_URL: http://localhost:8000
     ports:
       - "3000:3000"
     volumes:
