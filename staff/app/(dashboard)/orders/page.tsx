@@ -66,6 +66,8 @@ type CalculatedItemTotals = {
   rentalDays: number;
 };
 
+type OrderFormErrorMessages = string[] | null;
+
 const STATUS_GROUP_TABS: { id: OrderStatusGroup; label: string }[] = [
   { id: 'current', label: 'Текущие' },
   { id: 'archived', label: 'В архиве' },
@@ -81,6 +83,132 @@ const STATUS_TAG_TONES: Record<OrderStatus, 'default' | 'info' | 'success' | 'wa
     archived: 'default',
     declined: 'danger',
   };
+
+const ERROR_FIELD_LABELS: Record<string, string | null> = {
+  status: 'Статус',
+  installation_date: 'Дата монтажа',
+  dismantle_date: 'Дата демонтажа',
+  customer_id: 'Клиент',
+  customer: 'Клиент',
+  delivery_type: 'Тип доставки',
+  delivery_address: 'Адрес доставки',
+  comment: 'Комментарий',
+  items: 'Товары',
+  product_id: 'Товар',
+  product: 'Товар',
+  quantity: 'Количество',
+  rental_days: 'Дни аренды',
+  rental_mode: 'Режим аренды',
+  rental_tiers: 'Тарифы аренды',
+  non_field_errors: null,
+  detail: null,
+};
+
+const humanizeErrorPathSegment = (segment: string | number): string | null => {
+  if (typeof segment === 'number') {
+    return `№${segment + 1}`;
+  }
+
+  const mapped = ERROR_FIELD_LABELS[segment];
+
+  if (mapped === null) {
+    return null;
+  }
+
+  if (typeof mapped === 'string') {
+    return mapped;
+  }
+
+  const normalized = segment.replace(/_/g, ' ').trim();
+  if (!normalized) {
+    return null;
+  }
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+};
+
+const formatErrorPath = (segments: Array<string | number>): string =>
+  segments
+    .map(humanizeErrorPathSegment)
+    .filter((value): value is string => Boolean(value && value.trim().length > 0))
+    .join(' → ');
+
+const flattenErrorPayload = (
+  value: unknown,
+  path: Array<string | number> = [],
+): string[] => {
+  if (value == null) {
+    return [];
+  }
+
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    const prefix = formatErrorPath(path);
+    const text = String(value);
+    return prefix ? [`${prefix}: ${text}`] : [text];
+  }
+
+  if (Array.isArray(value)) {
+    if (value.length === 0) {
+      return [];
+    }
+
+    const isPrimitiveArray = value.every(
+      (item) =>
+        item == null ||
+        typeof item === 'string' ||
+        typeof item === 'number' ||
+        typeof item === 'boolean',
+    );
+
+    if (isPrimitiveArray) {
+      const prefix = formatErrorPath(path);
+      return value
+        .map((item) => (item == null ? '' : String(item)))
+        .filter((text) => text.trim().length > 0)
+        .map((text) => (prefix ? `${prefix}: ${text}` : text));
+    }
+
+    return value.flatMap((item, index) => flattenErrorPayload(item, [...path, index]));
+  }
+
+  if (typeof value === 'object') {
+    const entries = Object.entries(value as Record<string, unknown>);
+    if (entries.length === 0) {
+      return [];
+    }
+    return entries.flatMap(([key, child]) => flattenErrorPayload(child, [...path, key]));
+  }
+
+  return [];
+};
+
+const extractOrderErrorMessages = (error: unknown): string[] => {
+  if (axios.isAxiosError(error)) {
+    const data = error.response?.data;
+    if (data !== undefined) {
+      const flattened = flattenErrorPayload(data);
+      const uniqueMessages = Array.from(
+        new Set(flattened.map((message) => message.trim()).filter((message) => message.length > 0)),
+      );
+      if (uniqueMessages.length > 0) {
+        return uniqueMessages;
+      }
+    }
+
+    const statusText = error.response?.statusText;
+    if (typeof statusText === 'string' && statusText.trim().length > 0) {
+      return [statusText];
+    }
+    if (typeof error.message === 'string' && error.message.trim().length > 0) {
+      return [error.message];
+    }
+  }
+
+  if (error instanceof Error && error.message.trim().length > 0) {
+    return [error.message];
+  }
+
+  return [];
+};
 
 const currencyFormatter = new Intl.NumberFormat('ru-RU', {
   style: 'currency',
@@ -151,7 +279,7 @@ interface OrderFormContentProps {
   setForm: OrderFormSetter;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onClose: () => void;
-  error: string | null;
+  errors: OrderFormErrorMessages;
   isSubmitting: boolean;
   isLoading?: boolean;
   customerSearch: string;
@@ -179,7 +307,7 @@ const OrderFormContent = ({
   setForm,
   onSubmit,
   onClose,
-  error,
+  errors,
   isSubmitting,
   isLoading,
   customerSearch,
@@ -277,9 +405,21 @@ const OrderFormContent = ({
         </Button>
       </header>
 
-      {error ? (
+      {errors && errors.length ? (
         <Alert tone="danger" title="Не удалось сохранить заказ">
-          {error}
+          <ul
+            style={{
+              margin: 0,
+              paddingLeft: '1.25rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '4px',
+            }}
+          >
+            {errors.map((message) => (
+              <li key={message}>{message}</li>
+            ))}
+          </ul>
         </Alert>
       ) : null}
 
@@ -553,8 +693,8 @@ export default function OrdersPage() {
   const [editOrderId, setEditOrderId] = useState<number | null>(null);
   const [createForm, setCreateForm] = useState<OrderFormState>(() => createInitialFormState());
   const [editForm, setEditForm] = useState<OrderFormState>(() => createInitialFormState());
-  const [createError, setCreateError] = useState<string | null>(null);
-  const [editError, setEditError] = useState<string | null>(null);
+  const [createError, setCreateError] = useState<OrderFormErrorMessages>(null);
+  const [editError, setEditError] = useState<OrderFormErrorMessages>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [customerSearch, setCustomerSearch] = useState('');
   const [productSearch, setProductSearch] = useState('');
@@ -922,7 +1062,7 @@ export default function OrdersPage() {
     }
     const validationError = ensurePayloadValid(createForm);
     if (validationError) {
-      setCreateError(validationError);
+      setCreateError([validationError]);
       return;
     }
     setCreateError(null);
@@ -935,10 +1075,11 @@ export default function OrdersPage() {
         void refetch();
       },
       onError: (mutationError) => {
+        const messages = extractOrderErrorMessages(mutationError);
         setCreateError(
-          mutationError instanceof Error
-            ? mutationError.message
-            : 'Не удалось создать заказ. Попробуйте снова.'
+          messages.length > 0
+            ? messages
+            : ['Не удалось создать заказ. Попробуйте снова.'],
         );
       },
     });
@@ -951,7 +1092,7 @@ export default function OrdersPage() {
     }
     const validationError = ensurePayloadValid(editForm);
     if (validationError) {
-      setEditError(validationError);
+      setEditError([validationError]);
       return;
     }
     setEditError(null);
@@ -966,10 +1107,11 @@ export default function OrdersPage() {
           void refetch();
         },
         onError: (mutationError) => {
+          const messages = extractOrderErrorMessages(mutationError);
           setEditError(
-            mutationError instanceof Error
-              ? mutationError.message
-              : 'Не удалось обновить заказ. Попробуйте снова.'
+            messages.length > 0
+              ? messages
+              : ['Не удалось обновить заказ. Попробуйте снова.'],
           );
         },
       }
@@ -1196,7 +1338,7 @@ export default function OrdersPage() {
             setForm={setCreateForm}
             onSubmit={handleCreateSubmit}
             onClose={closeCreateDrawer}
-            error={createError}
+            errors={createError}
             isSubmitting={createMutation.isPending}
             customerSearch={customerSearch}
             onCustomerSearchChange={setCustomerSearch}
@@ -1225,7 +1367,7 @@ export default function OrdersPage() {
             setForm={setEditForm}
             onSubmit={handleEditSubmit}
             onClose={closeEditDrawer}
-            error={editError}
+            errors={editError}
             isSubmitting={updateMutation.isPending}
             isLoading={isEditLoading && !editOrderResponse}
             customerSearch={customerSearch}
