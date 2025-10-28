@@ -186,6 +186,32 @@ class ProductSeoSerializer(serializers.Serializer):
     )
 
 
+class CategoryPrimaryKeyOrSlugField(serializers.PrimaryKeyRelatedField):
+    """Accept either a UUID primary key or a slug when referencing categories."""
+
+    default_error_messages = {
+        'does_not_exist': 'Категория с указанным идентификатором или слагом не найдена.',
+        'invalid': 'Некорректное значение идентификатора категории.',
+    }
+
+    def to_internal_value(self, data):  # type: ignore[override]
+        queryset = self.get_queryset()
+        if queryset is None:
+            raise AssertionError('Category queryset is required.')
+
+        try:
+            return super().to_internal_value(data)
+        except serializers.ValidationError:
+            if isinstance(data, str):
+                slug = data.strip()
+                try:
+                    return queryset.get(slug=slug)
+                except Category.DoesNotExist:
+                    self.fail('does_not_exist')
+            self.fail('invalid')
+        except (TypeError, ValueError):
+            self.fail('invalid')
+
 class ProductBaseSerializer(serializers.ModelSerializer):
     price_rub = serializers.DecimalField(max_digits=12, decimal_places=2)
     loss_compensation_rub = serializers.DecimalField(
@@ -195,7 +221,7 @@ class ProductBaseSerializer(serializers.ModelSerializer):
         allow_null=True,
     )
     features = serializers.ListField(child=serializers.CharField(), required=False)
-    category_id = serializers.PrimaryKeyRelatedField(
+    category_id = CategoryPrimaryKeyOrSlugField(
         source='category', queryset=Category.objects.all(), write_only=True
     )
     category = serializers.PrimaryKeyRelatedField(read_only=True)

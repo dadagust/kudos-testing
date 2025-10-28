@@ -19,6 +19,7 @@ import {
   CustomerSummary,
   DeliveryType,
   ORDER_STATUS_LABELS,
+  OrderItemPayload,
   OrderStatus,
   OrderStatusGroup,
   OrderSummary,

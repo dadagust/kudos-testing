@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import Any
 
 from django.db import transaction
@@ -53,10 +53,7 @@ def _load_product_rental_tiers(product: Product) -> list[tuple[int, Decimal]]:
 
 
 def _snapshot_rental_tiers(tiers: list[tuple[int, Decimal]]) -> list[dict[str, str]]:
-    return [
-        {'end_day': end_day, 'price_per_day': format(price, '.2f')}
-        for end_day, price in tiers
-    ]
+    return [{'end_day': end_day, 'price_per_day': format(price, '.2f')} for end_day, price in tiers]
 
 
 def _calculate_rental_total(
