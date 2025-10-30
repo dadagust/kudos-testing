@@ -10,6 +10,7 @@ export type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
 export interface AuthContextValue {
   user: UserProfile | null;
   status: AuthStatus;
+  ready: boolean;
   login: (payload: { email: string; password: string }) => Promise<void>;
   logout: () => Promise<void>;
   setRole: (role: Role) => Promise<void>;

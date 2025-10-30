@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [status, setStatus] = useState<AuthStatus>('loading');
   const [isHydrated, setIsHydrated] = useState(useAuthStore.persist.hasHydrated());
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     if (isHydrated) {
@@ -38,11 +39,13 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     if (!accessToken) {
       setUser(null);
       setStatus('unauthenticated');
+      setIsReady(true);
       return;
     }
 
     let isActive = true;
     setStatus('loading');
+    setIsReady(false);
 
     authApi
       .me()
@@ -53,6 +56,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
         setUser(profile);
         setStatus('authenticated');
+        setIsReady(true);
       })
       .catch(() => {
         if (!isActive) {
@@ -62,6 +66,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         clearTokens();
         setUser(null);
         setStatus('unauthenticated');
+        setIsReady(true);
       });
 
     return () => {
@@ -72,15 +77,18 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   const handleLogin = useCallback(
     async (payload: { email: string; password: string }) => {
       setStatus('loading');
+      setIsReady(false);
 
       try {
         const data = await authApi.login(payload);
         setTokens(data.access, data.refresh);
         setUser(data.user);
         setStatus('authenticated');
+        setIsReady(true);
       } catch (error) {
         clearTokens();
         setStatus('unauthenticated');
+        setIsReady(true);
         throw error;
       }
     },
@@ -94,6 +102,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       clearTokens();
       setUser(null);
       setStatus('unauthenticated');
+      setIsReady(true);
     }
   }, [clearTokens]);
 
@@ -105,11 +114,12 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     () => ({
       user,
       status,
+      ready: isReady,
       login: handleLogin,
       logout: handleLogout,
       setRole: handleSetRole,
     }),
-    [user, status, handleLogin, handleLogout, handleSetRole]
+    [user, status, isReady, handleLogin, handleLogout, handleSetRole]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
