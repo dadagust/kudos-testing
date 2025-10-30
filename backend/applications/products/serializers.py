@@ -9,13 +9,15 @@ from django.db import transaction
 from django.db.models import Prefetch
 from rest_framework import serializers
 
-from .choices import (
-    DimensionShape,
-    RentalMode,
-    ReservationMode,
+from .choices import DimensionShape, RentalMode, ReservationMode
+from .models import (
+    Category,
+    Color,
+    InstallerQualification,
+    Product,
+    ProductImage,
     TransportRestriction,
 )
-from .models import Category, InstallerQualification, Product, ProductImage
 
 DATETIME_FIELD = serializers.DateTimeField()
 
@@ -23,6 +25,32 @@ DATETIME_FIELD = serializers.DateTimeField()
 class EnumChoiceSerializer(serializers.Serializer):
     value = serializers.CharField()
     label = serializers.CharField()
+
+
+class ModelValueField(serializers.CharField):
+    """CharField that validates value presence in a model."""
+
+    default_error_messages = {
+        'invalid_choice': 'Недопустимое значение: {value}.',
+    }
+
+    def __init__(self, *, model, **kwargs):
+        self.model = model
+        kwargs.setdefault('required', False)
+        kwargs.setdefault('allow_blank', True)
+        kwargs.setdefault('allow_null', True)
+        super().__init__(**kwargs)
+
+    def run_validation(self, data=serializers.empty):  # type: ignore[override]
+        value = super().run_validation(data)
+        if value in (None, ''):
+            return None
+        if not self.model.objects.filter(value=value).exists():
+            self.fail('invalid_choice', value=value)
+        return value
+
+    def to_representation(self, value):  # type: ignore[override]
+        return value or None
 
 
 class OptionalInstallerQualificationField(serializers.PrimaryKeyRelatedField):
@@ -115,10 +143,7 @@ class ProductOccupancySerializer(serializers.Serializer):
 class ProductDeliverySerializer(serializers.Serializer):
     volume_cm3 = serializers.IntegerField(min_value=1, required=False)
     weight_kg = serializers.DecimalField(max_digits=8, decimal_places=2, min_value=Decimal('0.01'))
-    transport_restriction = serializers.ChoiceField(
-        choices=TransportRestriction.choices,
-        required=False,
-    )
+    transport_restriction = ModelValueField(model=TransportRestriction)
     self_pickup_allowed = serializers.BooleanField(required=False)
 
 
@@ -227,6 +252,7 @@ class ProductBaseSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True,
     )
+    color = ModelValueField(model=Color)
     features = serializers.ListField(child=serializers.CharField(), required=False)
     category_id = CategoryPrimaryKeyOrSlugField(
         source='category', queryset=Category.objects.all(), write_only=True
@@ -443,7 +469,7 @@ class ProductBaseSerializer(serializers.ModelSerializer):
     def _apply_delivery(self, product: Product, delivery: dict) -> None:
         product.delivery_volume_cm3 = delivery.get('volume_cm3')
         product.delivery_weight_kg = delivery.get('weight_kg')
-        product.delivery_transport_restriction = delivery.get('transport_restriction') or ''
+        product.delivery_transport_restriction = delivery.get('transport_restriction')
         product.delivery_self_pickup_allowed = delivery.get('self_pickup_allowed', False)
 
     def _apply_setup(self, product: Product, setup: dict) -> None:
@@ -499,6 +525,7 @@ class ProductDetailSerializer(ProductBaseSerializer):
 class ProductListItemSerializer(serializers.ModelSerializer):
     thumbnail_url = serializers.SerializerMethodField()
     delivery = serializers.SerializerMethodField()
+    color = ModelValueField(model=Color, read_only=True)
 
     class Meta:
         model = Product

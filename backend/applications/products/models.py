@@ -12,13 +12,39 @@ from django.utils.text import slugify
 
 from applications.core.models import Date, PathAndRename
 
-from .choices import (
-    Color,
-    DimensionShape,
-    RentalMode,
-    ReservationMode,
-    TransportRestriction,
-)
+from .choices import DimensionShape, RentalMode, ReservationMode
+
+
+class Color(Date):
+    """Available color option for products."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    value = models.CharField('Значение', max_length=32, unique=True)
+    label = models.CharField('Название', max_length=255)
+
+    class Meta(Date.Meta):
+        verbose_name = 'Цвет'
+        verbose_name_plural = 'Цвета'
+        ordering = ['label']
+
+    def __str__(self) -> str:  # pragma: no cover - human readable repr
+        return self.label
+
+
+class TransportRestriction(Date):
+    """Available delivery transport restrictions."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    value = models.CharField('Значение', max_length=32, unique=True)
+    label = models.CharField('Название', max_length=255)
+
+    class Meta(Date.Meta):
+        verbose_name = 'Ограничение по транспорту'
+        verbose_name_plural = 'Ограничения по транспорту'
+        ordering = ['label']
+
+    def __str__(self) -> str:  # pragma: no cover - human readable repr
+        return self.label
 from .storage import product_image_storage
 
 
@@ -103,8 +129,8 @@ class Product(Date):
     color = models.CharField(
         'Цвет',
         max_length=32,
-        choices=Color.choices,
         blank=True,
+        null=True,
     )
 
     dimensions_shape = models.CharField(
@@ -203,8 +229,8 @@ class Product(Date):
     delivery_transport_restriction = models.CharField(
         'Ограничение по транспорту',
         max_length=32,
-        choices=TransportRestriction.choices,
         blank=True,
+        null=True,
     )
     delivery_self_pickup_allowed = models.BooleanField(
         'Самовывоз разрешён',
