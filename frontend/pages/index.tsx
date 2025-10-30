@@ -59,6 +59,7 @@ const ensureQuantities = (products: ProductSummary[], previous?: Record<string, 
 export default function Home() {
   const [tokens, setTokens] = useState<Tokens | null>(null);
   const [user, setUser] = useState<UserProfile | null>(null);
+  const [isRestoringSession, setIsRestoringSession] = useState(true);
   const [loginForm, setLoginForm] = useState<LoginFormState>(createInitialLoginForm);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -86,6 +87,7 @@ export default function Home() {
         localStorage.removeItem('kudos-client-auth');
       }
     }
+    setIsRestoringSession(false);
   }, []);
 
   useEffect(() => {
@@ -119,13 +121,17 @@ export default function Home() {
   }, [tokens]);
 
   useEffect(() => {
+    if (isRestoringSession) {
+      return;
+    }
+
     if (!tokens) {
       localStorage.removeItem('kudos-client-auth');
       return;
     }
 
     localStorage.setItem('kudos-client-auth', JSON.stringify({ tokens, user }));
-  }, [tokens, user]);
+  }, [isRestoringSession, tokens, user]);
 
   const handleLoginSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

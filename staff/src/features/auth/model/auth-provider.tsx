@@ -14,8 +14,27 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   const { accessToken, setTokens, clearTokens } = useAuthStore();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [status, setStatus] = useState<AuthStatus>('loading');
+  const [isHydrated, setIsHydrated] = useState(useAuthStore.persist.hasHydrated());
 
   useEffect(() => {
+    if (isHydrated) {
+      return;
+    }
+
+    const unsubscribe = useAuthStore.persist.onFinishHydration(() => {
+      setIsHydrated(true);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [isHydrated]);
+
+  useEffect(() => {
+    if (!isHydrated) {
+      return;
+    }
+
     if (!accessToken) {
       setUser(null);
       setStatus('unauthenticated');
@@ -48,7 +67,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     return () => {
       isActive = false;
     };
-  }, [accessToken, clearTokens]);
+  }, [accessToken, clearTokens, isHydrated]);
 
   const handleLogin = useCallback(
     async (payload: { email: string; password: string }) => {
