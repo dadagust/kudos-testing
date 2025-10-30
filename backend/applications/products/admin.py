@@ -2,7 +2,14 @@
 
 from django.contrib import admin
 
-from .models import Category, InstallerQualification, Product, ProductImage
+from .models import (
+    Category,
+    Color,
+    InstallerQualification,
+    Product,
+    ProductImage,
+    TransportRestriction,
+)
 
 
 class ProductImageInline(admin.TabularInline):
@@ -38,3 +45,15 @@ class ProductAdmin(admin.ModelAdmin):
 class InstallerQualificationAdmin(admin.ModelAdmin):
     list_display = ('name', 'price_rub', 'created', 'modified')
     search_fields = ('name',)
+
+
+@admin.register(Color)
+class ColorAdmin(admin.ModelAdmin):
+    list_display = ('label', 'value', 'created', 'modified')
+    search_fields = ('label', 'value')
+
+
+@admin.register(TransportRestriction)
+class TransportRestrictionAdmin(admin.ModelAdmin):
+    list_display = ('label', 'value', 'created', 'modified')
+    search_fields = ('label', 'value')

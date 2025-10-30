@@ -202,8 +202,7 @@
 
 ```json
 {
-  "cleaning_days": 1,               // «Чистка» — целые дни
-  "insurance_reserve_percent": 0    // «Страховой резерв», 0..100
+  "cleaning_days": 1               // «Чистка» — целые дни
 }
 ```
 
@@ -335,8 +334,7 @@
     "circle": { "diameter_cm": 330 }
   },
   "occupancy": {
-    "cleaning_days": 1,
-    "insurance_reserve_percent": 0
+    "cleaning_days": 1
   },
   "delivery": {
     "volume_cm3": 3500,
@@ -431,7 +429,6 @@
 1. **Габариты**: набор обязательных полей зависит от `dimensions.shape` (см. 3.1.1).
 2. **Числовые поля**:
    - `price_rub`, `loss_compensation_rub` — `>= 0`.
-   - `occupancy.insurance_reserve_percent` — `0..100`.
    - Время (`install_minutes`, `uninstall_minutes`) — целые `>= 0`.
    - `delivery.weight_kg`, `delivery.volume_cm3` — `> 0` (если не вычисляется).
 3. **Сетап**:
@@ -504,7 +501,7 @@
   "images": [
     {"id":"img_1","url":"https://.../1.jpg","position":1}
   ],
-  "occupancy": {"cleaning_days":1,"insurance_reserve_percent":0},
+  "occupancy": {"cleaning_days":1},
   "delivery": {"volume_cm3":3500,"weight_kg":2,"transport_restriction":"any","self_pickup_allowed":true},
   "setup": {"install_minutes":20,"uninstall_minutes":10,"installer_qualification":"4fbb0c1d-7b47-4c8b-9a5c-9c4c64f79d2a","min_installers":1,"self_setup_allowed":true},
   "rental": {"base_period":"standard"},

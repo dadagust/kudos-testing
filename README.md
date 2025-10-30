@@ -14,10 +14,43 @@ cd kudos
 ```
 
 ## 3. Запуск через Docker Compose (рекомендуемый)
+Перед запуском можно скопировать файл `.env.example` в `.env` и при необходимости переопределить порты публикации сервисов:
+
 ```bash
+cp .env.example .env
 docker compose up --build
 ```
-Команда собирает образы, поднимает Postgres, Redis, Django-бэкенд (`:8000`), пользовательский фронтенд (`:4000`) и административный фронтенд (`:3000`).
+Команда собирает образы, поднимает Postgres, Redis, Django-бэкенд (`:8000` по умолчанию), пользовательский фронтенд (`:4000`) и административный фронтенд (`:3000`). Значения можно изменить через переменные `BACKEND_PORT`, `FRONTEND_PORT` и `STAFF_PORT` в файле `.env`.
+
+### Запуск на портах 9000 / 5000 / 4000
+1. Скопируйте пример окружения и укажите желаемые порты публикации сервисов:
+   ```bash
+   cp .env.example .env
+   ```
+   ```env
+   BACKEND_PORT=9000
+   FRONTEND_PORT=5000
+   STAFF_PORT=4000
+   ```
+2. Обновите разрешённые источники для CORS в `backend/config/.env.local`, добавив фронтенды с новыми портами:
+   ```env
+   DJANGO_CORS_ORIGINS=http://localhost:4000,http://127.0.0.1:4000,http://localhost:5000,http://127.0.0.1:5000
+   ```
+3. Убедитесь, что фронтенды обращаются к бэкенду на новом порту:
+   ```env
+   # frontend/.env.local
+   KUDOS_BACKEND_ORIGIN=http://localhost:9000
+   NEXT_PUBLIC_API_URL=http://localhost:9000
+   ```
+   ```env
+   # staff/.env.local
+   NEXT_PUBLIC_API_URL=http://localhost:9000
+   ```
+4. Запустите сервисы:
+   ```bash
+   docker compose up --build
+   ```
+После запуска Django будет доступен на `http://localhost:9000`, пользовательский фронтенд — на `http://localhost:5000`, а административный — на `http://localhost:4000`.
 
 Остановка сервисов:
 ```bash
