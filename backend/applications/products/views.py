@@ -12,7 +12,6 @@ from rest_framework.decorators import action
 from rest_framework.fields import DateTimeField
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from .choices import DimensionShape, RentalMode, ReservationMode
 from .models import (
@@ -296,39 +295,21 @@ class ProductViewSet(viewsets.ModelViewSet):
         image.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
-class CategoryTreeView(APIView):
-    def get(self, request: Request):
+    @action(detail=False, methods=['get'], url_path='categories')
+    def categories(self, request: Request):
         categories = Category.objects.all().order_by('name')
         tree = build_category_tree(list(categories))
         return Response(tree)
 
-
-def build_category_tree(categories: list[Category], parent: Category | None = None) -> list[dict]:
-    result: list[dict] = []
-    for category in categories:
-        if category.parent_id == (parent.id if parent else None):
-            result.append(
-                {
-                    'id': str(category.id),
-                    'name': category.name,
-                    'slug': category.slug,
-                    'children': build_category_tree(categories, category),
-                }
-            )
-    return result
-
-
-class ColorsListView(APIView):
-    def get(self, request: Request):
+    @action(detail=False, methods=['get'], url_path='colors')
+    def colors(self, request: Request):
         colors = Color.objects.all().order_by('label')
         data = [{'value': color.value, 'label': color.label} for color in colors]
         serializer = EnumChoiceSerializer(data, many=True)
         return Response(serializer.data)
 
-
-class EnumsAggregateView(APIView):
-    def get(self, request: Request):
+    @action(detail=False, methods=['get'], url_path='enums')
+    def enums(self, request: Request):
         return Response(
             {
                 'colors': [
@@ -356,9 +337,17 @@ class EnumsAggregateView(APIView):
         )
 
 
-__all__ = [
-    'CategoryTreeView',
-    'ColorsListView',
-    'EnumsAggregateView',
-    'ProductViewSet',
-]
+def build_category_tree(categories: list[Category], parent: Category | None = None) -> list[dict]:
+    result: list[dict] = []
+    for category in categories:
+        if category.parent_id == (parent.id if parent else None):
+            result.append(
+                {
+                    'id': str(category.id),
+                    'name': category.name,
+                    'slug': category.slug,
+                    'children': build_category_tree(categories, category),
+                }
+            )
+    return result
+__all__ = ['ProductViewSet']

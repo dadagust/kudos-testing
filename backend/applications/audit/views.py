@@ -1,12 +1,12 @@
 from auditlog.models import LogEntry
 from django.db.models import Q
-from rest_framework.generics import ListAPIView
+from rest_framework import mixins, viewsets
 from rest_framework.permissions import IsAuthenticated
 
 from .serializers import AuditLogEntrySerializer
 
 
-class AuditLogListView(ListAPIView):
+class AuditLogViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = AuditLogEntrySerializer
     permission_classes = [IsAuthenticated]
     pagination_class = None

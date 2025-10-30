@@ -6,11 +6,10 @@ from io import BytesIO
 
 from django.db.models import Prefetch, Q
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
-from rest_framework import mixins, status, viewsets
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -217,43 +216,44 @@ class CustomerViewSet(viewsets.ModelViewSet):
         instance.save(update_fields=['is_active', 'modified'])
 
 
-class CustomerContactViewSet(
-    mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet
-):
-    permission_classes = [IsAuthenticated, CustomerAccessPolicy]
-    serializer_class = ContactSerializer
+    @action(detail=True, methods=['get', 'post'], url_path='contact')
+    def contact(self, request, *args, **kwargs):
+        customer = self.get_object()
+        queryset = customer.contacts.filter(is_active=True).order_by('-is_primary', '-created')
 
-    def get_customer(self) -> Customer:
-        if not hasattr(self, '_customer'):
-            customer = get_object_or_404(Customer, pk=self.kwargs['customer_id'], is_active=True)
-            self.check_object_permissions(self.request, customer)
-            self._customer = customer
-        return self._customer  # type: ignore[attr-defined]
+        if request.method == 'GET':
+            serializer = ContactSerializer(
+                queryset,
+                many=True,
+                context={
+                    'customer': customer,
+                    'request': request,
+                },
+            )
+            return Response({'data': serializer.data})
 
-    def get_queryset(self):  # type: ignore[override]
-        customer = self.get_customer()
-        return customer.contacts.filter(is_active=True).order_by('-is_primary', '-created')
-
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context['customer'] = self.get_customer()
-        return context
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        serializer = ContactSerializer(
+            data=request.data,
+            context={
+                'customer': customer,
+                'request': request,
+            },
+        )
         serializer.is_valid(raise_exception=True)
         contact = serializer.save()
-        read_serializer = self.get_serializer(contact)
+        read_serializer = ContactSerializer(
+            contact,
+            context={
+                'customer': customer,
+                'request': request,
+            },
+        )
         headers = self.get_success_headers(read_serializer.data)
         return Response(
-            {'data': read_serializer.data}, status=status.HTTP_201_CREATED, headers=headers
+            {'data': read_serializer.data},
+            status=status.HTTP_201_CREATED,
+            headers=headers,
         )
 
-    def list(self, request, *args, **kwargs):
-        response = super().list(request, *args, **kwargs)
-        if isinstance(response.data, list):
-            response.data = {'data': response.data}
-        return response
 
-
-__all__ = ['CustomerViewSet', 'CustomerContactViewSet']
+__all__ = ['CustomerViewSet']

@@ -1,8 +1,8 @@
 from django.contrib.auth import get_user_model
-from rest_framework import status
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -10,21 +10,26 @@ from .models import UserProfile
 from .serializers import AuthResponseSerializer, LoginSerializer, UserProfileSerializer
 
 
-class AuthMeView(APIView):
-    permission_classes = (IsAuthenticated,)
+class AuthViewSet(viewsets.ViewSet):
+    permission_classes = (AllowAny,)
 
-    def get(self, request):
+    def get_permissions(self):  # type: ignore[override]
+        if getattr(self, 'action', None) in {'me', 'logout'}:
+            permission_classes = (IsAuthenticated,)
+        else:
+            permission_classes = (AllowAny,)
+        return [permission() for permission in permission_classes]
+
+    @action(detail=False, methods=['get'], url_path='me')
+    def me(self, request):
         profile = getattr(request.user, 'profile', None)
         if profile is None:
             profile, _ = UserProfile.objects.get_or_create(user=request.user)
         data = UserProfileSerializer(profile).data
         return Response(data)
 
-
-class AuthLoginView(APIView):
-    permission_classes = (AllowAny,)
-
-    def post(self, request):
+    @action(detail=False, methods=['post'], url_path='login')
+    def login(self, request):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
@@ -42,22 +47,16 @@ class AuthLoginView(APIView):
             status=status.HTTP_200_OK,
         )
 
-
-class AuthLogoutView(APIView):
-    permission_classes = (IsAuthenticated,)
-
-    def post(self, request):
+    @action(detail=False, methods=['post'], url_path='logout')
+    def logout(self, request):
         # Токены не храним на сервере на этом этапе, фронт сбрасывает их самостоятельно.
         return Response(
             {'detail': 'Logged out'},
             status=status.HTTP_200_OK,
         )
 
-
-class AuthRefreshView(APIView):
-    permission_classes = (AllowAny,)
-
-    def post(self, request):
+    @action(detail=False, methods=['post'], url_path='refresh')
+    def refresh(self, request):
         refresh_token = request.data.get('refresh')
 
         if not refresh_token:

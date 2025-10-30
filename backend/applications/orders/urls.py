@@ -1,39 +1,13 @@
 """URL routing for order API."""
 
-from django.urls import path
+from rest_framework.routers import DefaultRouter
 
-from applications.common.url_utils import allow_optional_trailing_slash
-
-from .views import OrderCalculationView, OrderViewSet
+from .views import OrderViewSet
 
 app_name = 'orders'
 
-urlpatterns = allow_optional_trailing_slash([
-    path(
-        'order/',
-        OrderViewSet.as_view(
-            {
-                'get': 'list',
-                'post': 'create',
-            }
-        ),
-        name='order-list',
-    ),
-    path(
-        'order/calculate-total/',
-        OrderCalculationView.as_view(),
-        name='order-calculate-total',
-    ),
-    path(
-        'order/<uuid:pk>/',
-        OrderViewSet.as_view(
-            {
-                'get': 'retrieve',
-                'put': 'update',
-                'patch': 'partial_update',
-                'delete': 'destroy',
-            }
-        ),
-        name='order-detail',
-    ),
-])
+
+router = DefaultRouter(trailing_slash='/?')
+router.register('order', OrderViewSet, basename='order')
+
+urlpatterns = router.urls

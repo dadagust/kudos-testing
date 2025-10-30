@@ -1,9 +1,9 @@
-from django.urls import path
+from rest_framework.routers import DefaultRouter
 
-from applications.common.url_utils import allow_optional_trailing_slash
+from .views import AuditLogViewSet
 
-from .views import AuditLogListView
 
-urlpatterns = allow_optional_trailing_slash([
-    path('', AuditLogListView.as_view(), name='audit-log-list'),
-])
+router = DefaultRouter(trailing_slash='/?')
+router.register('', AuditLogViewSet, basename='audit-log')
+
+urlpatterns = router.urls
