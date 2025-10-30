@@ -8,16 +8,20 @@ import { Spinner } from '@/shared/ui';
 import { AdminLayout } from '@/widgets/admin-layout';
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
-  const { status, user } = useAuth();
+  const { status, user, ready } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
+    if (!ready) {
+      return;
+    }
+
     if (status === 'unauthenticated') {
       router.replace('/login');
     }
-  }, [status, router]);
+  }, [ready, status, router]);
 
-  if (status === 'loading') {
+  if (!ready || status === 'loading') {
     return <Spinner fullscreen label="Загружаем рабочее окружение" />;
   }
 
