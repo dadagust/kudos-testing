@@ -5,8 +5,6 @@ services:
       POSTGRES_DB: kudos
       POSTGRES_USER: kudos
       POSTGRES_PASSWORD: kudos
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -18,8 +16,6 @@ services:
 
   redis:
     image: redis:7-alpine
-    ports:
-      - "6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -30,20 +26,16 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile
-    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+    command: ["python", "manage.py", "runserver", "0.0.0.0:${BACKEND_PORT:-8000}"]
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
-    environment:
-      DATABASE_URL: postgresql://kudos:kudos@postgres:5432/kudos
-      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,frontend,staff
-      DJANGO_DEBUG: "1"
-      DJANGO_SETTINGS_MODULE: settings.settings
-      REDIS_URL: redis://redis:6379/0
+    env_file:
+      - ./backend/config/.env.local
     ports:
-      - "8000:8000"
+      - "${BACKEND_PORT:-8000}:${BACKEND_PORT:-8000}"
     volumes:
       - ./backend:/app
 
@@ -51,16 +43,17 @@ services:
     build:
       context: .
       dockerfile: frontend/Dockerfile
-    command: ["sh", "-c", "pnpm install --frozen-lockfile && pnpm dev"]
+    command:
+      - sh
+      - -c
+      - pnpm install --frozen-lockfile && pnpm exec next dev -p ${FRONTEND_PORT:-4000} --hostname 0.0.0.0
     depends_on:
       backend:
         condition: service_started
-    environment:
-      NODE_ENV: development
-      KUDOS_BACKEND_ORIGIN: http://localhost:8000
-      NEXT_PUBLIC_API_URL: http://localhost:8000
+    env_file:
+      - ./frontend/.env.local
     ports:
-      - "4000:4000"
+      - "${FRONTEND_PORT:-4000}:${FRONTEND_PORT:-4000}"
     volumes:
       - ./frontend:/app/frontend
       - frontend_node_modules:/app/frontend/node_modules
@@ -69,15 +62,17 @@ services:
     build:
       context: .
       dockerfile: staff/Dockerfile
-    command: ["sh", "-c", "pnpm install --frozen-lockfile && pnpm dev"]
+    command:
+      - sh
+      - -c
+      - pnpm install --frozen-lockfile && pnpm exec next dev -p ${STAFF_PORT:-3000} --hostname 0.0.0.0
     depends_on:
       backend:
         condition: service_started
-    environment:
-      NODE_ENV: development
-      NEXT_PUBLIC_API_URL: http://localhost:8000
+    env_file:
+      - ./staff/.env.local
     ports:
-      - "3000:3000"
+      - "${STAFF_PORT:-3000}:${STAFF_PORT:-3000}"
     volumes:
       - ./staff:/app/staff
       - staff_node_modules:/app/staff/node_modules
