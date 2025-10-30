@@ -2,24 +2,63 @@
 
 from __future__ import annotations
 
+import logging
 import math
 import uuid
 from decimal import Decimal
+from io import BytesIO
 
+from django.core.files.base import ContentFile
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.text import slugify
 
+from PIL import Image, ImageOps
+
 from applications.core.models import Date, PathAndRename
 
-from .choices import (
-    Color,
-    DimensionShape,
-    RentalMode,
-    ReservationMode,
-    TransportRestriction,
-)
+from .choices import DimensionShape, RentalMode, ReservationMode
+
+
+class Color(Date):
+    """Available color option for products."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    value = models.CharField('Значение', max_length=32, unique=True)
+    label = models.CharField('Название', max_length=255)
+
+    class Meta(Date.Meta):
+        verbose_name = 'Цвет'
+        verbose_name_plural = 'Цвета'
+        ordering = ['label']
+
+    def __str__(self) -> str:  # pragma: no cover - human readable repr
+        return self.label
+
+
+class TransportRestriction(Date):
+    """Available delivery transport restrictions."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    value = models.CharField('Значение', max_length=32, unique=True)
+    label = models.CharField('Название', max_length=255)
+
+    class Meta(Date.Meta):
+        verbose_name = 'Ограничение по транспорту'
+        verbose_name_plural = 'Ограничения по транспорту'
+        ordering = ['label']
+
+    def __str__(self) -> str:  # pragma: no cover - human readable repr
+        return self.label
 from .storage import product_image_storage
+
+
+logger = logging.getLogger(__name__)
+
+try:  # pragma: no cover - Pillow version compatibility
+    RESAMPLE_STRATEGY = Image.Resampling.LANCZOS
+except AttributeError:  # pragma: no cover - fallback for older Pillow
+    RESAMPLE_STRATEGY = Image.LANCZOS
 
 
 class Category(Date):
@@ -100,11 +139,15 @@ class Product(Date):
         null=True,
         blank=True,
     )
-    color = models.CharField(
-        'Цвет',
-        max_length=32,
-        choices=Color.choices,
+    color = models.ForeignKey(
+        Color,
+        on_delete=models.SET_NULL,
+        related_name='products',
+        verbose_name='Цвет',
+        null=True,
         blank=True,
+        to_field='value',
+        db_column='color',
     )
 
     dimensions_shape = models.CharField(
@@ -181,13 +224,6 @@ class Product(Date):
         null=True,
         blank=True,
     )
-    occupancy_insurance_reserve_percent = models.PositiveIntegerField(
-        'Страховой резерв, %',
-        validators=[MinValueValidator(0), MaxValueValidator(100)],
-        null=True,
-        blank=True,
-    )
-
     delivery_volume_cm3 = models.PositiveIntegerField(
         'Объём, см3',
         null=True,
@@ -200,11 +236,15 @@ class Product(Date):
         null=True,
         blank=True,
     )
-    delivery_transport_restriction = models.CharField(
-        'Ограничение по транспорту',
-        max_length=32,
-        choices=TransportRestriction.choices,
+    delivery_transport_restriction = models.ForeignKey(
+        TransportRestriction,
+        on_delete=models.SET_NULL,
+        related_name='products',
+        verbose_name='Ограничение по транспорту',
+        null=True,
         blank=True,
+        to_field='value',
+        db_column='delivery_transport_restriction',
     )
     delivery_self_pickup_allowed = models.BooleanField(
         'Самовывоз разрешён',
@@ -338,6 +378,69 @@ class ProductImage(Date):
     @property
     def url(self) -> str:
         return self.file.url if self.file else ''
+
+    def save(self, *args, process_image: bool = True, **kwargs):  # type: ignore[override]
+        update_fields = kwargs.get('update_fields')
+        should_process = process_image and (not update_fields or 'file' in update_fields)
+        super().save(*args, **kwargs)
+        if should_process and self.file:
+            self._process_image()
+
+    def _process_image(self) -> None:
+        """Crop the image to a 2000x2000 JPEG square."""
+
+        if not self.file:
+            return
+
+        original_name = self.file.name
+
+        try:
+            self.file.open('rb')
+            with Image.open(self.file) as img:
+                img = ImageOps.exif_transpose(img)
+                width, height = img.size
+                if not width or not height:
+                    return
+
+                min_side = min(width, height)
+                left = (width - min_side) / 2
+                top = (height - min_side) / 2
+                right = left + min_side
+                bottom = top + min_side
+                img = img.crop((left, top, right, bottom))
+
+                if img.size != (2000, 2000):
+                    img = img.resize((2000, 2000), RESAMPLE_STRATEGY)
+
+                if img.mode in {'RGBA', 'LA'} or (img.mode == 'P' and 'transparency' in img.info):
+                    rgba_image = img.convert('RGBA')
+                    background = Image.new('RGB', rgba_image.size, (255, 255, 255))
+                    background.paste(rgba_image, mask=rgba_image.split()[-1])
+                    img = background
+                else:
+                    img = img.convert('RGB')
+
+                buffer = BytesIO()
+                img.save(buffer, format='JPEG', quality=85, optimize=True)
+        except Exception:  # pragma: no cover - we don't expect processing to fail in tests
+            logger.exception('Failed to process product image %s', self.pk)
+            return
+        finally:
+            try:
+                self.file.close()
+            except Exception:  # pragma: no cover - defensive cleanup
+                pass
+
+        buffer.seek(0)
+        self.file.save(f'{self.id}.jpg', ContentFile(buffer.getvalue()), save=False)
+
+        if original_name and original_name != self.file.name:
+            try:
+                self.file.storage.delete(original_name)
+            except Exception:  # pragma: no cover - best effort cleanup
+                logger.warning('Failed to delete original product image %s', original_name)
+
+        self.save(update_fields=['file'], process_image=False)
 
 
 __all__ = ['Category', 'Product', 'ProductImage']
