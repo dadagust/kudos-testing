@@ -14,10 +14,11 @@ import { AuthContext, AuthStatus } from './auth-context';
 export const AuthProvider = ({ children }: PropsWithChildren) => {
   const { accessToken, refreshToken, user, setTokens, setUser, clearTokens } = useAuthStore();
   const [status, setStatus] = useState<AuthStatus>('loading');
-  const [isHydrated, setIsHydrated] = useState(useAuthStore.persist.hasHydrated());
+  const [isHydrated, setIsHydrated] = useState(false);
   const [isReady, setIsReady] = useState(false);
   useEffect(() => {
-    if (isHydrated) {
+    if (useAuthStore.persist.hasHydrated()) {
+      setIsHydrated(true);
       return;
     }
 
@@ -28,7 +29,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     return () => {
       unsubscribe();
     };
-  }, [isHydrated]);
+  }, []);
 
   useEffect(() => {
     if (!isHydrated) {
