@@ -2,12 +2,14 @@
 
 from django.urls import path
 
+from applications.common.url_utils import allow_optional_trailing_slash
+
 from .views import CategoryTreeView, ColorsListView, EnumsAggregateView, ProductViewSet
 
 app_name = 'products'
 
 
-urlpatterns = [
+urlpatterns = allow_optional_trailing_slash([
     path(
         'products/',
         ProductViewSet.as_view(
@@ -73,5 +75,6 @@ urlpatterns = [
         name='product-enums',
     ),
 ]
+)
 
 __all__ = ['urlpatterns']
