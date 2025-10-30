@@ -17,13 +17,39 @@ from PIL import Image, ImageOps
 
 from applications.core.models import Date, PathAndRename
 
-from .choices import (
-    Color,
-    DimensionShape,
-    RentalMode,
-    ReservationMode,
-    TransportRestriction,
-)
+from .choices import DimensionShape, RentalMode, ReservationMode
+
+
+class Color(Date):
+    """Available color option for products."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    value = models.CharField('Значение', max_length=32, unique=True)
+    label = models.CharField('Название', max_length=255)
+
+    class Meta(Date.Meta):
+        verbose_name = 'Цвет'
+        verbose_name_plural = 'Цвета'
+        ordering = ['label']
+
+    def __str__(self) -> str:  # pragma: no cover - human readable repr
+        return self.label
+
+
+class TransportRestriction(Date):
+    """Available delivery transport restrictions."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    value = models.CharField('Значение', max_length=32, unique=True)
+    label = models.CharField('Название', max_length=255)
+
+    class Meta(Date.Meta):
+        verbose_name = 'Ограничение по транспорту'
+        verbose_name_plural = 'Ограничения по транспорту'
+        ordering = ['label']
+
+    def __str__(self) -> str:  # pragma: no cover - human readable repr
+        return self.label
 from .storage import product_image_storage
 
 
@@ -113,11 +139,15 @@ class Product(Date):
         null=True,
         blank=True,
     )
-    color = models.CharField(
-        'Цвет',
-        max_length=32,
-        choices=Color.choices,
+    color = models.ForeignKey(
+        Color,
+        on_delete=models.SET_NULL,
+        related_name='products',
+        verbose_name='Цвет',
+        null=True,
         blank=True,
+        to_field='value',
+        db_column='color',
     )
 
     dimensions_shape = models.CharField(
@@ -194,13 +224,6 @@ class Product(Date):
         null=True,
         blank=True,
     )
-    occupancy_insurance_reserve_percent = models.PositiveIntegerField(
-        'Страховой резерв, %',
-        validators=[MinValueValidator(0), MaxValueValidator(100)],
-        null=True,
-        blank=True,
-    )
-
     delivery_volume_cm3 = models.PositiveIntegerField(
         'Объём, см3',
         null=True,
@@ -213,11 +236,15 @@ class Product(Date):
         null=True,
         blank=True,
     )
-    delivery_transport_restriction = models.CharField(
-        'Ограничение по транспорту',
-        max_length=32,
-        choices=TransportRestriction.choices,
+    delivery_transport_restriction = models.ForeignKey(
+        TransportRestriction,
+        on_delete=models.SET_NULL,
+        related_name='products',
+        verbose_name='Ограничение по транспорту',
+        null=True,
         blank=True,
+        to_field='value',
+        db_column='delivery_transport_restriction',
     )
     delivery_self_pickup_allowed = models.BooleanField(
         'Самовывоз разрешён',

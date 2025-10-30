@@ -103,7 +103,6 @@ export interface ProductCategorySummary {
 
 export interface ProductOccupancy {
   cleaning_days?: number | null;
-  insurance_reserve_percent?: number | null;
 }
 
 export interface ProductDelivery {
