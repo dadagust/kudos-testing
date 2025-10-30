@@ -12,10 +12,7 @@ interface AuthTokensState {
   clearTokens: () => void;
 }
 
-type PersistedAuthTokensState = Pick<
-  AuthTokensState,
-  'accessToken' | 'refreshToken' | 'user'
->;
+type PersistedAuthTokensState = Pick<AuthTokensState, 'accessToken' | 'refreshToken' | 'user'>;
 
 const createStorage = () =>
   createJSONStorage<PersistedAuthTokensState>(() => {

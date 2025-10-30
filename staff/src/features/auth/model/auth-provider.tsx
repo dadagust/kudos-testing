@@ -1,10 +1,10 @@
 'use client';
 
-import { PropsWithChildren, useCallback, useEffect, useMemo, useState } from 'react';
 import { isAxiosError } from 'axios';
+import { PropsWithChildren, useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Role } from '@/shared/config/roles';
 import { refreshTokens } from '@/shared/api/httpClient';
+import { Role } from '@/shared/config/roles';
 import { useAuthStore } from '@/shared/state/auth-store';
 
 import { authApi } from '../api/auth-api';
@@ -16,7 +16,6 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   const [status, setStatus] = useState<AuthStatus>('loading');
   const [isHydrated, setIsHydrated] = useState(useAuthStore.persist.hasHydrated());
   const [isReady, setIsReady] = useState(false);
-
   useEffect(() => {
     if (isHydrated) {
       return;
