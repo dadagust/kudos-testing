@@ -123,7 +123,6 @@ type CreateProductFormState = {
   };
   occupancy: {
     cleaning_days: string;
-    insurance_reserve_percent: string;
   };
   delivery: {
     volume_cm3: string;
@@ -192,7 +191,6 @@ const createEmptyProductForm = (defaults?: {
   },
   occupancy: {
     cleaning_days: '',
-    insurance_reserve_percent: '',
   },
   delivery: {
     volume_cm3: '',
@@ -311,11 +309,6 @@ const createFormFromProduct = (product: ProductDetail): CreateProductFormState =
       cleaning_days:
         product.occupancy?.cleaning_days !== undefined && product.occupancy?.cleaning_days !== null
           ? String(product.occupancy.cleaning_days)
-          : '',
-      insurance_reserve_percent:
-        product.occupancy?.insurance_reserve_percent !== undefined &&
-        product.occupancy?.insurance_reserve_percent !== null
-          ? String(product.occupancy.insurance_reserve_percent)
           : '',
     },
     delivery: {
@@ -649,15 +642,10 @@ const buildCreatePayload = (form: CreateProductFormState): ProductCreatePayload 
   }
 
   const cleaningDays = parseNumber(form.occupancy.cleaning_days);
-  const insuranceReserve = parseNumber(form.occupancy.insurance_reserve_percent);
-  if (cleaningDays !== undefined || insuranceReserve !== undefined) {
-    payload.occupancy = {};
-    if (cleaningDays !== undefined) {
-      payload.occupancy.cleaning_days = cleaningDays;
-    }
-    if (insuranceReserve !== undefined) {
-      payload.occupancy.insurance_reserve_percent = insuranceReserve;
-    }
+  if (cleaningDays !== undefined) {
+    payload.occupancy = {
+      cleaning_days: cleaningDays,
+    };
   }
 
   const volume = parseNumber(form.delivery.volume_cm3);
@@ -1107,13 +1095,7 @@ export default function ProductsPage() {
   const isOccupancyCleaningValid =
     createForm.occupancy.cleaning_days.trim() === '' ||
     (occupancyCleaningValue !== undefined && occupancyCleaningValue >= 0);
-  const occupancyInsuranceValue = parseNumber(createForm.occupancy.insurance_reserve_percent);
-  const isOccupancyInsuranceValid =
-    createForm.occupancy.insurance_reserve_percent.trim() === '' ||
-    (occupancyInsuranceValue !== undefined &&
-      occupancyInsuranceValue >= 0 &&
-      occupancyInsuranceValue <= 100);
-  const isOccupancyValid = isOccupancyCleaningValid && isOccupancyInsuranceValid;
+  const isOccupancyValid = isOccupancyCleaningValid;
 
   const deliveryVolumeValue = parseNumber(createForm.delivery.volume_cm3);
   const isDeliveryVolumeValid =
@@ -1215,12 +1197,6 @@ export default function ProductsPage() {
   const createOccupancyCleaningError =
     createTouched && createForm.occupancy.cleaning_days.trim() !== '' && !isOccupancyCleaningValid
       ? 'Введите количество дней (0 или больше)'
-      : undefined;
-  const createOccupancyInsuranceError =
-    createTouched &&
-    createForm.occupancy.insurance_reserve_percent.trim() !== '' &&
-    !isOccupancyInsuranceValid
-      ? 'Введите страховой резерв в диапазоне 0–100%'
       : undefined;
   const createDeliveryVolumeError =
     createTouched && !isDeliveryVolumeValid ? 'Введите объём (см³) больше 0' : undefined;
@@ -2461,21 +2437,6 @@ export default function ProductsPage() {
                     )}
                     helperText="Необязательное поле."
                     error={createOccupancyCleaningError}
-                  />
-                  <Input
-                    label="Страховой резерв, %"
-                    type="text"
-                    {...makeIntegerMask(createForm.occupancy.insurance_reserve_percent, (next) =>
-                      setCreateForm((prev) => ({
-                        ...prev,
-                        occupancy: {
-                          ...prev.occupancy,
-                          insurance_reserve_percent: next,
-                        },
-                      }))
-                    )}
-                    helperText="0–100%"
-                    error={createOccupancyInsuranceError}
                   />
                 </div>
               </section>

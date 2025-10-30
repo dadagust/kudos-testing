@@ -181,13 +181,6 @@ class Product(Date):
         null=True,
         blank=True,
     )
-    occupancy_insurance_reserve_percent = models.PositiveIntegerField(
-        'Страховой резерв, %',
-        validators=[MinValueValidator(0), MaxValueValidator(100)],
-        null=True,
-        blank=True,
-    )
-
     delivery_volume_cm3 = models.PositiveIntegerField(
         'Объём, см3',
         null=True,
