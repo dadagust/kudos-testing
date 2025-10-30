@@ -30,7 +30,11 @@ class CompanySerializer(serializers.ModelSerializer):
             'created',
             'modified',
         )
-        read_only_fields = ('id', 'created', 'modified')
+        read_only_fields = (
+            'id',
+            'created',
+            'modified',
+        )
 
 
 class CompanyInputSerializer(serializers.ModelSerializer):
@@ -59,7 +63,10 @@ class CompanyInputSerializer(serializers.ModelSerializer):
 
 
 class ContactSerializer(serializers.ModelSerializer):
-    phone = serializers.CharField(required=False, allow_blank=True)
+    phone = serializers.CharField(
+        required=False,
+        allow_blank=True,
+    )
 
     class Meta:
         model = Contact
@@ -75,7 +82,11 @@ class ContactSerializer(serializers.ModelSerializer):
             'created',
             'modified',
         )
-        read_only_fields = ('id', 'created', 'modified')
+        read_only_fields = (
+            'id',
+            'created',
+            'modified',
+        )
 
     def validate_email(self, value: str) -> str:
         return value.lower() if value else value
@@ -132,9 +143,15 @@ class CustomerDetailSerializer(CustomerListSerializer):
 
 
 class CustomerWriteSerializer(serializers.ModelSerializer):
-    company = CompanyInputSerializer(required=False, allow_null=True)
+    company = CompanyInputSerializer(
+        required=False,
+        allow_null=True,
+    )
     owner_id = serializers.PrimaryKeyRelatedField(
-        source='owner', queryset=User.objects.all(), allow_null=True, required=False
+        source='owner',
+        queryset=User.objects.all(),
+        allow_null=True,
+        required=False,
     )
 
     class Meta:

@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models.signals import post_save
@@ -30,11 +31,13 @@ LEGACY_ROLE_MAP = {
 
 class UserProfile(Date):
     user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
+        to=settings.AUTH_USER_MODEL,
+        verbose_name='Пользователь',
         on_delete=models.CASCADE,
         related_name='profile',
     )
     role = models.CharField(
+        verbose_name='Роль',
         max_length=32,
         choices=RoleChoices.choices,
         default=RoleChoices.SALES_MANAGER,

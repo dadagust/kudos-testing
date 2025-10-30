@@ -55,7 +55,10 @@ def _has_error_code(codes, target: str) -> bool:
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.select_related(
-        'category', 'color', 'delivery_transport_restriction', 'setup_installer_qualification'
+        'category',
+        'color',
+        'delivery_transport_restriction',
+        'setup_installer_qualification',
     )
     serializer_class = ProductBaseSerializer
     pagination_class = ProductCursorPagination

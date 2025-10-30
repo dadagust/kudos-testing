@@ -59,7 +59,11 @@ class ProductImageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductImage
-        fields = ('id', 'url', 'position')
+        fields = (
+            'id',
+            'url',
+            'position',
+        )
 
     def get_url(self, obj: ProductImage) -> str:
         url = obj.url
@@ -72,21 +76,43 @@ class ProductImageSerializer(serializers.ModelSerializer):
 
 
 class ProductDimensionsSerializer(serializers.Serializer):
-    shape = serializers.ChoiceField(choices=DimensionShape.choices)
+    shape = serializers.ChoiceField(
+        choices=DimensionShape.choices,
+    )
     circle = serializers.DictField(
-        child=serializers.DecimalField(max_digits=8, decimal_places=2), required=False
+        child=serializers.DecimalField(
+            max_digits=8,
+            decimal_places=2,
+        ),
+        required=False,
     )
     line = serializers.DictField(
-        child=serializers.DecimalField(max_digits=8, decimal_places=2), required=False
+        child=serializers.DecimalField(
+            max_digits=8,
+            decimal_places=2,
+        ),
+        required=False,
     )
     rectangle = serializers.DictField(
-        child=serializers.DecimalField(max_digits=8, decimal_places=2), required=False
+        child=serializers.DecimalField(
+            max_digits=8,
+            decimal_places=2,
+        ),
+        required=False,
     )
     cylinder = serializers.DictField(
-        child=serializers.DecimalField(max_digits=8, decimal_places=2), required=False
+        child=serializers.DecimalField(
+            max_digits=8,
+            decimal_places=2,
+        ),
+        required=False,
     )
     box = serializers.DictField(
-        child=serializers.DecimalField(max_digits=8, decimal_places=2), required=False
+        child=serializers.DecimalField(
+            max_digits=8,
+            decimal_places=2,
+        ),
+        required=False,
     )
 
     def validate(self, attrs):  # type: ignore[override]
@@ -130,17 +156,33 @@ class ProductOccupancySerializer(serializers.Serializer):
 
 
 class ProductDeliverySerializer(serializers.Serializer):
-    volume_cm3 = serializers.IntegerField(min_value=1, required=False)
-    weight_kg = serializers.DecimalField(max_digits=8, decimal_places=2, min_value=Decimal('0.01'))
-    transport_restriction = OptionalSlugRelatedField(
-        queryset=TransportRestriction.objects.all(), slug_field='value'
+    volume_cm3 = serializers.IntegerField(
+        min_value=1,
+        required=False,
     )
-    self_pickup_allowed = serializers.BooleanField(required=False)
+    weight_kg = serializers.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        min_value=Decimal('0.01'),
+    )
+    transport_restriction = OptionalSlugRelatedField(
+        queryset=TransportRestriction.objects.all(),
+        slug_field='value',
+    )
+    self_pickup_allowed = serializers.BooleanField(
+        required=False,
+    )
 
 
 class ProductSetupSerializer(serializers.Serializer):
-    install_minutes = serializers.IntegerField(min_value=0, required=False)
-    uninstall_minutes = serializers.IntegerField(min_value=0, required=False)
+    install_minutes = serializers.IntegerField(
+        min_value=0,
+        required=False,
+    )
+    uninstall_minutes = serializers.IntegerField(
+        min_value=0,
+        required=False,
+    )
     installer_qualification = OptionalInstallerQualificationField(
         queryset=InstallerQualification.objects.all(),
         required=False,
@@ -150,13 +192,19 @@ class ProductSetupSerializer(serializers.Serializer):
         choices=[(value, value) for value in range(1, 5)],
         required=False,
     )
-    self_setup_allowed = serializers.BooleanField(required=False)
+    self_setup_allowed = serializers.BooleanField(
+        required=False,
+    )
 
 
 class RentalTierSerializer(serializers.Serializer):
-    end_day = serializers.IntegerField(min_value=2)
+    end_day = serializers.IntegerField(
+        min_value=2,
+    )
     price_per_day = serializers.DecimalField(
-        max_digits=12, decimal_places=2, min_value=Decimal('0')
+        max_digits=12,
+        decimal_places=2,
+        min_value=Decimal('0'),
     )
 
 
@@ -166,7 +214,10 @@ class ProductRentalSerializer(serializers.Serializer):
         required=False,
         default=RentalMode.STANDARD,
     )
-    tiers = RentalTierSerializer(many=True, required=False)
+    tiers = RentalTierSerializer(
+        many=True,
+        required=False,
+    )
 
     def validate(self, attrs):  # type: ignore[override]
         mode = attrs.get('mode') or RentalMode.STANDARD
@@ -196,16 +247,33 @@ class ProductRentalSerializer(serializers.Serializer):
 
 
 class ProductVisibilitySerializer(serializers.Serializer):
-    reservation_mode = serializers.ChoiceField(choices=ReservationMode.choices, required=False)
-    show_on_pifakit = serializers.BooleanField(required=False)
-    show_on_site = serializers.BooleanField(required=False)
-    show_in_new = serializers.BooleanField(required=False)
-    category_cover_on_home = serializers.BooleanField(required=False)
+    reservation_mode = serializers.ChoiceField(
+        choices=ReservationMode.choices,
+        required=False,
+    )
+    show_on_pifakit = serializers.BooleanField(
+        required=False,
+    )
+    show_on_site = serializers.BooleanField(
+        required=False,
+    )
+    show_in_new = serializers.BooleanField(
+        required=False,
+    )
+    category_cover_on_home = serializers.BooleanField(
+        required=False,
+    )
 
 
 class ProductSeoSerializer(serializers.Serializer):
-    meta_title = serializers.CharField(required=False, allow_blank=True)
-    meta_description = serializers.CharField(required=False, allow_blank=True)
+    meta_title = serializers.CharField(
+        required=False,
+        allow_blank=True,
+    )
+    meta_description = serializers.CharField(
+        required=False,
+        allow_blank=True,
+    )
 
 
 class CategoryPrimaryKeyOrSlugField(serializers.PrimaryKeyRelatedField):
@@ -236,26 +304,59 @@ class CategoryPrimaryKeyOrSlugField(serializers.PrimaryKeyRelatedField):
 
 
 class ProductBaseSerializer(serializers.ModelSerializer):
-    price_rub = serializers.DecimalField(max_digits=12, decimal_places=2)
+    price_rub = serializers.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+    )
     loss_compensation_rub = serializers.DecimalField(
         max_digits=12,
         decimal_places=2,
         required=False,
         allow_null=True,
     )
-    color = OptionalSlugRelatedField(queryset=Color.objects.all(), slug_field='value')
-    features = serializers.ListField(child=serializers.CharField(), required=False)
-    category_id = CategoryPrimaryKeyOrSlugField(
-        source='category', queryset=Category.objects.all(), write_only=True
+    color = OptionalSlugRelatedField(
+        queryset=Color.objects.all(),
+        slug_field='value',
     )
-    category = serializers.PrimaryKeyRelatedField(read_only=True)
-    dimensions = ProductDimensionsSerializer(write_only=True)
-    occupancy = ProductOccupancySerializer(write_only=True, required=False)
-    delivery = ProductDeliverySerializer(write_only=True, required=False)
-    setup = ProductSetupSerializer(write_only=True, required=False)
-    rental = ProductRentalSerializer(write_only=True, required=False)
-    visibility = ProductVisibilitySerializer(write_only=True, required=False)
-    seo = ProductSeoSerializer(write_only=True, required=False)
+    features = serializers.ListField(
+        child=serializers.CharField(),
+        required=False,
+    )
+    category_id = CategoryPrimaryKeyOrSlugField(
+        source='category',
+        queryset=Category.objects.all(),
+        write_only=True,
+    )
+    category = serializers.PrimaryKeyRelatedField(
+        read_only=True,
+    )
+    dimensions = ProductDimensionsSerializer(
+        write_only=True,
+    )
+    occupancy = ProductOccupancySerializer(
+        write_only=True,
+        required=False,
+    )
+    delivery = ProductDeliverySerializer(
+        write_only=True,
+        required=False,
+    )
+    setup = ProductSetupSerializer(
+        write_only=True,
+        required=False,
+    )
+    rental = ProductRentalSerializer(
+        write_only=True,
+        required=False,
+    )
+    visibility = ProductVisibilitySerializer(
+        write_only=True,
+        required=False,
+    )
+    seo = ProductSeoSerializer(
+        write_only=True,
+        required=False,
+    )
     complementary_product_ids = serializers.ListField(
         child=serializers.UUIDField(),
         required=False,
@@ -284,7 +385,12 @@ class ProductBaseSerializer(serializers.ModelSerializer):
             'created',
             'modified',
         )
-        read_only_fields = ('id', 'created', 'modified', 'category')
+        read_only_fields = (
+            'id',
+            'created',
+            'modified',
+            'category',
+        )
 
     def validate(self, attrs):  # type: ignore[override]
         data = super().validate(attrs)

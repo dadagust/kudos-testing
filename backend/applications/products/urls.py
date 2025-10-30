@@ -1,42 +1,82 @@
 """Routing for product endpoints."""
 
-from django.urls import include, path, re_path
-from rest_framework.routers import DefaultRouter
+from django.urls import path
 
 from .views import CategoryTreeView, ColorsListView, EnumsAggregateView, ProductViewSet
 
 app_name = 'products'
 
-
-class OptionalSlashRouter(DefaultRouter):
-    """Default router variant that accepts URLs with or without the trailing slash."""
-
-    def __init__(self) -> None:
-        super().__init__(trailing_slash=False)
-        self.trailing_slash = '/?'
-
-
-router = OptionalSlashRouter()
-router.register('products', ProductViewSet, basename='product')
-
+product_list = ProductViewSet.as_view(
+    {
+        'get': 'list',
+        'post': 'create',
+    }
+)
+product_detail = ProductViewSet.as_view(
+    {
+        'get': 'retrieve',
+        'put': 'update',
+        'patch': 'partial_update',
+        'delete': 'destroy',
+    }
+)
+product_images = ProductViewSet.as_view(
+    {
+        'post': 'upload_images',
+    }
+)
+product_images_reorder = ProductViewSet.as_view(
+    {
+        'patch': 'reorder_images',
+    }
+)
+product_image_delete = ProductViewSet.as_view(
+    {
+        'delete': 'delete_image',
+    }
+)
 
 urlpatterns = [
-    re_path(
-        r'^products/categories/?$',
+    path(
+        'products/',
+        product_list,
+        name='product-list',
+    ),
+    path(
+        'products/<uuid:id>/',
+        product_detail,
+        name='product-detail',
+    ),
+    path(
+        'products/<uuid:id>/images/',
+        product_images,
+        name='product-images',
+    ),
+    path(
+        'products/<uuid:id>/images/reorder/',
+        product_images_reorder,
+        name='product-images-reorder',
+    ),
+    path(
+        'products/<uuid:id>/images/<uuid:image_id>/',
+        product_image_delete,
+        name='product-image-delete',
+    ),
+    path(
+        'products/categories/',
         CategoryTreeView.as_view(),
         name='product-categories',
     ),
-    re_path(
-        r'^products/colors/?$',
+    path(
+        'products/colors/',
         ColorsListView.as_view(),
         name='product-colors',
     ),
-    re_path(
-        r'^products/enums/?$',
+    path(
+        'products/enums/',
         EnumsAggregateView.as_view(),
         name='product-enums',
     ),
-    path('', include(router.urls)),
 ]
 
 __all__ = ['urlpatterns']

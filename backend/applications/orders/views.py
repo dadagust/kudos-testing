@@ -21,8 +21,15 @@ from .serializers import (
 class OrderViewSet(viewsets.ModelViewSet):
     """CRUD endpoint for managing orders."""
 
-    queryset = Order.objects.all().select_related('customer').prefetch_related('items')
-    permission_classes = [IsAuthenticated, OrderAccessPolicy]
+    queryset = (
+        Order.objects.all()
+        .select_related('customer')
+        .prefetch_related('items')
+    )
+    permission_classes = (
+        IsAuthenticated,
+        OrderAccessPolicy,
+    )
 
     def get_serializer_class(self):
         if self.action in {'create', 'update', 'partial_update'}:
@@ -72,7 +79,10 @@ class OrderViewSet(viewsets.ModelViewSet):
         return Response({'data': serializer.data})
 
     def create(self, request, *args, **kwargs):
-        serializer = OrderWriteSerializer(data=request.data, context=self.get_serializer_context())
+        serializer = OrderWriteSerializer(
+            data=request.data,
+            context=self.get_serializer_context(),
+        )
         serializer.is_valid(raise_exception=True)
         order = serializer.save()
         read_serializer = OrderDetailSerializer(order, context=self.get_serializer_context())
@@ -85,7 +95,10 @@ class OrderViewSet(viewsets.ModelViewSet):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         serializer = OrderWriteSerializer(
-            instance, data=request.data, context=self.get_serializer_context(), partial=partial
+            instance,
+            data=request.data,
+            context=self.get_serializer_context(),
+            partial=partial,
         )
         serializer.is_valid(raise_exception=True)
         order = serializer.save()
@@ -98,10 +111,16 @@ class OrderViewSet(viewsets.ModelViewSet):
 
 
 class OrderCalculationView(APIView):
-    permission_classes = [IsAuthenticated, OrderAccessPolicy]
+    permission_classes = (
+        IsAuthenticated,
+        OrderAccessPolicy,
+    )
 
     def post(self, request, *args, **kwargs):
-        serializer = OrderCalculationSerializer(data=request.data, context={'request': request})
+        serializer = OrderCalculationSerializer(
+            data=request.data,
+            context={'request': request},
+        )
         serializer.is_valid(raise_exception=True)
         result = serializer.calculate()
         return Response({'data': result}, status=status.HTTP_200_OK)

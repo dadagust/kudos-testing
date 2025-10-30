@@ -52,29 +52,46 @@ class Order(Date):
     """Represents a customer order."""
 
     status = models.CharField(
-        'Статус', max_length=32, choices=OrderStatus.choices, default=OrderStatus.NEW
+        verbose_name='Статус',
+        max_length=32,
+        choices=OrderStatus.choices,
+        default=OrderStatus.NEW,
     )
     total_amount = models.DecimalField(
-        'Сумма заказа', max_digits=12, decimal_places=2, default=Decimal('0.00')
+        verbose_name='Сумма заказа',
+        max_digits=12,
+        decimal_places=2,
+        default=Decimal('0.00'),
     )
-    installation_date = models.DateField('Дата монтажа')
-    dismantle_date = models.DateField('Дата демонтажа')
+    installation_date = models.DateField(
+        verbose_name='Дата монтажа',
+    )
+    dismantle_date = models.DateField(
+        verbose_name='Дата демонтажа',
+    )
     customer = models.ForeignKey(
-        'customers.Customer',
+        to='customers.Customer',
+        verbose_name='Клиент',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name='orders',
-        verbose_name='Клиент',
     )
     delivery_type = models.CharField(
-        'Тип доставки',
+        verbose_name='Тип доставки',
         max_length=32,
         choices=DeliveryType.choices,
         default=DeliveryType.DELIVERY,
     )
-    delivery_address = models.CharField('Адрес доставки', max_length=255, blank=True)
-    comment = models.TextField('Комментарий', blank=True)
+    delivery_address = models.CharField(
+        verbose_name='Адрес доставки',
+        max_length=255,
+        blank=True,
+    )
+    comment = models.TextField(
+        verbose_name='Комментарий',
+        blank=True,
+    )
 
     objects = OrderQuerySet.as_manager()
 
@@ -116,40 +133,48 @@ class OrderItem(Date):
     """Line item for a specific product in an order."""
 
     order = models.ForeignKey(
-        Order,
+        to=Order,
+        verbose_name='Заказ',
         on_delete=models.CASCADE,
         related_name='items',
-        verbose_name='Заказ',
     )
     product = models.ForeignKey(
-        Product,
+        to=Product,
+        verbose_name='Товар',
         on_delete=models.PROTECT,
         related_name='order_items',
-        verbose_name='Товар',
         null=True,
         blank=True,
     )
-    product_name = models.CharField('Название товара', max_length=255, blank=True)
+    product_name = models.CharField(
+        verbose_name='Название товара',
+        max_length=255,
+        blank=True,
+    )
     quantity = models.PositiveIntegerField(
-        'Количество', default=1, validators=[MinValueValidator(1)]
+        verbose_name='Количество',
+        default=1,
+        validators=[MinValueValidator(1)],
     )
     unit_price = models.DecimalField(
-        'Цена за единицу',
+        verbose_name='Цена за единицу',
         max_digits=12,
         decimal_places=2,
         validators=[MinValueValidator(Decimal('0.00'))],
     )
     rental_days = models.PositiveIntegerField(
-        'Дней аренды', default=1, validators=[MinValueValidator(1)]
+        verbose_name='Дней аренды',
+        default=1,
+        validators=[MinValueValidator(1)],
     )
     rental_mode = models.CharField(
-        'Режим аренды',
+        verbose_name='Режим аренды',
         max_length=32,
         choices=RentalMode.choices,
         default=RentalMode.STANDARD,
     )
     rental_tiers_snapshot = models.JSONField(
-        'Снимок тарифов аренды',
+        verbose_name='Снимок тарифов аренды',
         default=list,
         blank=True,
     )

@@ -9,7 +9,7 @@ from decimal import Decimal
 from io import BytesIO
 
 from django.core.files.base import ContentFile
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.text import slugify
 
@@ -18,14 +18,26 @@ from PIL import Image, ImageOps
 from applications.core.models import Date, PathAndRename
 
 from .choices import DimensionShape, RentalMode, ReservationMode
+from .storage import product_image_storage
 
 
 class Color(Date):
     """Available color option for products."""
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    value = models.CharField('Значение', max_length=32, unique=True)
-    label = models.CharField('Название', max_length=255)
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
+    value = models.CharField(
+        verbose_name='Значение',
+        max_length=32,
+        unique=True,
+    )
+    label = models.CharField(
+        verbose_name='Название',
+        max_length=255,
+    )
 
     class Meta(Date.Meta):
         verbose_name = 'Цвет'
@@ -39,9 +51,20 @@ class Color(Date):
 class TransportRestriction(Date):
     """Available delivery transport restrictions."""
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    value = models.CharField('Значение', max_length=32, unique=True)
-    label = models.CharField('Название', max_length=255)
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
+    value = models.CharField(
+        verbose_name='Значение',
+        max_length=32,
+        unique=True,
+    )
+    label = models.CharField(
+        verbose_name='Название',
+        max_length=255,
+    )
 
     class Meta(Date.Meta):
         verbose_name = 'Ограничение по транспорту'
@@ -50,7 +73,6 @@ class TransportRestriction(Date):
 
     def __str__(self) -> str:  # pragma: no cover - human readable repr
         return self.label
-from .storage import product_image_storage
 
 
 logger = logging.getLogger(__name__)
@@ -64,16 +86,28 @@ except AttributeError:  # pragma: no cover - fallback for older Pillow
 class Category(Date):
     """Hierarchical product category."""
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField('Название', max_length=255)
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
+    name = models.CharField(
+        verbose_name='Название',
+        max_length=255,
+    )
     parent = models.ForeignKey(
-        'self',
+        to='self',
+        verbose_name='Родительская категория',
         on_delete=models.CASCADE,
         null=True,
         blank=True,
         related_name='children',
     )
-    slug = models.SlugField('Слаг', max_length=255, unique=True)
+    slug = models.SlugField(
+        verbose_name='Слаг',
+        max_length=255,
+        unique=True,
+    )
 
     class Meta(Date.Meta):
         verbose_name = 'Категория'
@@ -87,10 +121,18 @@ class Category(Date):
 class InstallerQualification(Date):
     """Qualification required for product installation."""
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField('Название', max_length=255, unique=True)
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
+    name = models.CharField(
+        verbose_name='Название',
+        max_length=255,
+        unique=True,
+    )
     price_rub = models.DecimalField(
-        'Стоимость, руб',
+        verbose_name='Стоимость, руб',
         max_digits=12,
         decimal_places=2,
         validators=[MinValueValidator(Decimal('0'))],
@@ -109,30 +151,41 @@ class InstallerQualification(Date):
 class Product(Date):
     """Product offered for rent."""
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField('Название', max_length=255)
-    features = models.JSONField('Особенности', default=list, blank=True)
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
+    name = models.CharField(
+        verbose_name='Название',
+        max_length=255,
+    )
+    features = models.JSONField(
+        verbose_name='Особенности',
+        default=list,
+        blank=True,
+    )
     category = models.ForeignKey(
-        Category,
+        to=Category,
+        verbose_name='Категория',
         on_delete=models.PROTECT,
         related_name='products',
-        verbose_name='Категория',
     )
     complementary_products = models.ManyToManyField(
-        'self',
+        to='self',
         verbose_name='Дополняющие изделия',
         symmetrical=False,
         related_name='complemented_by',
         blank=True,
     )
     price_rub = models.DecimalField(
-        'Стоимость, руб',
+        verbose_name='Стоимость, руб',
         max_digits=12,
         decimal_places=2,
         validators=[MinValueValidator(Decimal('0'))],
     )
     loss_compensation_rub = models.DecimalField(
-        'Компенсация за потерю, руб',
+        verbose_name='Компенсация за потерю, руб',
         max_digits=12,
         decimal_places=2,
         validators=[MinValueValidator(Decimal('0'))],
@@ -140,10 +193,10 @@ class Product(Date):
         blank=True,
     )
     color = models.ForeignKey(
-        Color,
+        to=Color,
+        verbose_name='Цвет',
         on_delete=models.SET_NULL,
         related_name='products',
-        verbose_name='Цвет',
         null=True,
         blank=True,
         to_field='value',
@@ -151,68 +204,68 @@ class Product(Date):
     )
 
     dimensions_shape = models.CharField(
-        'Форма',
+        verbose_name='Форма',
         max_length=64,
         choices=DimensionShape.choices,
     )
     circle_diameter_cm = models.DecimalField(
-        'Диаметр круга, см',
+        verbose_name='Диаметр круга, см',
         max_digits=8,
         decimal_places=2,
         null=True,
         blank=True,
     )
     line_length_cm = models.DecimalField(
-        'Длина линии, см',
+        verbose_name='Длина линии, см',
         max_digits=8,
         decimal_places=2,
         null=True,
         blank=True,
     )
     rectangle_length_cm = models.DecimalField(
-        'Длина прямоугольника, см',
+        verbose_name='Длина прямоугольника, см',
         max_digits=8,
         decimal_places=2,
         null=True,
         blank=True,
     )
     rectangle_width_cm = models.DecimalField(
-        'Ширина прямоугольника, см',
+        verbose_name='Ширина прямоугольника, см',
         max_digits=8,
         decimal_places=2,
         null=True,
         blank=True,
     )
     cylinder_diameter_cm = models.DecimalField(
-        'Диаметр цилиндра, см',
+        verbose_name='Диаметр цилиндра, см',
         max_digits=8,
         decimal_places=2,
         null=True,
         blank=True,
     )
     cylinder_height_cm = models.DecimalField(
-        'Высота цилиндра, см',
+        verbose_name='Высота цилиндра, см',
         max_digits=8,
         decimal_places=2,
         null=True,
         blank=True,
     )
     box_height_cm = models.DecimalField(
-        'Высота параллелепипеда, см',
+        verbose_name='Высота параллелепипеда, см',
         max_digits=8,
         decimal_places=2,
         null=True,
         blank=True,
     )
     box_width_cm = models.DecimalField(
-        'Ширина параллелепипеда, см',
+        verbose_name='Ширина параллелепипеда, см',
         max_digits=8,
         decimal_places=2,
         null=True,
         blank=True,
     )
     box_depth_cm = models.DecimalField(
-        'Глубина параллелепипеда, см',
+        verbose_name='Глубина параллелепипеда, см',
         max_digits=8,
         decimal_places=2,
         null=True,
@@ -220,90 +273,134 @@ class Product(Date):
     )
 
     occupancy_cleaning_days = models.PositiveIntegerField(
-        'Чистка, дни',
+        verbose_name='Чистка, дни',
         null=True,
         blank=True,
     )
     delivery_volume_cm3 = models.PositiveIntegerField(
-        'Объём, см3',
+        verbose_name='Объём, см3',
         null=True,
         blank=True,
     )
     delivery_weight_kg = models.DecimalField(
-        'Вес, кг',
+        verbose_name='Вес, кг',
         max_digits=8,
         decimal_places=2,
         null=True,
         blank=True,
     )
     delivery_transport_restriction = models.ForeignKey(
-        TransportRestriction,
+        to=TransportRestriction,
+        verbose_name='Ограничение по транспорту',
         on_delete=models.SET_NULL,
         related_name='products',
-        verbose_name='Ограничение по транспорту',
         null=True,
         blank=True,
         to_field='value',
         db_column='delivery_transport_restriction',
     )
     delivery_self_pickup_allowed = models.BooleanField(
-        'Самовывоз разрешён',
+        verbose_name='Самовывоз разрешён',
         default=False,
     )
 
-    setup_install_minutes = models.PositiveIntegerField('Монтаж, мин', null=True, blank=True)
-    setup_uninstall_minutes = models.PositiveIntegerField('Демонтаж, мин', null=True, blank=True)
+    setup_install_minutes = models.PositiveIntegerField(
+        verbose_name='Монтаж, мин',
+        null=True,
+        blank=True,
+    )
+    setup_uninstall_minutes = models.PositiveIntegerField(
+        verbose_name='Демонтаж, мин',
+        null=True,
+        blank=True,
+    )
     setup_installer_qualification = models.ForeignKey(
-        InstallerQualification,
+        to=InstallerQualification,
+        verbose_name='Квалификация сетапёров',
         on_delete=models.SET_NULL,
         related_name='products',
-        verbose_name='Квалификация сетапёров',
         null=True,
         blank=True,
     )
     setup_min_installers = models.PositiveIntegerField(
-        'Минимум сетапёров',
+        verbose_name='Минимум сетапёров',
         choices=[(value, str(value)) for value in range(1, 5)],
         null=True,
         blank=True,
     )
-    setup_self_setup_allowed = models.BooleanField('Самостоятельный сетап', default=False)
+    setup_self_setup_allowed = models.BooleanField(
+        verbose_name='Самостоятельный сетап',
+        default=False,
+    )
 
     rental_mode = models.CharField(
-        'Режим аренды',
+        verbose_name='Режим аренды',
         max_length=32,
         choices=RentalMode.choices,
         default=RentalMode.STANDARD,
     )
     rental_special_tiers = models.JSONField(
-        'Тарифы аренды (особый)',
+        verbose_name='Тарифы аренды (особый)',
         default=list,
         blank=True,
     )
 
     visibility_reservation_mode = models.CharField(
-        'Бронирование',
+        verbose_name='Бронирование',
         max_length=32,
         choices=ReservationMode.choices,
         blank=True,
     )
-    visibility_show_on_pifakit = models.BooleanField('На pifakit', default=False)
-    visibility_show_on_site = models.BooleanField('На сайте', default=False)
-    visibility_show_in_new = models.BooleanField('Новинки', default=False)
-    visibility_category_cover_on_home = models.BooleanField('Обложка категории', default=False)
+    visibility_show_on_pifakit = models.BooleanField(
+        verbose_name='На pifakit',
+        default=False,
+    )
+    visibility_show_on_site = models.BooleanField(
+        verbose_name='На сайте',
+        default=False,
+    )
+    visibility_show_in_new = models.BooleanField(
+        verbose_name='Новинки',
+        default=False,
+    )
+    visibility_category_cover_on_home = models.BooleanField(
+        verbose_name='Обложка категории',
+        default=False,
+    )
 
-    seo_url_name = models.SlugField('URL имя', max_length=255, unique=True)
-    seo_meta_title = models.CharField('Meta title', max_length=255, blank=True)
-    seo_meta_description = models.CharField('Meta description', max_length=500, blank=True)
+    seo_url_name = models.SlugField(
+        verbose_name='URL имя',
+        max_length=255,
+        unique=True,
+    )
+    seo_meta_title = models.CharField(
+        verbose_name='Meta title',
+        max_length=255,
+        blank=True,
+    )
+    seo_meta_description = models.CharField(
+        verbose_name='Meta description',
+        max_length=500,
+        blank=True,
+    )
 
     class Meta(Date.Meta):
         verbose_name = 'Товар'
         verbose_name_plural = 'Товары'
         ordering = ['-created']
         indexes = [
-            models.Index(fields=('name',), name='product_name_idx'),
-            models.Index(fields=('category',), name='product_category_idx'),
-            models.Index(fields=('color',), name='product_color_idx'),
+            models.Index(
+                fields=('name',),
+                name='product_name_idx',
+            ),
+            models.Index(
+                fields=('category',),
+                name='product_category_idx',
+            ),
+            models.Index(
+                fields=('color',),
+                name='product_color_idx',
+            ),
         ]
 
     @property
@@ -353,19 +450,26 @@ class Product(Date):
 class ProductImage(Date):
     """Image for a product with explicit order."""
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
     product = models.ForeignKey(
-        Product,
+        to=Product,
+        verbose_name='Товар',
         on_delete=models.CASCADE,
         related_name='images',
-        verbose_name='Товар',
     )
     file = models.ImageField(
-        'Файл',
+        verbose_name='Файл',
         upload_to=PathAndRename(''),
         storage=product_image_storage,
     )
-    position = models.PositiveIntegerField('Позиция', default=1)
+    position = models.PositiveIntegerField(
+        verbose_name='Позиция',
+        default=1,
+    )
 
     class Meta(Date.Meta):
         verbose_name = 'Изображение товара'
