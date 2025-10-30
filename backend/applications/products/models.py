@@ -17,7 +17,6 @@ from PIL import Image, ImageOps
 from applications.core.models import Date, PathAndRename
 
 from .choices import DimensionShape, RentalMode, ReservationMode
-from .storage import product_image_storage
 
 
 class Color(Date):
@@ -462,8 +461,7 @@ class ProductImage(Date):
     )
     file = models.ImageField(
         verbose_name='Файл',
-        upload_to=PathAndRename(''),
-        storage=product_image_storage,
+        upload_to=PathAndRename('products/product_photo/file'),
     )
     position = models.PositiveIntegerField(
         verbose_name='Позиция',
