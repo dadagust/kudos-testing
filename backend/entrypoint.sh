@@ -14,6 +14,7 @@ echo "Postgres is ready."
 python manage.py migrate --noinput
 
 python manage.py seed_categories || true
+python manage.py seed_installer_qualifications || true
 python manage.py seed_demo_data || true
 
 exec python manage.py runserver 0.0.0.0:8000
