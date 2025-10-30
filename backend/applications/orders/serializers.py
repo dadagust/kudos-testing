@@ -22,8 +22,14 @@ class CustomerSummarySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Customer
-        fields = ('id', 'display_name')
-        read_only_fields = ('id', 'display_name')
+        fields = (
+            'id',
+            'display_name',
+        )
+        read_only_fields = (
+            'id',
+            'display_name',
+        )
 
     def get_display_name(self, obj: Customer) -> str:
         return obj.display_name or obj.full_name or obj.email or str(obj.pk)
@@ -34,7 +40,13 @@ class OrderProductSummarySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ('id', 'name', 'price_rub', 'color', 'thumbnail_url')
+        fields = (
+            'id',
+            'name',
+            'price_rub',
+            'color',
+            'thumbnail_url',
+        )
 
     def get_thumbnail_url(self, obj: Product) -> str | None:
         thumbnail = obj.thumbnail
@@ -160,7 +172,12 @@ class OrderSummarySerializer(serializers.ModelSerializer):
             'created',
             'modified',
         )
-        read_only_fields = ('id', 'total_amount', 'created', 'modified')
+        read_only_fields = (
+            'id',
+            'total_amount',
+            'created',
+            'modified',
+        )
 
 
 class OrderDetailSerializer(OrderSummarySerializer):
@@ -172,10 +189,22 @@ class OrderDetailSerializer(OrderSummarySerializer):
 
 class OrderItemInputSerializer(serializers.Serializer):
     product_id = serializers.UUIDField()
-    quantity = serializers.IntegerField(min_value=1)
-    rental_days = serializers.IntegerField(min_value=1, required=False, default=1)
-    rental_mode = serializers.ChoiceField(choices=RentalMode.choices, required=False)
-    rental_tiers = serializers.ListField(child=serializers.DictField(), required=False)
+    quantity = serializers.IntegerField(
+        min_value=1,
+    )
+    rental_days = serializers.IntegerField(
+        min_value=1,
+        required=False,
+        default=1,
+    )
+    rental_mode = serializers.ChoiceField(
+        choices=RentalMode.choices,
+        required=False,
+    )
+    rental_tiers = serializers.ListField(
+        child=serializers.DictField(),
+        required=False,
+    )
 
 
 def _derive_rental_days(installation: date | None, dismantle: date | None) -> int | None:
@@ -288,14 +317,29 @@ def _calculate_items_pricing(
 
 class OrderWriteSerializer(serializers.ModelSerializer):
     status = serializers.ChoiceField(
-        choices=OrderStatus.choices, default=OrderStatus.NEW, required=False
+        choices=OrderStatus.choices,
+        default=OrderStatus.NEW,
+        required=False,
     )
     customer_id = serializers.PrimaryKeyRelatedField(
-        source='customer', queryset=Customer.objects.all(), allow_null=True, required=False
+        source='customer',
+        queryset=Customer.objects.all(),
+        allow_null=True,
+        required=False,
     )
-    delivery_address = serializers.CharField(allow_blank=True, allow_null=True, required=False)
-    comment = serializers.CharField(allow_blank=True, allow_null=True, required=False)
-    items = OrderItemInputSerializer(many=True)
+    delivery_address = serializers.CharField(
+        allow_blank=True,
+        allow_null=True,
+        required=False,
+    )
+    comment = serializers.CharField(
+        allow_blank=True,
+        allow_null=True,
+        required=False,
+    )
+    items = OrderItemInputSerializer(
+        many=True,
+    )
 
     class Meta:
         model = Order

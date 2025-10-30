@@ -9,6 +9,10 @@ from .models import Order, OrderItem
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
+    raw_id_fields = (
+        'order',
+        'product',
+    )
     extra = 0
 
 
@@ -24,13 +28,42 @@ class OrderAdmin(admin.ModelAdmin):
         'delivery_type',
         'created',
     )
-    list_filter = ('status', 'delivery_type', 'installation_date')
-    search_fields = ('id', 'comment', 'delivery_address')
-    inlines = [OrderItemInline]
+    list_filter = (
+        'status',
+        'delivery_type',
+        'installation_date',
+    )
+    search_fields = (
+        'id',
+        'comment',
+        'delivery_address',
+        'customer__display_name',
+    )
+    raw_id_fields = (
+        'customer',
+    )
+    inlines = (
+        OrderItemInline,
+    )
 
 
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):
-    list_display = ('order', 'product', 'quantity', 'unit_price', 'subtotal')
-    list_filter = ('product',)
-    search_fields = ('order__id',)
+    list_display = (
+        'order',
+        'product',
+        'quantity',
+        'unit_price',
+        'subtotal',
+    )
+    list_filter = (
+        'product',
+    )
+    search_fields = (
+        'order__id',
+        'product__name',
+    )
+    raw_id_fields = (
+        'order',
+        'product',
+    )

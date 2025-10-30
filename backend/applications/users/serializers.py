@@ -1,5 +1,7 @@
 from django.contrib.auth import authenticate, get_user_model
 from django.db import DatabaseError, OperationalError, ProgrammingError
+from django.contrib.auth import authenticate, get_user_model
+from django.db.utils import DatabaseError, OperationalError, ProgrammingError
 from rest_framework import serializers
 
 from .models import LEGACY_ROLE_MAP, RoleChoices, UserProfile
@@ -15,7 +17,13 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProfile
-        fields = ('id', 'email', 'full_name', 'role', 'permissions')
+        fields = (
+            'id',
+            'email',
+            'full_name',
+            'role',
+            'permissions',
+        )
 
     def get_full_name(self, obj: UserProfile) -> str:
         return obj.user.get_full_name() or obj.user.email
