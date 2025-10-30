@@ -440,14 +440,7 @@ class ProductImage(Date):
             except Exception:  # pragma: no cover - best effort cleanup
                 logger.warning('Failed to delete original product image %s', original_name)
 
-        super().save(update_fields=['file'], process_image=False)
+        self.save(update_fields=['file'], process_image=False)
 
 
-__all__ = [
-    'Category',
-    'Color',
-    'InstallerQualification',
-    'Product',
-    'ProductImage',
-    'TransportRestriction',
-]
+__all__ = ['Category', 'Product', 'ProductImage']
