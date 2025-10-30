@@ -1,14 +1,21 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
+import { UserProfile } from '@/entities/user';
+
 interface AuthTokensState {
   accessToken: string | null;
   refreshToken: string | null;
+  user: UserProfile | null;
   setTokens: (access: string, refresh: string) => void;
+  setUser: (user: UserProfile | null) => void;
   clearTokens: () => void;
 }
 
-type PersistedAuthTokensState = Pick<AuthTokensState, 'accessToken' | 'refreshToken'>;
+type PersistedAuthTokensState = Pick<
+  AuthTokensState,
+  'accessToken' | 'refreshToken' | 'user'
+>;
 
 const createStorage = () =>
   createJSONStorage<PersistedAuthTokensState>(() => {
@@ -34,8 +41,10 @@ export const useAuthStore = create<AuthTokensState>()(
     (set) => ({
       accessToken: null,
       refreshToken: null,
+      user: null,
       setTokens: (access, refresh) => set({ accessToken: access, refreshToken: refresh }),
-      clearTokens: () => set({ accessToken: null, refreshToken: null }),
+      setUser: (user) => set({ user }),
+      clearTokens: () => set({ accessToken: null, refreshToken: null, user: null }),
     }),
     {
       name: 'kudos-staff-auth',
@@ -43,6 +52,7 @@ export const useAuthStore = create<AuthTokensState>()(
       partialize: (state) => ({
         accessToken: state.accessToken,
         refreshToken: state.refreshToken,
+        user: state.user,
       }),
     }
   )

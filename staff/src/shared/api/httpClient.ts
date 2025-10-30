@@ -118,7 +118,7 @@ const attachInterceptors = (client: AxiosInstance, options: CreateClientOptions)
         !config._retry &&
         config.url !== '/auth/refresh/'
       ) {
-        const { refreshToken, clearTokens, setTokens } = useAuthStore.getState();
+        const { refreshToken, clearTokens, setTokens, setUser } = useAuthStore.getState();
 
         if (!refreshToken) {
           clearTokens();
@@ -128,6 +128,7 @@ const attachInterceptors = (client: AxiosInstance, options: CreateClientOptions)
         try {
           const tokens = await requestTokenRefresh(refreshToken);
           setTokens(tokens.access, tokens.refresh);
+          setUser(tokens.user);
 
           config._retry = true;
           config.headers = config.headers ?? {};

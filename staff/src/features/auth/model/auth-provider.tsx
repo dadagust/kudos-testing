@@ -1,10 +1,10 @@
 'use client';
 
 import { PropsWithChildren, useCallback, useEffect, useMemo, useState } from 'react';
+import { isAxiosError } from 'axios';
 
-import { UserProfile } from '@/entities/user';
-import { refreshTokens } from '@/shared/api/httpClient';
 import { Role } from '@/shared/config/roles';
+import { refreshTokens } from '@/shared/api/httpClient';
 import { useAuthStore } from '@/shared/state/auth-store';
 
 import { authApi } from '../api/auth-api';
@@ -12,8 +12,7 @@ import { authApi } from '../api/auth-api';
 import { AuthContext, AuthStatus } from './auth-context';
 
 export const AuthProvider = ({ children }: PropsWithChildren) => {
-  const { accessToken, refreshToken, setTokens, clearTokens } = useAuthStore();
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const { accessToken, refreshToken, user, setTokens, setUser, clearTokens } = useAuthStore();
   const [status, setStatus] = useState<AuthStatus>('loading');
   const [isHydrated, setIsHydrated] = useState(useAuthStore.persist.hasHydrated());
   const [isReady, setIsReady] = useState(false);
@@ -51,6 +50,8 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
             setTokens(data.access, data.refresh);
             setUser(data.user);
+            setStatus('authenticated');
+            setIsReady(true);
           })
           .catch(() => {
             if (!isActive) {
@@ -74,6 +75,12 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       return;
     }
 
+    if (user) {
+      setStatus((prev) => (prev === 'authenticated' ? prev : 'authenticated'));
+      setIsReady((prev) => (prev ? prev : true));
+      return;
+    }
+
     let isActive = true;
     setStatus('loading');
     setIsReady(false);
@@ -89,21 +96,25 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         setStatus('authenticated');
         setIsReady(true);
       })
-      .catch(() => {
+      .catch((error) => {
         if (!isActive) {
           return;
         }
 
-        clearTokens();
-        setUser(null);
-        setStatus('unauthenticated');
+        if (isAxiosError(error) && error.response?.status === 401) {
+          clearTokens();
+          setUser(null);
+          setStatus('unauthenticated');
+        } else {
+          setStatus((prev) => (prev === 'authenticated' ? prev : 'authenticated'));
+        }
         setIsReady(true);
       });
 
     return () => {
       isActive = false;
     };
-  }, [accessToken, clearTokens, isHydrated, refreshToken, setTokens]);
+  }, [accessToken, clearTokens, isHydrated, refreshToken, setTokens, setUser, user]);
 
   const handleLogin = useCallback(
     async (payload: { email: string; password: string }) => {
@@ -118,12 +129,13 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         setIsReady(true);
       } catch (error) {
         clearTokens();
+        setUser(null);
         setStatus('unauthenticated');
         setIsReady(true);
         throw error;
       }
     },
-    [clearTokens, setTokens]
+    [clearTokens, setTokens, setUser]
   );
 
   const handleLogout = useCallback(async () => {
@@ -135,11 +147,16 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       setStatus('unauthenticated');
       setIsReady(true);
     }
-  }, [clearTokens]);
+  }, [clearTokens, setUser]);
 
-  const handleSetRole = useCallback(async (role: Role) => {
-    setUser((prev) => (prev ? { ...prev, role } : prev));
-  }, []);
+  const handleSetRole = useCallback(
+    async (role: Role) => {
+      if (user) {
+        setUser({ ...user, role });
+      }
+    },
+    [setUser, user]
+  );
 
   const value = useMemo(
     () => ({
