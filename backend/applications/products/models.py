@@ -139,11 +139,15 @@ class Product(Date):
         null=True,
         blank=True,
     )
-    color = models.CharField(
-        'Цвет',
-        max_length=32,
-        blank=True,
+    color = models.ForeignKey(
+        Color,
+        on_delete=models.SET_NULL,
+        related_name='products',
+        verbose_name='Цвет',
         null=True,
+        blank=True,
+        to_field='value',
+        db_column='color',
     )
 
     dimensions_shape = models.CharField(
@@ -232,11 +236,15 @@ class Product(Date):
         null=True,
         blank=True,
     )
-    delivery_transport_restriction = models.CharField(
-        'Ограничение по транспорту',
-        max_length=32,
-        blank=True,
+    delivery_transport_restriction = models.ForeignKey(
+        TransportRestriction,
+        on_delete=models.SET_NULL,
+        related_name='products',
+        verbose_name='Ограничение по транспорту',
         null=True,
+        blank=True,
+        to_field='value',
+        db_column='delivery_transport_restriction',
     )
     delivery_self_pickup_allowed = models.BooleanField(
         'Самовывоз разрешён',
@@ -435,4 +443,11 @@ class ProductImage(Date):
         super().save(update_fields=['file'], process_image=False)
 
 
-__all__ = ['Category', 'Product', 'ProductImage']
+__all__ = [
+    'Category',
+    'Color',
+    'InstallerQualification',
+    'Product',
+    'ProductImage',
+    'TransportRestriction',
+]

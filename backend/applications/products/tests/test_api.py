@@ -38,6 +38,7 @@ class ProductApiTests(APITestCase):
         )
         Color.objects.create(value='white', label='Белый')
         TransportRestriction.objects.create(value='any', label='Любой')
+        TransportRestriction.objects.create(value='truck_only', label='Только грузовой')
 
     def _create_payload(self):
         return {
@@ -124,7 +125,7 @@ class ProductApiTests(APITestCase):
             delivery_weight_kg='1.00',
         )
         product.delivery_self_pickup_allowed = True
-        product.delivery_transport_restriction = 'truck_only'
+        product.delivery_transport_restriction_id = 'truck_only'
         product.delivery_volume_cm3 = 10
         product.save()
 

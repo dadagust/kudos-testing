@@ -54,7 +54,9 @@ def _has_error_code(codes, target: str) -> bool:
 
 
 class ProductViewSet(viewsets.ModelViewSet):
-    queryset = Product.objects.select_related('category')
+    queryset = Product.objects.select_related(
+        'category', 'color', 'delivery_transport_restriction', 'setup_installer_qualification'
+    )
     serializer_class = ProductBaseSerializer
     pagination_class = ProductCursorPagination
     lookup_field = 'id'
@@ -142,11 +144,11 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         color = request.query_params.get('color')
         if color:
-            queryset = queryset.filter(color=color)
+            queryset = queryset.filter(color_id=color)
 
         transport = request.query_params.get('transport_restriction')
         if transport:
-            queryset = queryset.filter(delivery_transport_restriction=transport)
+            queryset = queryset.filter(delivery_transport_restriction_id=transport)
 
         self_pickup = request.query_params.get('self_pickup')
         if self_pickup in {'true', 'false'}:
