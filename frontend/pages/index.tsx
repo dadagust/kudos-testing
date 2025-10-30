@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   ApiError,
@@ -66,12 +66,21 @@ export default function Home() {
 
   const [products, setProducts] = useState<ProductSummary[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
+  const [isLoadingMoreProducts, setIsLoadingMoreProducts] = useState(false);
   const [productsError, setProductsError] = useState<string | null>(null);
+  const [nextProductsCursor, setNextProductsCursor] = useState<string | null>(null);
 
   const [orderForm, setOrderForm] = useState<OrderFormState>(createInitialOrderForm);
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
   const [orderSuccess, setOrderSuccess] = useState<OrderDetail | null>(null);
+
+  const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
+  const activeTokenRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    activeTokenRef.current = tokens?.access ?? null;
+  }, [tokens?.access]);
 
   useEffect(() => {
     const stored = localStorage.getItem('kudos-client-auth');
@@ -90,35 +99,111 @@ export default function Home() {
     setIsRestoringSession(false);
   }, []);
 
+  const loadProducts = useCallback(
+    async ({ cursor, append, token }: { cursor: string | null; append: boolean; token: string }) => {
+      setProductsError(null);
+      if (append) {
+        setIsLoadingMoreProducts(true);
+      } else {
+        setIsLoadingProducts(true);
+      }
+
+      try {
+        const page = await productsApi.list(token, { cursor });
+        if (activeTokenRef.current !== token) {
+          return;
+        }
+
+        let combinedProducts: ProductSummary[] = [];
+        setProducts((previous) => {
+          const base = append ? previous : [];
+          const existingIds = new Set(base.map((item) => item.id));
+          const merged = append ? [...base] : [];
+          page.items.forEach((item) => {
+            if (!existingIds.has(item.id)) {
+              merged.push(item);
+              existingIds.add(item.id);
+            }
+          });
+          combinedProducts = merged;
+          return merged;
+        });
+
+        setNextProductsCursor(page.nextCursor);
+        setOrderForm((previous) => ({
+          ...previous,
+          productQuantities: ensureQuantities(combinedProducts, previous.productQuantities),
+        }));
+      } catch (error) {
+        if (activeTokenRef.current === token) {
+          console.error(error);
+          const message =
+            error instanceof ApiError
+              ? error.message
+              : 'Не удалось загрузить список товаров. Попробуйте еще раз позднее.';
+          setProductsError(message);
+        }
+      } finally {
+        if (append) {
+          setIsLoadingMoreProducts(false);
+        } else {
+          setIsLoadingProducts(false);
+        }
+      }
+    },
+    [],
+  );
+
   useEffect(() => {
     if (!tokens?.access) {
+      setProducts([]);
+      setNextProductsCursor(null);
+      setIsLoadingProducts(false);
+      setIsLoadingMoreProducts(false);
       return;
     }
 
-    const loadProducts = async () => {
-      setIsLoadingProducts(true);
-      setProductsError(null);
-      try {
-        const items = await productsApi.list(tokens.access);
-        setProducts(items);
-        setOrderForm((previous) => ({
-          ...previous,
-          productQuantities: ensureQuantities(items, previous.productQuantities),
-        }));
-      } catch (error) {
-        console.error(error);
-        const message =
-          error instanceof ApiError
-            ? error.message
-            : 'Не удалось загрузить список товаров. Попробуйте еще раз позднее.';
-        setProductsError(message);
-      } finally {
-        setIsLoadingProducts(false);
-      }
-    };
+    setProducts([]);
+    setNextProductsCursor(null);
+    setProductsError(null);
 
-    void loadProducts();
-  }, [tokens]);
+    void loadProducts({ cursor: null, append: false, token: tokens.access });
+  }, [loadProducts, tokens?.access]);
+
+  const loadMoreProducts = useCallback(() => {
+    if (!tokens?.access || !nextProductsCursor || isLoadingProducts || isLoadingMoreProducts) {
+      return;
+    }
+    void loadProducts({ cursor: nextProductsCursor, append: true, token: tokens.access });
+  }, [isLoadingMoreProducts, isLoadingProducts, loadProducts, nextProductsCursor, tokens?.access]);
+
+  useEffect(() => {
+    if (!nextProductsCursor) {
+      return;
+    }
+
+    const node = loadMoreTriggerRef.current;
+    if (!node) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            loadMoreProducts();
+          }
+        });
+      },
+      { rootMargin: '200px 0px', threshold: 0 },
+    );
+
+    observer.observe(node);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [loadMoreProducts, nextProductsCursor]);
 
   useEffect(() => {
     if (isRestoringSession) {
@@ -159,9 +244,12 @@ export default function Home() {
     setTokens(null);
     setUser(null);
     setProducts([]);
+    setNextProductsCursor(null);
     setOrderForm(createInitialOrderForm());
     setOrderSuccess(null);
     setProductsError(null);
+    setIsLoadingProducts(false);
+    setIsLoadingMoreProducts(false);
   };
 
   const atLeastOneProductSelected = useMemo(
@@ -407,44 +495,60 @@ export default function Home() {
 
               <div className={styles.fieldGroup}>
                 <p className={styles.label}>Прайс-лист</p>
-                {isLoadingProducts ? (
+                {isLoadingProducts && products.length === 0 ? (
                   <p className={styles.helperText}>Загружаем товары…</p>
+                ) : products.length > 0 ? (
+                  <>
+                    <ul className={styles.productList}>
+                      {products.map((product) => (
+                        <li key={product.id} className={styles.productItem}>
+                          <div className={styles.productInfo}>
+                            <span className={styles.productName}>{product.name}</span>
+                            {Number.isFinite(product.base_price) && (
+                              <span className={styles.productPrice}>
+                                {new Intl.NumberFormat('ru-RU', {
+                                  style: 'currency',
+                                  currency: 'RUB',
+                                  maximumFractionDigits: 0,
+                                }).format(product.base_price)}
+                              </span>
+                            )}
+                          </div>
+                          <input
+                            type="number"
+                            min={0}
+                            step={1}
+                            className={styles.quantityInput}
+                            value={orderForm.productQuantities[product.id] ?? 0}
+                            onChange={(event) => {
+                              const value = Number(event.target.value);
+                              setOrderForm((prev) => ({
+                                ...prev,
+                                productQuantities: {
+                                  ...prev.productQuantities,
+                                  [product.id]: Number.isNaN(value) ? 0 : value,
+                                },
+                              }));
+                            }}
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                    <div className={styles.loadMoreContainer}>
+                      {isLoadingMoreProducts ? (
+                        <p className={styles.helperText}>Загружаем ещё товары…</p>
+                      ) : nextProductsCursor ? (
+                        <p className={styles.helperText}>
+                          Прокрутите ниже, чтобы загрузить больше товаров
+                        </p>
+                      ) : (
+                        <p className={styles.helperText}>Вы просмотрели все товары.</p>
+                      )}
+                      <div ref={loadMoreTriggerRef} className={styles.loadMoreTrigger} aria-hidden />
+                    </div>
+                  </>
                 ) : (
-                  <ul className={styles.productList}>
-                    {products.map((product) => (
-                      <li key={product.id} className={styles.productItem}>
-                        <div className={styles.productInfo}>
-                          <span className={styles.productName}>{product.name}</span>
-                          {Number.isFinite(product.base_price) && (
-                            <span className={styles.productPrice}>
-                              {new Intl.NumberFormat('ru-RU', {
-                                style: 'currency',
-                                currency: 'RUB',
-                                maximumFractionDigits: 0,
-                              }).format(product.base_price)}
-                            </span>
-                          )}
-                        </div>
-                        <input
-                          type="number"
-                          min={0}
-                          step={1}
-                          className={styles.quantityInput}
-                          value={orderForm.productQuantities[product.id] ?? 0}
-                          onChange={(event) => {
-                            const value = Number(event.target.value);
-                            setOrderForm((prev) => ({
-                              ...prev,
-                              productQuantities: {
-                                ...prev.productQuantities,
-                                [product.id]: Number.isNaN(value) ? 0 : value,
-                              },
-                            }));
-                          }}
-                        />
-                      </li>
-                    ))}
-                  </ul>
+                  <p className={styles.helperText}>Товары не найдены.</p>
                 )}
               </div>
 

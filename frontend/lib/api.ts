@@ -153,7 +153,19 @@ export interface ProductSummary {
 }
 
 export interface ProductListResponse {
-  data: ProductSummary[];
+  results?: ProductSummary[];
+  data?: ProductSummary[];
+  next_cursor?: string | null;
+}
+
+export interface ProductListPage {
+  items: ProductSummary[];
+  nextCursor: string | null;
+}
+
+interface ProductListParams {
+  cursor?: string | null;
+  limit?: number;
 }
 
 export interface CreateOrderPayload {
@@ -211,14 +223,40 @@ export const authApi = {
     }),
 };
 
+const normalizeProductListResponse = (payload: ProductListResponse | null): ProductListPage => {
+  if (!payload) {
+    return { items: [], nextCursor: null };
+  }
+
+  const items = Array.isArray(payload.results)
+    ? payload.results
+    : Array.isArray(payload.data)
+      ? payload.data
+      : [];
+
+  const nextCursor = typeof payload.next_cursor === 'string' ? payload.next_cursor : null;
+
+  return { items, nextCursor };
+};
+
 export const productsApi = {
-  list: async (token: string | null) => {
+  list: async (token: string | null, { cursor, limit }: ProductListParams = {}) => {
+    const params = new URLSearchParams();
+    if (cursor) {
+      params.set('cursor', cursor);
+    }
+    if (typeof limit === 'number') {
+      params.set('limit', String(limit));
+    }
+    const queryString = params.toString();
+    const path = queryString ? `/products/?${queryString}` : '/products/';
+
     try {
-      const response = await performRequest<ProductListResponse>(CORE_API_URL, '/products/', {
+      const response = await performRequest<ProductListResponse>(CORE_API_URL, path, {
         method: 'GET',
         token,
       });
-      return response.data;
+      return normalizeProductListResponse(response);
     } catch (error) {
       if (error instanceof ApiError && error.status === 404) {
         // Fallback to products provided by the orders endpoint metadata (OPTIONS request)
@@ -233,7 +271,7 @@ export const productsApi = {
         const child = (itemsField?.child as Record<string, unknown> | undefined) ?? null;
         const choices = (child?.choices as Array<Record<string, unknown>> | undefined) ?? [];
 
-        return choices
+        const fallbackItems = choices
           .map((choice) => ({
             id: String(choice.value ?? choice.key ?? ''),
             name: String(
@@ -242,6 +280,8 @@ export const productsApi = {
             base_price: Number(choice.price ?? 0) || 0,
           }))
           .filter((item) => item.id.length > 0 && item.name.length > 0);
+
+        return { items: fallbackItems, nextCursor: null };
       }
       throw error;
     }
