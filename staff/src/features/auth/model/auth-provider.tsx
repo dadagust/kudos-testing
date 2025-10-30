@@ -4,6 +4,7 @@ import { PropsWithChildren, useCallback, useEffect, useMemo, useState } from 're
 
 import { UserProfile } from '@/entities/user';
 import { Role } from '@/shared/config/roles';
+import { refreshTokens } from '@/shared/api/httpClient';
 import { useAuthStore } from '@/shared/state/auth-store';
 
 import { authApi } from '../api/auth-api';
@@ -11,7 +12,7 @@ import { authApi } from '../api/auth-api';
 import { AuthContext, AuthStatus } from './auth-context';
 
 export const AuthProvider = ({ children }: PropsWithChildren) => {
-  const { accessToken, setTokens, clearTokens } = useAuthStore();
+  const { accessToken, refreshToken, setTokens, clearTokens } = useAuthStore();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [status, setStatus] = useState<AuthStatus>('loading');
   const [isHydrated, setIsHydrated] = useState(useAuthStore.persist.hasHydrated());
@@ -37,6 +38,36 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     }
 
     if (!accessToken) {
+      if (refreshToken) {
+        let isActive = true;
+        setStatus('loading');
+        setIsReady(false);
+
+        refreshTokens(refreshToken)
+          .then((data) => {
+            if (!isActive) {
+              return;
+            }
+
+            setTokens(data.access, data.refresh);
+            setUser(data.user);
+          })
+          .catch(() => {
+            if (!isActive) {
+              return;
+            }
+
+            clearTokens();
+            setUser(null);
+            setStatus('unauthenticated');
+            setIsReady(true);
+          });
+
+        return () => {
+          isActive = false;
+        };
+      }
+
       setUser(null);
       setStatus('unauthenticated');
       setIsReady(true);
@@ -72,7 +103,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     return () => {
       isActive = false;
     };
-  }, [accessToken, clearTokens, isHydrated]);
+  }, [accessToken, clearTokens, isHydrated, refreshToken, setTokens]);
 
   const handleLogin = useCallback(
     async (payload: { email: string; password: string }) => {
