@@ -1,5 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 
+import type { AuthResponse } from '@/entities/user';
+
 import { auditLogger } from '../lib/logger';
 import { useAuthStore } from '../state/auth-store';
 
@@ -19,7 +21,10 @@ export const API_ROOT = resolveApiRoot(API_URL);
 const CORE_API_URL = `${API_ROOT}/core`;
 const API_V1_URL = `${API_ROOT}/api/v1`;
 
-type ExtendedAxiosRequestConfig = AxiosRequestConfig & { kudosTraceId?: string };
+type ExtendedAxiosRequestConfig = AxiosRequestConfig & {
+  kudosTraceId?: string;
+  _retry?: boolean;
+};
 
 const createTraceId = () =>
   typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -31,6 +36,30 @@ interface CreateClientOptions {
   withCredentials?: boolean;
   attachAuthToken?: boolean;
 }
+
+const refreshClient = axios.create({
+  baseURL: CORE_API_URL,
+  withCredentials: true,
+});
+
+let refreshPromise: Promise<AuthResponse> | null = null;
+
+const requestTokenRefresh = (refreshToken: string) => {
+  if (!refreshPromise) {
+    refreshPromise = refreshClient
+      .post<AuthResponse>('/auth/refresh/', { refresh: refreshToken })
+      .then((response) => {
+        refreshPromise = null;
+        return response.data;
+      })
+      .catch((error) => {
+        refreshPromise = null;
+        throw error;
+      });
+  }
+
+  return refreshPromise;
+};
 
 const attachInterceptors = (client: AxiosInstance, options: CreateClientOptions) => {
   client.interceptors.request.use((config) => {
@@ -68,7 +97,7 @@ const attachInterceptors = (client: AxiosInstance, options: CreateClientOptions)
 
       return response;
     },
-    (error) => {
+    async (error) => {
       const config = error.config as ExtendedAxiosRequestConfig | undefined;
       const traceId = config?.kudosTraceId ?? createTraceId();
       const url = config ? client.getUri(config) : options.baseURL;
@@ -82,8 +111,33 @@ const attachInterceptors = (client: AxiosInstance, options: CreateClientOptions)
         message: error.message,
       });
 
-      if (options.attachAuthToken && status === 401) {
-        useAuthStore.getState().clearTokens();
+      if (
+        options.attachAuthToken &&
+        status === 401 &&
+        config &&
+        !config._retry &&
+        config.url !== '/auth/refresh/'
+      ) {
+        const { refreshToken, clearTokens, setTokens } = useAuthStore.getState();
+
+        if (!refreshToken) {
+          clearTokens();
+          return Promise.reject(error);
+        }
+
+        try {
+          const tokens = await requestTokenRefresh(refreshToken);
+          setTokens(tokens.access, tokens.refresh);
+
+          config._retry = true;
+          config.headers = config.headers ?? {};
+          (config.headers as Record<string, string>).Authorization = `Bearer ${tokens.access}`;
+
+          return client(config);
+        } catch (refreshError) {
+          clearTokens();
+          return Promise.reject(refreshError);
+        }
       }
 
       return Promise.reject(error);
@@ -117,3 +171,5 @@ export const apiV1Client = createHttpClient({
   withCredentials: true,
   attachAuthToken: true,
 });
+
+export const refreshTokens = requestTokenRefresh;

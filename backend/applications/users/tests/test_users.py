@@ -85,6 +85,25 @@ class AuthTests(APITestCase):
         self.assertIn('adminpanel_view_dashboard', data['permissions'])
         self.assertIn('customers_view_customer', data['permissions'])
 
+    def test_refresh_returns_new_tokens(self):
+        login = self.client.post(
+            reverse('auth-login'), {'email': 'manager@kudos.ru', 'password': 'ChangeMe123!'}
+        )
+        payload = login.json()
+
+        response = self.client.post(reverse('auth-refresh'), {'refresh': payload['refresh']})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        data = response.json()
+        self.assertIn('access', data)
+        self.assertIn('refresh', data)
+        self.assertIn('user', data)
+        self.assertEqual(data['user']['email'], 'manager@kudos.ru')
+
+    def test_refresh_rejects_invalid_token(self):
+        response = self.client.post(reverse('auth-refresh'), {'refresh': 'invalid-token'})
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
 
 class RolePermissionsTests(TestCase):
     def test_role_groups_exist(self):
