@@ -14,14 +14,15 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .choices import (
+from .choices import DimensionShape, RentalMode, ReservationMode
+from .models import (
+    Category,
     Color,
-    DimensionShape,
-    RentalMode,
-    ReservationMode,
+    InstallerQualification,
+    Product,
+    ProductImage,
     TransportRestriction,
 )
-from .models import Category, InstallerQualification, Product, ProductImage
 from .pagination import ProductCursorPagination
 from .serializers import (
     EnumChoiceSerializer,
@@ -315,7 +316,8 @@ def build_category_tree(categories: list[Category], parent: Category | None = No
 
 class ColorsListView(APIView):
     def get(self, request: Request):
-        data = [{'value': choice.value, 'label': choice.label} for choice in Color]
+        colors = Color.objects.all().order_by('label')
+        data = [{'value': color.value, 'label': color.label} for color in colors]
         serializer = EnumChoiceSerializer(data, many=True)
         return Response(serializer.data)
 
@@ -324,13 +326,16 @@ class EnumsAggregateView(APIView):
     def get(self, request: Request):
         return Response(
             {
-                'colors': [{'value': choice.value, 'label': choice.label} for choice in Color],
+                'colors': [
+                    {'value': color.value, 'label': color.label}
+                    for color in Color.objects.all().order_by('label')
+                ],
                 'shapes': [
                     {'value': choice.value, 'label': choice.label} for choice in DimensionShape
                 ],
                 'transport_restrictions': [
-                    {'value': choice.value, 'label': choice.label}
-                    for choice in TransportRestriction
+                    {'value': restriction.value, 'label': restriction.label}
+                    for restriction in TransportRestriction.objects.all().order_by('label')
                 ],
                 'installer_qualifications': [
                     {'value': str(item.id), 'label': item.name}
