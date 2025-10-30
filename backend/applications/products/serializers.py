@@ -127,7 +127,6 @@ class ProductDimensionsSerializer(serializers.Serializer):
 
 class ProductOccupancySerializer(serializers.Serializer):
     cleaning_days = serializers.IntegerField(min_value=0, required=False)
-    insurance_reserve_percent = serializers.IntegerField(min_value=0, max_value=100, required=False)
 
 
 class ProductDeliverySerializer(serializers.Serializer):
@@ -456,7 +455,6 @@ class ProductBaseSerializer(serializers.ModelSerializer):
 
     def _apply_occupancy(self, product: Product, occupancy: dict) -> None:
         product.occupancy_cleaning_days = occupancy.get('cleaning_days')
-        product.occupancy_insurance_reserve_percent = occupancy.get('insurance_reserve_percent')
 
     def _apply_delivery(self, product: Product, delivery: dict) -> None:
         product.delivery_volume_cm3 = delivery.get('volume_cm3')
@@ -595,7 +593,6 @@ def serialize_dimensions(product: Product) -> dict:
 def serialize_occupancy(product: Product) -> dict:
     return {
         'cleaning_days': product.occupancy_cleaning_days,
-        'insurance_reserve_percent': product.occupancy_insurance_reserve_percent,
     }
 
 
