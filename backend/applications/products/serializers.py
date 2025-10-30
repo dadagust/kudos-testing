@@ -9,13 +9,15 @@ from django.db import transaction
 from django.db.models import Prefetch
 from rest_framework import serializers
 
-from .choices import (
-    DimensionShape,
-    RentalMode,
-    ReservationMode,
+from .choices import DimensionShape, RentalMode, ReservationMode
+from .models import (
+    Category,
+    Color,
+    InstallerQualification,
+    Product,
+    ProductImage,
     TransportRestriction,
 )
-from .models import Category, InstallerQualification, Product, ProductImage
 
 DATETIME_FIELD = serializers.DateTimeField()
 
@@ -23,6 +25,22 @@ DATETIME_FIELD = serializers.DateTimeField()
 class EnumChoiceSerializer(serializers.Serializer):
     value = serializers.CharField()
     label = serializers.CharField()
+
+
+class OptionalSlugRelatedField(serializers.SlugRelatedField):
+    """SlugRelatedField that treats empty values as null."""
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('allow_null', True)
+        kwargs.setdefault('required', False)
+        super().__init__(*args, **kwargs)
+
+    def to_internal_value(self, data):  # type: ignore[override]
+        if data in (None, ''):
+            return None
+        if isinstance(data, str) and not data.strip():
+            return None
+        return super().to_internal_value(data)
 
 
 class OptionalInstallerQualificationField(serializers.PrimaryKeyRelatedField):
@@ -115,9 +133,8 @@ class ProductOccupancySerializer(serializers.Serializer):
 class ProductDeliverySerializer(serializers.Serializer):
     volume_cm3 = serializers.IntegerField(min_value=1, required=False)
     weight_kg = serializers.DecimalField(max_digits=8, decimal_places=2, min_value=Decimal('0.01'))
-    transport_restriction = serializers.ChoiceField(
-        choices=TransportRestriction.choices,
-        required=False,
+    transport_restriction = OptionalSlugRelatedField(
+        queryset=TransportRestriction.objects.all(), slug_field='value'
     )
     self_pickup_allowed = serializers.BooleanField(required=False)
 
@@ -227,6 +244,7 @@ class ProductBaseSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True,
     )
+    color = OptionalSlugRelatedField(queryset=Color.objects.all(), slug_field='value')
     features = serializers.ListField(child=serializers.CharField(), required=False)
     category_id = CategoryPrimaryKeyOrSlugField(
         source='category', queryset=Category.objects.all(), write_only=True
@@ -443,7 +461,8 @@ class ProductBaseSerializer(serializers.ModelSerializer):
     def _apply_delivery(self, product: Product, delivery: dict) -> None:
         product.delivery_volume_cm3 = delivery.get('volume_cm3')
         product.delivery_weight_kg = delivery.get('weight_kg')
-        product.delivery_transport_restriction = delivery.get('transport_restriction') or ''
+        if 'transport_restriction' in delivery:
+            product.delivery_transport_restriction = delivery.get('transport_restriction')
         product.delivery_self_pickup_allowed = delivery.get('self_pickup_allowed', False)
 
     def _apply_setup(self, product: Product, setup: dict) -> None:
@@ -499,6 +518,7 @@ class ProductDetailSerializer(ProductBaseSerializer):
 class ProductListItemSerializer(serializers.ModelSerializer):
     thumbnail_url = serializers.SerializerMethodField()
     delivery = serializers.SerializerMethodField()
+    color = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -518,9 +538,12 @@ class ProductListItemSerializer(serializers.ModelSerializer):
 
     def get_delivery(self, obj: Product) -> dict:
         return {
-            'transport_restriction': obj.delivery_transport_restriction or None,
+            'transport_restriction': obj.delivery_transport_restriction_id,
             'self_pickup_allowed': obj.delivery_self_pickup_allowed,
         }
+
+    def get_color(self, obj: Product) -> str | None:
+        return obj.color_id
 
     def to_representation(self, instance: Product):  # type: ignore[override]
         data = super().to_representation(instance)
@@ -580,7 +603,7 @@ def serialize_delivery(product: Product) -> dict:
     return {
         'volume_cm3': product.delivery_volume_cm3,
         'weight_kg': decimal_to_float(product.delivery_weight_kg),
-        'transport_restriction': product.delivery_transport_restriction or None,
+        'transport_restriction': product.delivery_transport_restriction_id,
         'self_pickup_allowed': product.delivery_self_pickup_allowed,
     }
 

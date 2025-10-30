@@ -14,7 +14,13 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from applications.products.choices import DimensionShape, RentalMode, ReservationMode
-from applications.products.models import Category, InstallerQualification, Product
+from applications.products.models import (
+    Category,
+    Color,
+    InstallerQualification,
+    Product,
+    TransportRestriction,
+)
 
 
 class ProductApiTests(APITestCase):
@@ -30,6 +36,9 @@ class ProductApiTests(APITestCase):
             name='Только «Работник с парогенератором»',
             price_rub='1500.00',
         )
+        Color.objects.create(value='white', label='Белый')
+        TransportRestriction.objects.create(value='any', label='Любой')
+        TransportRestriction.objects.create(value='truck_only', label='Только грузовой')
 
     def _create_payload(self):
         return {
@@ -116,7 +125,7 @@ class ProductApiTests(APITestCase):
             delivery_weight_kg='1.00',
         )
         product.delivery_self_pickup_allowed = True
-        product.delivery_transport_restriction = 'truck_only'
+        product.delivery_transport_restriction_id = 'truck_only'
         product.delivery_volume_cm3 = 10
         product.save()
 
