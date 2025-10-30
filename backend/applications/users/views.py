@@ -11,9 +11,7 @@ from .serializers import AuthResponseSerializer, LoginSerializer, UserProfileSer
 
 
 class AuthMeView(APIView):
-    permission_classes = (
-        IsAuthenticated,
-    )
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request):
         profile = getattr(request.user, 'profile', None)
@@ -24,9 +22,7 @@ class AuthMeView(APIView):
 
 
 class AuthLoginView(APIView):
-    permission_classes = (
-        AllowAny,
-    )
+    permission_classes = (AllowAny,)
 
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
@@ -48,9 +44,7 @@ class AuthLoginView(APIView):
 
 
 class AuthLogoutView(APIView):
-    permission_classes = (
-        IsAuthenticated,
-    )
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request):
         # Токены не храним на сервере на этом этапе, фронт сбрасывает их самостоятельно.
@@ -61,9 +55,7 @@ class AuthLogoutView(APIView):
 
 
 class AuthRefreshView(APIView):
-    permission_classes = (
-        AllowAny,
-    )
+    permission_classes = (AllowAny,)
 
     def post(self, request):
         refresh_token = request.data.get('refresh')

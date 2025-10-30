@@ -6,60 +6,55 @@ from .views import CategoryTreeView, ColorsListView, EnumsAggregateView, Product
 
 app_name = 'products'
 
-product_list = ProductViewSet.as_view(
-    {
-        'get': 'list',
-        'post': 'create',
-    }
-)
-product_detail = ProductViewSet.as_view(
-    {
-        'get': 'retrieve',
-        'put': 'update',
-        'patch': 'partial_update',
-        'delete': 'destroy',
-    }
-)
-product_images = ProductViewSet.as_view(
-    {
-        'post': 'upload_images',
-    }
-)
-product_images_reorder = ProductViewSet.as_view(
-    {
-        'patch': 'reorder_images',
-    }
-)
-product_image_delete = ProductViewSet.as_view(
-    {
-        'delete': 'delete_image',
-    }
-)
 
 urlpatterns = [
     path(
         'products/',
-        product_list,
+        ProductViewSet.as_view(
+            {
+                'get': 'list',
+                'post': 'create',
+            }
+        ),
         name='product-list',
     ),
     path(
         'products/<uuid:id>/',
-        product_detail,
+        ProductViewSet.as_view(
+            {
+                'get': 'retrieve',
+                'put': 'update',
+                'patch': 'partial_update',
+                'delete': 'destroy',
+            }
+        ),
         name='product-detail',
     ),
     path(
         'products/<uuid:id>/images/',
-        product_images,
+        ProductViewSet.as_view(
+            {
+                'post': 'upload_images',
+            }
+        ),
         name='product-images',
     ),
     path(
         'products/<uuid:id>/images/reorder/',
-        product_images_reorder,
+        ProductViewSet.as_view(
+            {
+                'patch': 'reorder_images',
+            }
+        ),
         name='product-images-reorder',
     ),
     path(
         'products/<uuid:id>/images/<uuid:image_id>/',
-        product_image_delete,
+        ProductViewSet.as_view(
+            {
+                'delete': 'delete_image',
+            }
+        ),
         name='product-image-delete',
     ),
     path(

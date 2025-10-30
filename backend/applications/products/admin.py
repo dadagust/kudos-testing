@@ -15,9 +15,7 @@ from .models import (
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
     extra = 0
-    readonly_fields = (
-        'preview',
-    )
+    readonly_fields = ('preview',)
 
     def preview(self, obj):  # pragma: no cover - admin helper
         if obj.file:
@@ -39,12 +37,8 @@ class CategoryAdmin(admin.ModelAdmin):
         'name',
         'slug',
     )
-    list_filter = (
-        'parent',
-    )
-    raw_id_fields = (
-        'parent',
-    )
+    list_filter = ('parent',)
+    raw_id_fields = ('parent',)
 
 
 @admin.register(Product)
@@ -69,9 +63,7 @@ class ProductAdmin(admin.ModelAdmin):
         'category',
         'color',
     )
-    inlines = (
-        ProductImageInline,
-    )
+    inlines = (ProductImageInline,)
 
 
 @admin.register(InstallerQualification)
@@ -82,9 +74,7 @@ class InstallerQualificationAdmin(admin.ModelAdmin):
         'created',
         'modified',
     )
-    search_fields = (
-        'name',
-    )
+    search_fields = ('name',)
 
 
 @admin.register(Color)

@@ -64,7 +64,6 @@ def populate_lookup_tables(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('products', '0002_alter_productimage_file'),
     ]

@@ -14,9 +14,7 @@ class CompanyAdmin(admin.ModelAdmin):
         'is_active',
         'created',
     )
-    list_filter = (
-        'is_active',
-    )
+    list_filter = ('is_active',)
     search_fields = (
         'name',
         'inn',
@@ -59,9 +57,7 @@ class CustomerAdmin(admin.ModelAdmin):
         'owner',
         'company',
     )
-    inlines = (
-        ContactInline,
-    )
+    inlines = (ContactInline,)
 
 
 @admin.register(Contact)
@@ -75,9 +71,7 @@ class ContactAdmin(admin.ModelAdmin):
         'company',
         'is_primary',
     )
-    list_filter = (
-        'is_primary',
-    )
+    list_filter = ('is_primary',)
     search_fields = (
         'first_name',
         'last_name',

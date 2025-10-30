@@ -39,12 +39,8 @@ class OrderAdmin(admin.ModelAdmin):
         'delivery_address',
         'customer__display_name',
     )
-    raw_id_fields = (
-        'customer',
-    )
-    inlines = (
-        OrderItemInline,
-    )
+    raw_id_fields = ('customer',)
+    inlines = (OrderItemInline,)
 
 
 @admin.register(OrderItem)
@@ -56,9 +52,7 @@ class OrderItemAdmin(admin.ModelAdmin):
         'unit_price',
         'subtotal',
     )
-    list_filter = (
-        'product',
-    )
+    list_filter = ('product',)
     search_fields = (
         'order__id',
         'product__name',

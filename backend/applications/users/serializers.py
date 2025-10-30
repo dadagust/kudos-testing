@@ -1,6 +1,4 @@
 from django.contrib.auth import authenticate, get_user_model
-from django.db import DatabaseError, OperationalError, ProgrammingError
-from django.contrib.auth import authenticate, get_user_model
 from django.db.utils import DatabaseError, OperationalError, ProgrammingError
 from rest_framework import serializers
 

@@ -12,7 +12,6 @@ from django.core.files.base import ContentFile
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.text import slugify
-
 from PIL import Image, ImageOps
 
 from applications.core.models import Date, PathAndRename

@@ -21,11 +21,7 @@ from .serializers import (
 class OrderViewSet(viewsets.ModelViewSet):
     """CRUD endpoint for managing orders."""
 
-    queryset = (
-        Order.objects.all()
-        .select_related('customer')
-        .prefetch_related('items')
-    )
+    queryset = Order.objects.all().select_related('customer').prefetch_related('items')
     permission_classes = (
         IsAuthenticated,
         OrderAccessPolicy,

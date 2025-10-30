@@ -46,9 +46,7 @@ class Command(BaseCommand):
                 else:
                     updated += 1
                     self.stdout.write(
-                        self.style.NOTICE(
-                            f'Обновлён цвет: {obj.label} (значение: {obj.value})'
-                        )
+                        self.style.NOTICE(f'Обновлён цвет: {obj.label} (значение: {obj.value})')
                     )
 
             for value, label in TRANSPORT_RESTRICTIONS:
@@ -59,9 +57,7 @@ class Command(BaseCommand):
                 if was_created:
                     created += 1
                     self.stdout.write(
-                        self.style.SUCCESS(
-                            f'Создано ограничение по транспорту: {obj.label}'
-                        )
+                        self.style.SUCCESS(f'Создано ограничение по транспорту: {obj.label}')
                     )
                 else:
                     updated += 1
@@ -72,6 +68,4 @@ class Command(BaseCommand):
                         )
                     )
 
-        self.stdout.write(
-            self.style.SUCCESS(f'Готово. Создано: {created}, обновлено: {updated}.')
-        )
+        self.stdout.write(self.style.SUCCESS(f'Готово. Создано: {created}, обновлено: {updated}.'))
