@@ -2,11 +2,13 @@
 
 from django.urls import path
 
+from applications.common.url_utils import allow_optional_trailing_slash
+
 from .views import OrderCalculationView, OrderViewSet
 
 app_name = 'orders'
 
-urlpatterns = [
+urlpatterns = allow_optional_trailing_slash([
     path(
         'order/',
         OrderViewSet.as_view(
@@ -34,4 +36,4 @@ urlpatterns = [
         ),
         name='order-detail',
     ),
-]
+])

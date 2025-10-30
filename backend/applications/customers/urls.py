@@ -2,12 +2,14 @@
 
 from django.urls import path
 
+from applications.common.url_utils import allow_optional_trailing_slash
+
 from .views import CustomerContactViewSet, CustomerViewSet
 
 app_name = 'customers'
 
 
-urlpatterns = [
+urlpatterns = allow_optional_trailing_slash([
     path(
         'customer/',
         CustomerViewSet.as_view(
@@ -49,4 +51,4 @@ urlpatterns = [
         ),
         name='customer-contact',
     ),
-]
+])

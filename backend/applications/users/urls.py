@@ -1,10 +1,12 @@
 from django.urls import path
 
+from applications.common.url_utils import allow_optional_trailing_slash
+
 from .views import AuthLoginView, AuthLogoutView, AuthMeView, AuthRefreshView
 
 app_name = 'users'
 
-urlpatterns = [
+urlpatterns = allow_optional_trailing_slash([
     path(
         'login/',
         AuthLoginView.as_view(),
@@ -25,4 +27,4 @@ urlpatterns = [
         AuthRefreshView.as_view(),
         name='auth-refresh',
     ),
-]
+])
