@@ -60,7 +60,7 @@ class ProductApiTests(APITestCase):
                 'transport_restriction': 'any',
                 'self_pickup_allowed': True,
             },
-            'occupancy': {'cleaning_days': 1, 'insurance_reserve_percent': 0},
+            'occupancy': {'cleaning_days': 1},
             'setup': {
                 'install_minutes': 20,
                 'uninstall_minutes': 10,
