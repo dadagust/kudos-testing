@@ -20,6 +20,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='productimage',
             name='file',
-            field=models.ImageField(storage=django.core.files.storage.FileSystemStorage(base_url='/media/products/', location=pathlib.PureWindowsPath('C:/Users/gusit/Desktop/work/kudos-testing/media/products')), upload_to=applications.core.models.PathAndRename(''), verbose_name='Файл'),
+            field=models.ImageField(storage=django.core.files.storage.FileSystemStorage(base_url='/media/products/', location=pathlib.PurePosixPath('/media/products')), upload_to=applications.core.models.PathAndRename(''), verbose_name='Файл'),
         ),
     ]
