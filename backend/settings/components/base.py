@@ -96,9 +96,9 @@ PRODUCTS_MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
 
 products_media_url = env(
     'DJANGO_PRODUCTS_MEDIA_URL',
-    default=f"{MEDIA_URL if MEDIA_URL.endswith('/') else MEDIA_URL + '/'}products/",
+    default=f'{MEDIA_URL if MEDIA_URL.endswith("/") else MEDIA_URL + "/"}products/',
 )
 if not products_media_url.startswith('/'):
-    products_media_url = f"/{products_media_url.lstrip('/')}"
+    products_media_url = f'/{products_media_url.lstrip("/")}'
 PRODUCTS_MEDIA_URL = products_media_url
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
