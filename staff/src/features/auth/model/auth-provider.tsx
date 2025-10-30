@@ -3,8 +3,8 @@
 import { PropsWithChildren, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { UserProfile } from '@/entities/user';
-import { Role } from '@/shared/config/roles';
 import { refreshTokens } from '@/shared/api/httpClient';
+import { Role } from '@/shared/config/roles';
 import { useAuthStore } from '@/shared/state/auth-store';
 
 import { authApi } from '../api/auth-api';

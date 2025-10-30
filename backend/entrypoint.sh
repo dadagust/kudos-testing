@@ -18,4 +18,6 @@ python manage.py seed_installer_qualifications || true
 python manage.py seed_product_enums || true
 python manage.py seed_demo_data || true
 
-exec python manage.py runserver 0.0.0.0:8000
+BACKEND_PORT="${BACKEND_PORT:-8000}"
+echo "Starting Django development server on 0.0.0.0:${BACKEND_PORT}"
+exec python manage.py runserver "0.0.0.0:${BACKEND_PORT}"
