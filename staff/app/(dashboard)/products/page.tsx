@@ -3110,9 +3110,7 @@ export default function ProductsPage() {
                               : 'var(--color-danger)',
                         }}
                       >
-                        {item.quantity_delta > 0
-                          ? `+${item.quantity_delta}`
-                          : item.quantity_delta}
+                        {item.quantity_delta > 0 ? `+${item.quantity_delta}` : item.quantity_delta}
                       </span>
                     </div>
                     <div
@@ -3194,9 +3192,7 @@ export default function ProductsPage() {
                   min={1}
                   step={1}
                   value={receiveForm.quantity}
-                  onChange={(event) =>
-                    setReceiveForm({ quantity: event.target.value })
-                  }
+                  onChange={(event) => setReceiveForm({ quantity: event.target.value })}
                   required
                 />
                 <Button type="submit" disabled={isSubmittingTransaction}>
