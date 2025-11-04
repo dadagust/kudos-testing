@@ -150,6 +150,8 @@ export interface ProductSummary {
   id: string;
   name: string;
   base_price: number;
+  available_stock_qty: number;
+  stock_qty: number;
 }
 
 export interface ProductListResponse {
@@ -162,7 +164,7 @@ export interface CreateOrderPayload {
   delivery_type: 'delivery' | 'pickup';
   delivery_address?: string | null;
   comment?: string | null;
-  items: Array<{ product: string; quantity: number }>;
+  items: Array<{ product_id: string; quantity: number }>;
   status?: 'new';
   customer_id?: string | null;
 }
@@ -218,7 +220,12 @@ export const productsApi = {
         method: 'GET',
         token,
       });
-      return response.data;
+      return (response.data ?? []).map((item) => ({
+        ...item,
+        base_price: Number(item.base_price ?? item.price_rub ?? 0) || 0,
+        available_stock_qty: Number(item.available_stock_qty ?? 0) || 0,
+        stock_qty: Number(item.stock_qty ?? 0) || 0,
+      }));
     } catch (error) {
       if (error instanceof ApiError && error.status === 404) {
         // Fallback to products provided by the orders endpoint metadata (OPTIONS request)
@@ -240,6 +247,10 @@ export const productsApi = {
               choice.display_name ?? choice.display ?? choice.label ?? choice.value ?? ''
             ),
             base_price: Number(choice.price ?? 0) || 0,
+            available_stock_qty: Number(
+              choice.available_stock_qty ?? choice.available ?? 0
+            ) || 0,
+            stock_qty: Number(choice.stock_qty ?? choice.total ?? 0) || 0,
           }))
           .filter((item) => item.id.length > 0 && item.name.length > 0);
       }

@@ -16,6 +16,7 @@ from .models import (
     InstallerQualification,
     Product,
     ProductImage,
+    StockTransaction,
     TransportRestriction,
 )
 
@@ -634,6 +635,8 @@ class ProductListItemSerializer(serializers.ModelSerializer):
             'category_id',
             'thumbnail_url',
             'delivery',
+            'available_stock_qty',
+            'stock_qty',
         )
 
     def get_thumbnail_url(self, obj: Product) -> str | None:
@@ -669,6 +672,46 @@ class ProductListItemSerializer(serializers.ModelSerializer):
         if data.get('category_id') is not None:
             data['category_id'] = str(data['category_id'])
         return data
+
+
+class StockTransactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StockTransaction
+        fields = (
+            'id',
+            'product_id',
+            'quantity_delta',
+            'affects_available',
+            'is_applied',
+            'scheduled_for',
+            'note',
+            'created',
+        )
+        read_only_fields = (
+            'id',
+            'product_id',
+            'created',
+        )
+
+    def validate_quantity_delta(self, value: int) -> int:
+        if value == 0:
+            raise serializers.ValidationError('Изменение количества не может быть нулевым.')
+        return value
+
+    def validate(self, attrs):  # type: ignore[override]
+        is_applied = attrs.get('is_applied', True)
+        scheduled_for = attrs.get('scheduled_for')
+        if not is_applied and not scheduled_for:
+            raise serializers.ValidationError(
+                {
+                    'scheduled_for': 'Укажите дату и время для запланированной транзакции.',
+                }
+            )
+        return attrs
+
+    def create(self, validated_data):  # type: ignore[override]
+        product = self.context['product']
+        return StockTransaction.objects.create(product=product, **validated_data)
 
 
 def serialize_dimensions(product: Product) -> dict:
@@ -815,4 +858,5 @@ __all__ = [
     'serialize_seo',
     'serialize_setup',
     'serialize_visibility',
+    'StockTransactionSerializer',
 ]

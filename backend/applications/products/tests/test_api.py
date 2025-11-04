@@ -198,3 +198,36 @@ class ProductApiTests(APITestCase):
         delete_url = reverse('products:product-delete-image', args=[product.id, image_id])
         response = self.client.delete(delete_url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_stock_transactions_endpoint(self):
+        product = Product.objects.create(
+            name='Фонарь',
+            category=self.category,
+            price_rub='1500',
+            dimensions_shape=DimensionShape.LINE_LENGTH,
+            line_length_cm=50,
+            delivery_weight_kg='0.50',
+        )
+
+        url = reverse('products:product-transactions', args=[product.id])
+        payload = {
+            'quantity_delta': 5,
+            'affects_available': True,
+            'note': 'Поступление партии',
+        }
+
+        response = self.client.post(url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        transaction = response.json()
+        self.assertEqual(transaction['quantity_delta'], 5)
+        self.assertTrue(transaction['affects_available'])
+
+        product.refresh_from_db()
+        self.assertEqual(product.stock_qty, 5)
+        self.assertEqual(product.available_stock_qty, 5)
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        items = response.json()
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0]['id'], transaction['id'])

@@ -4,7 +4,13 @@ from django.urls import path
 
 from applications.common.url_utils import allow_optional_trailing_slash
 
-from .views import CategoryTreeView, ColorsListView, EnumsAggregateView, ProductViewSet
+from .views import (
+    CategoryTreeView,
+    ColorsListView,
+    EnumsAggregateView,
+    ProductTransactionViewSet,
+    ProductViewSet,
+)
 
 app_name = 'products'
 
@@ -59,6 +65,11 @@ urlpatterns = allow_optional_trailing_slash(
                 }
             ),
             name='product-image-delete',
+        ),
+        path(
+            'products/<uuid:id>/transactions/',
+            ProductTransactionViewSet.as_view({'get': 'list', 'post': 'create'}),
+            name='product-transactions',
         ),
         path(
             'products/categories/',

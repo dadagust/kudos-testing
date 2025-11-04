@@ -283,12 +283,12 @@ class Product(Date):
 
     stock_qty = models.PositiveIntegerField(
         verbose_name='Остаток на складе',
-        validators=[MinValueValidator(1)],
+        validators=[MinValueValidator(0)],
         default=0,
     )
     available_stock_qty = models.PositiveIntegerField(
         verbose_name='Доступный остаток на складе',
-        validators = [MinValueValidator(1)],
+        validators=[MinValueValidator(0)],
         default=0,
     )
 
@@ -426,6 +426,7 @@ class Product(Date):
     def available_in_stock(self) -> bool:
         return self.available_stock_qty > 0
 
+
     @property
     def thumbnail(self) -> ProductImage | None:
         return self.images.order_by('position').first()
@@ -469,6 +470,53 @@ class Product(Date):
                 return int(base_area * Decimal(self.cylinder_height_cm))
         return None
 
+
+class StockTransaction(Date):
+    """Inventory transaction affecting product stock levels."""
+
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
+    product = models.ForeignKey(
+        to=Product,
+        verbose_name='Товар',
+        on_delete=models.CASCADE,
+        related_name='stock_transactions',
+    )
+    quantity_delta = models.IntegerField(
+        verbose_name='Изменение количества',
+        help_text='Положительное значение увеличивает склад, отрицательное уменьшает.',
+    )
+    affects_available = models.BooleanField(
+        verbose_name='Влияет на доступный остаток',
+        default=True,
+        help_text='Если включено, доступный остаток изменится вместе с реальным.',
+    )
+    is_applied = models.BooleanField(
+        verbose_name='Транзакция применена',
+        default=True,
+        help_text='Неприменённые транзакции используются для планирования и не влияют на остатки.',
+    )
+    scheduled_for = models.DateTimeField(
+        verbose_name='Запланировано на',
+        null=True,
+        blank=True,
+    )
+    note = models.CharField(
+        verbose_name='Комментарий',
+        max_length=255,
+        blank=True,
+    )
+
+    class Meta(Date.Meta):
+        verbose_name = 'Складская транзакция'
+        verbose_name_plural = 'Складские транзакции'
+        ordering = ['-created']
+
+    def __str__(self) -> str:  # pragma: no cover - human readable repr
+        return f'{self.product.name}: {self.quantity_delta}'
 
 class ProductImage(Date):
     """Image for a product with explicit order."""
@@ -569,4 +617,4 @@ class ProductImage(Date):
         self.save(update_fields=['file'], process_image=False)
 
 
-__all__ = ['Category', 'Product', 'ProductImage']
+__all__ = ['Category', 'Product', 'ProductImage', 'StockTransaction']

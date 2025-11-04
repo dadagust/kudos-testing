@@ -48,10 +48,30 @@ const createInitialOrderForm = (): OrderFormState => ({
   productQuantities: {},
 });
 
+const sanitizeQuantity = (product: ProductSummary, rawValue: number) => {
+  if (!Number.isFinite(rawValue)) {
+    return 0;
+  }
+  const available = Math.max(0, product.available_stock_qty ?? 0);
+  if (available <= 0) {
+    return 0;
+  }
+  const integer = Math.trunc(rawValue);
+  if (integer <= 0) {
+    return 0;
+  }
+  return Math.min(integer, available);
+};
+
 const ensureQuantities = (products: ProductSummary[], previous?: Record<string, number>) => {
   const quantities: Record<string, number> = {};
   products.forEach((product) => {
-    quantities[product.id] = previous?.[product.id] ?? 0;
+    const previousValue = Number(previous?.[product.id] ?? 0);
+    if (!Number.isFinite(previousValue) || previousValue <= 0) {
+      quantities[product.id] = 0;
+      return;
+    }
+    quantities[product.id] = sanitizeQuantity(product, previousValue);
   });
   return quantities;
 };
@@ -167,8 +187,8 @@ export default function Home() {
   const atLeastOneProductSelected = useMemo(
     () =>
       products.some((product) => {
-        const value = orderForm.productQuantities[product.id] ?? 0;
-        return Number(value) > 0;
+        const value = Number(orderForm.productQuantities[product.id] ?? 0);
+        return sanitizeQuantity(product, value) > 0;
       }),
     [orderForm.productQuantities, products]
   );
@@ -198,12 +218,35 @@ export default function Home() {
       return;
     }
 
+    for (const product of products) {
+      const rawValue = Number(orderForm.productQuantities[product.id] ?? 0);
+      if (!Number.isFinite(rawValue) || rawValue < 0) {
+        setOrderError('Количество должно быть неотрицательным числом.');
+        return;
+      }
+      const available = Math.max(0, product.available_stock_qty ?? 0);
+      if (rawValue > available) {
+        setOrderError(
+          `Для товара «${product.name}» доступно только ${available} шт.`
+        );
+        return;
+      }
+    }
+
     const items = products
-      .map((product) => ({
-        product: product.id,
-        quantity: Number(orderForm.productQuantities[product.id] ?? 0),
-      }))
-      .filter((item) => item.quantity > 0);
+      .map((product) => {
+        const rawValue = Number(orderForm.productQuantities[product.id] ?? 0);
+        const quantity = sanitizeQuantity(product, rawValue);
+        return quantity > 0 ? { product_id: product.id, quantity } : null;
+      })
+      .filter(
+        (
+          item
+        ): item is {
+          product_id: string;
+          quantity: number;
+        } => item !== null
+      );
 
     const payload: CreateOrderPayload = {
       status: 'new',
@@ -413,35 +456,47 @@ export default function Home() {
                   <ul className={styles.productList}>
                     {products.map((product) => (
                       <li key={product.id} className={styles.productItem}>
-                        <div className={styles.productInfo}>
-                          <span className={styles.productName}>{product.name}</span>
-                          {Number.isFinite(product.base_price) && (
-                            <span className={styles.productPrice}>
-                              {new Intl.NumberFormat('ru-RU', {
-                                style: 'currency',
-                                currency: 'RUB',
-                                maximumFractionDigits: 0,
-                              }).format(product.base_price)}
-                            </span>
-                          )}
+                      <div className={styles.productInfo}>
+                        <span className={styles.productName}>{product.name}</span>
+                        {Number.isFinite(product.base_price) && (
+                          <span className={styles.productPrice}>
+                            {new Intl.NumberFormat('ru-RU', {
+                              style: 'currency',
+                              currency: 'RUB',
+                              maximumFractionDigits: 0,
+                            }).format(product.base_price)}
+                          </span>
+                        )}
+                        <div className={styles.productStock}>
+                          <span>Доступно: {product.available_stock_qty}</span>
+                          <span>На складе: {product.stock_qty}</span>
                         </div>
-                        <input
-                          type="number"
-                          min={0}
-                          step={1}
-                          className={styles.quantityInput}
-                          value={orderForm.productQuantities[product.id] ?? 0}
-                          onChange={(event) => {
-                            const value = Number(event.target.value);
-                            setOrderForm((prev) => ({
-                              ...prev,
-                              productQuantities: {
-                                ...prev.productQuantities,
-                                [product.id]: Number.isNaN(value) ? 0 : value,
-                              },
-                            }));
-                          }}
-                        />
+                        {product.available_stock_qty <= 0 ? (
+                          <span className={styles.helperText}>Нет доступного остатка</span>
+                        ) : null}
+                      </div>
+                      <input
+                        type="number"
+                        min={0}
+                        step={1}
+                        max={Math.max(0, product.available_stock_qty ?? 0)}
+                        className={styles.quantityInput}
+                        value={orderForm.productQuantities[product.id] ?? 0}
+                        disabled={product.available_stock_qty <= 0}
+                        onChange={(event) => {
+                          const rawValue = event.target.value;
+                          setOrderForm((prev) => ({
+                            ...prev,
+                            productQuantities: {
+                              ...prev.productQuantities,
+                              [product.id]:
+                                rawValue === ''
+                                  ? 0
+                                  : sanitizeQuantity(product, Number(rawValue)),
+                            },
+                          }));
+                        }}
+                      />
                       </li>
                     ))}
                   </ul>
