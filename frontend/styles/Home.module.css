@@ -177,6 +177,13 @@
   gap: 0.25rem;
 }
 
+.productControls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+}
+
 .productName {
   font-weight: 600;
 }
@@ -192,6 +199,12 @@
   gap: 0.75rem;
   font-size: 0.85rem;
   color: #555555;
+}
+
+.productRemaining {
+  font-size: 0.8rem;
+  color: #555555;
+  text-align: right;
 }
 
 .helperText {
@@ -237,5 +250,18 @@
   .loginForm {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .productItem {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .productControls {
+    align-items: flex-start;
+  }
+
+  .productRemaining {
+    text-align: left;
   }
 }
