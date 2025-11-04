@@ -751,6 +751,7 @@ const ProductCard = ({
   onEdit,
   onDelete,
   onAddTransaction,
+  onViewTransactions,
   canManage,
 }: {
   product: ProductListItem;
@@ -760,6 +761,7 @@ const ProductCard = ({
   onEdit?: (product: ProductListItem) => void;
   onDelete?: (product: ProductListItem) => void;
   onAddTransaction?: (product: ProductListItem) => void;
+  onViewTransactions?: (product: ProductListItem) => void;
   canManage: boolean;
 }) => {
   return (
@@ -821,6 +823,9 @@ const ProductCard = ({
             <Button type="button" onClick={() => onAddTransaction?.(product)}>
               Добавить транзакцию
             </Button>
+            <Button type="button" variant="ghost" onClick={() => onViewTransactions?.(product)}>
+              Просмотреть все транзакции
+            </Button>
             <Button type="button" variant="ghost" onClick={() => onEdit?.(product)}>
               Редактировать
             </Button>
@@ -863,6 +868,7 @@ export default function ProductsPage() {
   const [isSubmittingTransaction, setIsSubmittingTransaction] = useState(false);
   const [transactionError, setTransactionError] = useState<string | null>(null);
   const [transactionSuccess, setTransactionSuccess] = useState<string | null>(null);
+  const [transactionModalMode, setTransactionModalMode] = useState<'manage' | 'viewAll'>('manage');
   const [writeOffForm, setWriteOffForm] = useState({ quantity: '', affectsAvailable: true });
   const [receiveForm, setReceiveForm] = useState({ quantity: '' });
   const [planForm, setPlanForm] = useState({ quantity: '', scheduledFor: '' });
@@ -1415,12 +1421,36 @@ export default function ProductsPage() {
     setPlanForm({ quantity: '', scheduledFor: '' });
   };
 
-  const loadTransactions = async (productId: string) => {
+  const loadTransactions = async (productId: string, options?: { fetchAll?: boolean }) => {
     setIsLoadingTransactions(true);
     setTransactionError(null);
     try {
-      const items = await productsApi.listTransactions(productId);
-      setTransactions(items);
+      const fetchAll = options?.fetchAll ?? false;
+      const aggregated: ProductStockTransaction[] = [];
+      let currentPage = 1;
+      let hasMore = true;
+      let safetyCounter = 0;
+
+      while (hasMore) {
+        const { items, nextPage } = await productsApi.listTransactions(productId, {
+          page: currentPage,
+          pageSize: fetchAll ? 100 : undefined,
+        });
+        aggregated.push(...items);
+
+        if (!fetchAll || !nextPage || nextPage <= currentPage) {
+          hasMore = false;
+        } else {
+          currentPage = nextPage;
+        }
+
+        safetyCounter += 1;
+        if (safetyCounter > 50) {
+          hasMore = false;
+        }
+      }
+
+      setTransactions(aggregated);
     } catch (error) {
       const message =
         error instanceof Error
@@ -1432,7 +1462,7 @@ export default function ProductsPage() {
     }
   };
 
-  const openTransactionsModal = (product: ProductListItem) => {
+  const openTransactionsModal = (product: ProductListItem, options?: { viewAll?: boolean }) => {
     if (!canManageProducts) {
       return;
     }
@@ -1442,7 +1472,9 @@ export default function ProductsPage() {
     setTransactionSuccess(null);
     setTransactions([]);
     resetTransactionForms();
-    void loadTransactions(product.id);
+    const shouldViewAll = options?.viewAll ?? false;
+    setTransactionModalMode(shouldViewAll ? 'viewAll' : 'manage');
+    void loadTransactions(product.id, { fetchAll: shouldViewAll });
   };
 
   const closeTransactionsModal = () => {
@@ -1451,6 +1483,7 @@ export default function ProductsPage() {
     setTransactions([]);
     setTransactionError(null);
     setTransactionSuccess(null);
+    setTransactionModalMode('manage');
     resetTransactionForms();
   };
 
@@ -1483,7 +1516,9 @@ export default function ProductsPage() {
     try {
       const result = await productsApi.createTransaction(transactionProduct.id, payload);
       applyTransactionToProduct(result);
-      await loadTransactions(transactionProduct.id);
+      await loadTransactions(transactionProduct.id, {
+        fetchAll: transactionModalMode === 'viewAll',
+      });
       if (reset) {
         reset();
       }
@@ -2009,6 +2044,7 @@ export default function ProductsPage() {
               onEdit={openEditModal}
               onDelete={openDeleteModal}
               onAddTransaction={openTransactionsModal}
+              onViewTransactions={(item) => openTransactionsModal(item, { viewAll: true })}
               canManage={canManageProducts}
             />
           ))}
@@ -3068,6 +3104,11 @@ export default function ProductsPage() {
 
           <section style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <h3 style={{ margin: 0 }}>История транзакций</h3>
+            {transactionModalMode === 'viewAll' ? (
+              <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                Показаны все транзакции по товару.
+              </p>
+            ) : null}
             {isLoadingTransactions ? (
               <Spinner label="Загружаем транзакции" />
             ) : transactions.length > 0 ? (

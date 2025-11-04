@@ -118,11 +118,57 @@ export const productsApi = {
   deleteImage: async (productId: string, imageId: string): Promise<void> => {
     await apiV1Client.delete(`/products/${productId}/images/${imageId}`);
   },
-  listTransactions: async (productId: string): Promise<ProductStockTransaction[]> => {
-    const { data } = await apiV1Client.get<ProductStockTransaction[]>(
-      `/products/${productId}/transactions`
+  listTransactions: async (
+    productId: string,
+    params?: { page?: number; pageSize?: number }
+  ): Promise<{ items: ProductStockTransaction[]; nextPage: number | null }> => {
+    type TransactionsResponse =
+      | ProductStockTransaction[]
+      | {
+          data?: ProductStockTransaction[];
+          links?: { next?: string | null };
+          meta?: { pagination?: { page?: number; has_next?: boolean } };
+        };
+
+    const requestParams: Record<string, number> = {};
+    if (typeof params?.page === 'number' && Number.isFinite(params.page)) {
+      requestParams.page = params.page;
+    }
+    if (typeof params?.pageSize === 'number' && Number.isFinite(params.pageSize)) {
+      requestParams.page_size = params.pageSize;
+    }
+
+    const { data } = await apiV1Client.get<TransactionsResponse>(
+      `/products/${productId}/transactions`,
+      {
+        params: Object.keys(requestParams).length > 0 ? requestParams : undefined,
+      }
     );
-    return data;
+
+    if (Array.isArray(data)) {
+      return { items: data, nextPage: null };
+    }
+
+    const items = Array.isArray(data?.data) ? data.data : [];
+    const pagination = data?.meta?.pagination;
+
+    if (pagination?.has_next) {
+      const currentPage = pagination.page ?? params?.page ?? 1;
+      return { items, nextPage: currentPage + 1 };
+    }
+
+    const nextLink = data?.links?.next;
+    if (typeof nextLink === 'string') {
+      const match = nextLink.match(/[?&]page=(\d+)/);
+      if (match) {
+        const nextPage = Number(match[1]);
+        if (!Number.isNaN(nextPage)) {
+          return { items, nextPage };
+        }
+      }
+    }
+
+    return { items, nextPage: null };
   },
   createTransaction: async (
     productId: string,
