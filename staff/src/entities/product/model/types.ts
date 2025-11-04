@@ -143,6 +143,8 @@ export interface ProductListItem {
   id: string;
   name: string;
   price_rub: number;
+  available_stock_qty: number;
+  stock_qty: number;
   color?: ProductColor | null;
   category_id?: string;
   thumbnail_url?: string | null;
@@ -191,6 +193,25 @@ export interface ProductDetail extends ProductListItem {
 export interface ProductListResponse {
   results: ProductListItem[];
   next_cursor: string | null;
+}
+
+export interface ProductStockTransaction {
+  id: string;
+  product_id: string;
+  quantity_delta: number;
+  affects_available: boolean;
+  is_applied: boolean;
+  scheduled_for: string | null;
+  note?: string | null;
+  created: string;
+}
+
+export interface CreateProductStockTransactionPayload {
+  quantity_delta: number;
+  affects_available?: boolean;
+  is_applied?: boolean;
+  scheduled_for?: string | null;
+  note?: string;
 }
 
 export interface ProductListQuery {

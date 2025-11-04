@@ -11,6 +11,8 @@ import {
   ProductListQuery,
   ProductListResponse,
   ProductUpdatePayload,
+  ProductStockTransaction,
+  CreateProductStockTransactionPayload,
 } from '../model/types';
 
 const sanitizeParams = (params: ProductListQuery): Record<string, string | number | boolean> => {
@@ -115,6 +117,22 @@ export const productsApi = {
   },
   deleteImage: async (productId: string, imageId: string): Promise<void> => {
     await apiV1Client.delete(`/products/${productId}/images/${imageId}`);
+  },
+  listTransactions: async (productId: string): Promise<ProductStockTransaction[]> => {
+    const { data } = await apiV1Client.get<ProductStockTransaction[]>(
+      `/products/${productId}/transactions`
+    );
+    return data;
+  },
+  createTransaction: async (
+    productId: string,
+    payload: CreateProductStockTransactionPayload
+  ): Promise<ProductStockTransaction> => {
+    const { data } = await apiV1Client.post<ProductStockTransaction>(
+      `/products/${productId}/transactions`,
+      payload
+    );
+    return data;
   },
   categories: async (): Promise<ProductCategoriesResponseItem[]> => {
     const { data } = await apiV1Client.get<ProductCategoriesResponseItem[]>('/products/categories');

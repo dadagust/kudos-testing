@@ -219,9 +219,9 @@ def _derive_rental_days(installation: date | None, dismantle: date | None) -> in
 def _calculate_items_pricing(
     items_data: list[dict[str, Any]],
     default_rental_days: int | None,
-) -> tuple[list[dict[str, Any]], Decimal]:
+) -> tuple[list[dict[str, Any]], Decimal, dict[str, int]]:
     if not items_data:
-        return [], Decimal('0.00')
+        return [], Decimal('0.00'), {}
 
     product_ids = {str(item['product_id']) for item in items_data}
     products_qs = (
@@ -238,6 +238,7 @@ def _calculate_items_pricing(
     calculated: OrderedDict[tuple[str, int], dict[str, Any]] = OrderedDict()
     qualification_total = Decimal('0.00')
     seen_products: set[str] = set()
+    product_totals: dict[str, int] = {}
 
     def _add_product_item(product: Product, quantity: int, rental_days: int) -> None:
         nonlocal qualification_total
@@ -250,6 +251,9 @@ def _calculate_items_pricing(
         unit_price = unit_total.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
         subtotal_increment = unit_price * quantity
         tiers_snapshot = _snapshot_rental_tiers(tiers) if mode == RentalMode.SPECIAL else []
+
+        product_id_str = str(product.pk)
+        product_totals[product_id_str] = product_totals.get(product_id_str, 0) + quantity
 
         key = (str(product.pk), rental_days)
         existing = calculated.get(key)
@@ -312,7 +316,7 @@ def _calculate_items_pricing(
                 continue
             _add_product_item(complementary, quantity, rental_days)
 
-    return list(calculated.values()), qualification_total
+    return list(calculated.values()), qualification_total, product_totals
 
 
 class OrderWriteSerializer(serializers.ModelSerializer):
@@ -412,6 +416,9 @@ class OrderWriteSerializer(serializers.ModelSerializer):
             setattr(instance, field, value)
         instance.save()
         if items_data is not None:
+            existing_quantities = self._collect_existing_item_quantities(instance)
+            if existing_quantities:
+                self._adjust_available_stock(existing_quantities, increment=True)
             instance.items.all().delete()
             self._replace_items(instance, items_data, self._default_rental_days)
         instance.recalculate_total_amount()
@@ -424,7 +431,11 @@ class OrderWriteSerializer(serializers.ModelSerializer):
         items_data: list[dict[str, Any]],
         default_rental_days: int | None,
     ) -> None:
-        calculated_items, _ = _calculate_items_pricing(items_data, default_rental_days)
+        calculated_items, _, product_totals = _calculate_items_pricing(
+            items_data, default_rental_days
+        )
+        if product_totals:
+            self._adjust_available_stock(product_totals, increment=False)
         order_items = [
             OrderItem(
                 order=order,
@@ -440,6 +451,51 @@ class OrderWriteSerializer(serializers.ModelSerializer):
         ]
         OrderItem.objects.bulk_create(order_items)
 
+    def _collect_existing_item_quantities(self, order: Order) -> dict[str, int]:
+        totals: dict[str, int] = {}
+        for item in order.items.select_related('product'):
+            if not item.product_id:
+                continue
+            product_id = str(item.product_id)
+            totals[product_id] = totals.get(product_id, 0) + item.quantity
+        return totals
+
+    def _adjust_available_stock(self, product_totals: dict[str, int], *, increment: bool) -> None:
+        if not product_totals:
+            return
+
+        product_ids = list(product_totals.keys())
+        products = {
+            str(product.pk): product
+            for product in Product.objects.select_for_update().filter(pk__in=product_ids)
+        }
+
+        missing = [pid for pid in product_ids if pid not in products]
+        if missing:
+            raise serializers.ValidationError({'items': f'Товар {missing[0]} не найден'})
+
+        updated: list[Product] = []
+        for product_id, quantity in product_totals.items():
+            product = products[product_id]
+            if increment:
+                product.available_stock_qty += quantity
+            else:
+                if product.available_stock_qty < quantity:
+                    raise serializers.ValidationError(
+                        {
+                            'items': (
+                                'Недостаточно товара '
+                                f'"{product.name}" на складе. '
+                                f'Доступно: {product.available_stock_qty}, требуется: {quantity}.'
+                            )
+                        }
+                    )
+                product.available_stock_qty -= quantity
+            updated.append(product)
+
+        if updated:
+            Product.objects.bulk_update(updated, ['available_stock_qty'])
+
 
 class OrderCalculationSerializer(OrderWriteSerializer):
     class Meta(OrderWriteSerializer.Meta):
@@ -447,7 +503,7 @@ class OrderCalculationSerializer(OrderWriteSerializer):
 
     def calculate(self) -> dict[str, Any]:
         items_data = self.validated_data.get('items', [])
-        calculated_items, qualification_total = _calculate_items_pricing(
+        calculated_items, qualification_total, _ = _calculate_items_pricing(
             items_data, self._default_rental_days
         )
         total = sum((item['subtotal'] for item in calculated_items), Decimal('0.00'))

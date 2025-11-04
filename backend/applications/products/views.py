@@ -7,7 +7,7 @@ from decimal import Decimal, InvalidOperation
 from django.db import IntegrityError, models
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from rest_framework import serializers, status, viewsets
+from rest_framework import mixins, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.fields import DateTimeField
 from rest_framework.request import Request
@@ -22,6 +22,7 @@ from .models import (
     InstallerQualification,
     Product,
     ProductImage,
+    StockTransaction,
     TransportRestriction,
 )
 from .pagination import ProductCursorPagination
@@ -31,6 +32,7 @@ from .serializers import (
     ProductDetailSerializer,
     ProductImageSerializer,
     ProductListItemSerializer,
+    StockTransactionSerializer,
     prefetch_for_include,
 )
 
@@ -281,6 +283,31 @@ class ProductViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class ProductTransactionViewSet(
+    mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet
+):
+    """API endpoints for managing product stock transactions."""
+
+    serializer_class = StockTransactionSerializer
+
+    def get_product(self) -> Product:
+        if not hasattr(self, '_product_cache'):
+            self._product_cache = get_object_or_404(Product, pk=self.kwargs['id'])
+        return self._product_cache  # type: ignore[attr-defined]
+
+    def get_queryset(self):  # type: ignore[override]
+        product = self.get_product()
+        return StockTransaction.objects.filter(product=product).order_by('-created')
+
+    def get_serializer_context(self):  # type: ignore[override]
+        context = super().get_serializer_context()
+        context['product'] = self.get_product()
+        return context
+
+    def perform_create(self, serializer):  # type: ignore[override]
+        serializer.save()
+
+
 class CategoryTreeView(APIView):
     def get(self, request: Request):
         categories = Category.objects.all().order_by('name')
@@ -329,5 +356,6 @@ __all__ = [
     'CategoryTreeView',
     'ColorsListView',
     'EnumsAggregateView',
+    'ProductTransactionViewSet',
     'ProductViewSet',
 ]

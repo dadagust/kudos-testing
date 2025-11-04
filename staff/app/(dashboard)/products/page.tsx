@@ -21,6 +21,8 @@ import {
   ProductImage,
   ProductComplementarySummary,
   ProductUpdatePayload,
+  ProductStockTransaction,
+  CreateProductStockTransactionPayload,
   productsApi,
   useInfiniteProductsQuery,
 } from '@/entities/product';
@@ -67,6 +69,17 @@ const formatPrice = (value: number | string | null | undefined) => {
     return '—';
   }
   return currencyFormatter.format(amount);
+};
+
+const formatDateTime = (value?: string | null) => {
+  if (!value) {
+    return '—';
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+  return date.toLocaleString('ru-RU');
 };
 
 const flattenCategories = (
@@ -737,6 +750,7 @@ const ProductCard = ({
   transportLabel,
   onEdit,
   onDelete,
+  onAddTransaction,
   canManage,
 }: {
   product: ProductListItem;
@@ -745,6 +759,7 @@ const ProductCard = ({
   transportLabel: string | undefined;
   onEdit?: (product: ProductListItem) => void;
   onDelete?: (product: ProductListItem) => void;
+  onAddTransaction?: (product: ProductListItem) => void;
   canManage: boolean;
 }) => {
   return (
@@ -797,10 +812,15 @@ const ProductCard = ({
           <Badge tone={product.delivery.self_pickup_allowed ? 'success' : 'info'}>
             {product.delivery.self_pickup_allowed ? 'Самовывоз доступен' : 'Только доставка'}
           </Badge>
+          <Badge tone="success">Доступно: {product.available_stock_qty}</Badge>
+          <Badge tone="info">На складе: {product.stock_qty}</Badge>
         </div>
 
         {canManage ? (
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <Button type="button" onClick={() => onAddTransaction?.(product)}>
+              Добавить транзакцию
+            </Button>
             <Button type="button" variant="ghost" onClick={() => onEdit?.(product)}>
               Редактировать
             </Button>
@@ -835,6 +855,17 @@ export default function ProductsPage() {
   const [isComplementaryPickerVisible, setIsComplementaryPickerVisible] = useState(false);
   const [complementarySearch, setComplementarySearch] = useState('');
   const complementaryLoadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  const [isTransactionsModalOpen, setIsTransactionsModalOpen] = useState(false);
+  const [transactionProduct, setTransactionProduct] = useState<ProductListItem | null>(null);
+  const [transactions, setTransactions] = useState<ProductStockTransaction[]>([]);
+  const [isLoadingTransactions, setIsLoadingTransactions] = useState(false);
+  const [isSubmittingTransaction, setIsSubmittingTransaction] = useState(false);
+  const [transactionError, setTransactionError] = useState<string | null>(null);
+  const [transactionSuccess, setTransactionSuccess] = useState<string | null>(null);
+  const [writeOffForm, setWriteOffForm] = useState({ quantity: '', affectsAvailable: true });
+  const [receiveForm, setReceiveForm] = useState({ quantity: '' });
+  const [planForm, setPlanForm] = useState({ quantity: '', scheduledFor: '' });
 
   const canManageProducts = usePermission('products_add_product');
   const queryClient = useQueryClient();
@@ -1378,6 +1409,156 @@ export default function ProductsPage() {
     deleteProductMutation.reset();
   };
 
+  const resetTransactionForms = () => {
+    setWriteOffForm({ quantity: '', affectsAvailable: true });
+    setReceiveForm({ quantity: '' });
+    setPlanForm({ quantity: '', scheduledFor: '' });
+  };
+
+  const loadTransactions = async (productId: string) => {
+    setIsLoadingTransactions(true);
+    setTransactionError(null);
+    try {
+      const items = await productsApi.listTransactions(productId);
+      setTransactions(items);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Не удалось загрузить транзакции. Попробуйте ещё раз позднее.';
+      setTransactionError(message);
+    } finally {
+      setIsLoadingTransactions(false);
+    }
+  };
+
+  const openTransactionsModal = (product: ProductListItem) => {
+    if (!canManageProducts) {
+      return;
+    }
+    setTransactionProduct(product);
+    setIsTransactionsModalOpen(true);
+    setTransactionError(null);
+    setTransactionSuccess(null);
+    setTransactions([]);
+    resetTransactionForms();
+    void loadTransactions(product.id);
+  };
+
+  const closeTransactionsModal = () => {
+    setIsTransactionsModalOpen(false);
+    setTransactionProduct(null);
+    setTransactions([]);
+    setTransactionError(null);
+    setTransactionSuccess(null);
+    resetTransactionForms();
+  };
+
+  const applyTransactionToProduct = (result: ProductStockTransaction) => {
+    if (!result.is_applied) {
+      return;
+    }
+    setTransactionProduct((prev) => {
+      if (!prev) {
+        return prev;
+      }
+      const stock = Math.max(prev.stock_qty + result.quantity_delta, 0);
+      const availableDelta = result.affects_available ? result.quantity_delta : 0;
+      const available = Math.max(prev.available_stock_qty + availableDelta, 0);
+      return { ...prev, stock_qty: stock, available_stock_qty: available };
+    });
+  };
+
+  const submitTransaction = async (
+    payload: CreateProductStockTransactionPayload,
+    successMessage: string,
+    reset?: () => void
+  ) => {
+    if (!transactionProduct) {
+      return;
+    }
+    setTransactionError(null);
+    setTransactionSuccess(null);
+    setIsSubmittingTransaction(true);
+    try {
+      const result = await productsApi.createTransaction(transactionProduct.id, payload);
+      applyTransactionToProduct(result);
+      await loadTransactions(transactionProduct.id);
+      if (reset) {
+        reset();
+      }
+      setTransactionSuccess(successMessage);
+      void queryClient.invalidateQueries({ queryKey: ['products'] });
+      void queryClient.invalidateQueries({ queryKey: ['products', 'infinite'] });
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Не удалось создать транзакцию. Попробуйте ещё раз позднее.';
+      setTransactionError(message);
+    } finally {
+      setIsSubmittingTransaction(false);
+    }
+  };
+
+  const handleWriteOffSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const quantity = Number(writeOffForm.quantity);
+    if (!Number.isFinite(quantity) || quantity <= 0) {
+      setTransactionError('Укажите корректное количество для списания.');
+      return;
+    }
+    const payload: CreateProductStockTransactionPayload = {
+      quantity_delta: -Math.abs(Math.trunc(quantity)),
+      affects_available: writeOffForm.affectsAvailable,
+    };
+    void submitTransaction(payload, 'Списание создано.', () =>
+      setWriteOffForm((prev) => ({ ...prev, quantity: '' }))
+    );
+  };
+
+  const handleReceiveSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const quantity = Number(receiveForm.quantity);
+    if (!Number.isFinite(quantity) || quantity <= 0) {
+      setTransactionError('Укажите корректное количество для оприходования.');
+      return;
+    }
+    const payload: CreateProductStockTransactionPayload = {
+      quantity_delta: Math.abs(Math.trunc(quantity)),
+      affects_available: true,
+    };
+    void submitTransaction(payload, 'Поступление создано.', () => setReceiveForm({ quantity: '' }));
+  };
+
+  const handlePlanSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const quantity = Number(planForm.quantity);
+    if (!Number.isFinite(quantity) || quantity <= 0) {
+      setTransactionError('Укажите корректное количество для партии.');
+      return;
+    }
+    const scheduledRaw = planForm.scheduledFor.trim();
+    if (!scheduledRaw) {
+      setTransactionError('Укажите дату и время запуска партии.');
+      return;
+    }
+    const scheduledDate = new Date(scheduledRaw);
+    if (Number.isNaN(scheduledDate.getTime())) {
+      setTransactionError('Укажите корректную дату и время.');
+      return;
+    }
+    const payload: CreateProductStockTransactionPayload = {
+      quantity_delta: Math.abs(Math.trunc(quantity)),
+      affects_available: true,
+      is_applied: false,
+      scheduled_for: scheduledDate.toISOString(),
+    };
+    void submitTransaction(payload, 'Поставка запланирована.', () =>
+      setPlanForm({ quantity: '', scheduledFor: '' })
+    );
+  };
+
   const handleConfirmDelete = async () => {
     if (!productToDelete) {
       return;
@@ -1827,6 +2008,7 @@ export default function ProductsPage() {
               }
               onEdit={openEditModal}
               onDelete={openDeleteModal}
+              onAddTransaction={openTransactionsModal}
               canManage={canManageProducts}
             />
           ))}
@@ -2845,6 +3027,217 @@ export default function ProductsPage() {
             </Button>
           </div>
         </form>
+      </Modal>
+
+      <Modal
+        open={isTransactionsModalOpen}
+        title={
+          transactionProduct
+            ? `Складские транзакции — ${transactionProduct.name}`
+            : 'Складские транзакции'
+        }
+        onClose={closeTransactionsModal}
+      >
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px',
+            maxHeight: '70vh',
+            overflowY: 'auto',
+          }}
+        >
+          {transactionProduct ? (
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <Badge tone="success">Доступно: {transactionProduct.available_stock_qty}</Badge>
+              <Badge tone="info">На складе: {transactionProduct.stock_qty}</Badge>
+            </div>
+          ) : null}
+
+          {transactionError ? (
+            <Alert tone="danger" title="Ошибка">
+              {transactionError}
+            </Alert>
+          ) : null}
+
+          {transactionSuccess ? (
+            <Alert tone="success" title="Готово">
+              {transactionSuccess}
+            </Alert>
+          ) : null}
+
+          <section style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <h3 style={{ margin: 0 }}>История транзакций</h3>
+            {isLoadingTransactions ? (
+              <Spinner label="Загружаем транзакции" />
+            ) : transactions.length > 0 ? (
+              <ul
+                style={{
+                  listStyle: 'none',
+                  margin: 0,
+                  padding: 0,
+                  maxHeight: '240px',
+                  overflowY: 'auto',
+                  borderRadius: '12px',
+                  border: '1px solid var(--color-border)',
+                }}
+              >
+                {transactions.map((item) => (
+                  <li
+                    key={item.id}
+                    style={{
+                      padding: '12px 16px',
+                      borderBottom: '1px solid var(--color-border)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '6px',
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        flexWrap: 'wrap',
+                        gap: '8px',
+                      }}
+                    >
+                      <span style={{ fontWeight: 600 }}>{formatDateTime(item.created)}</span>
+                      <span
+                        style={{
+                          color:
+                            item.quantity_delta >= 0
+                              ? 'var(--color-success)'
+                              : 'var(--color-danger)',
+                        }}
+                      >
+                        {item.quantity_delta > 0
+                          ? `+${item.quantity_delta}`
+                          : item.quantity_delta}
+                      </span>
+                    </div>
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '12px',
+                        fontSize: '0.875rem',
+                        color: 'var(--color-text-muted)',
+                      }}
+                    >
+                      <span>
+                        {item.affects_available
+                          ? 'Доступный остаток изменён'
+                          : 'Доступный остаток не изменён'}
+                      </span>
+                      {!item.is_applied ? <span>Не применено</span> : null}
+                      {item.scheduled_for ? (
+                        <span>Запланировано: {formatDateTime(item.scheduled_for)}</span>
+                      ) : null}
+                      {item.note ? <span>Комментарий: {item.note}</span> : null}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p style={{ color: 'var(--color-text-muted)', margin: 0 }}>
+                Транзакции ещё не создавались.
+              </p>
+            )}
+          </section>
+
+          <section style={{ display: 'grid', gap: '24px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <h3 style={{ margin: 0 }}>Списать</h3>
+              <form
+                onSubmit={handleWriteOffSubmit}
+                style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+              >
+                <Input
+                  label="Количество для списания"
+                  type="number"
+                  min={1}
+                  step={1}
+                  value={writeOffForm.quantity}
+                  onChange={(event) =>
+                    setWriteOffForm((prev) => ({ ...prev, quantity: event.target.value }))
+                  }
+                  required
+                />
+                <label style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <input
+                    type="checkbox"
+                    checked={writeOffForm.affectsAvailable}
+                    onChange={(event) =>
+                      setWriteOffForm((prev) => ({
+                        ...prev,
+                        affectsAvailable: event.target.checked,
+                      }))
+                    }
+                  />
+                  <span>Также уменьшить доступный остаток</span>
+                </label>
+                <Button type="submit" disabled={isSubmittingTransaction}>
+                  {isSubmittingTransaction ? 'Сохраняем…' : 'Списать'}
+                </Button>
+              </form>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <h3 style={{ margin: 0 }}>Оприходовать</h3>
+              <form
+                onSubmit={handleReceiveSubmit}
+                style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+              >
+                <Input
+                  label="Количество для оприходования"
+                  type="number"
+                  min={1}
+                  step={1}
+                  value={receiveForm.quantity}
+                  onChange={(event) =>
+                    setReceiveForm({ quantity: event.target.value })
+                  }
+                  required
+                />
+                <Button type="submit" disabled={isSubmittingTransaction}>
+                  {isSubmittingTransaction ? 'Сохраняем…' : 'Оприходовать'}
+                </Button>
+              </form>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <h3 style={{ margin: 0 }}>Запланировать партию</h3>
+              <form
+                onSubmit={handlePlanSubmit}
+                style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+              >
+                <Input
+                  label="Количество"
+                  type="number"
+                  min={1}
+                  step={1}
+                  value={planForm.quantity}
+                  onChange={(event) =>
+                    setPlanForm((prev) => ({ ...prev, quantity: event.target.value }))
+                  }
+                  required
+                />
+                <Input
+                  label="Дата и время поставки"
+                  type="datetime-local"
+                  value={planForm.scheduledFor}
+                  onChange={(event) =>
+                    setPlanForm((prev) => ({ ...prev, scheduledFor: event.target.value }))
+                  }
+                  required
+                />
+                <Button type="submit" disabled={isSubmittingTransaction}>
+                  {isSubmittingTransaction ? 'Сохраняем…' : 'Запланировать'}
+                </Button>
+              </form>
+            </div>
+          </section>
+        </div>
       </Modal>
 
       <Modal open={isDeleteModalOpen} title="Удаление товара" onClose={closeDeleteModal}>

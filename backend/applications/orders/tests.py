@@ -36,7 +36,11 @@ class OrderApiTests(APITestCase):
             delivery_volume_cm3=1000,
         )
         self.product.setup_installer_qualification = self.installer_qualification
-        self.product.save(update_fields=['setup_installer_qualification'])
+        self.product.stock_qty = 10
+        self.product.available_stock_qty = 10
+        self.product.save(
+            update_fields=['setup_installer_qualification', 'stock_qty', 'available_stock_qty']
+        )
 
     def test_create_order(self):
         url = reverse('orders:order-list')
@@ -68,6 +72,9 @@ class OrderApiTests(APITestCase):
         self.assertIsNone(item['rental_tiers'])
         self.assertAlmostEqual(float(item['unit_price']), 2700.0, places=2)
         self.assertAlmostEqual(float(data['total_amount']), 5900.0, places=2)
+
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.available_stock_qty, 8)
 
     def test_list_orders_filtered_by_group(self):
         url = reverse('orders:order-list')
@@ -172,3 +179,47 @@ class OrderApiTests(APITestCase):
         self.assertAlmostEqual(float(data['total_amount']), 5900.0, places=2)
         self.assertIn('items', data)
         self.assertEqual(len(data['items']), 1)
+
+    def test_cannot_create_order_when_stock_is_insufficient(self):
+        self.product.available_stock_qty = 1
+        self.product.save(update_fields=['available_stock_qty'])
+
+        url = reverse('orders:order-list')
+        payload = {
+            'installation_date': '2024-06-01',
+            'dismantle_date': '2024-06-05',
+            'items': [{'product_id': str(self.product.pk), 'quantity': 2, 'rental_days': 1}],
+        }
+
+        response = self.client.post(url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        body = response.json()
+        self.assertIn('items', body)
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.available_stock_qty, 1)
+
+    def test_updating_order_restores_previous_reservations(self):
+        url = reverse('orders:order-list')
+        payload = {
+            'installation_date': '2024-06-01',
+            'dismantle_date': '2024-06-05',
+            'items': [{'product_id': str(self.product.pk), 'quantity': 3, 'rental_days': 1}],
+        }
+        response = self.client.post(url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        order_id = response.json()['data']['id']
+
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.available_stock_qty, 7)
+
+        update_url = reverse('orders:order-detail', args=[order_id])
+        update_payload = {
+            'installation_date': '2024-06-02',
+            'dismantle_date': '2024-06-06',
+            'items': [{'product_id': str(self.product.pk), 'quantity': 1, 'rental_days': 1}],
+        }
+        response = self.client.put(update_url, update_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.available_stock_qty, 9)
