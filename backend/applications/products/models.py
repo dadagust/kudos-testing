@@ -286,6 +286,11 @@ class Product(Date):
         validators=[MinValueValidator(1)],
         default=0,
     )
+    available_stock_qty = models.PositiveIntegerField(
+        verbose_name='Доступный остаток на складе',
+        validators = [MinValueValidator(1)],
+        default=0,
+    )
 
     delivery_volume_cm3 = models.PositiveIntegerField(
         verbose_name='Объём, см3',
@@ -416,6 +421,10 @@ class Product(Date):
     @property
     def in_stock(self) -> bool:
         return self.stock_qty > 0
+
+    @property
+    def available_in_stock(self) -> bool:
+        return self.available_stock_qty > 0
 
     @property
     def thumbnail(self) -> ProductImage | None:
