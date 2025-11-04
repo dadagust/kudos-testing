@@ -203,11 +203,6 @@ export default function Home() {
       return;
     }
 
-    if (!atLeastOneProductSelected) {
-      setOrderError('Добавьте хотя бы один товар.');
-      return;
-    }
-
     if (orderForm.deliveryType === 'delivery' && !orderForm.deliveryAddress.trim()) {
       setOrderError('Укажите адрес доставки или выберите самовывоз.');
       return;
@@ -218,54 +213,88 @@ export default function Home() {
       return;
     }
 
-    for (const product of products) {
-      const rawValue = Number(orderForm.productQuantities[product.id] ?? 0);
-      if (!Number.isFinite(rawValue) || rawValue < 0) {
-        setOrderError('Количество должно быть неотрицательным числом.');
-        return;
-      }
-      const available = Math.max(0, product.available_stock_qty ?? 0);
-      if (rawValue > available) {
-        setOrderError(
-          `Для товара «${product.name}» доступно только ${available} шт.`
-        );
-        return;
-      }
+    if (!atLeastOneProductSelected) {
+      setOrderError('Добавьте хотя бы один товар.');
+      return;
     }
-
-    const items = products
-      .map((product) => {
-        const rawValue = Number(orderForm.productQuantities[product.id] ?? 0);
-        const quantity = sanitizeQuantity(product, rawValue);
-        return quantity > 0 ? { product_id: product.id, quantity } : null;
-      })
-      .filter(
-        (
-          item
-        ): item is {
-          product_id: string;
-          quantity: number;
-        } => item !== null
-      );
-
-    const payload: CreateOrderPayload = {
-      status: 'new',
-      installation_date: orderForm.installationDate,
-      dismantle_date: orderForm.dismantleDate,
-      delivery_type: orderForm.deliveryType,
-      delivery_address:
-        orderForm.deliveryType === 'pickup' ? null : orderForm.deliveryAddress.trim() || null,
-      comment: orderForm.comment.trim() || null,
-      items,
-    };
 
     setIsSubmittingOrder(true);
     try {
+      const latestProducts = await productsApi.list(tokens.access);
+      setProducts(latestProducts);
+
+      const sanitizedQuantities = ensureQuantities(
+        latestProducts,
+        orderForm.productQuantities
+      );
+
+      let validationError: string | null = null;
+
+      for (const product of latestProducts) {
+        const rawValue = Number(orderForm.productQuantities[product.id] ?? 0);
+        if (!Number.isFinite(rawValue) || rawValue < 0) {
+          validationError = 'Количество должно быть неотрицательным числом.';
+          break;
+        }
+        const available = Math.max(0, product.available_stock_qty ?? 0);
+        if (rawValue > available) {
+          validationError = `Для товара «${product.name}» доступно только ${available} шт.`;
+          break;
+        }
+      }
+
+      const hasSelection = latestProducts.some(
+        (product) => (sanitizedQuantities[product.id] ?? 0) > 0
+      );
+
+      if (!validationError && !hasSelection) {
+        validationError = 'Добавьте хотя бы один товар.';
+      }
+
+      if (validationError) {
+        setOrderForm((prev) => ({
+          ...prev,
+          productQuantities: sanitizedQuantities,
+        }));
+        setOrderError(validationError);
+        return;
+      }
+
+      setOrderForm((prev) => ({
+        ...prev,
+        productQuantities: sanitizedQuantities,
+      }));
+
+      const items = latestProducts
+        .map((product) => {
+          const quantity = sanitizedQuantities[product.id] ?? 0;
+          return quantity > 0 ? { product_id: product.id, quantity } : null;
+        })
+        .filter(
+          (
+            item
+          ): item is {
+            product_id: string;
+            quantity: number;
+          } => item !== null
+        );
+
+      const payload: CreateOrderPayload = {
+        status: 'new',
+        installation_date: orderForm.installationDate,
+        dismantle_date: orderForm.dismantleDate,
+        delivery_type: orderForm.deliveryType,
+        delivery_address:
+          orderForm.deliveryType === 'pickup' ? null : orderForm.deliveryAddress.trim() || null,
+        comment: orderForm.comment.trim() || null,
+        items,
+      };
+
       const response = await ordersApi.create(payload, tokens.access);
       setOrderSuccess(response.data);
       setOrderForm((previous) => ({
         ...createInitialOrderForm(),
-        productQuantities: ensureQuantities(products),
+        productQuantities: ensureQuantities(latestProducts),
       }));
     } catch (error) {
       console.error(error);
@@ -454,51 +483,63 @@ export default function Home() {
                   <p className={styles.helperText}>Загружаем товары…</p>
                 ) : (
                   <ul className={styles.productList}>
-                    {products.map((product) => (
-                      <li key={product.id} className={styles.productItem}>
-                      <div className={styles.productInfo}>
-                        <span className={styles.productName}>{product.name}</span>
-                        {Number.isFinite(product.base_price) && (
-                          <span className={styles.productPrice}>
-                            {new Intl.NumberFormat('ru-RU', {
-                              style: 'currency',
-                              currency: 'RUB',
-                              maximumFractionDigits: 0,
-                            }).format(product.base_price)}
-                          </span>
-                        )}
-                        <div className={styles.productStock}>
-                          <span>Доступно: {product.available_stock_qty}</span>
-                          <span>На складе: {product.stock_qty}</span>
-                        </div>
-                        {product.available_stock_qty <= 0 ? (
-                          <span className={styles.helperText}>Нет доступного остатка</span>
-                        ) : null}
-                      </div>
-                      <input
-                        type="number"
-                        min={0}
-                        step={1}
-                        max={Math.max(0, product.available_stock_qty ?? 0)}
-                        className={styles.quantityInput}
-                        value={orderForm.productQuantities[product.id] ?? 0}
-                        disabled={product.available_stock_qty <= 0}
-                        onChange={(event) => {
-                          const rawValue = event.target.value;
-                          setOrderForm((prev) => ({
-                            ...prev,
-                            productQuantities: {
-                              ...prev.productQuantities,
-                              [product.id]:
-                                rawValue === ''
-                                  ? 0
-                                  : sanitizeQuantity(product, Number(rawValue)),
-                            },
-                          }));
-                        }}
-                      />
-                      </li>
-                    ))}
+                    {products.map((product) => {
+                      const rawSelected = Number(orderForm.productQuantities[product.id] ?? 0);
+                      const selectedQuantity = sanitizeQuantity(product, rawSelected);
+                      const available = Math.max(0, product.available_stock_qty ?? 0);
+                      const remaining = Math.max(available - selectedQuantity, 0);
+
+                      return (
+                        <li key={product.id} className={styles.productItem}>
+                          <div className={styles.productInfo}>
+                            <span className={styles.productName}>{product.name}</span>
+                            {Number.isFinite(product.base_price) && (
+                              <span className={styles.productPrice}>
+                                {new Intl.NumberFormat('ru-RU', {
+                                  style: 'currency',
+                                  currency: 'RUB',
+                                  maximumFractionDigits: 0,
+                                }).format(product.base_price)}
+                              </span>
+                            )}
+                            <div className={styles.productStock}>
+                              <span>Доступно: {product.available_stock_qty}</span>
+                              <span>На складе: {product.stock_qty}</span>
+                            </div>
+                            {product.available_stock_qty <= 0 ? (
+                              <span className={styles.helperText}>Нет доступного остатка</span>
+                            ) : null}
+                          </div>
+                          <div className={styles.productControls}>
+                            <input
+                              type="number"
+                              min={0}
+                              step={1}
+                              max={available}
+                              className={styles.quantityInput}
+                              value={orderForm.productQuantities[product.id] ?? 0}
+                              disabled={product.available_stock_qty <= 0}
+                              onChange={(event) => {
+                                const rawValue = event.target.value;
+                                setOrderForm((prev) => ({
+                                  ...prev,
+                                  productQuantities: {
+                                    ...prev.productQuantities,
+                                    [product.id]:
+                                      rawValue === ''
+                                        ? 0
+                                        : sanitizeQuantity(product, Number(rawValue)),
+                                  },
+                                }));
+                              }}
+                            />
+                            <span className={styles.productRemaining}>
+                              Остаток после выбора: {remaining}
+                            </span>
+                          </div>
+                        </li>
+                      );
+                    })}
                   </ul>
                 )}
               </div>
