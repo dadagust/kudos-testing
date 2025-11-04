@@ -1,5 +1,3 @@
-"""Utilities for generating stable slugs for seeded categories."""
-
 from __future__ import annotations
 
 from django.utils.text import slugify
@@ -39,15 +37,12 @@ _RU_TO_LATIN = {
     'ю': 'yu',
     'я': 'ya',
 }
-
-
-def _transliterate(value: str) -> str:
-    return ''.join(_RU_TO_LATIN.get(char, char) for char in value.lower())
+_TRANSLIT = {ord(c): r for c, r in _RU_TO_LATIN.items()}
 
 
 def make_slug(name: str) -> str:
-    transliterated = _transliterate(name)
-    slug = slugify(transliterated, allow_unicode=False)
+    text = name.lower().translate(_TRANSLIT)
+    slug = slugify(text, allow_unicode=False)
     if not slug:
         raise ValueError(f"Не удалось построить slug для категории '{name}'")
     return slug

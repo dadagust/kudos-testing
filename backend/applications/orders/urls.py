@@ -8,32 +8,34 @@ from .views import OrderCalculationView, OrderViewSet
 
 app_name = 'orders'
 
-urlpatterns = allow_optional_trailing_slash([
-    path(
-        'order/',
-        OrderViewSet.as_view(
-            {
-                'get': 'list',
-                'post': 'create',
-            }
+urlpatterns = allow_optional_trailing_slash(
+    [
+        path(
+            'order/',
+            OrderViewSet.as_view(
+                {
+                    'get': 'list',
+                    'post': 'create',
+                }
+            ),
+            name='order-list',
         ),
-        name='order-list',
-    ),
-    path(
-        'order/calculate-total/',
-        OrderCalculationView.as_view(),
-        name='order-calculate-total',
-    ),
-    path(
-        'order/<uuid:pk>/',
-        OrderViewSet.as_view(
-            {
-                'get': 'retrieve',
-                'put': 'update',
-                'patch': 'partial_update',
-                'delete': 'destroy',
-            }
+        path(
+            'order/calculate-total/',
+            OrderCalculationView.as_view(),
+            name='order-calculate-total',
         ),
-        name='order-detail',
-    ),
-])
+        path(
+            'order/<uuid:pk>/',
+            OrderViewSet.as_view(
+                {
+                    'get': 'retrieve',
+                    'put': 'update',
+                    'patch': 'partial_update',
+                    'delete': 'destroy',
+                }
+            ),
+            name='order-detail',
+        ),
+    ]
+)

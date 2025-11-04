@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
-
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -20,17 +18,12 @@ def _serialize_product(product: Product) -> dict[str, object]:
     }
 
 
-def _iter_products() -> Iterable[dict[str, object]]:
-    for product in Product.objects.order_by('-created')[:100]:
-        yield _serialize_product(product)
-
-
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def product_list(request):
     """Return the catalog of available products."""
-
-    return Response({'data': list(_iter_products())})
+    products = Product.objects.order_by('-created')
+    return Response({'data': [_serialize_product(p) for p in products]})
 
 
 @api_view(['GET'])

@@ -2,17 +2,19 @@
 
 from __future__ import annotations
 
-from typing import Iterable, List, Union
+from collections.abc import Iterable
 
 from django.urls import URLPattern, URLResolver, include, path
 
-__all__ = ["allow_optional_trailing_slash"]
+__all__ = ['allow_optional_trailing_slash']
 
 
-ExpandedPatternList = List[Union[URLPattern, URLResolver]]
+ExpandedPatternList = list[URLPattern | URLResolver]
 
 
-def allow_optional_trailing_slash(patterns: Iterable[Union[URLPattern, URLResolver]]) -> ExpandedPatternList:
+def allow_optional_trailing_slash(
+    patterns: Iterable[URLPattern | URLResolver],
+) -> ExpandedPatternList:
     """Return URL patterns that accept both with and without trailing slashes."""
     expanded: ExpandedPatternList = []
 
@@ -20,8 +22,8 @@ def allow_optional_trailing_slash(patterns: Iterable[Union[URLPattern, URLResolv
         expanded.append(pattern)
 
         if isinstance(pattern, URLPattern):
-            route = getattr(pattern.pattern, "_route", None)
-            if not route or not route.endswith("/"):
+            route = getattr(pattern.pattern, '_route', None)
+            if not route or not route.endswith('/'):
                 continue
 
             slashless_route = route[:-1]
@@ -30,7 +32,7 @@ def allow_optional_trailing_slash(patterns: Iterable[Union[URLPattern, URLResolv
 
             if any(
                 isinstance(existing, URLPattern)
-                and getattr(existing.pattern, "_route", None) == slashless_route
+                and getattr(existing.pattern, '_route', None) == slashless_route
                 for existing in expanded
             ):
                 continue
@@ -44,8 +46,8 @@ def allow_optional_trailing_slash(patterns: Iterable[Union[URLPattern, URLResolv
                 )
             )
         elif isinstance(pattern, URLResolver):
-            route = getattr(pattern.pattern, "_route", None)
-            if not route or not route.endswith("/"):
+            route = getattr(pattern.pattern, '_route', None)
+            if not route or not route.endswith('/'):
                 continue
 
             slashless_route = route[:-1]
@@ -54,12 +56,12 @@ def allow_optional_trailing_slash(patterns: Iterable[Union[URLPattern, URLResolv
 
             if any(
                 isinstance(existing, URLResolver)
-                and getattr(existing.pattern, "_route", None) == slashless_route
+                and getattr(existing.pattern, '_route', None) == slashless_route
                 for existing in expanded
             ):
                 continue
 
-            include_arg: Union[str, tuple[str, str]] = pattern.urlconf_name
+            include_arg: str | tuple[str, str] = pattern.urlconf_name
             if pattern.app_name:
                 include_arg = (pattern.urlconf_name, pattern.app_name)
 

@@ -18,6 +18,9 @@ cd kudos
 
 ```bash
 cp .env.example .env
+
+docker builder prune -a
+
 docker compose up --build
 ```
 Команда собирает образы, поднимает Postgres, Redis, Django-бэкенд (`:8000` по умолчанию), пользовательский фронтенд (`:4000`) и административный фронтенд (`:3000`). Значения можно изменить через переменные `BACKEND_PORT`, `FRONTEND_PORT` и `STAFF_PORT` в файле `.env`.

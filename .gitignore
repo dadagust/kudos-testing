@@ -11,9 +11,9 @@ node_modules/
 dist/
 *.log
 .env.local
-!/backend/config/.env.local
-!/frontend/.env.local
-!/staff/.env.local
+/backend/config/.env.local
+/frontend/.env.local
+/staff/.env.local
 *.tsbuildinfo
 /media/
 /staticfiles/
