@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+from django.db import transaction
 from django.db.models import Q
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Order
+from .models import Order, OrderStatus
 from .permissions import OrderAccessPolicy
 from .serializers import (
     OrderCalculationSerializer,
@@ -16,6 +17,7 @@ from .serializers import (
     OrderSummarySerializer,
     OrderWriteSerializer,
 )
+from .services import adjust_available_stock, collect_order_item_totals
 
 
 class OrderViewSet(viewsets.ModelViewSet):
@@ -104,6 +106,14 @@ class OrderViewSet(viewsets.ModelViewSet):
     def partial_update(self, request, *args, **kwargs):
         kwargs['partial'] = True
         return self.update(request, *args, **kwargs)
+
+    @transaction.atomic
+    def perform_destroy(self, instance):  # type: ignore[override]
+        if instance.status != OrderStatus.DECLINED:
+            product_totals = collect_order_item_totals(instance)
+            if product_totals:
+                adjust_available_stock(product_totals, increment=True)
+        super().perform_destroy(instance)
 
 
 class OrderCalculationView(APIView):

@@ -15,6 +15,7 @@ from applications.products.choices import RentalMode
 from applications.products.models import Product
 
 from .models import DeliveryType, Order, OrderItem, OrderStatus
+from .services import adjust_available_stock, collect_order_item_totals
 
 
 class CustomerSummarySerializer(serializers.ModelSerializer):
@@ -404,7 +405,12 @@ class OrderWriteSerializer(serializers.ModelSerializer):
     def create(self, validated_data: dict[str, Any]) -> Order:
         items_data = validated_data.pop('items', [])
         order = Order.objects.create(**validated_data)
-        self._replace_items(order, items_data, self._default_rental_days)
+        self._replace_items(
+            order,
+            items_data,
+            self._default_rental_days,
+            reserve_stock=order.status != OrderStatus.DECLINED,
+        )
         order.recalculate_total_amount()
         order.save(update_fields=['total_amount'])
         return order
@@ -412,15 +418,36 @@ class OrderWriteSerializer(serializers.ModelSerializer):
     @transaction.atomic
     def update(self, instance: Order, validated_data: dict[str, Any]) -> Order:
         items_data = validated_data.pop('items', None)
+        previous_status = instance.status
+        new_status = validated_data.get('status', previous_status)
         for field, value in validated_data.items():
             setattr(instance, field, value)
         instance.save()
         if items_data is not None:
-            existing_quantities = self._collect_existing_item_quantities(instance)
-            if existing_quantities:
-                self._adjust_available_stock(existing_quantities, increment=True)
+            if previous_status != OrderStatus.DECLINED:
+                existing_quantities = collect_order_item_totals(instance)
+                if existing_quantities:
+                    adjust_available_stock(existing_quantities, increment=True)
             instance.items.all().delete()
-            self._replace_items(instance, items_data, self._default_rental_days)
+            self._replace_items(
+                instance,
+                items_data,
+                self._default_rental_days,
+                reserve_stock=new_status != OrderStatus.DECLINED,
+            )
+        if new_status != previous_status:
+            product_totals = collect_order_item_totals(instance)
+            if product_totals:
+                if (
+                    new_status == OrderStatus.DECLINED
+                    and previous_status != OrderStatus.DECLINED
+                ):
+                    adjust_available_stock(product_totals, increment=True)
+                elif (
+                    previous_status == OrderStatus.DECLINED
+                    and new_status != OrderStatus.DECLINED
+                ):
+                    adjust_available_stock(product_totals, increment=False)
         instance.recalculate_total_amount()
         instance.save(update_fields=['total_amount'])
         return instance
@@ -430,12 +457,14 @@ class OrderWriteSerializer(serializers.ModelSerializer):
         order: Order,
         items_data: list[dict[str, Any]],
         default_rental_days: int | None,
+        *,
+        reserve_stock: bool,
     ) -> None:
         calculated_items, _, product_totals = _calculate_items_pricing(
             items_data, default_rental_days
         )
-        if product_totals:
-            self._adjust_available_stock(product_totals, increment=False)
+        if reserve_stock and product_totals:
+            adjust_available_stock(product_totals, increment=False)
         order_items = [
             OrderItem(
                 order=order,
@@ -450,52 +479,6 @@ class OrderWriteSerializer(serializers.ModelSerializer):
             for item in calculated_items
         ]
         OrderItem.objects.bulk_create(order_items)
-
-    def _collect_existing_item_quantities(self, order: Order) -> dict[str, int]:
-        totals: dict[str, int] = {}
-        for item in order.items.select_related('product'):
-            if not item.product_id:
-                continue
-            product_id = str(item.product_id)
-            totals[product_id] = totals.get(product_id, 0) + item.quantity
-        return totals
-
-    def _adjust_available_stock(self, product_totals: dict[str, int], *, increment: bool) -> None:
-        if not product_totals:
-            return
-
-        product_ids = list(product_totals.keys())
-        products = {
-            str(product.pk): product
-            for product in Product.objects.select_for_update().filter(pk__in=product_ids)
-        }
-
-        missing = [pid for pid in product_ids if pid not in products]
-        if missing:
-            raise serializers.ValidationError({'items': f'Товар {missing[0]} не найден'})
-
-        updated: list[Product] = []
-        for product_id, quantity in product_totals.items():
-            product = products[product_id]
-            if increment:
-                product.available_stock_qty += quantity
-            else:
-                if product.available_stock_qty < quantity:
-                    raise serializers.ValidationError(
-                        {
-                            'items': (
-                                'Недостаточно товара '
-                                f'"{product.name}" на складе. '
-                                f'Доступно: {product.available_stock_qty}, требуется: {quantity}.'
-                            )
-                        }
-                    )
-                product.available_stock_qty -= quantity
-            updated.append(product)
-
-        if updated:
-            Product.objects.bulk_update(updated, ['available_stock_qty'])
-
 
 class OrderCalculationSerializer(OrderWriteSerializer):
     class Meta(OrderWriteSerializer.Meta):

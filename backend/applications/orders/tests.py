@@ -223,3 +223,55 @@ class OrderApiTests(APITestCase):
 
         self.product.refresh_from_db()
         self.assertEqual(self.product.available_stock_qty, 9)
+
+    def test_cancelling_and_reopening_order_updates_stock(self):
+        url = reverse('orders:order-list')
+        payload = {
+            'installation_date': '2024-06-01',
+            'dismantle_date': '2024-06-05',
+            'items': [{'product_id': str(self.product.pk), 'quantity': 2, 'rental_days': 1}],
+        }
+
+        response = self.client.post(url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        order_id = response.json()['data']['id']
+
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.available_stock_qty, 8)
+
+        detail_url = reverse('orders:order-detail', args=[order_id])
+        response = self.client.patch(
+            detail_url, {'status': OrderStatus.DECLINED}, format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.available_stock_qty, 10)
+
+        response = self.client.patch(detail_url, {'status': OrderStatus.NEW}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.available_stock_qty, 8)
+
+    def test_deleting_order_restores_stock(self):
+        url = reverse('orders:order-list')
+        payload = {
+            'installation_date': '2024-06-01',
+            'dismantle_date': '2024-06-05',
+            'items': [{'product_id': str(self.product.pk), 'quantity': 2, 'rental_days': 1}],
+        }
+
+        response = self.client.post(url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        order_id = response.json()['data']['id']
+
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.available_stock_qty, 8)
+
+        detail_url = reverse('orders:order-detail', args=[order_id])
+        response = self.client.delete(detail_url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.available_stock_qty, 10)
