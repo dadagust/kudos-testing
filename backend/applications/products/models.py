@@ -275,6 +275,18 @@ class Product(Date):
         null=True,
         blank=True,
     )
+
+    description = models.TextField(
+        verbose_name='Описание',
+        blank=True,
+    )
+
+    stock_qty = models.PositiveIntegerField(
+        verbose_name='Остаток на складе',
+        validators=[MinValueValidator(1)],
+        default=0,
+    )
+
     delivery_volume_cm3 = models.PositiveIntegerField(
         verbose_name='Объём, см3',
         null=True,
@@ -400,6 +412,10 @@ class Product(Date):
                 name='product_color_idx',
             ),
         ]
+
+    @property
+    def in_stock(self) -> bool:
+        return self.stock_qty > 0
 
     @property
     def thumbnail(self) -> ProductImage | None:
