@@ -471,6 +471,12 @@ class Product(Date):
         return None
 
 
+class OrderStockTransactionType(models.TextChoices):
+    RESERVATION = 'reservation', 'Резервирование заказа'
+    ISSUE = 'issue', 'Списание по заказу'
+    RETURN = 'return', 'Возврат по заказу'
+
+
 class StockTransaction(Date):
     """Inventory transaction affecting product stock levels."""
 
@@ -488,6 +494,11 @@ class StockTransaction(Date):
     quantity_delta = models.IntegerField(
         verbose_name='Изменение количества',
         help_text='Положительное значение увеличивает склад, отрицательное уменьшает.',
+    )
+    affects_stock = models.BooleanField(
+        verbose_name='Влияет на складской остаток',
+        default=True,
+        help_text='Если выключено, фактический складской остаток не изменится.',
     )
     affects_available = models.BooleanField(
         verbose_name='Влияет на доступный остаток',
@@ -522,11 +533,32 @@ class StockTransaction(Date):
         max_length=255,
         blank=True,
     )
+    order = models.ForeignKey(
+        to='orders.Order',
+        verbose_name='Заказ',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='stock_transactions',
+    )
+    order_transaction_type = models.CharField(
+        verbose_name='Тип транзакции заказа',
+        max_length=32,
+        choices=OrderStockTransactionType.choices,
+        null=True,
+        blank=True,
+    )
 
     class Meta(Date.Meta):
         verbose_name = 'Складская транзакция'
         verbose_name_plural = 'Складские транзакции'
         ordering = ['-created']
+        constraints = [
+            models.UniqueConstraint(
+                fields=('order', 'order_transaction_type', 'product'),
+                name='unique_order_transaction_per_product',
+            )
+        ]
 
     def __str__(self) -> str:  # pragma: no cover - human readable repr
         return f'{self.product.name}: {self.quantity_delta}'
@@ -651,4 +683,10 @@ class ProductImage(Date):
         self.save(update_fields=['file'], process_image=False)
 
 
-__all__ = ['Category', 'Product', 'ProductImage', 'StockTransaction']
+__all__ = [
+    'Category',
+    'Product',
+    'ProductImage',
+    'StockTransaction',
+    'OrderStockTransactionType',
+]

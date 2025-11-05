@@ -677,6 +677,7 @@ class ProductListItemSerializer(serializers.ModelSerializer):
 class StockTransactionSerializer(serializers.ModelSerializer):
     created_by = serializers.PrimaryKeyRelatedField(read_only=True)
     created_by_name = serializers.CharField(read_only=True)
+    order_id = serializers.UUIDField(read_only=True)
 
     class Meta:
         model = StockTransaction
@@ -684,10 +685,13 @@ class StockTransactionSerializer(serializers.ModelSerializer):
             'id',
             'product_id',
             'quantity_delta',
+            'affects_stock',
             'affects_available',
             'is_applied',
             'scheduled_for',
             'note',
+            'order_id',
+            'order_transaction_type',
             'created',
             'created_by',
             'created_by_name',
@@ -695,6 +699,7 @@ class StockTransactionSerializer(serializers.ModelSerializer):
         read_only_fields = (
             'id',
             'product_id',
+            'order_id',
             'created',
             'created_by',
             'created_by_name',
