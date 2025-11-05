@@ -675,6 +675,9 @@ class ProductListItemSerializer(serializers.ModelSerializer):
 
 
 class StockTransactionSerializer(serializers.ModelSerializer):
+    created_by = serializers.PrimaryKeyRelatedField(read_only=True)
+    created_by_name = serializers.CharField(read_only=True)
+
     class Meta:
         model = StockTransaction
         fields = (
@@ -686,11 +689,15 @@ class StockTransactionSerializer(serializers.ModelSerializer):
             'scheduled_for',
             'note',
             'created',
+            'created_by',
+            'created_by_name',
         )
         read_only_fields = (
             'id',
             'product_id',
             'created',
+            'created_by',
+            'created_by_name',
         )
 
     def validate_quantity_delta(self, value: int) -> int:
@@ -711,6 +718,9 @@ class StockTransactionSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):  # type: ignore[override]
         product = self.context['product']
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            validated_data.setdefault('created_by', request.user)
         return StockTransaction.objects.create(product=product, **validated_data)
 
 

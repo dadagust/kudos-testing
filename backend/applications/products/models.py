@@ -8,6 +8,7 @@ import uuid
 from decimal import Decimal
 from io import BytesIO
 
+from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -504,6 +505,19 @@ class StockTransaction(Date):
         null=True,
         blank=True,
     )
+    created_by = models.ForeignKey(
+        to=settings.AUTH_USER_MODEL,
+        verbose_name='Пользователь',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='stock_transactions',
+    )
+    created_by_name = models.CharField(
+        verbose_name='Имя пользователя',
+        max_length=255,
+        blank=True,
+    )
     note = models.CharField(
         verbose_name='Комментарий',
         max_length=255,
@@ -517,6 +531,27 @@ class StockTransaction(Date):
 
     def __str__(self) -> str:  # pragma: no cover - human readable repr
         return f'{self.product.name}: {self.quantity_delta}'
+
+    def _resolve_user_display_name(self) -> str:
+        if not self.created_by:
+            return ''
+
+        full_name = self.created_by.get_full_name()
+        if full_name:
+            return full_name
+
+        email = getattr(self.created_by, 'email', '') or ''
+        if email:
+            return email
+
+        return self.created_by.get_username()
+
+    def save(self, *args, **kwargs):
+        if self.created_by:
+            display_name = self._resolve_user_display_name()
+            if display_name and self.created_by_name != display_name:
+                self.created_by_name = display_name
+        super().save(*args, **kwargs)
 
 class ProductImage(Date):
     """Image for a product with explicit order."""

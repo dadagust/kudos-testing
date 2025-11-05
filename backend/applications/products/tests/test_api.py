@@ -221,6 +221,8 @@ class ProductApiTests(APITestCase):
         transaction = response.json()
         self.assertEqual(transaction['quantity_delta'], 5)
         self.assertTrue(transaction['affects_available'])
+        self.assertEqual(transaction['created_by'], self.user.id)
+        self.assertEqual(transaction['created_by_name'], 'admin@example.com')
 
         product.refresh_from_db()
         self.assertEqual(product.stock_qty, 5)
@@ -231,3 +233,5 @@ class ProductApiTests(APITestCase):
         items = response.json()
         self.assertEqual(len(items), 1)
         self.assertEqual(items[0]['id'], transaction['id'])
+        self.assertEqual(items[0]['created_by'], self.user.id)
+        self.assertEqual(items[0]['created_by_name'], 'admin@example.com')
