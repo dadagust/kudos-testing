@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 
+import { formatDateTimeDisplay } from '@/shared/lib/date';
+
 import { listIntegrationDescriptors } from './adapters';
 
 const statusLabels: Record<string, string> = {
@@ -25,6 +27,10 @@ export async function GET() {
     {
       data: descriptors.map((integration) => ({
         ...integration,
+        last_synced_at:
+          integration.last_synced_at == null
+            ? null
+            : formatDateTimeDisplay(integration.last_synced_at) ?? integration.last_synced_at,
         status_label: statusLabels[integration.status] ?? integration.status,
         provider_label: providerLabels[integration.provider] ?? integration.provider,
       })),

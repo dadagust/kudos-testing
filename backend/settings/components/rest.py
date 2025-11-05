@@ -8,6 +8,10 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.AllowAny',),
     'DEFAULT_PAGINATION_CLASS': 'applications.common.pagination.DefaultPagination',
+    'DATE_FORMAT': '%d.%m.%Y',
+    'DATETIME_FORMAT': '%d.%m.%Y %H:%M',
+    'DATE_INPUT_FORMATS': ['%d.%m.%Y', 'iso-8601'],
+    'DATETIME_INPUT_FORMATS': ['%d.%m.%Y %H:%M', '%d.%m.%Y %H:%M:%S', 'iso-8601'],
 }
 
 SIMPLE_JWT = {

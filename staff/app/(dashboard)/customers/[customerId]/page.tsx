@@ -4,14 +4,11 @@ import { useRouter } from 'next/navigation';
 
 import { CUSTOMER_TYPE_LABELS, CustomerDetail, useCustomerQuery } from '@/entities/customer';
 import { RoleGuard } from '@/features/auth';
+import { ensureDateTimeDisplay } from '@/shared/lib/date';
 import { formatPhoneDisplay } from '@/shared/lib/phone';
 import { Alert, Badge, Button, Spinner, Tag } from '@/shared/ui';
 
-const formatDateTime = (value: string) =>
-  new Date(value).toLocaleString('ru-RU', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  });
+const formatDateTime = (value: string) => ensureDateTimeDisplay(value);
 
 interface CustomerDetailsPageProps {
   params: { customerId: string };

@@ -31,6 +31,7 @@ import {
 } from '@/entities/order';
 import { ProductListItem, useInfiniteProductsQuery } from '@/entities/product';
 import { RoleGuard, usePermission } from '@/features/auth';
+import { formatDateDisplay, toDateInputValue, toServerDateValue } from '@/shared/lib/date';
 import type { TableColumn } from '@/shared/ui';
 import {
   Accordion,
@@ -264,11 +265,8 @@ const formatDate = (value: string) => {
   if (!value) {
     return '—';
   }
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-  return date.toLocaleDateString('ru-RU');
+  const formatted = formatDateDisplay(value);
+  return formatted ?? value;
 };
 
 const createInitialFormState = (): OrderFormState => ({
@@ -802,8 +800,8 @@ export default function OrdersPage() {
     const rentalDays = calculateRentalDays(form.installation_date, form.dismantle_date) ?? 1;
     return {
       status: form.status,
-      installation_date: form.installation_date,
-      dismantle_date: form.dismantle_date,
+      installation_date: toServerDateValue(form.installation_date),
+      dismantle_date: toServerDateValue(form.dismantle_date),
       customer_id: form.customer?.id ?? null,
       delivery_type: form.delivery_type,
       delivery_address:
@@ -889,8 +887,8 @@ export default function OrdersPage() {
       });
       setEditForm({
         status: order.status,
-        installation_date: order.installation_date,
-        dismantle_date: order.dismantle_date,
+        installation_date: toDateInputValue(order.installation_date),
+        dismantle_date: toDateInputValue(order.dismantle_date),
         customer: order.customer,
         delivery_type: order.delivery_type,
         delivery_address: order.delivery_address ?? '',

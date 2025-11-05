@@ -26,6 +26,7 @@ import {
   useUpdateCustomerMutation,
 } from '@/entities/customer';
 import { RoleGuard, usePermission } from '@/features/auth';
+import { ensureDateTimeDisplay } from '@/shared/lib/date';
 import { formatPhoneDisplay, formatPhoneInput, normalizePhoneNumber } from '@/shared/lib/phone';
 import {
   Alert,
@@ -42,11 +43,7 @@ import type { TableColumn } from '@/shared/ui';
 
 const DEFAULT_PAGE_SIZE = 10;
 
-const formatDateTime = (value: string) =>
-  new Date(value).toLocaleString('ru-RU', {
-    dateStyle: 'short',
-    timeStyle: 'short',
-  });
+const formatDateTime = (value: string) => ensureDateTimeDisplay(value);
 
 const normalizeValue = (value: string) => {
   const trimmed = value.trim();

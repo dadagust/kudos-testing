@@ -27,6 +27,7 @@ import {
   useInfiniteProductsQuery,
 } from '@/entities/product';
 import { RoleGuard, usePermission } from '@/features/auth';
+import { ensureDateTimeDisplay } from '@/shared/lib/date';
 import {
   Alert,
   Badge,
@@ -71,16 +72,7 @@ const formatPrice = (value: number | string | null | undefined) => {
   return currencyFormatter.format(amount);
 };
 
-const formatDateTime = (value?: string | null) => {
-  if (!value) {
-    return '—';
-  }
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-  return date.toLocaleString('ru-RU');
-};
+const formatDateTime = (value?: string | null) => (value ? ensureDateTimeDisplay(value) : '—');
 
 const flattenCategories = (
   nodes: ProductCategoriesResponseItem[],
