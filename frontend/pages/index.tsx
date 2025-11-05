@@ -203,6 +203,11 @@ export default function Home() {
       return;
     }
 
+    if (!atLeastOneProductSelected) {
+      setOrderError('Добавьте хотя бы один товар.');
+      return;
+    }
+
     if (orderForm.deliveryType === 'delivery' && !orderForm.deliveryAddress.trim()) {
       setOrderError('Укажите адрес доставки или выберите самовывоз.');
       return;
@@ -223,10 +228,7 @@ export default function Home() {
       const latestProducts = await productsApi.list(tokens.access);
       setProducts(latestProducts);
 
-      const sanitizedQuantities = ensureQuantities(
-        latestProducts,
-        orderForm.productQuantities
-      );
+      const sanitizedQuantities = ensureQuantities(latestProducts, orderForm.productQuantities);
 
       let validationError: string | null = null;
 

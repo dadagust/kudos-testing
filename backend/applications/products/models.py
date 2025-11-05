@@ -427,7 +427,6 @@ class Product(Date):
     def available_in_stock(self) -> bool:
         return self.available_stock_qty > 0
 
-
     @property
     def thumbnail(self) -> ProductImage | None:
         return self.images.order_by('position').first()

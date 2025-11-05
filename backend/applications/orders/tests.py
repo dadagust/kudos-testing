@@ -66,6 +66,7 @@ class OrderApiTests(APITestCase):
         self.assertEqual(data['installation_date'], '2024-06-01')
         self.assertEqual(data['dismantle_date'], '2024-06-05')
         self.assertGreater(float(data['total_amount']), 0)
+        self.assertAlmostEqual(float(data['services_total_amount']), 500.0, places=2)
         item = data['items'][0]
         self.assertEqual(item['rental_days'], 1)
         self.assertEqual(item['rental_mode'], 'standard')
@@ -110,6 +111,7 @@ class OrderApiTests(APITestCase):
         self.assertEqual(data['delivery_type'], DeliveryType.PICKUP)
         self.assertEqual(data['delivery_address'], '')
         self.assertEqual(data['comment'], '')
+        self.assertIn('services_total_amount', data)
 
     def test_create_order_with_special_rental(self):
         self.product.rental_mode = 'special'
@@ -143,6 +145,7 @@ class OrderApiTests(APITestCase):
         self.assertEqual(item['rental_tiers'][0]['end_day'], 3)
         self.assertAlmostEqual(float(item['unit_price']), 11900.0, places=2)
         self.assertAlmostEqual(float(data['total_amount']), 12400.0, places=2)
+        self.assertAlmostEqual(float(data['services_total_amount']), 500.0, places=2)
 
     def test_installer_qualification_counted_once(self):
         url = reverse('orders:order-list')
@@ -160,6 +163,7 @@ class OrderApiTests(APITestCase):
         data = response.json()['data']
         # unit price 2700 * (1 + 2) = 8100, qualification price 500 added once
         self.assertAlmostEqual(float(data['total_amount']), 8600.0, places=2)
+        self.assertAlmostEqual(float(data['services_total_amount']), 500.0, places=2)
 
     def test_calculate_total_endpoint(self):
         url = reverse('orders:order-calculate-total')
@@ -240,9 +244,7 @@ class OrderApiTests(APITestCase):
         self.assertEqual(self.product.available_stock_qty, 8)
 
         detail_url = reverse('orders:order-detail', args=[order_id])
-        response = self.client.patch(
-            detail_url, {'status': OrderStatus.DECLINED}, format='json'
-        )
+        response = self.client.patch(detail_url, {'status': OrderStatus.DECLINED}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.product.refresh_from_db()

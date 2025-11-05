@@ -2,16 +2,13 @@
 
 from __future__ import annotations
 
-from typing import Dict
-
 from rest_framework import serializers
 
 from applications.products.models import Product
 
 from .models import Order
 
-
-ProductTotals = Dict[str, int]
+ProductTotals = dict[str, int]
 
 
 def collect_order_item_totals(order: Order) -> ProductTotals:
