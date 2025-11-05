@@ -414,7 +414,7 @@ class OrderWriteSerializer(serializers.ModelSerializer):
             reserve_stock=order.status != OrderStatus.DECLINED,
         )
         order.recalculate_total_amount()
-        order.save(update_fields=['total_amount'])
+        order.save(update_fields=['total_amount', 'services_total_amount'])
         return order
 
     @transaction.atomic
@@ -445,7 +445,7 @@ class OrderWriteSerializer(serializers.ModelSerializer):
                 elif previous_status == OrderStatus.DECLINED and new_status != OrderStatus.DECLINED:
                     adjust_available_stock(product_totals, increment=False)
         instance.recalculate_total_amount()
-        instance.save(update_fields=['total_amount'])
+        instance.save(update_fields=['total_amount', 'services_total_amount'])
         return instance
 
     def _replace_items(

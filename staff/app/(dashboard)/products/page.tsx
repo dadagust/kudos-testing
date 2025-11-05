@@ -2925,19 +2925,19 @@ export default function ProductsPage() {
                 <div
                   style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'center' }}
                 >
-                  <label style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                    <input
-                      type="checkbox"
-                      checked={createForm.visibility.show_on_pifakit}
-                      onChange={(event) =>
-                        setCreateForm((prev) => ({
-                          ...prev,
-                          visibility: { ...prev.visibility, show_on_pifakit: event.target.checked },
-                        }))
-                      }
-                    />
-                    Показывать на pifakit.ru
-                  </label>
+                  {/*<label style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>*/}
+                  {/*  <input*/}
+                  {/*    type="checkbox"*/}
+                  {/*    checked={createForm.visibility.show_on_pifakit}*/}
+                  {/*    onChange={(event) =>*/}
+                  {/*      setCreateForm((prev) => ({*/}
+                  {/*        ...prev,*/}
+                  {/*        visibility: { ...prev.visibility, show_on_pifakit: event.target.checked },*/}
+                  {/*      }))*/}
+                  {/*    }*/}
+                  {/*  />*/}
+                  {/*  Показывать на pifakit.ru*/}
+                  {/*</label>*/}
                   <label style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                     <input
                       type="checkbox"
@@ -3111,9 +3111,7 @@ export default function ProductsPage() {
               >
                 {transactions.map((item) => {
                   const createdByLabel =
-                    item.created_by_name?.trim() ||
-                    item.created_by ||
-                    'Неизвестный пользователь';
+                    item.created_by_name?.trim() || item.created_by || 'Неизвестный пользователь';
 
                   return (
                     <li
@@ -3143,7 +3141,9 @@ export default function ProductsPage() {
                                 : 'var(--color-danger)',
                           }}
                         >
-                          {item.quantity_delta > 0 ? `+${item.quantity_delta}` : item.quantity_delta}
+                          {item.quantity_delta > 0
+                            ? `+${item.quantity_delta}`
+                            : item.quantity_delta}
                         </span>
                       </div>
                       <div

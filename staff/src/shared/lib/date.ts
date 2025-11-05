@@ -1,11 +1,9 @@
 const pad = (value: number): string => value.toString().padStart(2, '0');
 
-const DISPLAY_DATE_PATTERN =
-  /^(\d{2})\.(\d{2})\.(\d{4})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?$/;
+const DISPLAY_DATE_PATTERN = /^(\d{2})\.(\d{2})\.(\d{4})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?$/;
 const ISO_DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const ISO_DATE_TIME_PATTERN = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/;
-const ISO_DATE_TIME_WITH_SECONDS_PATTERN =
-  /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}/;
+const ISO_DATE_TIME_WITH_SECONDS_PATTERN = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}/;
 
 interface ParsedDateParts {
   year: number;
@@ -18,10 +16,7 @@ interface ParsedDateParts {
   hasSeconds: boolean;
 }
 
-const createDateFromParts = (
-  parts: ParsedDateParts,
-  useUTC = false
-): Date | null => {
+const createDateFromParts = (parts: ParsedDateParts, useUTC = false): Date | null => {
   const { year, month, day, hours, minutes, seconds } = parts;
   if (month < 1 || month > 12 || day < 1 || day > 31) {
     return null;
@@ -116,9 +111,7 @@ const formatTimeParts = (parts: ParsedDateParts): string => {
   return parts.hasSeconds ? `${base}:${pad(parts.seconds)}` : base;
 };
 
-export const formatDateDisplay = (
-  value: string | null | undefined
-): string | null => {
+export const formatDateDisplay = (value: string | null | undefined): string | null => {
   const parts = parseDateParts(value);
   if (!parts) {
     return null;
@@ -126,9 +119,7 @@ export const formatDateDisplay = (
   return formatDateParts(parts);
 };
 
-export const formatDateTimeDisplay = (
-  value: string | null | undefined
-): string | null => {
+export const formatDateTimeDisplay = (value: string | null | undefined): string | null => {
   const parts = parseDateParts(value);
   if (!parts) {
     return null;
@@ -179,12 +170,8 @@ export const nowDateTimeString = (): string => {
   return formatDateTimeDisplay(iso) ?? iso;
 };
 
-export const ensureDateDisplay = (
-  value: string | null | undefined,
-  fallback = '—'
-): string => formatDateDisplay(value) ?? (value ? value : fallback);
+export const ensureDateDisplay = (value: string | null | undefined, fallback = '—'): string =>
+  formatDateDisplay(value) ?? (value ? value : fallback);
 
-export const ensureDateTimeDisplay = (
-  value: string | null | undefined,
-  fallback = '—'
-): string => formatDateTimeDisplay(value) ?? (value ? value : fallback);
+export const ensureDateTimeDisplay = (value: string | null | undefined, fallback = '—'): string =>
+  formatDateTimeDisplay(value) ?? (value ? value : fallback);

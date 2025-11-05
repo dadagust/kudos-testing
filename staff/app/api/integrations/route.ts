@@ -30,7 +30,7 @@ export async function GET() {
         last_synced_at:
           integration.last_synced_at == null
             ? null
-            : formatDateTimeDisplay(integration.last_synced_at) ?? integration.last_synced_at,
+            : (formatDateTimeDisplay(integration.last_synced_at) ?? integration.last_synced_at),
         status_label: statusLabels[integration.status] ?? integration.status,
         provider_label: providerLabels[integration.provider] ?? integration.provider,
       })),
