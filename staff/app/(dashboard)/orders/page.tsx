@@ -32,7 +32,7 @@ import {
 } from '@/entities/order';
 import { ProductListItem, useInfiniteProductsQuery } from '@/entities/product';
 import { RoleGuard, usePermission } from '@/features/auth';
-import { formatDateDisplay, toServerDateValue, toTimestamp } from '@/shared/lib/date';
+import { formatDateDisplay, toDateInputValue, toServerDateValue, toTimestamp } from '@/shared/lib/date';
 import type { TableColumn } from '@/shared/ui';
 import {
   Accordion,
@@ -488,8 +488,8 @@ const OrderFormContent = ({
           ))}
         </Select>
         <Input
-          type="text"
-          inputMode="numeric"
+          type="date"
+          lang="en-GB"
           label="Дата монтажа"
           placeholder="ДД.ММ.ГГГГ"
           value={form.installation_date}
@@ -498,8 +498,8 @@ const OrderFormContent = ({
           required
         />
         <Input
-          type="text"
-          inputMode="numeric"
+          type="date"
+          lang="en-GB"
           label="Дата демонтажа"
           placeholder="ДД.ММ.ГГГГ"
           value={form.dismantle_date}
