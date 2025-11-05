@@ -9,7 +9,13 @@ from rest_framework.test import APITestCase
 
 from applications.customers.models import Customer
 from applications.orders.models import DeliveryType, OrderStatus
-from applications.products.models import Category, InstallerQualification, Product
+from applications.products.models import (
+    Category,
+    InstallerQualification,
+    OrderStockTransactionType,
+    Product,
+    StockTransaction,
+)
 
 
 class OrderApiTests(APITestCase):
@@ -85,6 +91,9 @@ class OrderApiTests(APITestCase):
             'delivery_type': DeliveryType.PICKUP,
             'items': [{'product_id': str(self.product.pk), 'quantity': 1, 'rental_days': 1}],
             'status': OrderStatus.ARCHIVED,
+            'return_items': [
+                {'product_id': str(self.product.pk), 'quantity': 1},
+            ],
         }
         self.client.post(url, payload, format='json')
 
@@ -277,3 +286,150 @@ class OrderApiTests(APITestCase):
 
         self.product.refresh_from_db()
         self.assertEqual(self.product.available_stock_qty, 10)
+
+    def test_reservation_transactions_created_on_order_creation(self):
+        url = reverse('orders:order-list')
+        payload = {
+            'installation_date': '2024-06-01',
+            'dismantle_date': '2024-06-05',
+            'items': [{'product_id': str(self.product.pk), 'quantity': 3, 'rental_days': 1}],
+        }
+
+        response = self.client.post(url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        order_id = response.json()['data']['id']
+
+        reservations = StockTransaction.objects.filter(
+            order_id=order_id,
+            order_transaction_type=OrderStockTransactionType.RESERVATION,
+        )
+        self.assertEqual(reservations.count(), 1)
+        reservation = reservations.get()
+        self.assertEqual(reservation.quantity_delta, -3)
+        self.assertFalse(reservation.affects_stock)
+        self.assertTrue(reservation.affects_available)
+
+    def test_in_work_status_creates_issue_transactions_once(self):
+        url = reverse('orders:order-list')
+        payload = {
+            'installation_date': '2024-06-01',
+            'dismantle_date': '2024-06-05',
+            'items': [{'product_id': str(self.product.pk), 'quantity': 2, 'rental_days': 1}],
+        }
+
+        response = self.client.post(url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        order_id = response.json()['data']['id']
+
+        detail_url = reverse('orders:order-detail', args=[order_id])
+        response = self.client.patch(detail_url, {'status': OrderStatus.IN_WORK}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        issue_transactions = StockTransaction.objects.filter(
+            order_id=order_id,
+            order_transaction_type=OrderStockTransactionType.ISSUE,
+        )
+        self.assertEqual(issue_transactions.count(), 1)
+        issue = issue_transactions.get()
+        self.assertEqual(issue.quantity_delta, -2)
+        self.assertTrue(issue.affects_stock)
+        self.assertFalse(issue.affects_available)
+
+        # Re-applying the same status should not create duplicates.
+        response = self.client.patch(detail_url, {'status': OrderStatus.IN_WORK}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            StockTransaction.objects.filter(
+                order_id=order_id,
+                order_transaction_type=OrderStockTransactionType.ISSUE,
+            ).count(),
+            1,
+        )
+
+    def test_archived_status_requires_return_items(self):
+        url = reverse('orders:order-list')
+        payload = {
+            'installation_date': '2024-06-01',
+            'dismantle_date': '2024-06-05',
+            'items': [{'product_id': str(self.product.pk), 'quantity': 1, 'rental_days': 1}],
+        }
+        response = self.client.post(url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        order_id = response.json()['data']['id']
+
+        detail_url = reverse('orders:order-detail', args=[order_id])
+        response = self.client.patch(detail_url, {'status': OrderStatus.ARCHIVED}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_archived_status_creates_return_transactions(self):
+        url = reverse('orders:order-list')
+        payload = {
+            'installation_date': '2024-06-01',
+            'dismantle_date': '2024-06-05',
+            'items': [{'product_id': str(self.product.pk), 'quantity': 2, 'rental_days': 1}],
+        }
+        response = self.client.post(url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        order_id = response.json()['data']['id']
+
+        detail_url = reverse('orders:order-detail', args=[order_id])
+        response = self.client.patch(detail_url, {'status': OrderStatus.IN_WORK}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = self.client.patch(
+            detail_url,
+            {
+                'status': OrderStatus.ARCHIVED,
+                'return_items': [
+                    {'product_id': str(self.product.pk), 'quantity': 1},
+                ],
+            },
+            format='json',
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        returns = StockTransaction.objects.filter(
+            order_id=order_id,
+            order_transaction_type=OrderStockTransactionType.RETURN,
+        )
+        self.assertEqual(returns.count(), 1)
+        transaction = returns.get()
+        self.assertEqual(transaction.quantity_delta, 1)
+        self.assertTrue(transaction.affects_stock)
+        self.assertTrue(transaction.affects_available)
+
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.available_stock_qty, 9)
+        self.assertEqual(self.product.stock_qty, 9)
+
+    def test_declined_status_removes_all_transactions(self):
+        url = reverse('orders:order-list')
+        payload = {
+            'installation_date': '2024-06-01',
+            'dismantle_date': '2024-06-05',
+            'items': [{'product_id': str(self.product.pk), 'quantity': 2, 'rental_days': 1}],
+        }
+        response = self.client.post(url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        order_id = response.json()['data']['id']
+
+        detail_url = reverse('orders:order-detail', args=[order_id])
+        self.client.patch(detail_url, {'status': OrderStatus.IN_WORK}, format='json')
+        self.client.patch(
+            detail_url,
+            {
+                'status': OrderStatus.ARCHIVED,
+                'return_items': [
+                    {'product_id': str(self.product.pk), 'quantity': 2},
+                ],
+            },
+            format='json',
+        )
+
+        response = self.client.patch(detail_url, {'status': OrderStatus.DECLINED}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertFalse(StockTransaction.objects.filter(order_id=order_id).exists())
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.available_stock_qty, 10)
+        self.assertEqual(self.product.stock_qty, 10)

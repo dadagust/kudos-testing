@@ -17,7 +17,7 @@ from .serializers import (
     OrderSummarySerializer,
     OrderWriteSerializer,
 )
-from .services import adjust_available_stock, collect_order_item_totals
+from .services import collect_order_item_totals, reset_order_transactions
 
 
 class OrderViewSet(viewsets.ModelViewSet):
@@ -110,9 +110,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     @transaction.atomic
     def perform_destroy(self, instance):  # type: ignore[override]
         if instance.status != OrderStatus.DECLINED:
-            product_totals = collect_order_item_totals(instance)
-            if product_totals:
-                adjust_available_stock(product_totals, increment=True)
+            reset_order_transactions(instance)
         super().perform_destroy(instance)
 
 

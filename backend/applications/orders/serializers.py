@@ -6,6 +6,7 @@ from collections import OrderedDict
 from datetime import date
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import Any
+from uuid import UUID
 
 from django.db import transaction
 from rest_framework import serializers
@@ -15,7 +16,12 @@ from applications.products.choices import RentalMode
 from applications.products.models import Product
 
 from .models import DeliveryType, Order, OrderItem, OrderStatus
-from .services import adjust_available_stock, collect_order_item_totals
+from .services import (
+    collect_order_item_totals,
+    ensure_order_stock_transactions,
+    reset_order_transactions,
+    validate_stock_availability,
+)
 
 
 class CustomerSummarySerializer(serializers.ModelSerializer):
@@ -322,6 +328,11 @@ def _calculate_items_pricing(
     return list(calculated.values()), qualification_total, product_totals
 
 
+class OrderReturnItemInputSerializer(serializers.Serializer):
+    product_id = serializers.UUIDField()
+    quantity = serializers.IntegerField(min_value=0)
+
+
 class OrderWriteSerializer(serializers.ModelSerializer):
     status = serializers.ChoiceField(
         choices=OrderStatus.choices,
@@ -346,6 +357,12 @@ class OrderWriteSerializer(serializers.ModelSerializer):
     )
     items = OrderItemInputSerializer(
         many=True,
+    )
+    return_items = OrderReturnItemInputSerializer(
+        many=True,
+        required=False,
+        allow_empty=True,
+        write_only=True,
     )
 
     class Meta:
@@ -401,11 +418,22 @@ class OrderWriteSerializer(serializers.ModelSerializer):
         if 'comment' in attrs and attrs['comment'] in (None, ''):
             attrs['comment'] = ''
 
+        status_value = attrs.get('status') or getattr(self.instance, 'status', None)
+        return_items = attrs.get('return_items', serializers.empty)
+        if status_value == OrderStatus.ARCHIVED:
+            if return_items in (serializers.empty, None):
+                raise serializers.ValidationError(
+                    {'return_items': 'Укажите, сколько единиц товара вернулось на склад.'}
+                )
+        elif return_items not in (serializers.empty, None):
+            attrs.pop('return_items', None)
+
         return attrs
 
     @transaction.atomic
     def create(self, validated_data: dict[str, Any]) -> Order:
         items_data = validated_data.pop('items', [])
+        return_items_data = validated_data.pop('return_items', None)
         order = Order.objects.create(**validated_data)
         self._replace_items(
             order,
@@ -413,6 +441,14 @@ class OrderWriteSerializer(serializers.ModelSerializer):
             self._default_rental_days,
             reserve_stock=order.status != OrderStatus.DECLINED,
         )
+        if return_items_data:
+            setattr(order, '_return_quantities', self._build_return_quantities(order, return_items_data))
+        ensure_order_stock_transactions(
+            order,
+            return_quantities=getattr(order, '_return_quantities', None),
+        )
+        if hasattr(order, '_return_quantities'):
+            delattr(order, '_return_quantities')
         order.recalculate_total_amount()
         order.save(update_fields=['total_amount', 'services_total_amount'])
         return order
@@ -420,16 +456,14 @@ class OrderWriteSerializer(serializers.ModelSerializer):
     @transaction.atomic
     def update(self, instance: Order, validated_data: dict[str, Any]) -> Order:
         items_data = validated_data.pop('items', None)
+        return_items_data = validated_data.pop('return_items', None)
         previous_status = instance.status
         new_status = validated_data.get('status', previous_status)
         for field, value in validated_data.items():
             setattr(instance, field, value)
         instance.save()
         if items_data is not None:
-            if previous_status != OrderStatus.DECLINED:
-                existing_quantities = collect_order_item_totals(instance)
-                if existing_quantities:
-                    adjust_available_stock(existing_quantities, increment=True)
+            reset_order_transactions(instance)
             instance.items.all().delete()
             self._replace_items(
                 instance,
@@ -437,13 +471,27 @@ class OrderWriteSerializer(serializers.ModelSerializer):
                 self._default_rental_days,
                 reserve_stock=new_status != OrderStatus.DECLINED,
             )
+        if return_items_data is not None:
+            setattr(instance, '_return_quantities', self._build_return_quantities(instance, return_items_data))
+        elif hasattr(instance, '_return_quantities'):
+            delattr(instance, '_return_quantities')
+        ensure_order_stock_transactions(
+            instance,
+            return_quantities=getattr(instance, '_return_quantities', None),
+        )
         if new_status != previous_status:
             product_totals = collect_order_item_totals(instance)
             if product_totals:
                 if new_status == OrderStatus.DECLINED and previous_status != OrderStatus.DECLINED:
-                    adjust_available_stock(product_totals, increment=True)
+                    reset_order_transactions(instance)
                 elif previous_status == OrderStatus.DECLINED and new_status != OrderStatus.DECLINED:
-                    adjust_available_stock(product_totals, increment=False)
+                    validate_stock_availability(product_totals)
+                    ensure_order_stock_transactions(
+                        instance,
+                        return_quantities=getattr(instance, '_return_quantities', None),
+                    )
+        if hasattr(instance, '_return_quantities'):
+            delattr(instance, '_return_quantities')
         instance.recalculate_total_amount()
         instance.save(update_fields=['total_amount', 'services_total_amount'])
         return instance
@@ -460,7 +508,7 @@ class OrderWriteSerializer(serializers.ModelSerializer):
             items_data, default_rental_days
         )
         if reserve_stock and product_totals:
-            adjust_available_stock(product_totals, increment=False)
+            validate_stock_availability(product_totals)
         order_items = [
             OrderItem(
                 order=order,
@@ -475,6 +523,54 @@ class OrderWriteSerializer(serializers.ModelSerializer):
             for item in calculated_items
         ]
         OrderItem.objects.bulk_create(order_items)
+
+    def _build_return_quantities(
+        self, order: Order, return_items: list[dict[str, Any]]
+    ) -> dict[UUID, int]:
+        totals: dict[UUID, int] = {}
+        for item in order.items.select_related('product'):
+            if not item.product_id:
+                continue
+            totals[item.product_id] = totals.get(item.product_id, 0) + item.quantity
+        if not totals:
+            raise serializers.ValidationError(
+                {'return_items': 'Нечего возвращать: в заказе нет товаров.'}
+            )
+        result: dict[UUID, int] = {}
+        for payload in return_items:
+            product_id = payload['product_id']
+            quantity = payload['quantity']
+            if product_id not in totals:
+                raise serializers.ValidationError(
+                    {
+                        'return_items': (
+                            f'Товар {product_id} отсутствует в заказе и не может быть возвращён.'
+                        )
+                    }
+                )
+            ordered_quantity = totals[product_id]
+            if quantity > ordered_quantity:
+                raise serializers.ValidationError(
+                    {
+                        'return_items': (
+                            'Количество возврата не может превышать заказанное. '
+                            f'Для товара {product_id} заказано {ordered_quantity}, '
+                            f'указано к возврату {quantity}.'
+                        )
+                    }
+                )
+            result[product_id] = quantity
+        missing = [pid for pid in totals.keys() if pid not in result]
+        if missing:
+            raise serializers.ValidationError(
+                {
+                    'return_items': (
+                        'Укажите количество возврата для всех товаров заказа. '
+                        f'Отсутствуют: {", ".join(str(pid) for pid in missing)}.'
+                    )
+                }
+            )
+        return result
 
 
 class OrderCalculationSerializer(OrderWriteSerializer):

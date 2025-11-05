@@ -13,11 +13,14 @@ from .models import Product, StockTransaction
 
 
 def _calculate_contribution(
-    quantity_delta: int, affects_available: bool, is_applied: bool
+    quantity_delta: int,
+    affects_available: bool,
+    affects_stock: bool,
+    is_applied: bool,
 ) -> tuple[int, int]:
     if not is_applied:
         return 0, 0
-    stock_change = quantity_delta
+    stock_change = quantity_delta if affects_stock else 0
     available_change = quantity_delta if affects_available else 0
     return stock_change, available_change
 
@@ -52,10 +55,11 @@ def store_previous_transaction_state(sender, instance: StockTransaction, **_) ->
         if previous is not None:
             previous_product_id = previous.product_id
             previous_stock_change, previous_available_change = _calculate_contribution(
-                previous.quantity_delta,
-                previous.affects_available,
-                previous.is_applied,
-            )
+            previous.quantity_delta,
+            previous.affects_available,
+            getattr(previous, 'affects_stock', True),
+            previous.is_applied,
+        )
 
     instance._previous_stock_change = previous_stock_change  # type: ignore[attr-defined]
     instance._previous_available_change = previous_available_change  # type: ignore[attr-defined]
@@ -69,7 +73,10 @@ def apply_transaction(sender, instance: StockTransaction, **_) -> None:
     previous_product_id = getattr(instance, '_previous_product_id', None)
 
     new_stock_change, new_available_change = _calculate_contribution(
-        instance.quantity_delta, instance.affects_available, instance.is_applied
+        instance.quantity_delta,
+        instance.affects_available,
+        getattr(instance, 'affects_stock', True),
+        instance.is_applied,
     )
 
     if previous_product_id and previous_product_id != instance.product_id:
@@ -89,6 +96,9 @@ def apply_transaction(sender, instance: StockTransaction, **_) -> None:
 @receiver(post_delete, sender=StockTransaction)
 def revert_transaction(sender, instance: StockTransaction, **_) -> None:
     stock_change, available_change = _calculate_contribution(
-        instance.quantity_delta, instance.affects_available, instance.is_applied
+        instance.quantity_delta,
+        instance.affects_available,
+        getattr(instance, 'affects_stock', True),
+        instance.is_applied,
     )
     _apply_stock_delta(instance.product_id, -stock_change, -available_change)
