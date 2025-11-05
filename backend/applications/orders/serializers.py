@@ -163,6 +163,7 @@ class OrderSummarySerializer(serializers.ModelSerializer):
             'status',
             'status_label',
             'total_amount',
+            'services_total_amount',
             'installation_date',
             'dismantle_date',
             'customer',
@@ -176,6 +177,7 @@ class OrderSummarySerializer(serializers.ModelSerializer):
         read_only_fields = (
             'id',
             'total_amount',
+            'services_total_amount',
             'created',
             'modified',
         )
