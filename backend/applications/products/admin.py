@@ -111,16 +111,21 @@ class StockTransactionAdmin(admin.ModelAdmin):
     list_display = (
         'product',
         'quantity_delta',
+        'affects_stock',
         'affects_available',
         'is_applied',
         'scheduled_for',
+        'order',
+        'order_transaction_type',
         'created_by_name',
         'created',
     )
     list_filter = (
+        'affects_stock',
         'affects_available',
         'is_applied',
         'product',
+        'order_transaction_type',
     )
     search_fields = (
         'product__name',
@@ -134,4 +139,5 @@ class StockTransactionAdmin(admin.ModelAdmin):
     raw_id_fields = (
         'product',
         'created_by',
+        'order',
     )
