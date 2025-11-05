@@ -8,6 +8,7 @@ from .models import (
     InstallerQualification,
     Product,
     ProductImage,
+    StockTransaction,
     TransportRestriction,
 )
 
@@ -102,4 +103,35 @@ class TransportRestrictionAdmin(admin.ModelAdmin):
     search_fields = (
         'label',
         'value',
+    )
+
+
+@admin.register(StockTransaction)
+class StockTransactionAdmin(admin.ModelAdmin):
+    list_display = (
+        'product',
+        'quantity_delta',
+        'affects_available',
+        'is_applied',
+        'scheduled_for',
+        'created_by_name',
+        'created',
+    )
+    list_filter = (
+        'affects_available',
+        'is_applied',
+        'product',
+    )
+    search_fields = (
+        'product__name',
+        'created_by_name',
+        'note',
+    )
+    readonly_fields = (
+        'created',
+        'modified',
+    )
+    raw_id_fields = (
+        'product',
+        'created_by',
     )
