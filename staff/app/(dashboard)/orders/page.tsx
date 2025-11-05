@@ -5,6 +5,7 @@ import Link from 'next/link';
 import {
   ChangeEvent,
   Dispatch,
+  FocusEvent,
   FormEvent,
   ReactNode,
   useCallback,
@@ -31,7 +32,7 @@ import {
 } from '@/entities/order';
 import { ProductListItem, useInfiniteProductsQuery } from '@/entities/product';
 import { RoleGuard, usePermission } from '@/features/auth';
-import { formatDateDisplay, toDateInputValue, toServerDateValue } from '@/shared/lib/date';
+import { formatDateDisplay, toServerDateValue, toTimestamp } from '@/shared/lib/date';
 import type { TableColumn } from '@/shared/ui';
 import {
   Accordion,
@@ -285,14 +286,14 @@ const calculateRentalDays = (installation: string, dismantle: string): number | 
     return null;
   }
 
-  const start = new Date(installation);
-  const end = new Date(dismantle);
+  const start = toTimestamp(installation);
+  const end = toTimestamp(dismantle);
 
-  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+  if (start === null || end === null) {
     return null;
   }
 
-  const diffMs = end.getTime() - start.getTime();
+  const diffMs = end - start;
   const diffDays = Math.floor(diffMs / (24 * 60 * 60 * 1000));
   const totalDays = diffDays + 1;
 
@@ -389,9 +390,27 @@ const OrderFormContent = ({
     setForm((prev) => ({ ...prev, installation_date: value }));
   };
 
+  const handleInstallationDateBlur = (event: FocusEvent<HTMLInputElement>) => {
+    const { value } = event.target;
+    const formatted = formatDateDisplay(value);
+    setForm((prev) => ({
+      ...prev,
+      installation_date: formatted ?? value.trim(),
+    }));
+  };
+
   const handleDismantleDateChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
     setForm((prev) => ({ ...prev, dismantle_date: value }));
+  };
+
+  const handleDismantleDateBlur = (event: FocusEvent<HTMLInputElement>) => {
+    const { value } = event.target;
+    const formatted = formatDateDisplay(value);
+    setForm((prev) => ({
+      ...prev,
+      dismantle_date: formatted ?? value.trim(),
+    }));
   };
 
   const handleDeliveryTypeChange = (event: ChangeEvent<HTMLSelectElement>) => {
@@ -469,17 +488,23 @@ const OrderFormContent = ({
           ))}
         </Select>
         <Input
-          type="date"
+          type="text"
+          inputMode="numeric"
           label="Дата монтажа"
+          placeholder="ДД.ММ.ГГГГ"
           value={form.installation_date}
           onChange={handleInstallationDateChange}
+          onBlur={handleInstallationDateBlur}
           required
         />
         <Input
-          type="date"
+          type="text"
+          inputMode="numeric"
           label="Дата демонтажа"
+          placeholder="ДД.ММ.ГГГГ"
           value={form.dismantle_date}
           onChange={handleDismantleDateChange}
+          onBlur={handleDismantleDateBlur}
           required
         />
         <Select label="Тип доставки" value={form.delivery_type} onChange={handleDeliveryTypeChange}>
@@ -889,8 +914,8 @@ export default function OrdersPage() {
       });
       setEditForm({
         status: order.status,
-        installation_date: toDateInputValue(order.installation_date),
-        dismantle_date: toDateInputValue(order.dismantle_date),
+        installation_date: formatDateDisplay(order.installation_date) ?? order.installation_date ?? '',
+        dismantle_date: formatDateDisplay(order.dismantle_date) ?? order.dismantle_date ?? '',
         customer: order.customer,
         delivery_type: order.delivery_type,
         delivery_address: order.delivery_address ?? '',
