@@ -6,15 +6,11 @@ import {
   useIntegrationsQuery,
 } from '@/entities/integration';
 import { RoleGuard } from '@/features/auth';
+import { ensureDateTimeDisplay } from '@/shared/lib/date';
 import { Alert, Badge, Button, Spinner, Tag } from '@/shared/ui';
 
 const formatDateTime = (value: string | null) =>
-  value
-    ? new Date(value).toLocaleString('ru-RU', {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-      })
-    : 'Ещё не синхронизировалось';
+  value ? ensureDateTimeDisplay(value) : 'Ещё не синхронизировалось';
 
 export default function IntegrationsPage() {
   const { data, isLoading, isError, error, refetch, isFetching } = useIntegrationsQuery();

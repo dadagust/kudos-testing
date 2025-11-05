@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 
 import { RoleGuard } from '@/features/auth';
+import { ensureDateTimeDisplay, toTimestamp } from '@/shared/lib/date';
 import { useAuditLogStore } from '@/shared/state/audit-log-store';
 import type { AuditLogEntry } from '@/shared/state/audit-log-store';
 import { Badge, Button, Table, Tag } from '@/shared/ui';
@@ -22,20 +23,30 @@ const LEVEL_TONE: Record<string, 'success' | 'warning' | 'danger' | 'info'> = {
   error: 'danger',
 };
 
-const formatDateTime = (value: string) =>
-  new Date(value).toLocaleString('ru-RU', {
-    dateStyle: 'short',
-    timeStyle: 'medium',
-  });
+const formatDateTime = (value: string) => ensureDateTimeDisplay(value);
 
 export default function LogsPage() {
   const entries = useAuditLogStore((state) => state.entries);
   const clear = useAuditLogStore((state) => state.clear);
 
-  const data = useMemo<AuditLogEntry[]>(
-    () => entries.slice().sort((a, b) => (a.timestamp < b.timestamp ? 1 : -1)),
-    [entries]
-  );
+  const data = useMemo<AuditLogEntry[]>(() => {
+    const sorted = entries.slice();
+    sorted.sort((a, b) => {
+      const aTime = toTimestamp(a.timestamp);
+      const bTime = toTimestamp(b.timestamp);
+      if (aTime !== null && bTime !== null) {
+        return bTime - aTime;
+      }
+      if (aTime !== null) {
+        return -1;
+      }
+      if (bTime !== null) {
+        return 1;
+      }
+      return a.timestamp < b.timestamp ? 1 : -1;
+    });
+    return sorted;
+  }, [entries]);
 
   const columns: TableColumn<AuditLogEntry>[] = [
     {

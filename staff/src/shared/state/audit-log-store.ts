@@ -22,7 +22,7 @@ interface AuditLogState {
 const seedEntries: AuditLogEntry[] = [
   {
     id: 'seed-log-1',
-    timestamp: '2025-10-12T06:40:00.000Z',
+    timestamp: '12.10.2025 09:40:00',
     level: 'success',
     action: 'INTEGRATION_SYNC',
     message: 'AmoCRM: синхронизация сделок завершена успешно (12 изменений).',
@@ -31,7 +31,7 @@ const seedEntries: AuditLogEntry[] = [
   },
   {
     id: 'seed-log-2',
-    timestamp: '2025-10-12T05:55:00.000Z',
+    timestamp: '12.10.2025 08:55:00',
     level: 'info',
     action: 'USER_ACTION',
     message: 'Менеджер manager@kudos.ru обновил карточку товара «Диван Velour Oslo».',
@@ -40,7 +40,7 @@ const seedEntries: AuditLogEntry[] = [
   },
   {
     id: 'seed-log-3',
-    timestamp: '2025-10-11T22:51:00.000Z',
+    timestamp: '11.10.2025 01:51:00',
     level: 'error',
     action: 'INTEGRATION_ERROR',
     message: 'AmoCRM Webhook вернул ошибку 401 Unauthorized.',

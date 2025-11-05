@@ -9,6 +9,7 @@ import {
   useProductQuery,
 } from '@/entities/product';
 import { RoleGuard } from '@/features/auth';
+import { ensureDateTimeDisplay } from '@/shared/lib/date';
 import { Alert, Badge, Button, Spinner, Tag } from '@/shared/ui';
 
 const formatCurrency = new Intl.NumberFormat('ru-RU', {
@@ -17,11 +18,7 @@ const formatCurrency = new Intl.NumberFormat('ru-RU', {
   maximumFractionDigits: 0,
 });
 
-const formatDateTime = (value: string) =>
-  new Date(value).toLocaleString('ru-RU', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  });
+const formatDateTime = (value: string) => ensureDateTimeDisplay(value);
 
 const STATUS_TONE: Record<string, 'success' | 'warning' | 'danger' | 'info'> = {
   active: 'success',

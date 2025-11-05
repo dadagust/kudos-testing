@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { formatDateTimeDisplay, toTimestamp } from '@/shared/lib/date';
+
 import {
   AVAILABILITY_STATUSES,
   AvailabilityStatus,
@@ -85,8 +87,17 @@ const applySort = (items: ProductEntity[], sort: string | null): ProductEntity[]
       return (a.base_price - b.base_price) * direction;
     }
     if (sortKey === 'updated_at') {
-      const aTime = new Date(a.updated_at).getTime();
-      const bTime = new Date(b.updated_at).getTime();
+      const aTime = toTimestamp(a.updated_at);
+      const bTime = toTimestamp(b.updated_at);
+      if (aTime === null && bTime === null) {
+        return 0;
+      }
+      if (aTime === null) {
+        return 1;
+      }
+      if (bTime === null) {
+        return -1;
+      }
       return (aTime - bTime) * direction;
     }
     return 0;
@@ -152,7 +163,7 @@ export function GET(request: NextRequest) {
         base_price: product.base_price,
         security_deposit: product.security_deposit,
         short_description: product.short_description,
-        updated_at: product.updated_at,
+        updated_at: formatDateTimeDisplay(product.updated_at) ?? product.updated_at,
       })),
       meta,
       filters: {

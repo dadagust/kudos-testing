@@ -1,11 +1,11 @@
 import { AuditLogLevel, useAuditLogStore } from '../state/audit-log-store';
 
+import { nowDateTimeString } from './date';
+
 const createLogId = () =>
   typeof crypto !== 'undefined' && 'randomUUID' in crypto
     ? crypto.randomUUID()
     : `log-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-
-const nowIsoString = () => new Date().toISOString();
 
 interface LogPayload {
   level: AuditLogLevel;
@@ -31,7 +31,7 @@ export const auditLogger = {
   log: ({ level, action, message, actor = 'system', traceId, context, timestamp }: LogPayload) => {
     const entry = {
       id: createLogId(),
-      timestamp: timestamp ?? nowIsoString(),
+      timestamp: timestamp ?? nowDateTimeString(),
       level,
       action,
       message,

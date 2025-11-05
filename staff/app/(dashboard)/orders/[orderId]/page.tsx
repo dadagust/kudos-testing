@@ -5,13 +5,13 @@ import { useRouter } from 'next/navigation';
 
 import { OrderDetail, OrderStatus, ORDER_STATUS_LABELS, useOrderQuery } from '@/entities/order';
 import { RoleGuard } from '@/features/auth';
+import { ensureDateDisplay, ensureDateTimeDisplay } from '@/shared/lib/date';
 import { Alert, Badge, Button, Spinner, Table, Tag } from '@/shared/ui';
 import type { TableColumn } from '@/shared/ui';
 
-const formatDate = (value: string) => new Date(value).toLocaleDateString('ru-RU');
+const formatDate = (value: string) => ensureDateDisplay(value);
 
-const formatDateTime = (value: string) =>
-  new Date(value).toLocaleString('ru-RU', { dateStyle: 'medium', timeStyle: 'short' });
+const formatDateTime = (value: string) => ensureDateTimeDisplay(value);
 
 const currencyFormatter = new Intl.NumberFormat('ru-RU', {
   style: 'currency',
