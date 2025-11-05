@@ -177,6 +177,14 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                       {order.delivery_type === 'pickup' ? 'Самовывоз' : 'Доставка'}
                     </dd>
                   </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                      Стоимость услуг (монтаж/доставка)
+                    </dt>
+                    <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
+                      {formatCurrency(order.services_total_amount)}
+                    </dd>
+                  </div>
                   {order.delivery_type === 'delivery' ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                       <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
