@@ -376,6 +376,7 @@ class OrderWriteSerializer(serializers.ModelSerializer):
             'delivery_address',
             'comment',
             'items',
+            'return_items',
         )
 
     def __init__(self, *args, **kwargs) -> None:
