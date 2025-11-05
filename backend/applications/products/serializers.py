@@ -677,7 +677,7 @@ class ProductListItemSerializer(serializers.ModelSerializer):
 class StockTransactionSerializer(serializers.ModelSerializer):
     created_by = serializers.PrimaryKeyRelatedField(read_only=True)
     created_by_name = serializers.CharField(read_only=True)
-    order_id = serializers.UUIDField(source='order_id', read_only=True)
+    order_id = serializers.UUIDField(read_only=True)
 
     class Meta:
         model = StockTransaction
