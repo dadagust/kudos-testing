@@ -3109,59 +3109,67 @@ export default function ProductsPage() {
                   border: '1px solid var(--color-border)',
                 }}
               >
-                {transactions.map((item) => (
-                  <li
-                    key={item.id}
-                    style={{
-                      padding: '12px 16px',
-                      borderBottom: '1px solid var(--color-border)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '6px',
-                    }}
-                  >
-                    <div
+                {transactions.map((item) => {
+                  const createdByLabel =
+                    item.created_by_name?.trim() ||
+                    item.created_by ||
+                    'Неизвестный пользователь';
+
+                  return (
+                    <li
+                      key={item.id}
                       style={{
+                        padding: '12px 16px',
+                        borderBottom: '1px solid var(--color-border)',
                         display: 'flex',
-                        justifyContent: 'space-between',
-                        flexWrap: 'wrap',
-                        gap: '8px',
+                        flexDirection: 'column',
+                        gap: '6px',
                       }}
                     >
-                      <span style={{ fontWeight: 600 }}>{formatDateTime(item.created)}</span>
-                      <span
+                      <div
                         style={{
-                          color:
-                            item.quantity_delta >= 0
-                              ? 'var(--color-success)'
-                              : 'var(--color-danger)',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          flexWrap: 'wrap',
+                          gap: '8px',
                         }}
                       >
-                        {item.quantity_delta > 0 ? `+${item.quantity_delta}` : item.quantity_delta}
-                      </span>
-                    </div>
-                    <div
-                      style={{
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        gap: '12px',
-                        fontSize: '0.875rem',
-                        color: 'var(--color-text-muted)',
-                      }}
-                    >
-                      <span>
-                        {item.affects_available
-                          ? 'Доступный остаток изменён'
-                          : 'Доступный остаток не изменён'}
-                      </span>
-                      {!item.is_applied ? <span>Не применено</span> : null}
-                      {item.scheduled_for ? (
-                        <span>Запланировано: {formatDateTime(item.scheduled_for)}</span>
-                      ) : null}
-                      {item.note ? <span>Комментарий: {item.note}</span> : null}
-                    </div>
-                  </li>
-                ))}
+                        <span style={{ fontWeight: 600 }}>{formatDateTime(item.created)}</span>
+                        <span
+                          style={{
+                            color:
+                              item.quantity_delta >= 0
+                                ? 'var(--color-success)'
+                                : 'var(--color-danger)',
+                          }}
+                        >
+                          {item.quantity_delta > 0 ? `+${item.quantity_delta}` : item.quantity_delta}
+                        </span>
+                      </div>
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          gap: '12px',
+                          fontSize: '0.875rem',
+                          color: 'var(--color-text-muted)',
+                        }}
+                      >
+                        <span>Создал: {createdByLabel}</span>
+                        <span>
+                          {item.affects_available
+                            ? 'Доступный остаток изменён'
+                            : 'Доступный остаток не изменён'}
+                        </span>
+                        {!item.is_applied ? <span>Не применено</span> : null}
+                        {item.scheduled_for ? (
+                          <span>Запланировано: {formatDateTime(item.scheduled_for)}</span>
+                        ) : null}
+                        {item.note ? <span>Комментарий: {item.note}</span> : null}
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
             ) : (
               <p style={{ color: 'var(--color-text-muted)', margin: 0 }}>
