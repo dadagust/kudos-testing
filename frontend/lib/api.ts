@@ -222,7 +222,7 @@ export const productsApi = {
       });
       return (response.data ?? []).map((item) => ({
         ...item,
-        base_price: Number(item.base_price ?? item.price_rub ?? 0) || 0,
+        base_price: Number(item.base_price ?? item.base_price ?? 0) || 0,
         available_stock_qty: Number(item.available_stock_qty ?? 0) || 0,
         stock_qty: Number(item.stock_qty ?? 0) || 0,
       }));
@@ -247,9 +247,7 @@ export const productsApi = {
               choice.display_name ?? choice.display ?? choice.label ?? choice.value ?? ''
             ),
             base_price: Number(choice.price ?? 0) || 0,
-            available_stock_qty: Number(
-              choice.available_stock_qty ?? choice.available ?? 0
-            ) || 0,
+            available_stock_qty: Number(choice.available_stock_qty ?? choice.available ?? 0) || 0,
             stock_qty: Number(choice.stock_qty ?? choice.total ?? 0) || 0,
           }))
           .filter((item) => item.id.length > 0 && item.name.length > 0);

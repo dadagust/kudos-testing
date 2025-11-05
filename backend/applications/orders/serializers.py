@@ -438,15 +438,9 @@ class OrderWriteSerializer(serializers.ModelSerializer):
         if new_status != previous_status:
             product_totals = collect_order_item_totals(instance)
             if product_totals:
-                if (
-                    new_status == OrderStatus.DECLINED
-                    and previous_status != OrderStatus.DECLINED
-                ):
+                if new_status == OrderStatus.DECLINED and previous_status != OrderStatus.DECLINED:
                     adjust_available_stock(product_totals, increment=True)
-                elif (
-                    previous_status == OrderStatus.DECLINED
-                    and new_status != OrderStatus.DECLINED
-                ):
+                elif previous_status == OrderStatus.DECLINED and new_status != OrderStatus.DECLINED:
                     adjust_available_stock(product_totals, increment=False)
         instance.recalculate_total_amount()
         instance.save(update_fields=['total_amount'])
@@ -479,6 +473,7 @@ class OrderWriteSerializer(serializers.ModelSerializer):
             for item in calculated_items
         ]
         OrderItem.objects.bulk_create(order_items)
+
 
 class OrderCalculationSerializer(OrderWriteSerializer):
     class Meta(OrderWriteSerializer.Meta):

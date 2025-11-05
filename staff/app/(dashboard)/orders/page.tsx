@@ -779,6 +779,8 @@ export default function OrdersPage() {
           id: item.product.id,
           name: item.product.name,
           price_rub: Number(item.unit_price),
+          available_stock_qty: 0,
+          stock_qty: 0,
           color: coerceProductColor(item.product.color),
           thumbnail_url: item.product.thumbnail_url ?? null,
           delivery: { transport_restriction: null, self_pickup_allowed: false },

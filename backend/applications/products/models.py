@@ -426,7 +426,6 @@ class Product(Date):
     def available_in_stock(self) -> bool:
         return self.available_stock_qty > 0
 
-
     @property
     def thumbnail(self) -> ProductImage | None:
         return self.images.order_by('position').first()
@@ -517,6 +516,7 @@ class StockTransaction(Date):
 
     def __str__(self) -> str:  # pragma: no cover - human readable repr
         return f'{self.product.name}: {self.quantity_delta}'
+
 
 class ProductImage(Date):
     """Image for a product with explicit order."""

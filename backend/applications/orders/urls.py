@@ -26,7 +26,7 @@ urlpatterns = allow_optional_trailing_slash(
             name='order-calculate-total',
         ),
         path(
-            'order/<uuid:pk>/',
+            'order/<int:pk>/',
             OrderViewSet.as_view(
                 {
                     'get': 'retrieve',

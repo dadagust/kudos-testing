@@ -751,7 +751,6 @@ const ProductCard = ({
   onEdit,
   onDelete,
   onAddTransaction,
-  onViewTransactions,
   canManage,
 }: {
   product: ProductListItem;
@@ -761,7 +760,6 @@ const ProductCard = ({
   onEdit?: (product: ProductListItem) => void;
   onDelete?: (product: ProductListItem) => void;
   onAddTransaction?: (product: ProductListItem) => void;
-  onViewTransactions?: (product: ProductListItem) => void;
   canManage: boolean;
 }) => {
   return (
@@ -822,9 +820,6 @@ const ProductCard = ({
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             <Button type="button" onClick={() => onAddTransaction?.(product)}>
               Добавить транзакцию
-            </Button>
-            <Button type="button" variant="ghost" onClick={() => onViewTransactions?.(product)}>
-              Просмотреть все транзакции
             </Button>
             <Button type="button" variant="ghost" onClick={() => onEdit?.(product)}>
               Редактировать
@@ -2044,7 +2039,6 @@ export default function ProductsPage() {
               onEdit={openEditModal}
               onDelete={openDeleteModal}
               onAddTransaction={openTransactionsModal}
-              onViewTransactions={(item) => openTransactionsModal(item, { viewAll: true })}
               canManage={canManageProducts}
             />
           ))}

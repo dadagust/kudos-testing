@@ -240,9 +240,7 @@ class OrderApiTests(APITestCase):
         self.assertEqual(self.product.available_stock_qty, 8)
 
         detail_url = reverse('orders:order-detail', args=[order_id])
-        response = self.client.patch(
-            detail_url, {'status': OrderStatus.DECLINED}, format='json'
-        )
+        response = self.client.patch(detail_url, {'status': OrderStatus.DECLINED}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.product.refresh_from_db()
