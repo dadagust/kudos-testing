@@ -63,6 +63,12 @@ class Order(Date):
         decimal_places=2,
         default=Decimal('0.00'),
     )
+    services_total_amount = models.DecimalField(
+        verbose_name='Сумма услуг (монтаж/доставка)',
+        max_digits=12,
+        decimal_places=2,
+        default=Decimal('0.00'),
+    )
     installation_date = models.DateField(
         verbose_name='Дата монтажа',
     )
@@ -125,6 +131,7 @@ class Order(Date):
             qualification_total += qualification.price_rub or Decimal('0.00')
 
         total += qualification_total
+        self.services_total_amount = qualification_total
         self.total_amount = total
         return total
 

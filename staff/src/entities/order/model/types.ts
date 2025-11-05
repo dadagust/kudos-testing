@@ -50,6 +50,7 @@ export interface OrderSummary {
   status: OrderStatus;
   status_label: string;
   total_amount: string;
+  services_total_amount: string;
   installation_date: string;
   dismantle_date: string;
   customer: CustomerSummary | null;
