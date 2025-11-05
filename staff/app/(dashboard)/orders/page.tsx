@@ -31,7 +31,7 @@ import {
 } from '@/entities/order';
 import { ProductListItem, useInfiniteProductsQuery } from '@/entities/product';
 import { RoleGuard, usePermission } from '@/features/auth';
-import { formatDateDisplay, toDateInputValue, toServerDateValue } from '@/shared/lib/date';
+import { formatDateDisplay, toDateInputValue, toServerDateValue, toTimestamp } from '@/shared/lib/date';
 import type { TableColumn } from '@/shared/ui';
 import {
   Accordion,
@@ -285,14 +285,14 @@ const calculateRentalDays = (installation: string, dismantle: string): number | 
     return null;
   }
 
-  const start = new Date(installation);
-  const end = new Date(dismantle);
+  const start = toTimestamp(installation);
+  const end = toTimestamp(dismantle);
 
-  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+  if (start === null || end === null) {
     return null;
   }
 
-  const diffMs = end.getTime() - start.getTime();
+  const diffMs = end - start;
   const diffDays = Math.floor(diffMs / (24 * 60 * 60 * 1000));
   const totalDays = diffDays + 1;
 
@@ -470,6 +470,7 @@ const OrderFormContent = ({
         </Select>
         <Input
           type="date"
+          lang="en-GB"
           label="Дата монтажа"
           value={form.installation_date}
           onChange={handleInstallationDateChange}
@@ -477,6 +478,7 @@ const OrderFormContent = ({
         />
         <Input
           type="date"
+          lang="en-GB"
           label="Дата демонтажа"
           value={form.dismantle_date}
           onChange={handleDismantleDateChange}
