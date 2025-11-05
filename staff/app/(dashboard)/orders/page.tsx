@@ -24,12 +24,13 @@ import {
   OrderStatus,
   OrderStatusGroup,
   OrderSummary,
+  UpdateOrderPayload,
   useCreateOrderMutation,
   useOrderQuery,
   useOrdersQuery,
   useUpdateOrderMutation,
 } from '@/entities/order';
-import { ProductListItem, useInfiniteProductsQuery } from '@/entities/product';
+import { ProductListItem, productsApi, useInfiniteProductsQuery } from '@/entities/product';
 import { RoleGuard, usePermission } from '@/features/auth';
 import { formatDateDisplay, toDateInputValue, toServerDateValue } from '@/shared/lib/date';
 import type { TableColumn } from '@/shared/ui';
@@ -40,6 +41,7 @@ import {
   Drawer,
   FormField,
   Input,
+  Modal,
   Select,
   Spinner,
   Table,
@@ -68,6 +70,12 @@ type CalculatedItemTotals = {
 };
 
 type OrderFormErrorMessages = string[] | null;
+
+type ReturnItem = {
+  productId: string;
+  name: string;
+  orderedQuantity: number;
+};
 
 const STATUS_GROUP_TABS: { id: OrderStatusGroup; label: string }[] = [
   { id: 'current', label: 'Текущие' },
@@ -739,6 +747,15 @@ export default function OrdersPage() {
   const [editCalculatedItems, setEditCalculatedItems] = useState<
     Record<string, CalculatedItemTotals>
   >({});
+  const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
+  const [pendingReturn, setPendingReturn] = useState<{
+    orderId: number;
+    payload: UpdateOrderPayload;
+    items: ReturnItem[];
+  } | null>(null);
+  const [returnQuantities, setReturnQuantities] = useState<Record<string, string>>({});
+  const [returnModalError, setReturnModalError] = useState<string | null>(null);
+  const [isSubmittingReturns, setIsSubmittingReturns] = useState(false);
 
   const productQueryParams = useMemo(
     () => ({
@@ -791,6 +808,23 @@ export default function OrdersPage() {
     });
     return extras.length ? [...extras, ...fetchedProducts] : fetchedProducts;
   }, [fetchedProducts, editOrderResponse]);
+
+  const getProductNameById = useCallback(
+    (productId: string): string => {
+      const product = products.find((item) => item.id === productId);
+      if (product) {
+        return product.name;
+      }
+      const orderItem = editOrderResponse?.data.items.find(
+        (item) => item.product?.id === productId
+      );
+      if (orderItem) {
+        return orderItem.product?.name ?? orderItem.product_name ?? productId;
+      }
+      return productId;
+    },
+    [editOrderResponse, products]
+  );
 
   const loadMoreProducts = useCallback(() => {
     if (hasMoreProducts) {
@@ -1079,6 +1113,18 @@ export default function OrdersPage() {
     return null;
   };
 
+  const handleOrderUpdateSuccess = () => {
+    setIsEditOpen(false);
+    setEditOrderId(null);
+    setSuccessMessage('Изменения сохранены.');
+    void refetch();
+  };
+
+  const handleOrderUpdateError = (mutationError: unknown) => {
+    const messages = extractOrderErrorMessages(mutationError);
+    setEditError(messages.length > 0 ? messages : ['Не удалось обновить заказ. Попробуйте снова.']);
+  };
+
   const handleCreateSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!canManageOrders) {
@@ -1119,20 +1165,38 @@ export default function OrdersPage() {
     }
     setEditError(null);
     const payload = buildPayloadFromForm(editForm);
+
+    if (editForm.status === 'archived') {
+      const returnItems: ReturnItem[] = payload.items.map((item) => ({
+        productId: item.product_id,
+        orderedQuantity: item.quantity,
+        name: getProductNameById(item.product_id),
+      }));
+
+      if (returnItems.length > 0) {
+        const initialQuantities = returnItems.reduce<Record<string, string>>((acc, item) => {
+          acc[item.productId] = String(item.orderedQuantity);
+          return acc;
+        }, {});
+        setReturnQuantities(initialQuantities);
+        setPendingReturn({ orderId: editOrderId, payload, items: returnItems });
+        setReturnModalError(null);
+        setIsReturnModalOpen(true);
+        return;
+      }
+    }
+
+    setPendingReturn(null);
+    setReturnModalError(null);
+    setReturnQuantities({});
     updateMutation.mutate(
       { orderId: editOrderId, payload },
       {
         onSuccess: () => {
-          setIsEditOpen(false);
-          setEditOrderId(null);
-          setSuccessMessage('Изменения сохранены.');
-          void refetch();
+          handleOrderUpdateSuccess();
         },
         onError: (mutationError) => {
-          const messages = extractOrderErrorMessages(mutationError);
-          setEditError(
-            messages.length > 0 ? messages : ['Не удалось обновить заказ. Попробуйте снова.']
-          );
+          handleOrderUpdateError(mutationError);
         },
       }
     );
@@ -1163,6 +1227,99 @@ export default function OrdersPage() {
     updateProductQuantity(setEditForm, productId, 1);
   const handleEditDecrement = (productId: string) =>
     updateProductQuantity(setEditForm, productId, -1);
+
+  const handleReturnQuantityChange = (productId: string, value: string) => {
+    setReturnQuantities((prev) => ({ ...prev, [productId]: value }));
+  };
+
+  const resetReturnModalState = () => {
+    setPendingReturn(null);
+    setReturnQuantities({});
+    setReturnModalError(null);
+  };
+
+  const handleCloseReturnModal = () => {
+    if (isSubmittingReturns) {
+      return;
+    }
+    setIsReturnModalOpen(false);
+    resetReturnModalState();
+  };
+
+  const confirmReturnSubmission = async () => {
+    if (!pendingReturn) {
+      return;
+    }
+
+    const quantities: Array<{ item: ReturnItem; quantity: number }> = [];
+
+    for (const item of pendingReturn.items) {
+      const rawValue = returnQuantities[item.productId] ?? '';
+      if (!rawValue.trim()) {
+        quantities.push({ item, quantity: 0 });
+        continue;
+      }
+      const parsed = Number(rawValue);
+      if (!Number.isFinite(parsed)) {
+        setReturnModalError(`Укажите корректное количество для «${item.name}».`);
+        return;
+      }
+      if (parsed < 0) {
+        setReturnModalError(`Количество для «${item.name}» не может быть отрицательным.`);
+        return;
+      }
+      const normalized = Math.trunc(parsed);
+      if (normalized > item.orderedQuantity) {
+        setReturnModalError(
+          `Количество возврата для «${item.name}» не может превышать ${item.orderedQuantity}.`
+        );
+        return;
+      }
+      quantities.push({ item, quantity: Math.max(0, normalized) });
+    }
+
+    setReturnModalError(null);
+    setIsSubmittingReturns(true);
+
+    try {
+      for (const entry of quantities) {
+        if (entry.quantity <= 0) {
+          continue;
+        }
+        await productsApi.createTransaction(entry.item.productId, {
+          quantity_delta: entry.quantity,
+          affects_available: true,
+        });
+      }
+
+      try {
+        await updateMutation.mutateAsync({
+          orderId: pendingReturn.orderId,
+          payload: pendingReturn.payload,
+        });
+        handleOrderUpdateSuccess();
+        setIsReturnModalOpen(false);
+        resetReturnModalState();
+      } catch (mutationError) {
+        handleOrderUpdateError(mutationError);
+        const messages = extractOrderErrorMessages(mutationError);
+        setReturnModalError(messages[0] ?? 'Не удалось обновить заказ. Попробуйте снова.');
+      }
+    } catch (transactionError) {
+      const message =
+        transactionError instanceof Error
+          ? transactionError.message
+          : 'Не удалось создать возврат на склад. Попробуйте снова.';
+      setReturnModalError(message);
+    } finally {
+      setIsSubmittingReturns(false);
+    }
+  };
+
+  const handleReturnModalSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    void confirmReturnSubmission();
+  };
 
   const handleSelectCreateCustomer = (customer: CustomerOption | null) => {
     setCreateForm((prev) => ({ ...prev, customer }));
@@ -1408,6 +1565,86 @@ export default function OrdersPage() {
             calculatedItems={editCalculatedItems}
           />
         </Drawer>
+        <Modal
+          open={isReturnModalOpen}
+          onClose={handleCloseReturnModal}
+          title="Возврат товаров на склад"
+        >
+          <form
+            onSubmit={handleReturnModalSubmit}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px',
+              padding: '0 8px 16px',
+              maxHeight: '70vh',
+              overflowY: 'auto',
+            }}
+          >
+            <p style={{ margin: 0, color: 'var(--color-text-muted)', lineHeight: 1.5 }}>
+              Укажите, сколько единиц каждого товара вернулось на склад. Ниже указано, сколько
+              товаров уехало со склада по заказу.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {pendingReturn?.items.map((item) => (
+                <div
+                  key={item.productId}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px',
+                    padding: '12px',
+                    border: '1px solid var(--color-border)',
+                    borderRadius: '12px',
+                    background: 'var(--color-surface-muted)',
+                  }}
+                >
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <span style={{ fontWeight: 600 }}>{item.name}</span>
+                    <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                      В заказе: {item.orderedQuantity}
+                    </span>
+                  </div>
+                  <Input
+                    type="number"
+                    min={0}
+                    max={item.orderedQuantity}
+                    value={returnQuantities[item.productId] ?? ''}
+                    onChange={(event) =>
+                      handleReturnQuantityChange(item.productId, event.target.value)
+                    }
+                    placeholder="Количество, вернувшееся на склад"
+                  />
+                </div>
+              ))}
+            </div>
+            {returnModalError ? (
+              <Alert tone="danger" title="Не удалось сохранить возврат">
+                {returnModalError}
+              </Alert>
+            ) : null}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '12px',
+                flexWrap: 'wrap',
+              }}
+            >
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handleCloseReturnModal}
+                disabled={isSubmittingReturns}
+              >
+                Отмена
+              </Button>
+              <Button type="submit" disabled={isSubmittingReturns}>
+                {isSubmittingReturns ? 'Сохранение…' : 'Подтвердить возврат'}
+              </Button>
+            </div>
+          </form>
+        </Modal>
       </div>
     </RoleGuard>
   );
