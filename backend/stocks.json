@@ -1,0 +1,9025 @@
+[
+  {
+    "id": 1,
+    "town_id": 2120,
+    "article_id": 1,
+    "quantity": 180,
+    "occupation": [
+      132
+    ],
+    "average_order": 84,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 2,
+    "town_id": 2120,
+    "article_id": 2,
+    "quantity": 167,
+    "occupation": [
+      100,
+      45,
+      30
+    ],
+    "average_order": 58,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 3,
+    "town_id": 2120,
+    "article_id": 3,
+    "quantity": 192,
+    "occupation": [
+      82,
+      13,
+      23
+    ],
+    "average_order": 39,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 4,
+    "town_id": 2120,
+    "article_id": 4,
+    "quantity": 195,
+    "occupation": [
+      1,
+      1,
+      130
+    ],
+    "average_order": 33,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 5,
+    "town_id": 2120,
+    "article_id": 5,
+    "quantity": 202,
+    "occupation": [
+      30
+    ],
+    "average_order": 30,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 6,
+    "town_id": 2120,
+    "article_id": 6,
+    "quantity": 201,
+    "occupation": [
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 8,
+    "town_id": 2120,
+    "article_id": 8,
+    "quantity": 200,
+    "occupation": [
+      38,
+      27
+    ],
+    "average_order": 33,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 9,
+    "town_id": 2120,
+    "article_id": 9,
+    "quantity": 204,
+    "occupation": [
+      35,
+      40
+    ],
+    "average_order": 35,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 12,
+    "town_id": 2120,
+    "article_id": 12,
+    "quantity": 200,
+    "occupation": [
+      1,
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 13,
+    "town_id": 2120,
+    "article_id": 13,
+    "quantity": 254,
+    "occupation": [
+      180
+    ],
+    "average_order": 102,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 14,
+    "town_id": 2120,
+    "article_id": 14,
+    "quantity": 210,
+    "occupation": [
+      43
+    ],
+    "average_order": 43,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 15,
+    "town_id": 2120,
+    "article_id": 15,
+    "quantity": 300,
+    "occupation": [
+      67,
+      30
+    ],
+    "average_order": 49,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 16,
+    "town_id": 2120,
+    "article_id": 16,
+    "quantity": 200,
+    "occupation": [
+      85,
+      23,
+      75
+    ],
+    "average_order": 61,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 17,
+    "town_id": 2120,
+    "article_id": 17,
+    "quantity": 200,
+    "occupation": [
+      85,
+      140,
+      20
+    ],
+    "average_order": 82,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 18,
+    "town_id": 2120,
+    "article_id": 18,
+    "quantity": 116,
+    "occupation": [
+      20
+    ],
+    "average_order": 20,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 21,
+    "town_id": 2120,
+    "article_id": 21,
+    "quantity": 150,
+    "occupation": [
+      30
+    ],
+    "average_order": 30,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 23,
+    "town_id": 2120,
+    "article_id": 23,
+    "quantity": 250,
+    "occupation": [
+      25,
+      38,
+      19
+    ],
+    "average_order": 36,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 24,
+    "town_id": 2120,
+    "article_id": 24,
+    "quantity": 250,
+    "occupation": [
+      100,
+      185,
+      48,
+      51,
+      90,
+      56,
+      19,
+      63,
+      82,
+      40,
+      145
+    ],
+    "average_order": 52,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 25,
+    "town_id": 2120,
+    "article_id": 25,
+    "quantity": 250,
+    "occupation": [
+      145,
+      93,
+      19,
+      26
+    ],
+    "average_order": 59,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 26,
+    "town_id": 2120,
+    "article_id": 26,
+    "quantity": 250,
+    "occupation": [
+      12,
+      93,
+      145,
+      82,
+      48,
+      19,
+      110
+    ],
+    "average_order": 52,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 30,
+    "town_id": 2120,
+    "article_id": 30,
+    "quantity": 120,
+    "occupation": [
+      40
+    ],
+    "average_order": 40,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 31,
+    "town_id": 2120,
+    "article_id": 31,
+    "quantity": 150,
+    "occupation": [
+      2,
+      1,
+      10
+    ],
+    "average_order": 4,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 33,
+    "town_id": 2120,
+    "article_id": 33,
+    "quantity": 150,
+    "occupation": [
+      1,
+      2
+    ],
+    "average_order": 2,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 39,
+    "town_id": 2120,
+    "article_id": 39,
+    "quantity": 300,
+    "occupation": [
+      70,
+      150,
+      26,
+      90
+    ],
+    "average_order": 84,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 40,
+    "town_id": 2120,
+    "article_id": 40,
+    "quantity": 300,
+    "occupation": [
+      90,
+      70,
+      26
+    ],
+    "average_order": 62,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 41,
+    "town_id": 2120,
+    "article_id": 41,
+    "quantity": 200,
+    "occupation": [
+      40,
+      2,
+      2
+    ],
+    "average_order": 15,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 42,
+    "town_id": 2120,
+    "article_id": 42,
+    "quantity": 200,
+    "occupation": [
+      20,
+      3,
+      2
+    ],
+    "average_order": 8,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 43,
+    "town_id": 2120,
+    "article_id": 43,
+    "quantity": 230,
+    "occupation": [
+      1,
+      42
+    ],
+    "average_order": 17,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 44,
+    "town_id": 2120,
+    "article_id": 44,
+    "quantity": 230,
+    "occupation": [
+      2,
+      42,
+      35
+    ],
+    "average_order": 26,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 45,
+    "town_id": 2120,
+    "article_id": 45,
+    "quantity": 200,
+    "occupation": [
+      22,
+      27
+    ],
+    "average_order": 25,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 46,
+    "town_id": 2120,
+    "article_id": 46,
+    "quantity": 200,
+    "occupation": [
+      22
+    ],
+    "average_order": 22,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 47,
+    "town_id": 2120,
+    "article_id": 47,
+    "quantity": 190,
+    "occupation": [
+      20
+    ],
+    "average_order": 29,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 48,
+    "town_id": 2120,
+    "article_id": 48,
+    "quantity": 190,
+    "occupation": [
+      20
+    ],
+    "average_order": 20,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 49,
+    "town_id": 2120,
+    "article_id": 49,
+    "quantity": 200,
+    "occupation": [
+      58,
+      56
+    ],
+    "average_order": 57,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 50,
+    "town_id": 2120,
+    "article_id": 50,
+    "quantity": 200,
+    "occupation": [
+      58
+    ],
+    "average_order": 58,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 51,
+    "town_id": 2120,
+    "article_id": 51,
+    "quantity": 228,
+    "occupation": [
+      24,
+      37,
+      50,
+      25,
+      43,
+      44,
+      1
+    ],
+    "average_order": 32,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 52,
+    "town_id": 2120,
+    "article_id": 52,
+    "quantity": 228,
+    "occupation": [
+      25,
+      50,
+      49,
+      44,
+      24,
+      1,
+      43
+    ],
+    "average_order": 33,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 56,
+    "town_id": 2120,
+    "article_id": 56,
+    "quantity": 225,
+    "occupation": [
+      26
+    ],
+    "average_order": 26,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 57,
+    "town_id": 2120,
+    "article_id": 57,
+    "quantity": 240,
+    "occupation": [
+      30
+    ],
+    "average_order": 30,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 59,
+    "town_id": 2120,
+    "article_id": 59,
+    "quantity": 240,
+    "occupation": [
+      30
+    ],
+    "average_order": 30,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 60,
+    "town_id": 2120,
+    "article_id": 60,
+    "quantity": 240,
+    "occupation": [
+      30
+    ],
+    "average_order": 30,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 61,
+    "town_id": 2120,
+    "article_id": 61,
+    "quantity": 240,
+    "occupation": [
+      55
+    ],
+    "average_order": 34,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 63,
+    "town_id": 2120,
+    "article_id": 63,
+    "quantity": 240,
+    "occupation": [
+      30,
+      35
+    ],
+    "average_order": 26,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 65,
+    "town_id": 2120,
+    "article_id": 65,
+    "quantity": 350,
+    "occupation": [
+      45,
+      132,
+      140,
+      18
+    ],
+    "average_order": 72,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 68,
+    "town_id": 2120,
+    "article_id": 68,
+    "quantity": 250,
+    "occupation": [
+      42
+    ],
+    "average_order": 27,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 74,
+    "town_id": 2120,
+    "article_id": 74,
+    "quantity": 470,
+    "occupation": [
+      120,
+      353,
+      73,
+      19,
+      30,
+      130,
+      80,
+      42
+    ],
+    "average_order": 58,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 75,
+    "town_id": 2120,
+    "article_id": 75,
+    "quantity": 300,
+    "occupation": [
+      40
+    ],
+    "average_order": 40,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 76,
+    "town_id": 2120,
+    "article_id": 76,
+    "quantity": 200,
+    "occupation": [
+      60,
+      150,
+      130
+    ],
+    "average_order": 78,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 78,
+    "town_id": 2120,
+    "article_id": 78,
+    "quantity": 148,
+    "occupation": [
+      30
+    ],
+    "average_order": 16,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 79,
+    "town_id": 2120,
+    "article_id": 79,
+    "quantity": 200,
+    "occupation": [
+      60,
+      150
+    ],
+    "average_order": 54,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 80,
+    "town_id": 2120,
+    "article_id": 80,
+    "quantity": 172,
+    "occupation": [
+      130
+    ],
+    "average_order": 66,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 81,
+    "town_id": 2120,
+    "article_id": 81,
+    "quantity": 200,
+    "occupation": [
+      71,
+      47,
+      39,
+      144,
+      40,
+      45,
+      29,
+      119,
+      102
+    ],
+    "average_order": 58,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 82,
+    "town_id": 2120,
+    "article_id": 82,
+    "quantity": 150,
+    "occupation": [
+      35,
+      63,
+      100
+    ],
+    "average_order": 66,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 83,
+    "town_id": 2120,
+    "article_id": 83,
+    "quantity": 390,
+    "occupation": [
+      90,
+      65,
+      130,
+      60,
+      54,
+      170,
+      67,
+      88
+    ],
+    "average_order": 66,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 84,
+    "town_id": 2120,
+    "article_id": 84,
+    "quantity": 200,
+    "occupation": [
+      55,
+      45,
+      10
+    ],
+    "average_order": 37,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 86,
+    "town_id": 2120,
+    "article_id": 86,
+    "quantity": 200,
+    "occupation": [
+      12
+    ],
+    "average_order": 12,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 87,
+    "town_id": 2120,
+    "article_id": 87,
+    "quantity": 152,
+    "occupation": [
+      8,
+      12,
+      8
+    ],
+    "average_order": 20,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 88,
+    "town_id": 2120,
+    "article_id": 88,
+    "quantity": 260,
+    "occupation": [
+      40,
+      60,
+      38,
+      130,
+      57
+    ],
+    "average_order": 74,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 89,
+    "town_id": 2120,
+    "article_id": 89,
+    "quantity": 200,
+    "occupation": [
+      33,
+      71
+    ],
+    "average_order": 65,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 90,
+    "town_id": 2120,
+    "article_id": 90,
+    "quantity": 199,
+    "occupation": [
+      37
+    ],
+    "average_order": 37,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 91,
+    "town_id": 2120,
+    "article_id": 91,
+    "quantity": 250,
+    "occupation": [
+      38,
+      15,
+      115,
+      26,
+      34,
+      16,
+      73,
+      60,
+      25,
+      66,
+      1,
+      24,
+      67,
+      50,
+      186
+    ],
+    "average_order": 33,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 92,
+    "town_id": 2120,
+    "article_id": 92,
+    "quantity": 127,
+    "occupation": [
+      35
+    ],
+    "average_order": 33,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 93,
+    "town_id": 2120,
+    "article_id": 93,
+    "quantity": 190,
+    "occupation": [
+      30,
+      3,
+      140
+    ],
+    "average_order": 36,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 94,
+    "town_id": 2120,
+    "article_id": 94,
+    "quantity": 20,
+    "occupation": [
+      19
+    ],
+    "average_order": 19,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 95,
+    "town_id": 2120,
+    "article_id": 95,
+    "quantity": 20,
+    "occupation": [
+      5,
+      3
+    ],
+    "average_order": 6,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 98,
+    "town_id": 2120,
+    "article_id": 98,
+    "quantity": 300,
+    "occupation": [
+      2,
+      82,
+      26,
+      50,
+      69,
+      85,
+      52,
+      162,
+      205,
+      50,
+      20,
+      13,
+      67
+    ],
+    "average_order": 61,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 100,
+    "town_id": 2120,
+    "article_id": 101,
+    "quantity": 7,
+    "occupation": [
+      4,
+      4,
+      2
+    ],
+    "average_order": 3,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 101,
+    "town_id": 2120,
+    "article_id": 102,
+    "quantity": 250,
+    "occupation": [
+      25
+    ],
+    "average_order": 48,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 102,
+    "town_id": 2120,
+    "article_id": 103,
+    "quantity": 300,
+    "occupation": [
+      60,
+      18
+    ],
+    "average_order": 39,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 104,
+    "town_id": 2120,
+    "article_id": 105,
+    "quantity": 300,
+    "occupation": [
+      60
+    ],
+    "average_order": 60,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 107,
+    "town_id": 2120,
+    "article_id": 108,
+    "quantity": 300,
+    "occupation": [
+      27,
+      260
+    ],
+    "average_order": 96,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 108,
+    "town_id": 2120,
+    "article_id": 109,
+    "quantity": 300,
+    "occupation": [
+      29
+    ],
+    "average_order": 35,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 109,
+    "town_id": 2120,
+    "article_id": 110,
+    "quantity": 200,
+    "occupation": [
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 111,
+    "town_id": 2120,
+    "article_id": 112,
+    "quantity": 200,
+    "occupation": [
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 112,
+    "town_id": 2120,
+    "article_id": 113,
+    "quantity": 300,
+    "occupation": [
+      50
+    ],
+    "average_order": 50,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 114,
+    "town_id": 2120,
+    "article_id": 115,
+    "quantity": 30,
+    "occupation": [
+      8,
+      2,
+      6,
+      1
+    ],
+    "average_order": 6,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 116,
+    "town_id": 2120,
+    "article_id": 117,
+    "quantity": 30,
+    "occupation": [
+      2,
+      10,
+      3,
+      7,
+      1,
+      6,
+      4
+    ],
+    "average_order": 3,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 118,
+    "town_id": 2120,
+    "article_id": 119,
+    "quantity": 5,
+    "occupation": [
+      1,
+      1,
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 119,
+    "town_id": 2120,
+    "article_id": 120,
+    "quantity": 70,
+    "occupation": [
+      4,
+      3,
+      1,
+      6,
+      8,
+      10,
+      6
+    ],
+    "average_order": 6,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 120,
+    "town_id": 2120,
+    "article_id": 121,
+    "quantity": 20,
+    "occupation": [
+      12,
+      3,
+      4,
+      15,
+      5,
+      10
+    ],
+    "average_order": 5,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 121,
+    "town_id": 2120,
+    "article_id": 122,
+    "quantity": 20,
+    "occupation": [
+      4,
+      4
+    ],
+    "average_order": 6,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 123,
+    "town_id": 2120,
+    "article_id": 124,
+    "quantity": 1500,
+    "occupation": [
+      87,
+      182,
+      20,
+      57,
+      320,
+      70,
+      80,
+      92
+    ],
+    "average_order": 73,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 124,
+    "town_id": 2120,
+    "article_id": 125,
+    "quantity": 800,
+    "occupation": [
+      60,
+      40,
+      130,
+      108,
+      55,
+      144,
+      60
+    ],
+    "average_order": 75,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 125,
+    "town_id": 2120,
+    "article_id": 126,
+    "quantity": 500,
+    "occupation": [
+      240,
+      88
+    ],
+    "average_order": 100,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 126,
+    "town_id": 2120,
+    "article_id": 127,
+    "quantity": 200,
+    "occupation": [
+      22,
+      47
+    ],
+    "average_order": 35,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 127,
+    "town_id": 2120,
+    "article_id": 128,
+    "quantity": 200,
+    "occupation": [
+      72,
+      60
+    ],
+    "average_order": 66,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 129,
+    "town_id": 2120,
+    "article_id": 130,
+    "quantity": 200,
+    "occupation": [
+      24,
+      28,
+      40
+    ],
+    "average_order": 54,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 130,
+    "town_id": 2120,
+    "article_id": 131,
+    "quantity": 200,
+    "occupation": [
+      47,
+      93,
+      41,
+      54,
+      174,
+      65,
+      130
+    ],
+    "average_order": 72,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 131,
+    "town_id": 2120,
+    "article_id": 132,
+    "quantity": 200,
+    "occupation": [
+      20
+    ],
+    "average_order": 20,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 132,
+    "town_id": 2120,
+    "article_id": 133,
+    "quantity": 200,
+    "occupation": [
+      37
+    ],
+    "average_order": 53,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 134,
+    "town_id": 2120,
+    "article_id": 135,
+    "quantity": 200,
+    "occupation": [
+      60
+    ],
+    "average_order": 60,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 136,
+    "town_id": 2120,
+    "article_id": 138,
+    "quantity": 330,
+    "occupation": [
+      122,
+      47,
+      60,
+      80,
+      3
+    ],
+    "average_order": 64,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 137,
+    "town_id": 2120,
+    "article_id": 139,
+    "quantity": 330,
+    "occupation": [
+      55,
+      90
+    ],
+    "average_order": 73,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 138,
+    "town_id": 2120,
+    "article_id": 140,
+    "quantity": 70,
+    "occupation": [
+      50
+    ],
+    "average_order": 34,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 140,
+    "town_id": 2120,
+    "article_id": 142,
+    "quantity": 240,
+    "occupation": [
+      60,
+      130
+    ],
+    "average_order": 95,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 141,
+    "town_id": 2120,
+    "article_id": 143,
+    "quantity": 240,
+    "occupation": [
+      10,
+      30,
+      75,
+      24,
+      7
+    ],
+    "average_order": 29,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 142,
+    "town_id": 2120,
+    "article_id": 144,
+    "quantity": 390,
+    "occupation": [
+      80,
+      84
+    ],
+    "average_order": 145,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 143,
+    "town_id": 2120,
+    "article_id": 145,
+    "quantity": 210,
+    "occupation": [
+      30
+    ],
+    "average_order": 30,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 144,
+    "town_id": 2120,
+    "article_id": 146,
+    "quantity": 215,
+    "occupation": [
+      30,
+      145,
+      52,
+      204,
+      122,
+      52,
+      36,
+      82,
+      40
+    ],
+    "average_order": 49,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 145,
+    "town_id": 2120,
+    "article_id": 147,
+    "quantity": 200,
+    "occupation": [
+      40,
+      50
+    ],
+    "average_order": 38,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 146,
+    "town_id": 2120,
+    "article_id": 148,
+    "quantity": 200,
+    "occupation": [
+      82,
+      116
+    ],
+    "average_order": 99,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 147,
+    "town_id": 2120,
+    "article_id": 149,
+    "quantity": 207,
+    "occupation": [
+      4,
+      47,
+      25,
+      76
+    ],
+    "average_order": 40,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 148,
+    "town_id": 2120,
+    "article_id": 150,
+    "quantity": 200,
+    "occupation": [
+      40
+    ],
+    "average_order": 40,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 152,
+    "town_id": 2120,
+    "article_id": 154,
+    "quantity": 205,
+    "occupation": [
+      47
+    ],
+    "average_order": 47,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 155,
+    "town_id": 2120,
+    "article_id": 157,
+    "quantity": 90,
+    "occupation": [
+      75,
+      62,
+      11,
+      45
+    ],
+    "average_order": 41,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 156,
+    "town_id": 2120,
+    "article_id": 158,
+    "quantity": 90,
+    "occupation": [
+      45,
+      11,
+      25,
+      42
+    ],
+    "average_order": 29,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 157,
+    "town_id": 2120,
+    "article_id": 159,
+    "quantity": 90,
+    "occupation": [
+      62,
+      50,
+      11
+    ],
+    "average_order": 33,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 158,
+    "town_id": 2120,
+    "article_id": 160,
+    "quantity": 90,
+    "occupation": [
+      11,
+      42,
+      45,
+      89
+    ],
+    "average_order": 47,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 159,
+    "town_id": 2120,
+    "article_id": 161,
+    "quantity": 19,
+    "occupation": [
+      2,
+      2
+    ],
+    "average_order": 2,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 160,
+    "town_id": 2120,
+    "article_id": 162,
+    "quantity": 33,
+    "occupation": [
+      6,
+      15,
+      7,
+      6,
+      18,
+      24,
+      16,
+      1
+    ],
+    "average_order": 7,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 161,
+    "town_id": 2120,
+    "article_id": 163,
+    "quantity": 11,
+    "occupation": [
+      3,
+      2,
+      1,
+      3
+    ],
+    "average_order": 2,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 162,
+    "town_id": 2120,
+    "article_id": 164,
+    "quantity": 15,
+    "occupation": [
+      2
+    ],
+    "average_order": 2,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 163,
+    "town_id": 2120,
+    "article_id": 165,
+    "quantity": 35,
+    "occupation": [
+      1,
+      12,
+      7,
+      8,
+      6,
+      1,
+      6,
+      22,
+      4,
+      3
+    ],
+    "average_order": 5,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 164,
+    "town_id": 2120,
+    "article_id": 166,
+    "quantity": 35,
+    "occupation": [
+      16,
+      23
+    ],
+    "average_order": 13,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 165,
+    "town_id": 2120,
+    "article_id": 167,
+    "quantity": 27,
+    "occupation": [
+      7
+    ],
+    "average_order": 7,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 167,
+    "town_id": 2120,
+    "article_id": 169,
+    "quantity": 35,
+    "occupation": [
+      5
+    ],
+    "average_order": 5,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 168,
+    "town_id": 2120,
+    "article_id": 170,
+    "quantity": 44,
+    "occupation": [
+      7,
+      3,
+      4,
+      8,
+      4
+    ],
+    "average_order": 5,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 171,
+    "town_id": 2120,
+    "article_id": 173,
+    "quantity": 30,
+    "occupation": [
+      4,
+      4
+    ],
+    "average_order": 4,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 172,
+    "town_id": 2120,
+    "article_id": 174,
+    "quantity": 22,
+    "occupation": [
+      3,
+      10
+    ],
+    "average_order": 7,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 175,
+    "town_id": 2120,
+    "article_id": 181,
+    "quantity": 40,
+    "occupation": [
+      7,
+      5,
+      1
+    ],
+    "average_order": 4,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 176,
+    "town_id": 2120,
+    "article_id": 182,
+    "quantity": 45,
+    "occupation": [
+      1,
+      4,
+      3,
+      4,
+      1,
+      17,
+      2,
+      12,
+      5,
+      1,
+      22,
+      1
+    ],
+    "average_order": 4,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 178,
+    "town_id": 2120,
+    "article_id": 184,
+    "quantity": 35,
+    "occupation": [
+      8
+    ],
+    "average_order": 6,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 179,
+    "town_id": 2120,
+    "article_id": 185,
+    "quantity": 30,
+    "occupation": [
+      20,
+      9,
+      5,
+      1
+    ],
+    "average_order": 9,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 180,
+    "town_id": 2120,
+    "article_id": 186,
+    "quantity": 40,
+    "occupation": [
+      4,
+      11,
+      4,
+      1,
+      8,
+      9,
+      1,
+      2
+    ],
+    "average_order": 4,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 182,
+    "town_id": 2120,
+    "article_id": 188,
+    "quantity": 45,
+    "occupation": [
+      2,
+      11,
+      3
+    ],
+    "average_order": 4,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 183,
+    "town_id": 2120,
+    "article_id": 189,
+    "quantity": 50,
+    "occupation": [
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 184,
+    "town_id": 2120,
+    "article_id": 190,
+    "quantity": 20,
+    "occupation": [
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 189,
+    "town_id": 2120,
+    "article_id": 196,
+    "quantity": 30,
+    "occupation": [
+      2,
+      2
+    ],
+    "average_order": 2,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 190,
+    "town_id": 2120,
+    "article_id": 197,
+    "quantity": 30,
+    "occupation": [
+      11
+    ],
+    "average_order": 11,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 194,
+    "town_id": 2120,
+    "article_id": 201,
+    "quantity": 27,
+    "occupation": [
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 195,
+    "town_id": 2120,
+    "article_id": 202,
+    "quantity": 30,
+    "occupation": [
+      3,
+      6
+    ],
+    "average_order": 5,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 196,
+    "town_id": 2120,
+    "article_id": 203,
+    "quantity": 30,
+    "occupation": [
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 202,
+    "town_id": 2120,
+    "article_id": 209,
+    "quantity": 20,
+    "occupation": [
+      10
+    ],
+    "average_order": 10,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 203,
+    "town_id": 2120,
+    "article_id": 210,
+    "quantity": 15,
+    "occupation": [
+      10,
+      3,
+      6,
+      8
+    ],
+    "average_order": 7,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 204,
+    "town_id": 2120,
+    "article_id": 211,
+    "quantity": 20,
+    "occupation": [
+      1,
+      10,
+      3
+    ],
+    "average_order": 5,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 206,
+    "town_id": 2120,
+    "article_id": 213,
+    "quantity": 15,
+    "occupation": [
+      4,
+      5
+    ],
+    "average_order": 5,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 207,
+    "town_id": 2120,
+    "article_id": 214,
+    "quantity": 15,
+    "occupation": [
+      3
+    ],
+    "average_order": 3,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 209,
+    "town_id": 2120,
+    "article_id": 216,
+    "quantity": 20,
+    "occupation": [
+      4
+    ],
+    "average_order": 4,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 210,
+    "town_id": 2120,
+    "article_id": 217,
+    "quantity": 10,
+    "occupation": [
+      2,
+      3
+    ],
+    "average_order": 3,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 213,
+    "town_id": 2120,
+    "article_id": 220,
+    "quantity": 20,
+    "occupation": [
+      7
+    ],
+    "average_order": 5,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 214,
+    "town_id": 2120,
+    "article_id": 221,
+    "quantity": 20,
+    "occupation": [
+      11,
+      5,
+      7
+    ],
+    "average_order": 8,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 217,
+    "town_id": 2120,
+    "article_id": 224,
+    "quantity": 30,
+    "occupation": [
+      1
+    ],
+    "average_order": 3,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 218,
+    "town_id": 2120,
+    "article_id": 225,
+    "quantity": 25,
+    "occupation": [
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 225,
+    "town_id": 2120,
+    "article_id": 232,
+    "quantity": 35,
+    "occupation": [
+      2
+    ],
+    "average_order": 2,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 226,
+    "town_id": 2120,
+    "article_id": 233,
+    "quantity": 38,
+    "occupation": [
+      8
+    ],
+    "average_order": 8,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 227,
+    "town_id": 2120,
+    "article_id": 234,
+    "quantity": 35,
+    "occupation": [
+      9
+    ],
+    "average_order": 9,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 229,
+    "town_id": 2120,
+    "article_id": 236,
+    "quantity": 30,
+    "occupation": [
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 232,
+    "town_id": 2120,
+    "article_id": 239,
+    "quantity": 30,
+    "occupation": [
+      8
+    ],
+    "average_order": 8,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 234,
+    "town_id": 2120,
+    "article_id": 241,
+    "quantity": 30,
+    "occupation": [
+      14,
+      11,
+      6
+    ],
+    "average_order": 6,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 237,
+    "town_id": 2120,
+    "article_id": 244,
+    "quantity": 30,
+    "occupation": [
+      1,
+      6
+    ],
+    "average_order": 3,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 241,
+    "town_id": 2120,
+    "article_id": 248,
+    "quantity": 30,
+    "occupation": [
+      7
+    ],
+    "average_order": 7,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 242,
+    "town_id": 2120,
+    "article_id": 249,
+    "quantity": 30,
+    "occupation": [
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 243,
+    "town_id": 2120,
+    "article_id": 250,
+    "quantity": 20,
+    "occupation": [
+      3
+    ],
+    "average_order": 3,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 245,
+    "town_id": 2120,
+    "article_id": 252,
+    "quantity": 20,
+    "occupation": [
+      7
+    ],
+    "average_order": 7,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 246,
+    "town_id": 2120,
+    "article_id": 253,
+    "quantity": 20,
+    "occupation": [
+      10
+    ],
+    "average_order": 6,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 248,
+    "town_id": 2120,
+    "article_id": 255,
+    "quantity": 30,
+    "occupation": [
+      3
+    ],
+    "average_order": 8,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 249,
+    "town_id": 2120,
+    "article_id": 256,
+    "quantity": 400,
+    "occupation": [
+      35,
+      1,
+      24,
+      60,
+      40,
+      11,
+      4
+    ],
+    "average_order": 21,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 253,
+    "town_id": 2120,
+    "article_id": 260,
+    "quantity": 350,
+    "occupation": [
+      52,
+      31,
+      67
+    ],
+    "average_order": 48,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 254,
+    "town_id": 2120,
+    "article_id": 261,
+    "quantity": 350,
+    "occupation": [
+      56,
+      87
+    ],
+    "average_order": 72,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 255,
+    "town_id": 2120,
+    "article_id": 262,
+    "quantity": 300,
+    "occupation": [
+      55,
+      42,
+      24,
+      60,
+      25,
+      35
+    ],
+    "average_order": 37,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 256,
+    "town_id": 2120,
+    "article_id": 263,
+    "quantity": 400,
+    "occupation": [
+      75
+    ],
+    "average_order": 75,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 257,
+    "town_id": 2120,
+    "article_id": 264,
+    "quantity": 200,
+    "occupation": [
+      61
+    ],
+    "average_order": 61,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 258,
+    "town_id": 2120,
+    "article_id": 265,
+    "quantity": 300,
+    "occupation": [
+      35,
+      30
+    ],
+    "average_order": 24,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 259,
+    "town_id": 2120,
+    "article_id": 266,
+    "quantity": 200,
+    "occupation": [
+      50
+    ],
+    "average_order": 50,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 260,
+    "town_id": 2120,
+    "article_id": 267,
+    "quantity": 300,
+    "occupation": [
+      7,
+      10,
+      29,
+      6
+    ],
+    "average_order": 19,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 262,
+    "town_id": 2120,
+    "article_id": 269,
+    "quantity": 300,
+    "occupation": [
+      102
+    ],
+    "average_order": 102,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 263,
+    "town_id": 2120,
+    "article_id": 270,
+    "quantity": 200,
+    "occupation": [
+      45,
+      46
+    ],
+    "average_order": 33,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 264,
+    "town_id": 2120,
+    "article_id": 271,
+    "quantity": 300,
+    "occupation": [
+      100
+    ],
+    "average_order": 36,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 266,
+    "town_id": 2120,
+    "article_id": 273,
+    "quantity": 300,
+    "occupation": [
+      6,
+      47
+    ],
+    "average_order": 20,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 267,
+    "town_id": 2120,
+    "article_id": 274,
+    "quantity": 250,
+    "occupation": [
+      65,
+      6
+    ],
+    "average_order": 36,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 271,
+    "town_id": 2120,
+    "article_id": 278,
+    "quantity": 250,
+    "occupation": [
+      22,
+      93
+    ],
+    "average_order": 58,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 272,
+    "town_id": 2120,
+    "article_id": 279,
+    "quantity": 250,
+    "occupation": [
+      42
+    ],
+    "average_order": 25,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 273,
+    "town_id": 2120,
+    "article_id": 280,
+    "quantity": 250,
+    "occupation": [
+      12,
+      146
+    ],
+    "average_order": 43,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 276,
+    "town_id": 2120,
+    "article_id": 283,
+    "quantity": 300,
+    "occupation": [
+      19,
+      10
+    ],
+    "average_order": 12,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 277,
+    "town_id": 2120,
+    "article_id": 284,
+    "quantity": 300,
+    "occupation": [
+      34,
+      45,
+      48
+    ],
+    "average_order": 42,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 278,
+    "town_id": 2120,
+    "article_id": 285,
+    "quantity": 200,
+    "occupation": [
+      40,
+      80,
+      70,
+      112
+    ],
+    "average_order": 53,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 279,
+    "town_id": 2120,
+    "article_id": 286,
+    "quantity": 290,
+    "occupation": [
+      45,
+      60,
+      45
+    ],
+    "average_order": 53,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 280,
+    "town_id": 2120,
+    "article_id": 287,
+    "quantity": 290,
+    "occupation": [
+      43,
+      70
+    ],
+    "average_order": 78,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 282,
+    "town_id": 2120,
+    "article_id": 289,
+    "quantity": 200,
+    "occupation": [
+      54,
+      60,
+      35,
+      13,
+      30,
+      25,
+      10,
+      87
+    ],
+    "average_order": 30,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 283,
+    "town_id": 2120,
+    "article_id": 290,
+    "quantity": 200,
+    "occupation": [
+      12,
+      43,
+      6,
+      88,
+      98,
+      90
+    ],
+    "average_order": 61,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 285,
+    "town_id": 2120,
+    "article_id": 292,
+    "quantity": 300,
+    "occupation": [
+      140
+    ],
+    "average_order": 140,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 286,
+    "town_id": 2120,
+    "article_id": 293,
+    "quantity": 350,
+    "occupation": [
+      24
+    ],
+    "average_order": 23,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 287,
+    "town_id": 2120,
+    "article_id": 294,
+    "quantity": 350,
+    "occupation": [
+      80,
+      40,
+      25
+    ],
+    "average_order": 48,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 289,
+    "town_id": 2120,
+    "article_id": 296,
+    "quantity": 200,
+    "occupation": [
+      150
+    ],
+    "average_order": 85,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 290,
+    "town_id": 2120,
+    "article_id": 297,
+    "quantity": 200,
+    "occupation": [
+      113,
+      10,
+      12
+    ],
+    "average_order": 36,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 291,
+    "town_id": 2120,
+    "article_id": 298,
+    "quantity": 300,
+    "occupation": [
+      57
+    ],
+    "average_order": 57,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 292,
+    "town_id": 2120,
+    "article_id": 299,
+    "quantity": 200,
+    "occupation": [
+      75
+    ],
+    "average_order": 38,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 294,
+    "town_id": 2120,
+    "article_id": 301,
+    "quantity": 200,
+    "occupation": [
+      30,
+      27
+    ],
+    "average_order": 29,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 298,
+    "town_id": 2120,
+    "article_id": 305,
+    "quantity": 200,
+    "occupation": [
+      56,
+      23,
+      50,
+      64,
+      30,
+      176,
+      148
+    ],
+    "average_order": 60,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 299,
+    "town_id": 2120,
+    "article_id": 306,
+    "quantity": 200,
+    "occupation": [
+      30
+    ],
+    "average_order": 30,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 300,
+    "town_id": 2120,
+    "article_id": 307,
+    "quantity": 200,
+    "occupation": [
+      25,
+      48,
+      50,
+      20,
+      10
+    ],
+    "average_order": 30,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 301,
+    "town_id": 2120,
+    "article_id": 308,
+    "quantity": 200,
+    "occupation": [
+      37
+    ],
+    "average_order": 37,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 302,
+    "town_id": 2120,
+    "article_id": 309,
+    "quantity": 200,
+    "occupation": [
+      10,
+      83,
+      55,
+      82
+    ],
+    "average_order": 57,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 303,
+    "town_id": 2120,
+    "article_id": 310,
+    "quantity": 12,
+    "occupation": [
+      5,
+      9
+    ],
+    "average_order": 7,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 304,
+    "town_id": 2120,
+    "article_id": 311,
+    "quantity": 9,
+    "occupation": [
+      3,
+      6
+    ],
+    "average_order": 5,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 305,
+    "town_id": 2120,
+    "article_id": 313,
+    "quantity": 9,
+    "occupation": [
+      4,
+      2,
+      3,
+      6,
+      8,
+      3,
+      7,
+      8,
+      8
+    ],
+    "average_order": 5,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 306,
+    "town_id": 2120,
+    "article_id": 314,
+    "quantity": 27,
+    "occupation": [
+      10,
+      10
+    ],
+    "average_order": 10,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 308,
+    "town_id": 2120,
+    "article_id": 316,
+    "quantity": 20,
+    "occupation": [
+      4
+    ],
+    "average_order": 4,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 311,
+    "town_id": 2120,
+    "article_id": 319,
+    "quantity": 10,
+    "occupation": [
+      6
+    ],
+    "average_order": 6,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 315,
+    "town_id": 2120,
+    "article_id": 324,
+    "quantity": 100,
+    "occupation": [
+      24,
+      50,
+      10,
+      22
+    ],
+    "average_order": 27,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 316,
+    "town_id": 2120,
+    "article_id": 325,
+    "quantity": 100,
+    "occupation": [
+      45,
+      50,
+      25,
+      55,
+      100,
+      30,
+      10,
+      15,
+      90,
+      35,
+      30
+    ],
+    "average_order": 33,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 317,
+    "town_id": 2120,
+    "article_id": 326,
+    "quantity": 20,
+    "occupation": [
+      4,
+      6
+    ],
+    "average_order": 5,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 319,
+    "town_id": 2120,
+    "article_id": 328,
+    "quantity": 20,
+    "occupation": [
+      3
+    ],
+    "average_order": 3,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 321,
+    "town_id": 2120,
+    "article_id": 330,
+    "quantity": 20,
+    "occupation": [
+      15
+    ],
+    "average_order": 15,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 322,
+    "town_id": 2120,
+    "article_id": 331,
+    "quantity": 20,
+    "occupation": [
+      3,
+      1,
+      3
+    ],
+    "average_order": 2,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 323,
+    "town_id": 2120,
+    "article_id": 332,
+    "quantity": 60,
+    "occupation": [
+      4,
+      6,
+      20,
+      28,
+      15
+    ],
+    "average_order": 13,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 324,
+    "town_id": 2120,
+    "article_id": 333,
+    "quantity": 60,
+    "occupation": [
+      12,
+      40,
+      30,
+      60,
+      40,
+      30
+    ],
+    "average_order": 23,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 325,
+    "town_id": 2120,
+    "article_id": 334,
+    "quantity": 60,
+    "occupation": [
+      6,
+      24,
+      3
+    ],
+    "average_order": 10,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 326,
+    "town_id": 2120,
+    "article_id": 335,
+    "quantity": 60,
+    "occupation": [
+      6
+    ],
+    "average_order": 6,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 327,
+    "town_id": 2120,
+    "article_id": 336,
+    "quantity": 60,
+    "occupation": [
+      6
+    ],
+    "average_order": 6,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 328,
+    "town_id": 2120,
+    "article_id": 337,
+    "quantity": 60,
+    "occupation": [
+      2,
+      6,
+      2,
+      10
+    ],
+    "average_order": 5,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 329,
+    "town_id": 2120,
+    "article_id": 338,
+    "quantity": 60,
+    "occupation": [
+      6,
+      5,
+      12
+    ],
+    "average_order": 8,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 331,
+    "town_id": 2120,
+    "article_id": 340,
+    "quantity": 270,
+    "occupation": [
+      70,
+      40,
+      100,
+      140,
+      71,
+      50,
+      52,
+      100,
+      90,
+      95,
+      80,
+      30,
+      155,
+      24
+    ],
+    "average_order": 47,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 333,
+    "town_id": 2120,
+    "article_id": 342,
+    "quantity": 40,
+    "occupation": [
+      13,
+      15,
+      20,
+      7,
+      15,
+      10,
+      30
+    ],
+    "average_order": 16,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 334,
+    "town_id": 2120,
+    "article_id": 343,
+    "quantity": 50,
+    "occupation": [
+      10,
+      22,
+      4,
+      5
+    ],
+    "average_order": 10,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 335,
+    "town_id": 2120,
+    "article_id": 344,
+    "quantity": 400,
+    "occupation": [
+      115,
+      30,
+      130,
+      36
+    ],
+    "average_order": 78,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 336,
+    "town_id": 2120,
+    "article_id": 345,
+    "quantity": 18,
+    "occupation": [
+      7
+    ],
+    "average_order": 9,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 337,
+    "town_id": 2120,
+    "article_id": 346,
+    "quantity": 20,
+    "occupation": [
+      2
+    ],
+    "average_order": 2,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 342,
+    "town_id": 2120,
+    "article_id": 351,
+    "quantity": 20,
+    "occupation": [
+      9,
+      15
+    ],
+    "average_order": 12,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 343,
+    "town_id": 2120,
+    "article_id": 352,
+    "quantity": 20,
+    "occupation": [
+      4,
+      7
+    ],
+    "average_order": 6,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 344,
+    "town_id": 2120,
+    "article_id": 353,
+    "quantity": 20,
+    "occupation": [
+      12,
+      9
+    ],
+    "average_order": 11,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 345,
+    "town_id": 2120,
+    "article_id": 354,
+    "quantity": 20,
+    "occupation": [
+      10
+    ],
+    "average_order": 10,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 346,
+    "town_id": 2120,
+    "article_id": 355,
+    "quantity": 1,
+    "occupation": [
+      1,
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 348,
+    "town_id": 2120,
+    "article_id": 357,
+    "quantity": 120,
+    "occupation": [
+      100
+    ],
+    "average_order": 64,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 359,
+    "town_id": 2120,
+    "article_id": 368,
+    "quantity": 150,
+    "occupation": [
+      35
+    ],
+    "average_order": 60,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 361,
+    "town_id": 2120,
+    "article_id": 370,
+    "quantity": 1,
+    "occupation": [
+      1,
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 362,
+    "town_id": 2120,
+    "article_id": 371,
+    "quantity": 5,
+    "occupation": [
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 365,
+    "town_id": 2120,
+    "article_id": 374,
+    "quantity": 40,
+    "occupation": [
+      5
+    ],
+    "average_order": 5,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 367,
+    "town_id": 2120,
+    "article_id": 376,
+    "quantity": 100,
+    "occupation": [
+      3,
+      6,
+      4
+    ],
+    "average_order": 4,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 368,
+    "town_id": 2120,
+    "article_id": 377,
+    "quantity": 100,
+    "occupation": [
+      8,
+      14
+    ],
+    "average_order": 10,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 369,
+    "town_id": 2120,
+    "article_id": 378,
+    "quantity": 20,
+    "occupation": [
+      10,
+      1,
+      2
+    ],
+    "average_order": 4,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 370,
+    "town_id": 2120,
+    "article_id": 379,
+    "quantity": 20,
+    "occupation": [
+      9,
+      6
+    ],
+    "average_order": 8,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 371,
+    "town_id": 2120,
+    "article_id": 380,
+    "quantity": 10,
+    "occupation": [
+      8,
+      1
+    ],
+    "average_order": 5,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 372,
+    "town_id": 2120,
+    "article_id": 381,
+    "quantity": 10,
+    "occupation": [
+      8,
+      4
+    ],
+    "average_order": 6,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 375,
+    "town_id": 2120,
+    "article_id": 384,
+    "quantity": 1,
+    "occupation": [
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 377,
+    "town_id": 2120,
+    "article_id": 386,
+    "quantity": 1,
+    "occupation": [
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 378,
+    "town_id": 2120,
+    "article_id": 387,
+    "quantity": 2,
+    "occupation": [
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 379,
+    "town_id": 2120,
+    "article_id": 388,
+    "quantity": 2,
+    "occupation": [
+      2,
+      2
+    ],
+    "average_order": 2,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 380,
+    "town_id": 2120,
+    "article_id": 389,
+    "quantity": 6,
+    "occupation": [
+      2,
+      4
+    ],
+    "average_order": 3,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 382,
+    "town_id": 2120,
+    "article_id": 394,
+    "quantity": 200,
+    "occupation": [
+      50
+    ],
+    "average_order": 50,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 383,
+    "town_id": 2120,
+    "article_id": 396,
+    "quantity": 210,
+    "occupation": [
+      30
+    ],
+    "average_order": 30,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 385,
+    "town_id": 2120,
+    "article_id": 400,
+    "quantity": 270,
+    "occupation": [
+      67,
+      50
+    ],
+    "average_order": 112,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 386,
+    "town_id": 2120,
+    "article_id": 402,
+    "quantity": 270,
+    "occupation": [
+      52
+    ],
+    "average_order": 52,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 387,
+    "town_id": 2120,
+    "article_id": 404,
+    "quantity": 300,
+    "occupation": [
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 388,
+    "town_id": 2120,
+    "article_id": 407,
+    "quantity": 200,
+    "occupation": [
+      57,
+      82
+    ],
+    "average_order": 70,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 392,
+    "town_id": 2120,
+    "article_id": 416,
+    "quantity": 250,
+    "occupation": [
+      205,
+      69
+    ],
+    "average_order": 137,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 393,
+    "town_id": 2120,
+    "article_id": 419,
+    "quantity": 270,
+    "occupation": [
+      75,
+      13
+    ],
+    "average_order": 30,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 394,
+    "town_id": 2120,
+    "article_id": 421,
+    "quantity": 200,
+    "occupation": [
+      60
+    ],
+    "average_order": 60,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 396,
+    "town_id": 2120,
+    "article_id": 425,
+    "quantity": 270,
+    "occupation": [
+      130,
+      50,
+      47,
+      60,
+      215,
+      18,
+      2,
+      10,
+      244
+    ],
+    "average_order": 79,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 397,
+    "town_id": 2120,
+    "article_id": 426,
+    "quantity": 270,
+    "occupation": [
+      47,
+      215,
+      220,
+      50
+    ],
+    "average_order": 133,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 400,
+    "town_id": 2120,
+    "article_id": 433,
+    "quantity": 200,
+    "occupation": [
+      10
+    ],
+    "average_order": 10,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 402,
+    "town_id": 2120,
+    "article_id": 437,
+    "quantity": 270,
+    "occupation": [
+      18
+    ],
+    "average_order": 18,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 406,
+    "town_id": 2120,
+    "article_id": 445,
+    "quantity": 270,
+    "occupation": [
+      130
+    ],
+    "average_order": 72,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 407,
+    "town_id": 2120,
+    "article_id": 447,
+    "quantity": 270,
+    "occupation": [
+      2
+    ],
+    "average_order": 2,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 410,
+    "town_id": 2120,
+    "article_id": 454,
+    "quantity": 160,
+    "occupation": [
+      1,
+      26,
+      85,
+      20
+    ],
+    "average_order": 33,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 413,
+    "town_id": 2120,
+    "article_id": 459,
+    "quantity": 250,
+    "occupation": [
+      38,
+      221,
+      20,
+      2,
+      209,
+      90,
+      69,
+      102,
+      13,
+      19,
+      130,
+      51,
+      28,
+      40,
+      56,
+      1,
+      64,
+      75
+    ],
+    "average_order": 52,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 414,
+    "town_id": 2120,
+    "article_id": 460,
+    "quantity": 250,
+    "occupation": [
+      109,
+      1,
+      130,
+      13,
+      1
+    ],
+    "average_order": 42,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 416,
+    "town_id": 2120,
+    "article_id": 464,
+    "quantity": 150,
+    "occupation": [
+      10,
+      20,
+      87
+    ],
+    "average_order": 30,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 417,
+    "town_id": 2120,
+    "article_id": 466,
+    "quantity": 150,
+    "occupation": [
+      9
+    ],
+    "average_order": 11,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 418,
+    "town_id": 2120,
+    "article_id": 468,
+    "quantity": 150,
+    "occupation": [
+      90
+    ],
+    "average_order": 90,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 419,
+    "town_id": 2120,
+    "article_id": 470,
+    "quantity": 150,
+    "occupation": [
+      56,
+      87,
+      75
+    ],
+    "average_order": 43,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 420,
+    "town_id": 2120,
+    "article_id": 472,
+    "quantity": 150,
+    "occupation": [
+      51
+    ],
+    "average_order": 101,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 423,
+    "town_id": 2120,
+    "article_id": 478,
+    "quantity": 150,
+    "occupation": [
+      38
+    ],
+    "average_order": 38,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 424,
+    "town_id": 2120,
+    "article_id": 480,
+    "quantity": 150,
+    "occupation": [
+      1
+    ],
+    "average_order": 32,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 425,
+    "town_id": 2120,
+    "article_id": 482,
+    "quantity": 200,
+    "occupation": [
+      35,
+      70
+    ],
+    "average_order": 53,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 426,
+    "town_id": 2120,
+    "article_id": 483,
+    "quantity": 160,
+    "occupation": [
+      20,
+      23,
+      63,
+      22
+    ],
+    "average_order": 32,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 427,
+    "town_id": 2120,
+    "article_id": 484,
+    "quantity": 200,
+    "occupation": [
+      60,
+      114,
+      62,
+      12,
+      88
+    ],
+    "average_order": 67,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 432,
+    "town_id": 2120,
+    "article_id": 489,
+    "quantity": 200,
+    "occupation": [
+      30,
+      10,
+      45
+    ],
+    "average_order": 23,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 433,
+    "town_id": 2120,
+    "article_id": 490,
+    "quantity": 300,
+    "occupation": [
+      67,
+      73,
+      60,
+      42,
+      37,
+      29
+    ],
+    "average_order": 51,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 434,
+    "town_id": 2120,
+    "article_id": 491,
+    "quantity": 250,
+    "occupation": [
+      200,
+      48,
+      33
+    ],
+    "average_order": 90,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 435,
+    "town_id": 2120,
+    "article_id": 492,
+    "quantity": 200,
+    "occupation": [
+      32,
+      42,
+      42,
+      45
+    ],
+    "average_order": 40,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 436,
+    "town_id": 2120,
+    "article_id": 493,
+    "quantity": 200,
+    "occupation": [
+      25,
+      26
+    ],
+    "average_order": 22,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 440,
+    "town_id": 2120,
+    "article_id": 499,
+    "quantity": 250,
+    "occupation": [
+      72
+    ],
+    "average_order": 72,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 441,
+    "town_id": 2120,
+    "article_id": 500,
+    "quantity": 100,
+    "occupation": [
+      72
+    ],
+    "average_order": 72,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 443,
+    "town_id": 2120,
+    "article_id": 505,
+    "quantity": 197,
+    "occupation": [
+      135,
+      72,
+      75,
+      26,
+      80,
+      56,
+      45,
+      48
+    ],
+    "average_order": 58,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 444,
+    "town_id": 2120,
+    "article_id": 506,
+    "quantity": 205,
+    "occupation": [
+      80,
+      93,
+      48
+    ],
+    "average_order": 74,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 445,
+    "town_id": 2120,
+    "article_id": 510,
+    "quantity": 220,
+    "occupation": [
+      25
+    ],
+    "average_order": 58,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 446,
+    "town_id": 2120,
+    "article_id": 512,
+    "quantity": 200,
+    "occupation": [
+      72
+    ],
+    "average_order": 71,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 447,
+    "town_id": 2120,
+    "article_id": 514,
+    "quantity": 200,
+    "occupation": [
+      26,
+      47,
+      50
+    ],
+    "average_order": 41,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 450,
+    "town_id": 2120,
+    "article_id": 520,
+    "quantity": 200,
+    "occupation": [
+      42
+    ],
+    "average_order": 42,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 456,
+    "town_id": 2120,
+    "article_id": 530,
+    "quantity": 60,
+    "occupation": [
+      8,
+      11,
+      40,
+      2,
+      10,
+      10,
+      10,
+      10
+    ],
+    "average_order": 13,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 457,
+    "town_id": 2120,
+    "article_id": 531,
+    "quantity": 60,
+    "occupation": [
+      6,
+      10,
+      4
+    ],
+    "average_order": 7,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 462,
+    "town_id": 2120,
+    "article_id": 536,
+    "quantity": 240,
+    "occupation": [
+      72,
+      23,
+      63
+    ],
+    "average_order": 53,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 463,
+    "town_id": 2120,
+    "article_id": 537,
+    "quantity": 240,
+    "occupation": [
+      146,
+      23,
+      63,
+      72,
+      55
+    ],
+    "average_order": 72,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 466,
+    "town_id": 2120,
+    "article_id": 540,
+    "quantity": 240,
+    "occupation": [
+      52
+    ],
+    "average_order": 52,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 468,
+    "town_id": 2120,
+    "article_id": 542,
+    "quantity": 144,
+    "occupation": [
+      25,
+      60
+    ],
+    "average_order": 43,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 469,
+    "town_id": 2120,
+    "article_id": 543,
+    "quantity": 144,
+    "occupation": [
+      23,
+      60,
+      25
+    ],
+    "average_order": 36,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 471,
+    "town_id": 2120,
+    "article_id": 545,
+    "quantity": 240,
+    "occupation": [
+      95
+    ],
+    "average_order": 95,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 472,
+    "town_id": 2120,
+    "article_id": 546,
+    "quantity": 240,
+    "occupation": [
+      95
+    ],
+    "average_order": 95,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 474,
+    "town_id": 2120,
+    "article_id": 548,
+    "quantity": 150,
+    "occupation": [
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 475,
+    "town_id": 2120,
+    "article_id": 549,
+    "quantity": 240,
+    "occupation": [
+      10,
+      80
+    ],
+    "average_order": 45,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 476,
+    "town_id": 2120,
+    "article_id": 550,
+    "quantity": 240,
+    "occupation": [
+      80,
+      10,
+      35,
+      15
+    ],
+    "average_order": 35,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 477,
+    "town_id": 2120,
+    "article_id": 551,
+    "quantity": 240,
+    "occupation": [
+      60,
+      60,
+      57,
+      14
+    ],
+    "average_order": 48,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 478,
+    "town_id": 2120,
+    "article_id": 552,
+    "quantity": 240,
+    "occupation": [
+      14,
+      60
+    ],
+    "average_order": 37,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 479,
+    "town_id": 2120,
+    "article_id": 553,
+    "quantity": 240,
+    "occupation": [
+      10,
+      35,
+      60,
+      1,
+      1
+    ],
+    "average_order": 18,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 480,
+    "town_id": 2120,
+    "article_id": 554,
+    "quantity": 240,
+    "occupation": [
+      60,
+      10,
+      10,
+      1
+    ],
+    "average_order": 16,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 481,
+    "town_id": 2120,
+    "article_id": 555,
+    "quantity": 204,
+    "occupation": [
+      55,
+      20,
+      60,
+      12,
+      1
+    ],
+    "average_order": 30,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 482,
+    "town_id": 2120,
+    "article_id": 556,
+    "quantity": 204,
+    "occupation": [
+      38,
+      60,
+      10
+    ],
+    "average_order": 36,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 483,
+    "town_id": 2120,
+    "article_id": 557,
+    "quantity": 204,
+    "occupation": [
+      33,
+      10,
+      97,
+      40
+    ],
+    "average_order": 25,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 484,
+    "town_id": 2120,
+    "article_id": 558,
+    "quantity": 204,
+    "occupation": [
+      72
+    ],
+    "average_order": 40,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 485,
+    "town_id": 2120,
+    "article_id": 559,
+    "quantity": 204,
+    "occupation": [
+      57,
+      105,
+      12,
+      200,
+      120
+    ],
+    "average_order": 52,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 486,
+    "town_id": 2120,
+    "article_id": 560,
+    "quantity": 204,
+    "occupation": [
+      10,
+      30
+    ],
+    "average_order": 23,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 487,
+    "town_id": 2120,
+    "article_id": 561,
+    "quantity": 240,
+    "occupation": [
+      3
+    ],
+    "average_order": 3,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 488,
+    "town_id": 2120,
+    "article_id": 562,
+    "quantity": 240,
+    "occupation": [
+      4
+    ],
+    "average_order": 4,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 489,
+    "town_id": 2120,
+    "article_id": 563,
+    "quantity": 15,
+    "occupation": [
+      6,
+      2,
+      6,
+      10
+    ],
+    "average_order": 4,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 490,
+    "town_id": 2120,
+    "article_id": 564,
+    "quantity": 10,
+    "occupation": [
+      1,
+      4,
+      4
+    ],
+    "average_order": 4,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 491,
+    "town_id": 2120,
+    "article_id": 565,
+    "quantity": 40,
+    "occupation": [
+      5,
+      5,
+      1,
+      15,
+      17,
+      5
+    ],
+    "average_order": 8,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 492,
+    "town_id": 2120,
+    "article_id": 566,
+    "quantity": 30,
+    "occupation": [
+      30,
+      1,
+      7,
+      15,
+      10
+    ],
+    "average_order": 10,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 493,
+    "town_id": 2120,
+    "article_id": 567,
+    "quantity": 50,
+    "occupation": [
+      30,
+      15,
+      7,
+      5,
+      8,
+      30,
+      7,
+      32,
+      6,
+      15
+    ],
+    "average_order": 12,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 494,
+    "town_id": 2120,
+    "article_id": 568,
+    "quantity": 15,
+    "occupation": [
+      5,
+      1,
+      10,
+      8
+    ],
+    "average_order": 5,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 495,
+    "town_id": 2120,
+    "article_id": 569,
+    "quantity": 20,
+    "occupation": [
+      15,
+      11,
+      18
+    ],
+    "average_order": 10,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 496,
+    "town_id": 2120,
+    "article_id": 570,
+    "quantity": 150,
+    "occupation": [
+      32,
+      63,
+      25,
+      130,
+      16,
+      130,
+      22,
+      45,
+      104,
+      72
+    ],
+    "average_order": 53,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 497,
+    "town_id": 2120,
+    "article_id": 571,
+    "quantity": 10,
+    "occupation": [
+      5
+    ],
+    "average_order": 5,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 498,
+    "town_id": 2120,
+    "article_id": 572,
+    "quantity": 10,
+    "occupation": [
+      1
+    ],
+    "average_order": 3,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 500,
+    "town_id": 2120,
+    "article_id": 574,
+    "quantity": 10,
+    "occupation": [
+      8,
+      8,
+      9,
+      3
+    ],
+    "average_order": 7,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 502,
+    "town_id": 2120,
+    "article_id": 576,
+    "quantity": 10,
+    "occupation": [
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 503,
+    "town_id": 2120,
+    "article_id": 577,
+    "quantity": 18,
+    "occupation": [
+      4
+    ],
+    "average_order": 4,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 504,
+    "town_id": 2120,
+    "article_id": 578,
+    "quantity": 15,
+    "occupation": [
+      5,
+      7,
+      2
+    ],
+    "average_order": 5,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 505,
+    "town_id": 2120,
+    "article_id": 579,
+    "quantity": 20,
+    "occupation": [
+      3
+    ],
+    "average_order": 3,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 507,
+    "town_id": 2120,
+    "article_id": 581,
+    "quantity": 10,
+    "occupation": [
+      7
+    ],
+    "average_order": 7,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 510,
+    "town_id": 2120,
+    "article_id": 584,
+    "quantity": 35,
+    "occupation": [
+      5,
+      18,
+      1,
+      20,
+      13,
+      7,
+      21,
+      19,
+      19,
+      6,
+      22,
+      4,
+      10,
+      3,
+      17,
+      5
+    ],
+    "average_order": 6,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 511,
+    "town_id": 2120,
+    "article_id": 585,
+    "quantity": 20,
+    "occupation": [
+      1,
+      5,
+      1
+    ],
+    "average_order": 3,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 512,
+    "town_id": 2120,
+    "article_id": 586,
+    "quantity": 100,
+    "occupation": [
+      35,
+      32
+    ],
+    "average_order": 34,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 514,
+    "town_id": 2120,
+    "article_id": 588,
+    "quantity": 220,
+    "occupation": [
+      47,
+      90,
+      60,
+      57
+    ],
+    "average_order": 55,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 517,
+    "town_id": 2120,
+    "article_id": 591,
+    "quantity": 100,
+    "occupation": [
+      90,
+      100,
+      69,
+      100,
+      67,
+      72
+    ],
+    "average_order": 83,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 518,
+    "town_id": 2120,
+    "article_id": 592,
+    "quantity": 130,
+    "occupation": [
+      50,
+      42,
+      19,
+      50,
+      40,
+      50,
+      69
+    ],
+    "average_order": 53,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 519,
+    "town_id": 2120,
+    "article_id": 593,
+    "quantity": 130,
+    "occupation": [
+      82
+    ],
+    "average_order": 47,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 521,
+    "town_id": 2120,
+    "article_id": 595,
+    "quantity": 10,
+    "occupation": [
+      2,
+      5,
+      3,
+      6,
+      4,
+      2,
+      1
+    ],
+    "average_order": 4,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 522,
+    "town_id": 2120,
+    "article_id": 596,
+    "quantity": 6,
+    "occupation": [
+      1,
+      1,
+      5,
+      6
+    ],
+    "average_order": 3,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 523,
+    "town_id": 2120,
+    "article_id": 597,
+    "quantity": 10,
+    "occupation": [
+      3
+    ],
+    "average_order": 4,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 524,
+    "town_id": 2120,
+    "article_id": 598,
+    "quantity": 10,
+    "occupation": [
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 528,
+    "town_id": 2120,
+    "article_id": 602,
+    "quantity": 10,
+    "occupation": [
+      4,
+      1,
+      6
+    ],
+    "average_order": 4,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 530,
+    "town_id": 2120,
+    "article_id": 604,
+    "quantity": 12,
+    "occupation": [
+      1,
+      5
+    ],
+    "average_order": 3,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 532,
+    "town_id": 2120,
+    "article_id": 606,
+    "quantity": 10,
+    "occupation": [
+      1
+    ],
+    "average_order": 2,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 533,
+    "town_id": 2120,
+    "article_id": 607,
+    "quantity": 10,
+    "occupation": [
+      3,
+      1
+    ],
+    "average_order": 2,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 535,
+    "town_id": 2120,
+    "article_id": 609,
+    "quantity": 10,
+    "occupation": [
+      1,
+      1,
+      1,
+      4
+    ],
+    "average_order": 2,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 537,
+    "town_id": 2120,
+    "article_id": 611,
+    "quantity": 10,
+    "occupation": [
+      9,
+      5
+    ],
+    "average_order": 7,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 538,
+    "town_id": 2120,
+    "article_id": 612,
+    "quantity": 10,
+    "occupation": [
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 540,
+    "town_id": 2120,
+    "article_id": 614,
+    "quantity": 200,
+    "occupation": [
+      91,
+      26,
+      40,
+      35,
+      52,
+      118,
+      35,
+      75
+    ],
+    "average_order": 53,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 541,
+    "town_id": 2120,
+    "article_id": 615,
+    "quantity": 200,
+    "occupation": [
+      15
+    ],
+    "average_order": 15,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 542,
+    "town_id": 2120,
+    "article_id": 616,
+    "quantity": 14,
+    "occupation": [
+      4,
+      8,
+      11,
+      3
+    ],
+    "average_order": 7,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 543,
+    "town_id": 2120,
+    "article_id": 617,
+    "quantity": 10,
+    "occupation": [
+      5,
+      1
+    ],
+    "average_order": 3,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 544,
+    "town_id": 2120,
+    "article_id": 618,
+    "quantity": 10,
+    "occupation": [
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 545,
+    "town_id": 2120,
+    "article_id": 619,
+    "quantity": 100,
+    "occupation": [
+      58,
+      47,
+      20,
+      60
+    ],
+    "average_order": 37,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 546,
+    "town_id": 2120,
+    "article_id": 620,
+    "quantity": 200,
+    "occupation": [
+      44,
+      28,
+      14
+    ],
+    "average_order": 22,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 547,
+    "town_id": 2120,
+    "article_id": 621,
+    "quantity": 25,
+    "occupation": [
+      1,
+      6,
+      4,
+      8
+    ],
+    "average_order": 9,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 548,
+    "town_id": 2120,
+    "article_id": 622,
+    "quantity": 15,
+    "occupation": [
+      4,
+      15,
+      5,
+      1,
+      2,
+      6,
+      1,
+      3,
+      3,
+      5
+    ],
+    "average_order": 5,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 549,
+    "town_id": 2120,
+    "article_id": 623,
+    "quantity": 40,
+    "occupation": [
+      2,
+      2,
+      34,
+      12,
+      6,
+      2,
+      10,
+      1,
+      16,
+      20,
+      8,
+      20,
+      7
+    ],
+    "average_order": 9,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 550,
+    "town_id": 2120,
+    "article_id": 624,
+    "quantity": 15,
+    "occupation": [
+      3,
+      5
+    ],
+    "average_order": 4,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 552,
+    "town_id": 2120,
+    "article_id": 626,
+    "quantity": 1,
+    "occupation": [
+      1,
+      1,
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 553,
+    "town_id": 2120,
+    "article_id": 627,
+    "quantity": 1,
+    "occupation": [
+      1,
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 555,
+    "town_id": 2120,
+    "article_id": 630,
+    "quantity": 1,
+    "occupation": [
+      1,
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 556,
+    "town_id": 2120,
+    "article_id": 631,
+    "quantity": 250,
+    "occupation": [
+      30,
+      60,
+      30
+    ],
+    "average_order": 40,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 557,
+    "town_id": 2120,
+    "article_id": 632,
+    "quantity": 4,
+    "occupation": [
+      1,
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 558,
+    "town_id": 2120,
+    "article_id": 638,
+    "quantity": 20,
+    "occupation": [
+      20,
+      5,
+      4,
+      8,
+      4,
+      8,
+      20,
+      9,
+      1,
+      10,
+      3
+    ],
+    "average_order": 7,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 559,
+    "town_id": 2120,
+    "article_id": 639,
+    "quantity": 20,
+    "occupation": [
+      9,
+      20,
+      3,
+      8,
+      20,
+      8,
+      5,
+      4
+    ],
+    "average_order": 7,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 560,
+    "town_id": 2120,
+    "article_id": 641,
+    "quantity": 20,
+    "occupation": [
+      10,
+      4
+    ],
+    "average_order": 7,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 562,
+    "town_id": 2120,
+    "article_id": 644,
+    "quantity": 20,
+    "occupation": [
+      6,
+      5
+    ],
+    "average_order": 7,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 563,
+    "town_id": 2120,
+    "article_id": 645,
+    "quantity": 20,
+    "occupation": [
+      1
+    ],
+    "average_order": 4,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 564,
+    "town_id": 2120,
+    "article_id": 646,
+    "quantity": 20,
+    "occupation": [
+      2,
+      4,
+      1
+    ],
+    "average_order": 2,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 565,
+    "town_id": 2120,
+    "article_id": 647,
+    "quantity": 20,
+    "occupation": [
+      3,
+      1,
+      1
+    ],
+    "average_order": 2,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 566,
+    "town_id": 2120,
+    "article_id": 648,
+    "quantity": 60,
+    "occupation": [
+      3,
+      10,
+      44,
+      4,
+      10,
+      8,
+      6,
+      60
+    ],
+    "average_order": 16,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 567,
+    "town_id": 2120,
+    "article_id": 649,
+    "quantity": 70,
+    "occupation": [
+      30,
+      4
+    ],
+    "average_order": 12,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 568,
+    "town_id": 2120,
+    "article_id": 650,
+    "quantity": 60,
+    "occupation": [
+      55,
+      15,
+      20
+    ],
+    "average_order": 18,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 569,
+    "town_id": 2120,
+    "article_id": 651,
+    "quantity": 3,
+    "occupation": [
+      3,
+      2
+    ],
+    "average_order": 3,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 570,
+    "town_id": 2120,
+    "article_id": 652,
+    "quantity": 10,
+    "occupation": [
+      5
+    ],
+    "average_order": 5,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 571,
+    "town_id": 2120,
+    "article_id": 653,
+    "quantity": 1,
+    "occupation": [
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 572,
+    "town_id": 2120,
+    "article_id": 654,
+    "quantity": 1,
+    "occupation": [
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 573,
+    "town_id": 2120,
+    "article_id": 655,
+    "quantity": 1,
+    "occupation": [
+      1,
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 574,
+    "town_id": 2120,
+    "article_id": 656,
+    "quantity": 5,
+    "occupation": [
+      4
+    ],
+    "average_order": 4,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 575,
+    "town_id": 2120,
+    "article_id": 657,
+    "quantity": 330,
+    "occupation": [
+      26
+    ],
+    "average_order": 26,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 577,
+    "town_id": 2120,
+    "article_id": 659,
+    "quantity": 150,
+    "occupation": [
+      47
+    ],
+    "average_order": 47,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 579,
+    "town_id": 2120,
+    "article_id": 663,
+    "quantity": 45,
+    "occupation": [
+      8,
+      15,
+      4,
+      23,
+      2,
+      22,
+      6,
+      21,
+      1,
+      16
+    ],
+    "average_order": 7,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 583,
+    "town_id": 2120,
+    "article_id": 669,
+    "quantity": 15,
+    "occupation": [
+      1,
+      5,
+      2,
+      1,
+      6
+    ],
+    "average_order": 5,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 584,
+    "town_id": 2120,
+    "article_id": 670,
+    "quantity": 15,
+    "occupation": [
+      2,
+      1,
+      10,
+      13,
+      2
+    ],
+    "average_order": 5,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 585,
+    "town_id": 2120,
+    "article_id": 671,
+    "quantity": 250,
+    "occupation": [
+      69
+    ],
+    "average_order": 69,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 586,
+    "town_id": 2120,
+    "article_id": 672,
+    "quantity": 250,
+    "occupation": [
+      100,
+      40,
+      28,
+      102,
+      64
+    ],
+    "average_order": 67,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 588,
+    "town_id": 2120,
+    "article_id": 677,
+    "quantity": 124,
+    "occupation": [
+      38,
+      60,
+      43
+    ],
+    "average_order": 47,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 589,
+    "town_id": 2120,
+    "article_id": 679,
+    "quantity": 80,
+    "occupation": [
+      56
+    ],
+    "average_order": 56,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 590,
+    "town_id": 2120,
+    "article_id": 680,
+    "quantity": 1,
+    "occupation": [
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 591,
+    "town_id": 2120,
+    "article_id": 681,
+    "quantity": 157,
+    "occupation": [
+      61,
+      88,
+      25,
+      57,
+      107,
+      135,
+      32,
+      61,
+      83,
+      77,
+      39,
+      30
+    ],
+    "average_order": 58,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 592,
+    "town_id": 2120,
+    "article_id": 682,
+    "quantity": 40,
+    "occupation": [
+      4
+    ],
+    "average_order": 4,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 593,
+    "town_id": 2120,
+    "article_id": 683,
+    "quantity": 40,
+    "occupation": [
+      40
+    ],
+    "average_order": 18,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 594,
+    "town_id": 2120,
+    "article_id": 684,
+    "quantity": 75,
+    "occupation": [
+      8,
+      33,
+      9
+    ],
+    "average_order": 17,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 596,
+    "town_id": 2120,
+    "article_id": 686,
+    "quantity": 92,
+    "occupation": [
+      12
+    ],
+    "average_order": 12,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 604,
+    "town_id": 2120,
+    "article_id": 694,
+    "quantity": 152,
+    "occupation": [
+      152,
+      50
+    ],
+    "average_order": 101,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 606,
+    "town_id": 2120,
+    "article_id": 696,
+    "quantity": 108,
+    "occupation": [
+      25
+    ],
+    "average_order": 25,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 607,
+    "town_id": 2120,
+    "article_id": 697,
+    "quantity": 149,
+    "occupation": [
+      100,
+      52,
+      140,
+      95
+    ],
+    "average_order": 97,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 608,
+    "town_id": 2120,
+    "article_id": 698,
+    "quantity": 20,
+    "occupation": [
+      7
+    ],
+    "average_order": 7,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 609,
+    "town_id": 2120,
+    "article_id": 699,
+    "quantity": 200,
+    "occupation": [
+      25,
+      47,
+      60
+    ],
+    "average_order": 44,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 610,
+    "town_id": 2120,
+    "article_id": 700,
+    "quantity": 200,
+    "occupation": [
+      60,
+      100
+    ],
+    "average_order": 60,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 611,
+    "town_id": 2120,
+    "article_id": 701,
+    "quantity": 2,
+    "occupation": [
+      1,
+      2
+    ],
+    "average_order": 2,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 612,
+    "town_id": 2120,
+    "article_id": 702,
+    "quantity": 2,
+    "occupation": [
+      1,
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 614,
+    "town_id": 2120,
+    "article_id": 704,
+    "quantity": 3,
+    "occupation": [
+      3
+    ],
+    "average_order": 3,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 615,
+    "town_id": 2120,
+    "article_id": 705,
+    "quantity": 3,
+    "occupation": [
+      3,
+      1,
+      2
+    ],
+    "average_order": 2,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 616,
+    "town_id": 2120,
+    "article_id": 706,
+    "quantity": 3,
+    "occupation": [
+      2,
+      2,
+      3,
+      3
+    ],
+    "average_order": 3,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 617,
+    "town_id": 2120,
+    "article_id": 707,
+    "quantity": 200,
+    "occupation": [
+      23,
+      7,
+      50,
+      12
+    ],
+    "average_order": 51,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 618,
+    "town_id": 2120,
+    "article_id": 708,
+    "quantity": 200,
+    "occupation": [
+      50
+    ],
+    "average_order": 85,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 619,
+    "town_id": 2120,
+    "article_id": 710,
+    "quantity": 200,
+    "occupation": [
+      12,
+      23,
+      7
+    ],
+    "average_order": 26,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 620,
+    "town_id": 2120,
+    "article_id": 712,
+    "quantity": 2,
+    "occupation": [
+      2,
+      2,
+      2,
+      2
+    ],
+    "average_order": 2,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 621,
+    "town_id": 2120,
+    "article_id": 713,
+    "quantity": 4,
+    "occupation": [
+      4,
+      4,
+      4,
+      2
+    ],
+    "average_order": 4,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 622,
+    "town_id": 2120,
+    "article_id": 714,
+    "quantity": 4,
+    "occupation": [
+      1,
+      4,
+      4
+    ],
+    "average_order": 3,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 623,
+    "town_id": 2120,
+    "article_id": 715,
+    "quantity": 4,
+    "occupation": [
+      1
+    ],
+    "average_order": 2,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 624,
+    "town_id": 2120,
+    "article_id": 716,
+    "quantity": 20,
+    "occupation": [
+      1,
+      3
+    ],
+    "average_order": 2,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 625,
+    "town_id": 2120,
+    "article_id": 717,
+    "quantity": 120,
+    "occupation": [
+      13,
+      1
+    ],
+    "average_order": 7,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 626,
+    "town_id": 2120,
+    "article_id": 718,
+    "quantity": 20,
+    "occupation": [
+      4,
+      1,
+      1,
+      19,
+      1,
+      1,
+      13,
+      14
+    ],
+    "average_order": 5,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 627,
+    "town_id": 2120,
+    "article_id": 719,
+    "quantity": 200,
+    "occupation": [
+      92,
+      11,
+      170,
+      42
+    ],
+    "average_order": 66,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 628,
+    "town_id": 2120,
+    "article_id": 720,
+    "quantity": 10,
+    "occupation": [
+      1,
+      2
+    ],
+    "average_order": 2,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 629,
+    "town_id": 2120,
+    "article_id": 721,
+    "quantity": 6,
+    "occupation": [
+      2
+    ],
+    "average_order": 2,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 630,
+    "town_id": 2120,
+    "article_id": 722,
+    "quantity": 5,
+    "occupation": [
+      2,
+      1
+    ],
+    "average_order": 2,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 632,
+    "town_id": 2120,
+    "article_id": 724,
+    "quantity": 200,
+    "occupation": [
+      30
+    ],
+    "average_order": 30,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 634,
+    "town_id": 2120,
+    "article_id": 727,
+    "quantity": 200,
+    "occupation": [
+      84
+    ],
+    "average_order": 42,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 635,
+    "town_id": 2120,
+    "article_id": 728,
+    "quantity": 200,
+    "occupation": [
+      47
+    ],
+    "average_order": 44,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 636,
+    "town_id": 2120,
+    "article_id": 729,
+    "quantity": 10,
+    "occupation": [
+      2
+    ],
+    "average_order": 2,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 637,
+    "town_id": 2120,
+    "article_id": 730,
+    "quantity": 110,
+    "occupation": [
+      37,
+      54,
+      45
+    ],
+    "average_order": 45,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 639,
+    "town_id": 2120,
+    "article_id": 732,
+    "quantity": 300,
+    "occupation": [
+      1
+    ],
+    "average_order": 11,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 640,
+    "town_id": 2120,
+    "article_id": 733,
+    "quantity": 300,
+    "occupation": [
+      2,
+      1
+    ],
+    "average_order": 2,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 641,
+    "town_id": 2120,
+    "article_id": 734,
+    "quantity": 148,
+    "occupation": [
+      148,
+      10
+    ],
+    "average_order": 79,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 643,
+    "town_id": 2120,
+    "article_id": 736,
+    "quantity": 150,
+    "occupation": [
+      24,
+      60,
+      15,
+      37,
+      68
+    ],
+    "average_order": 34,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 644,
+    "town_id": 2120,
+    "article_id": 737,
+    "quantity": 107,
+    "occupation": [
+      1
+    ],
+    "average_order": 19,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 645,
+    "town_id": 2120,
+    "article_id": 738,
+    "quantity": 120,
+    "occupation": [
+      91,
+      39,
+      1
+    ],
+    "average_order": 27,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 648,
+    "town_id": 2120,
+    "article_id": 741,
+    "quantity": 150,
+    "occupation": [
+      100,
+      90
+    ],
+    "average_order": 95,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 649,
+    "town_id": 2120,
+    "article_id": 742,
+    "quantity": 150,
+    "occupation": [
+      100,
+      90
+    ],
+    "average_order": 95,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 650,
+    "town_id": 2120,
+    "article_id": 743,
+    "quantity": 204,
+    "occupation": [
+      22,
+      72,
+      152,
+      23
+    ],
+    "average_order": 67,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 651,
+    "town_id": 2120,
+    "article_id": 744,
+    "quantity": 1,
+    "occupation": [
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 652,
+    "town_id": 2120,
+    "article_id": 745,
+    "quantity": 200,
+    "occupation": [
+      40,
+      1,
+      80
+    ],
+    "average_order": 40,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 653,
+    "town_id": 2120,
+    "article_id": 746,
+    "quantity": 200,
+    "occupation": [
+      1
+    ],
+    "average_order": 1,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 654,
+    "town_id": 2120,
+    "article_id": 747,
+    "quantity": 200,
+    "occupation": [
+      18,
+      1
+    ],
+    "average_order": 10,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 655,
+    "town_id": 2120,
+    "article_id": 748,
+    "quantity": 200,
+    "occupation": [
+      127,
+      32,
+      25
+    ],
+    "average_order": 61,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 656,
+    "town_id": 2120,
+    "article_id": 749,
+    "quantity": 150,
+    "occupation": [
+      90,
+      56
+    ],
+    "average_order": 49,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 657,
+    "town_id": 2120,
+    "article_id": 750,
+    "quantity": 150,
+    "occupation": [
+      90,
+      56,
+      40
+    ],
+    "average_order": 47,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 658,
+    "town_id": 2120,
+    "article_id": 751,
+    "quantity": 150,
+    "occupation": [
+      7,
+      25
+    ],
+    "average_order": 16,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 659,
+    "town_id": 2120,
+    "article_id": 752,
+    "quantity": 150,
+    "occupation": [
+      7,
+      18,
+      25
+    ],
+    "average_order": 17,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 661,
+    "town_id": 2120,
+    "article_id": 754,
+    "quantity": 228,
+    "occupation": [
+      2
+    ],
+    "average_order": 2,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 663,
+    "town_id": 2120,
+    "article_id": 756,
+    "quantity": 50,
+    "occupation": [
+      10,
+      50
+    ],
+    "average_order": 30,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 251,
+    "town_id": 2120,
+    "article_id": 258,
+    "quantity": 250,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 106,
+    "town_id": 2120,
+    "article_id": 107,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 664,
+    "town_id": 2120,
+    "article_id": 757,
+    "quantity": 50,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 601,
+    "town_id": 2120,
+    "article_id": 691,
+    "quantity": 1,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 647,
+    "town_id": 2120,
+    "article_id": 740,
+    "quantity": 330,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 452,
+    "town_id": 2120,
+    "article_id": 524,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 455,
+    "town_id": 2120,
+    "article_id": 529,
+    "quantity": 2,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 665,
+    "town_id": 2120,
+    "article_id": 758,
+    "quantity": 1,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 599,
+    "town_id": 2120,
+    "article_id": 689,
+    "quantity": 1,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 151,
+    "town_id": 2120,
+    "article_id": 153,
+    "quantity": 1,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 384,
+    "town_id": 2120,
+    "article_id": 398,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 399,
+    "town_id": 2120,
+    "article_id": 430,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 270,
+    "town_id": 2120,
+    "article_id": 277,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 437,
+    "town_id": 2120,
+    "article_id": 494,
+    "quantity": 70,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 268,
+    "town_id": 2120,
+    "article_id": 275,
+    "quantity": 180,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 310,
+    "town_id": 2120,
+    "article_id": 318,
+    "quantity": 400,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 339,
+    "town_id": 2120,
+    "article_id": 348,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 20,
+    "town_id": 2120,
+    "article_id": 20,
+    "quantity": 117,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 330,
+    "town_id": 2120,
+    "article_id": 339,
+    "quantity": 60,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 265,
+    "town_id": 2120,
+    "article_id": 272,
+    "quantity": 300,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 405,
+    "town_id": 2120,
+    "article_id": 443,
+    "quantity": 270,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 373,
+    "town_id": 2120,
+    "article_id": 382,
+    "quantity": 1,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 238,
+    "town_id": 2120,
+    "article_id": 245,
+    "quantity": 30,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 27,
+    "town_id": 2120,
+    "article_id": 27,
+    "quantity": 150,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 230,
+    "town_id": 2120,
+    "article_id": 237,
+    "quantity": 28,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 449,
+    "town_id": 2120,
+    "article_id": 518,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 149,
+    "town_id": 2120,
+    "article_id": 151,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 307,
+    "town_id": 2120,
+    "article_id": 315,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 554,
+    "town_id": 2120,
+    "article_id": 629,
+    "quantity": 250,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 191,
+    "town_id": 2120,
+    "article_id": 198,
+    "quantity": 3,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 295,
+    "town_id": 2120,
+    "article_id": 302,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 11,
+    "town_id": 2120,
+    "article_id": 11,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 228,
+    "town_id": 2120,
+    "article_id": 235,
+    "quantity": 28,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 135,
+    "town_id": 2120,
+    "article_id": 136,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 252,
+    "town_id": 2120,
+    "article_id": 259,
+    "quantity": 300,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 526,
+    "town_id": 2120,
+    "article_id": 600,
+    "quantity": 10,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 508,
+    "town_id": 2120,
+    "article_id": 582,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 662,
+    "town_id": 2120,
+    "article_id": 755,
+    "quantity": 50,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 357,
+    "town_id": 2120,
+    "article_id": 366,
+    "quantity": 150,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 465,
+    "town_id": 2120,
+    "article_id": 539,
+    "quantity": 240,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 66,
+    "town_id": 2120,
+    "article_id": 66,
+    "quantity": 214,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 284,
+    "town_id": 2120,
+    "article_id": 291,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 633,
+    "town_id": 2120,
+    "article_id": 725,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 442,
+    "town_id": 2120,
+    "article_id": 502,
+    "quantity": 69,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 239,
+    "town_id": 2120,
+    "article_id": 246,
+    "quantity": 30,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 288,
+    "town_id": 2120,
+    "article_id": 295,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 34,
+    "town_id": 2120,
+    "article_id": 34,
+    "quantity": 100,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 296,
+    "town_id": 2120,
+    "article_id": 303,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 428,
+    "town_id": 2120,
+    "article_id": 485,
+    "quantity": 300,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 10,
+    "town_id": 2120,
+    "article_id": 10,
+    "quantity": 300,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 139,
+    "town_id": 2120,
+    "article_id": 141,
+    "quantity": 1,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 381,
+    "town_id": 2120,
+    "article_id": 390,
+    "quantity": 270,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 193,
+    "town_id": 2120,
+    "article_id": 200,
+    "quantity": 30,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 408,
+    "town_id": 2120,
+    "article_id": 449,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 250,
+    "town_id": 2120,
+    "article_id": 257,
+    "quantity": 300,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 64,
+    "town_id": 2120,
+    "article_id": 64,
+    "quantity": 240,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 582,
+    "town_id": 2120,
+    "article_id": 668,
+    "quantity": 15,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 458,
+    "town_id": 2120,
+    "article_id": 532,
+    "quantity": 240,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 198,
+    "town_id": 2120,
+    "article_id": 205,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 71,
+    "town_id": 2120,
+    "article_id": 71,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 72,
+    "town_id": 2120,
+    "article_id": 72,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 186,
+    "town_id": 2120,
+    "article_id": 192,
+    "quantity": 30,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 177,
+    "town_id": 2120,
+    "article_id": 183,
+    "quantity": 30,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 297,
+    "town_id": 2120,
+    "article_id": 304,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 459,
+    "town_id": 2120,
+    "article_id": 533,
+    "quantity": 240,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 314,
+    "town_id": 2120,
+    "article_id": 323,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 391,
+    "town_id": 2120,
+    "article_id": 414,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 274,
+    "town_id": 2120,
+    "article_id": 281,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 473,
+    "town_id": 2120,
+    "article_id": 547,
+    "quantity": 240,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 320,
+    "town_id": 2120,
+    "article_id": 329,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 595,
+    "town_id": 2120,
+    "article_id": 685,
+    "quantity": 57,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 412,
+    "town_id": 2120,
+    "article_id": 458,
+    "quantity": 250,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 211,
+    "town_id": 2120,
+    "article_id": 218,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 77,
+    "town_id": 2120,
+    "article_id": 77,
+    "quantity": 60,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 153,
+    "town_id": 2120,
+    "article_id": 155,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 631,
+    "town_id": 2120,
+    "article_id": 723,
+    "quantity": 250,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 73,
+    "town_id": 2120,
+    "article_id": 73,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 355,
+    "town_id": 2120,
+    "article_id": 364,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 261,
+    "town_id": 2120,
+    "article_id": 268,
+    "quantity": 300,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 332,
+    "town_id": 2120,
+    "article_id": 341,
+    "quantity": 40,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 404,
+    "town_id": 2120,
+    "article_id": 441,
+    "quantity": 250,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 233,
+    "town_id": 2120,
+    "article_id": 240,
+    "quantity": 40,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 578,
+    "town_id": 2120,
+    "article_id": 660,
+    "quantity": 65,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 376,
+    "town_id": 2120,
+    "article_id": 385,
+    "quantity": 2,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 515,
+    "town_id": 2120,
+    "article_id": 589,
+    "quantity": 180,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 642,
+    "town_id": 2120,
+    "article_id": 735,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 293,
+    "town_id": 2120,
+    "article_id": 300,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 536,
+    "town_id": 2120,
+    "article_id": 610,
+    "quantity": 10,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 401,
+    "town_id": 2120,
+    "article_id": 435,
+    "quantity": 270,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 281,
+    "town_id": 2120,
+    "article_id": 288,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 461,
+    "town_id": 2120,
+    "article_id": 535,
+    "quantity": 240,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 499,
+    "town_id": 2120,
+    "article_id": 573,
+    "quantity": 10,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 181,
+    "town_id": 2120,
+    "article_id": 187,
+    "quantity": 30,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 340,
+    "town_id": 2120,
+    "article_id": 349,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 429,
+    "town_id": 2120,
+    "article_id": 486,
+    "quantity": 100,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 96,
+    "town_id": 2120,
+    "article_id": 96,
+    "quantity": 202,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 581,
+    "town_id": 2120,
+    "article_id": 667,
+    "quantity": 5,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 600,
+    "town_id": 2120,
+    "article_id": 690,
+    "quantity": 1,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 221,
+    "town_id": 2120,
+    "article_id": 228,
+    "quantity": 30,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 576,
+    "town_id": 2120,
+    "article_id": 658,
+    "quantity": 120,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 398,
+    "town_id": 2120,
+    "article_id": 428,
+    "quantity": 270,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 19,
+    "town_id": 2120,
+    "article_id": 19,
+    "quantity": 117,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 215,
+    "town_id": 2120,
+    "article_id": 222,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 366,
+    "town_id": 2120,
+    "article_id": 375,
+    "quantity": 40,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 37,
+    "town_id": 2120,
+    "article_id": 37,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 85,
+    "town_id": 2120,
+    "article_id": 85,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 421,
+    "town_id": 2120,
+    "article_id": 474,
+    "quantity": 150,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 32,
+    "town_id": 2120,
+    "article_id": 32,
+    "quantity": 120,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 358,
+    "town_id": 2120,
+    "article_id": 367,
+    "quantity": 150,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 603,
+    "town_id": 2120,
+    "article_id": 693,
+    "quantity": 177,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 133,
+    "town_id": 2120,
+    "article_id": 134,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 638,
+    "town_id": 2120,
+    "article_id": 731,
+    "quantity": 250,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 113,
+    "town_id": 2120,
+    "article_id": 114,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 403,
+    "town_id": 2120,
+    "article_id": 439,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 170,
+    "town_id": 2120,
+    "article_id": 172,
+    "quantity": 25,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 55,
+    "town_id": 2120,
+    "article_id": 55,
+    "quantity": 220,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 374,
+    "town_id": 2120,
+    "article_id": 383,
+    "quantity": 2,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 244,
+    "town_id": 2120,
+    "article_id": 251,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 128,
+    "town_id": 2120,
+    "article_id": 129,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 38,
+    "town_id": 2120,
+    "article_id": 38,
+    "quantity": 90,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 353,
+    "town_id": 2120,
+    "article_id": 362,
+    "quantity": 46,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 216,
+    "town_id": 2120,
+    "article_id": 223,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 646,
+    "town_id": 2120,
+    "article_id": 739,
+    "quantity": 1,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 551,
+    "town_id": 2120,
+    "article_id": 625,
+    "quantity": 1,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 318,
+    "town_id": 2120,
+    "article_id": 327,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 312,
+    "town_id": 2120,
+    "article_id": 321,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 470,
+    "town_id": 2120,
+    "article_id": 544,
+    "quantity": 144,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 110,
+    "town_id": 2120,
+    "article_id": 111,
+    "quantity": 178,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 99,
+    "town_id": 2120,
+    "article_id": 100,
+    "quantity": 300,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 28,
+    "town_id": 2120,
+    "article_id": 28,
+    "quantity": 150,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 313,
+    "town_id": 2120,
+    "article_id": 322,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 356,
+    "town_id": 2120,
+    "article_id": 365,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 122,
+    "town_id": 2120,
+    "article_id": 123,
+    "quantity": 4,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 62,
+    "town_id": 2120,
+    "article_id": 62,
+    "quantity": 240,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 531,
+    "town_id": 2120,
+    "article_id": 605,
+    "quantity": 10,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 454,
+    "town_id": 2120,
+    "article_id": 528,
+    "quantity": 1,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 390,
+    "town_id": 2120,
+    "article_id": 413,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 439,
+    "town_id": 2120,
+    "article_id": 497,
+    "quantity": 70,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 117,
+    "town_id": 2120,
+    "article_id": 118,
+    "quantity": 30,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 438,
+    "town_id": 2120,
+    "article_id": 495,
+    "quantity": 140,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 185,
+    "town_id": 2120,
+    "article_id": 191,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 309,
+    "town_id": 2120,
+    "article_id": 317,
+    "quantity": 300,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 349,
+    "town_id": 2120,
+    "article_id": 358,
+    "quantity": 120,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 363,
+    "town_id": 2120,
+    "article_id": 372,
+    "quantity": 1,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 341,
+    "town_id": 2120,
+    "article_id": 350,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 409,
+    "town_id": 2120,
+    "article_id": 451,
+    "quantity": 270,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 605,
+    "town_id": 2120,
+    "article_id": 695,
+    "quantity": 139,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 587,
+    "town_id": 2120,
+    "article_id": 676,
+    "quantity": 10,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 389,
+    "town_id": 2120,
+    "article_id": 410,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 97,
+    "town_id": 2120,
+    "article_id": 97,
+    "quantity": 270,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 205,
+    "town_id": 2120,
+    "article_id": 212,
+    "quantity": 15,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 197,
+    "town_id": 2120,
+    "article_id": 204,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 187,
+    "town_id": 2120,
+    "article_id": 193,
+    "quantity": 30,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 351,
+    "town_id": 2120,
+    "article_id": 360,
+    "quantity": 46,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 269,
+    "town_id": 2120,
+    "article_id": 276,
+    "quantity": 250,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 534,
+    "town_id": 2120,
+    "article_id": 608,
+    "quantity": 10,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 430,
+    "town_id": 2120,
+    "article_id": 487,
+    "quantity": 300,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 506,
+    "town_id": 2120,
+    "article_id": 580,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 520,
+    "town_id": 2120,
+    "article_id": 594,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 67,
+    "town_id": 2120,
+    "article_id": 67,
+    "quantity": 250,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 464,
+    "town_id": 2120,
+    "article_id": 538,
+    "quantity": 240,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 352,
+    "town_id": 2120,
+    "article_id": 361,
+    "quantity": 46,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 395,
+    "town_id": 2120,
+    "article_id": 423,
+    "quantity": 100,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 224,
+    "town_id": 2120,
+    "article_id": 231,
+    "quantity": 35,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 660,
+    "town_id": 2120,
+    "article_id": 753,
+    "quantity": 300,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 513,
+    "town_id": 2120,
+    "article_id": 587,
+    "quantity": 100,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 460,
+    "town_id": 2120,
+    "article_id": 534,
+    "quantity": 240,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 69,
+    "town_id": 2120,
+    "article_id": 69,
+    "quantity": 233,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 529,
+    "town_id": 2120,
+    "article_id": 603,
+    "quantity": 13,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 219,
+    "town_id": 2120,
+    "article_id": 226,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 192,
+    "town_id": 2120,
+    "article_id": 199,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 338,
+    "town_id": 2120,
+    "article_id": 347,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 350,
+    "town_id": 2120,
+    "article_id": 359,
+    "quantity": 46,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 235,
+    "town_id": 2120,
+    "article_id": 242,
+    "quantity": 30,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 501,
+    "town_id": 2120,
+    "article_id": 575,
+    "quantity": 18,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 509,
+    "town_id": 2120,
+    "article_id": 583,
+    "quantity": 10,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 29,
+    "town_id": 2120,
+    "article_id": 29,
+    "quantity": 150,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 354,
+    "town_id": 2120,
+    "article_id": 363,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 516,
+    "town_id": 2120,
+    "article_id": 590,
+    "quantity": 132,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 580,
+    "town_id": 2120,
+    "article_id": 665,
+    "quantity": 150,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 539,
+    "town_id": 2120,
+    "article_id": 613,
+    "quantity": 150,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 467,
+    "town_id": 2120,
+    "article_id": 541,
+    "quantity": 240,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 247,
+    "town_id": 2120,
+    "article_id": 254,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 347,
+    "town_id": 2120,
+    "article_id": 356,
+    "quantity": 120,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 54,
+    "town_id": 2120,
+    "article_id": 54,
+    "quantity": 360,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 103,
+    "town_id": 2120,
+    "article_id": 104,
+    "quantity": 300,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 525,
+    "town_id": 2120,
+    "article_id": 599,
+    "quantity": 10,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 115,
+    "town_id": 2120,
+    "article_id": 116,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 236,
+    "town_id": 2120,
+    "article_id": 243,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 208,
+    "town_id": 2120,
+    "article_id": 215,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 36,
+    "town_id": 2120,
+    "article_id": 36,
+    "quantity": 99,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 174,
+    "town_id": 2120,
+    "article_id": 176,
+    "quantity": 30,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 451,
+    "town_id": 2120,
+    "article_id": 522,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 200,
+    "town_id": 2120,
+    "article_id": 207,
+    "quantity": 25,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 53,
+    "town_id": 2120,
+    "article_id": 53,
+    "quantity": 360,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 222,
+    "town_id": 2120,
+    "article_id": 229,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 275,
+    "town_id": 2120,
+    "article_id": 282,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 613,
+    "town_id": 2120,
+    "article_id": 703,
+    "quantity": 0,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 58,
+    "town_id": 2120,
+    "article_id": 58,
+    "quantity": 240,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 364,
+    "town_id": 2120,
+    "article_id": 373,
+    "quantity": 1,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 22,
+    "town_id": 2120,
+    "article_id": 22,
+    "quantity": 150,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 360,
+    "town_id": 2120,
+    "article_id": 369,
+    "quantity": 150,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 70,
+    "town_id": 2120,
+    "article_id": 70,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 199,
+    "town_id": 2120,
+    "article_id": 206,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 422,
+    "town_id": 2120,
+    "article_id": 476,
+    "quantity": 150,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 105,
+    "town_id": 2120,
+    "article_id": 106,
+    "quantity": 300,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 561,
+    "town_id": 2120,
+    "article_id": 643,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 415,
+    "town_id": 2120,
+    "article_id": 462,
+    "quantity": 270,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 220,
+    "town_id": 2120,
+    "article_id": 227,
+    "quantity": 30,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 166,
+    "town_id": 2120,
+    "article_id": 168,
+    "quantity": 27,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 431,
+    "town_id": 2120,
+    "article_id": 488,
+    "quantity": 150,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 597,
+    "town_id": 2120,
+    "article_id": 687,
+    "quantity": 100,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 201,
+    "town_id": 2120,
+    "article_id": 208,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 169,
+    "town_id": 2120,
+    "article_id": 171,
+    "quantity": 5,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 598,
+    "town_id": 2120,
+    "article_id": 688,
+    "quantity": 1,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 154,
+    "town_id": 2120,
+    "article_id": 156,
+    "quantity": 300,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 35,
+    "town_id": 2120,
+    "article_id": 35,
+    "quantity": 95,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 602,
+    "town_id": 2120,
+    "article_id": 692,
+    "quantity": 277,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 173,
+    "town_id": 2120,
+    "article_id": 175,
+    "quantity": 29,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 188,
+    "town_id": 2120,
+    "article_id": 195,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 448,
+    "town_id": 2120,
+    "article_id": 516,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 527,
+    "town_id": 2120,
+    "article_id": 601,
+    "quantity": 10,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 150,
+    "town_id": 2120,
+    "article_id": 152,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 411,
+    "town_id": 2120,
+    "article_id": 456,
+    "quantity": 30,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 240,
+    "town_id": 2120,
+    "article_id": 247,
+    "quantity": 30,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 223,
+    "town_id": 2120,
+    "article_id": 230,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 231,
+    "town_id": 2120,
+    "article_id": 238,
+    "quantity": 27,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 212,
+    "town_id": 2120,
+    "article_id": 219,
+    "quantity": 20,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 453,
+    "town_id": 2120,
+    "article_id": 526,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  },
+  {
+    "id": 7,
+    "town_id": 2120,
+    "article_id": 7,
+    "quantity": 200,
+    "occupation": null,
+    "average_order": null,
+    "shortage": 0,
+    "town_name": "Москва",
+    "branch_is_closed": false
+  }
+]
