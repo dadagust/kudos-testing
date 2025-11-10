@@ -1,0 +1,479 @@
+[
+  {
+    "id": 1,
+    "name": "Мебель",
+    "position": 0,
+    "created_at": "2022-11-03T13:35:49.915Z",
+    "updated_at": "2024-02-12T10:25:55.930Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 16,
+    "name": "Посуда",
+    "position": 1,
+    "created_at": "2022-11-14T10:20:16.477Z",
+    "updated_at": "2024-02-12T10:25:55.929Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 2,
+    "name": "Скатерти круглые",
+    "position": 2,
+    "created_at": "2022-11-03T13:35:49.918Z",
+    "updated_at": "2024-02-19T20:05:30.083Z",
+    "section_id": null,
+    "cover_article_id": 174
+  },
+  {
+    "id": 21,
+    "name": "Скатерти прямоугольные",
+    "position": 3,
+    "created_at": "2024-02-06T17:05:37.551Z",
+    "updated_at": "2024-02-19T20:06:24.604Z",
+    "section_id": null,
+    "cover_article_id": 203
+  },
+  {
+    "id": 22,
+    "name": "Салфетка",
+    "position": 4,
+    "created_at": "2024-02-12T08:25:59.723Z",
+    "updated_at": "2025-04-16T12:29:14.856Z",
+    "section_id": null,
+    "cover_article_id": 736
+  },
+  {
+    "id": 5,
+    "name": "Освещение",
+    "position": 5,
+    "created_at": "2022-11-03T13:35:49.927Z",
+    "updated_at": "2024-02-12T10:25:55.925Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 9,
+    "name": "Указатели",
+    "position": 6,
+    "created_at": "2022-11-03T13:35:49.939Z",
+    "updated_at": "2024-02-12T10:25:55.924Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 10,
+    "name": "Аксессуары",
+    "position": 7,
+    "created_at": "2022-11-03T13:35:49.942Z",
+    "updated_at": "2024-02-12T10:25:55.923Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 11,
+    "name": "Бокалы",
+    "position": 8,
+    "created_at": "2022-11-10T13:36:35.267Z",
+    "updated_at": "2024-03-08T09:19:41.574Z",
+    "section_id": null,
+    "cover_article_id": 532
+  },
+  {
+    "id": 12,
+    "name": "Подстановочные тарелки",
+    "position": 9,
+    "created_at": "2022-11-10T14:19:57.983Z",
+    "updated_at": "2024-03-13T21:50:52.472Z",
+    "section_id": null,
+    "cover_article_id": 557
+  },
+  {
+    "id": 13,
+    "name": "Сервизные тарелки",
+    "position": 10,
+    "created_at": "2022-11-10T14:20:07.870Z",
+    "updated_at": "2024-03-13T21:51:37.446Z",
+    "section_id": null,
+    "cover_article_id": 17
+  },
+  {
+    "id": 31,
+    "name": "Плейсматы",
+    "position": 11,
+    "created_at": "2024-02-15T07:06:02.506Z",
+    "updated_at": "2024-02-15T07:44:47.249Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 19,
+    "name": "Кольца для салфеток",
+    "position": 12,
+    "created_at": "2022-11-15T11:45:19.798Z",
+    "updated_at": "2024-02-19T20:08:17.194Z",
+    "section_id": null,
+    "cover_article_id": 369
+  },
+  {
+    "id": 15,
+    "name": "Столовые приборы",
+    "position": 13,
+    "created_at": "2022-11-14T07:51:24.365Z",
+    "updated_at": "2024-02-15T07:44:47.247Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 32,
+    "name": "Креманки",
+    "position": 14,
+    "created_at": "2024-02-15T07:18:08.872Z",
+    "updated_at": "2024-02-15T07:44:47.246Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 17,
+    "name": "Стулья",
+    "position": 15,
+    "created_at": "2022-11-14T13:46:15.419Z",
+    "updated_at": "2024-05-05T17:02:31.720Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 18,
+    "name": "Банкетные столы",
+    "position": 16,
+    "created_at": "2022-11-15T10:49:33.638Z",
+    "updated_at": "2024-05-05T17:02:41.516Z",
+    "section_id": null,
+    "cover_article_id": 118
+  },
+  {
+    "id": 53,
+    "name": "Деревянные столы",
+    "position": 17,
+    "created_at": "2024-03-13T20:20:43.192Z",
+    "updated_at": "2024-05-05T17:02:57.824Z",
+    "section_id": null,
+    "cover_article_id": 563
+  },
+  {
+    "id": 34,
+    "name": "Дизайнерские столы",
+    "position": 18,
+    "created_at": "2024-02-15T08:47:36.423Z",
+    "updated_at": "2024-05-05T17:03:51.340Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 57,
+    "name": "Журнальные столы",
+    "position": 19,
+    "created_at": "2024-05-05T16:34:24.354Z",
+    "updated_at": "2024-05-05T17:03:51.339Z",
+    "section_id": null,
+    "cover_article_id": 655
+  },
+  {
+    "id": 55,
+    "name": "Коктейльные столы",
+    "position": 20,
+    "created_at": "2024-03-27T07:54:13.577Z",
+    "updated_at": "2024-05-05T17:03:51.339Z",
+    "section_id": null,
+    "cover_article_id": 122
+  },
+  {
+    "id": 33,
+    "name": "Столы для торта",
+    "position": 21,
+    "created_at": "2024-02-15T08:24:46.732Z",
+    "updated_at": "2024-05-05T17:04:31.688Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 41,
+    "name": "Стулья Мэдисон",
+    "position": 22,
+    "created_at": "2024-02-26T10:17:46.568Z",
+    "updated_at": "2024-05-05T17:04:31.687Z",
+    "section_id": null,
+    "cover_article_id": 471
+  },
+  {
+    "id": 60,
+    "name": "Стулья Кампо",
+    "position": 23,
+    "created_at": "2025-03-11T16:13:36.249Z",
+    "updated_at": "2025-03-11T16:13:54.963Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 42,
+    "name": "Стулья Ланцер",
+    "position": 24,
+    "created_at": "2024-02-27T14:26:41.295Z",
+    "updated_at": "2025-03-11T16:13:54.962Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 37,
+    "name": "Стулья Вашингтон Gold",
+    "position": 25,
+    "created_at": "2024-02-16T10:18:05.123Z",
+    "updated_at": "2025-03-11T16:13:54.961Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 39,
+    "name": "Стулья Вашингтон Silver",
+    "position": 26,
+    "created_at": "2024-02-20T11:48:38.692Z",
+    "updated_at": "2025-03-11T16:13:54.961Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 40,
+    "name": "Стулья Франко",
+    "position": 27,
+    "created_at": "2024-02-24T18:48:23.466Z",
+    "updated_at": "2025-03-11T16:13:54.960Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 43,
+    "name": "Стулья Октава",
+    "position": 28,
+    "created_at": "2024-02-27T22:19:41.515Z",
+    "updated_at": "2025-03-11T16:13:54.959Z",
+    "section_id": null,
+    "cover_article_id": 509
+  },
+  {
+    "id": 47,
+    "name": "Стулья Кроссбэк",
+    "position": 29,
+    "created_at": "2024-03-05T13:31:13.858Z",
+    "updated_at": "2025-03-11T16:13:54.958Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 48,
+    "name": "Стулья Талула",
+    "position": 30,
+    "created_at": "2024-03-05T13:32:10.239Z",
+    "updated_at": "2025-03-11T16:13:54.957Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 58,
+    "name": "Стулья Манила",
+    "position": 31,
+    "created_at": "2025-03-11T14:38:27.594Z",
+    "updated_at": "2025-03-11T16:13:54.956Z",
+    "section_id": null,
+    "cover_article_id": 700
+  },
+  {
+    "id": 44,
+    "name": "Стулья Наполеон",
+    "position": 32,
+    "created_at": "2024-03-05T13:25:48.549Z",
+    "updated_at": "2025-03-11T16:13:54.956Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 49,
+    "name": "Стулья Гост",
+    "position": 33,
+    "created_at": "2024-03-05T13:33:21.031Z",
+    "updated_at": "2025-03-11T16:13:54.955Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 52,
+    "name": "Стулья Тиффани",
+    "position": 34,
+    "created_at": "2024-03-05T13:40:02.634Z",
+    "updated_at": "2025-03-11T16:13:54.954Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 45,
+    "name": "Стулья Феникс",
+    "position": 35,
+    "created_at": "2024-03-05T13:29:08.859Z",
+    "updated_at": "2025-03-11T16:13:54.953Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 46,
+    "name": "Стулья Доминго",
+    "position": 36,
+    "created_at": "2024-03-05T13:30:30.852Z",
+    "updated_at": "2025-03-11T16:13:54.952Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 50,
+    "name": "Стулья Даймонд",
+    "position": 37,
+    "created_at": "2024-03-05T13:37:34.217Z",
+    "updated_at": "2025-03-11T16:13:54.952Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 20,
+    "name": "Подушки на стулья",
+    "position": 38,
+    "created_at": "2022-11-16T13:50:00.125Z",
+    "updated_at": "2025-03-11T16:13:54.951Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 51,
+    "name": "Барные стулья",
+    "position": 39,
+    "created_at": "2024-03-05T13:38:49.017Z",
+    "updated_at": "2025-03-11T16:13:54.950Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 59,
+    "name": "Банкетки",
+    "position": 40,
+    "created_at": "2025-03-11T14:45:49.049Z",
+    "updated_at": "2025-03-11T16:13:54.949Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 54,
+    "name": "Кресла-мешки",
+    "position": 41,
+    "created_at": "2024-03-13T21:40:34.067Z",
+    "updated_at": "2025-03-11T16:13:54.947Z",
+    "section_id": null,
+    "cover_article_id": 565
+  },
+  {
+    "id": 27,
+    "name": "Пуфы",
+    "position": 42,
+    "created_at": "2024-02-13T06:54:34.159Z",
+    "updated_at": "2025-03-11T16:13:54.946Z",
+    "section_id": null,
+    "cover_article_id": 330
+  },
+  {
+    "id": 56,
+    "name": "Шезлонг",
+    "position": 43,
+    "created_at": "2024-04-25T12:39:26.731Z",
+    "updated_at": "2025-03-11T16:13:54.945Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 36,
+    "name": "Диваны, кресла",
+    "position": 44,
+    "created_at": "2024-02-15T10:56:24.022Z",
+    "updated_at": "2025-03-12T07:24:56.533Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 35,
+    "name": "Стрейч-чехлы на столы",
+    "position": 45,
+    "created_at": "2024-02-15T09:41:30.013Z",
+    "updated_at": "2025-03-11T16:13:54.942Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 23,
+    "name": "Канделябры, подсвечники",
+    "position": 46,
+    "created_at": "2024-02-12T10:34:55.757Z",
+    "updated_at": "2025-03-11T16:13:54.941Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 24,
+    "name": "Перья страуса",
+    "position": 47,
+    "created_at": "2024-02-12T13:03:49.603Z",
+    "updated_at": "2025-03-11T16:13:54.939Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 25,
+    "name": "Стойки для цветов",
+    "position": 48,
+    "created_at": "2024-02-12T13:08:19.010Z",
+    "updated_at": "2025-03-11T16:13:54.938Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 26,
+    "name": "Пледы",
+    "position": 49,
+    "created_at": "2024-02-12T13:23:42.581Z",
+    "updated_at": "2025-03-11T16:13:54.937Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 28,
+    "name": "Зонт",
+    "position": 50,
+    "created_at": "2024-02-13T14:25:54.916Z",
+    "updated_at": "2025-03-11T16:13:54.936Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 29,
+    "name": "Led-свечи",
+    "position": 51,
+    "created_at": "2024-02-13T14:35:15.675Z",
+    "updated_at": "2025-03-11T16:13:54.935Z",
+    "section_id": null,
+    "cover_article_id": null
+  },
+  {
+    "id": 30,
+    "name": "Номерки столов, мольберт",
+    "position": 52,
+    "created_at": "2024-02-14T14:45:29.120Z",
+    "updated_at": "2025-03-11T16:13:54.934Z",
+    "section_id": null,
+    "cover_article_id": null
+  }
+]
