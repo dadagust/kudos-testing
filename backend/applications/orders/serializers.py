@@ -15,7 +15,14 @@ from applications.customers.models import Customer
 from applications.products.choices import RentalMode
 from applications.products.models import Product
 
-from .models import DeliveryType, Order, OrderItem, OrderStatus
+from .models import (
+    DeliveryType,
+    LogisticsState,
+    Order,
+    OrderItem,
+    OrderStatus,
+    PaymentStatus,
+)
 from .services import (
     collect_order_item_totals,
     ensure_order_stock_transactions,
@@ -161,6 +168,20 @@ class OrderSummarySerializer(serializers.ModelSerializer):
     customer = CustomerSummarySerializer(read_only=True)
     status_label = serializers.CharField(source='get_status_display', read_only=True)
     delivery_type_label = serializers.CharField(source='get_delivery_type_display', read_only=True)
+    payment_status_label = serializers.CharField(
+        source='get_payment_status_display',
+        read_only=True,
+    )
+    logistics_state_label = serializers.SerializerMethodField()
+    warehouse_received_by = serializers.IntegerField(
+        source='warehouse_received_by_id',
+        read_only=True,
+    )
+    is_warehouse_received = serializers.BooleanField(
+        source='is_warehouse_received',
+        read_only=True,
+    )
+    items = OrderItemSerializer(many=True, read_only=True)
 
     class Meta:
         model = Order
@@ -168,15 +189,24 @@ class OrderSummarySerializer(serializers.ModelSerializer):
             'id',
             'status',
             'status_label',
+            'payment_status',
+            'payment_status_label',
+            'logistics_state',
+            'logistics_state_label',
             'total_amount',
             'services_total_amount',
             'installation_date',
             'dismantle_date',
+            'shipment_date',
             'customer',
             'delivery_type',
             'delivery_type_label',
             'delivery_address',
             'comment',
+            'warehouse_received_at',
+            'warehouse_received_by',
+            'is_warehouse_received',
+            'items',
             'created',
             'modified',
         )
@@ -188,12 +218,16 @@ class OrderSummarySerializer(serializers.ModelSerializer):
             'modified',
         )
 
+    def get_logistics_state_label(self, obj: Order) -> str | None:
+        state = obj.logistics_state
+        if not state:
+            return None
+        return dict(LogisticsState.choices).get(state)
+
 
 class OrderDetailSerializer(OrderSummarySerializer):
-    items = OrderItemSerializer(many=True, read_only=True)
-
     class Meta(OrderSummarySerializer.Meta):
-        fields = OrderSummarySerializer.Meta.fields + ('items',)
+        fields = OrderSummarySerializer.Meta.fields
 
 
 class OrderItemInputSerializer(serializers.Serializer):
@@ -333,11 +367,37 @@ class OrderReturnItemInputSerializer(serializers.Serializer):
     quantity = serializers.IntegerField(min_value=0)
 
 
+class OrderPaymentStatusUpdateSerializer(serializers.Serializer):
+    payment_status = serializers.ChoiceField(choices=PaymentStatus.choices)
+
+
+class OrderLogisticsStateUpdateSerializer(serializers.Serializer):
+    logistics_state = serializers.ChoiceField(
+        choices=LogisticsState.choices,
+        allow_null=True,
+        required=False,
+    )
+
+
+class OrderReceiveSerializer(serializers.Serializer):
+    received = serializers.BooleanField(required=False)
+
+
 class OrderWriteSerializer(serializers.ModelSerializer):
     status = serializers.ChoiceField(
         choices=OrderStatus.choices,
         default=OrderStatus.NEW,
         required=False,
+    )
+    payment_status = serializers.ChoiceField(
+        choices=PaymentStatus.choices,
+        default=PaymentStatus.UNPAID,
+        required=False,
+    )
+    logistics_state = serializers.ChoiceField(
+        choices=LogisticsState.choices,
+        required=False,
+        allow_null=True,
     )
     customer_id = serializers.PrimaryKeyRelatedField(
         source='customer',
@@ -355,6 +415,10 @@ class OrderWriteSerializer(serializers.ModelSerializer):
         allow_null=True,
         required=False,
     )
+    shipment_date = serializers.DateField(
+        allow_null=True,
+        required=False,
+    )
     items = OrderItemInputSerializer(
         many=True,
     )
@@ -369,8 +433,11 @@ class OrderWriteSerializer(serializers.ModelSerializer):
         model = Order
         fields = (
             'status',
+            'payment_status',
+            'logistics_state',
             'installation_date',
             'dismantle_date',
+            'shipment_date',
             'customer_id',
             'delivery_type',
             'delivery_address',
@@ -418,6 +485,10 @@ class OrderWriteSerializer(serializers.ModelSerializer):
             attrs['delivery_address'] = ''
         if 'comment' in attrs and attrs['comment'] in (None, ''):
             attrs['comment'] = ''
+
+        logistics_state = attrs.get('logistics_state', serializers.empty)
+        if logistics_state == '':
+            attrs['logistics_state'] = None
 
         status_value = attrs.get('status') or getattr(self.instance, 'status', None)
         return_items = attrs.get('return_items', serializers.empty)

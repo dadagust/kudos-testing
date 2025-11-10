@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 
+from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
 
@@ -24,6 +25,18 @@ class OrderStatus(models.TextChoices):
 class DeliveryType(models.TextChoices):
     DELIVERY = 'delivery', 'Доставка'
     PICKUP = 'pickup', 'Самовывоз'
+
+
+class PaymentStatus(models.TextChoices):
+    PAID = 'paid', 'Оплачен'
+    UNPAID = 'unpaid', 'Не оплачен'
+    PARTIALLY_PAID = 'partially_paid', 'Частично оплачен'
+
+
+class LogisticsState(models.TextChoices):
+    HANDOVER_TO_PICKING = 'handover_to_picking', 'Передан на сборку'
+    PICKED = 'picked', 'Собран'
+    SHIPPED = 'shipped', 'Отгружен'
 
 
 STATUS_GROUP_MAP: dict[str, tuple[str, ...]] = {
@@ -89,6 +102,37 @@ class Order(Date):
         choices=DeliveryType.choices,
         default=DeliveryType.DELIVERY,
     )
+    payment_status = models.CharField(
+        verbose_name='Статус оплаты',
+        max_length=32,
+        choices=PaymentStatus.choices,
+        default=PaymentStatus.UNPAID,
+    )
+    logistics_state = models.CharField(
+        verbose_name='Состояние логистики',
+        max_length=32,
+        choices=LogisticsState.choices,
+        blank=True,
+        null=True,
+    )
+    shipment_date = models.DateField(
+        verbose_name='Дата отгрузки',
+        blank=True,
+        null=True,
+    )
+    warehouse_received_at = models.DateTimeField(
+        verbose_name='Принят на склад в',
+        blank=True,
+        null=True,
+    )
+    warehouse_received_by = models.ForeignKey(
+        verbose_name='Принят на складе пользователем',
+        to=settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='received_orders',
+    )
     delivery_address = models.CharField(
         verbose_name='Адрес доставки',
         max_length=255,
@@ -105,6 +149,12 @@ class Order(Date):
         verbose_name = 'Заказ'
         verbose_name_plural = 'Заказы'
         ordering = ['-created']
+        indexes = [
+            models.Index(fields=['payment_status']),
+            models.Index(fields=['logistics_state']),
+            models.Index(fields=['shipment_date']),
+            models.Index(fields=['logistics_state', 'warehouse_received_at']),
+        ]
 
     def __str__(self) -> str:  # pragma: no cover - human readable representation
         return f'Заказ #{self.pk}'
@@ -134,6 +184,10 @@ class Order(Date):
         self.services_total_amount = qualification_total
         self.total_amount = total
         return total
+
+    @property
+    def is_warehouse_received(self) -> bool:
+        return self.warehouse_received_at is not None
 
 
 class OrderItem(Date):
