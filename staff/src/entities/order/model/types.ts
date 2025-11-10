@@ -20,6 +20,22 @@ export const DELIVERY_TYPE_LABELS: Record<DeliveryType, string> = {
   pickup: 'Самовывоз',
 };
 
+export type PaymentStatus = 'paid' | 'unpaid' | 'partially_paid';
+
+export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
+  paid: 'оплачен',
+  unpaid: 'не оплачен',
+  partially_paid: 'частично оплачен',
+};
+
+export type LogisticsState = 'handover_to_picking' | 'picked' | 'shipped';
+
+export const LOGISTICS_STATE_LABELS: Record<LogisticsState, string> = {
+  handover_to_picking: 'Передан на сборку',
+  picked: 'Собран',
+  shipped: 'Отгружен',
+};
+
 export interface CustomerSummary {
   id: string;
   display_name: string;
@@ -49,22 +65,29 @@ export interface OrderSummary {
   id: number;
   status: OrderStatus;
   status_label: string;
+  payment_status: PaymentStatus;
+  payment_status_label: string;
+  logistics_state: LogisticsState | null;
+  logistics_state_label: string | null;
   total_amount: string;
   services_total_amount: string;
   installation_date: string;
   dismantle_date: string;
+  shipment_date: string | null;
   customer: CustomerSummary | null;
   delivery_type: DeliveryType;
   delivery_type_label: string;
   delivery_address: string;
   comment: string;
+  warehouse_received_at: string | null;
+  warehouse_received_by: number | null;
+  is_warehouse_received: boolean;
   created: string;
   modified: string;
-}
-
-export interface OrderDetail extends OrderSummary {
   items: OrderItem[];
 }
+
+export interface OrderDetail extends OrderSummary {}
 
 export interface OrderListResponse {
   data: OrderSummary[];
@@ -96,6 +119,11 @@ export interface OrderListQuery {
   status_group?: OrderStatusGroup;
   status?: OrderStatus;
   search?: string;
+  payment_status?: PaymentStatus[];
+  logistics_state?: Array<LogisticsState | 'null'>;
+  shipment_date_from?: string;
+  shipment_date_to?: string;
+  q?: string;
 }
 
 export interface OrderItemPayload {
@@ -108,8 +136,11 @@ export interface OrderItemPayload {
 
 export interface CreateOrderPayload {
   status?: OrderStatus;
+  payment_status?: PaymentStatus;
+  logistics_state?: LogisticsState | null;
   installation_date: string;
   dismantle_date: string;
+  shipment_date?: string | null;
   customer_id?: string | null;
   delivery_type: DeliveryType;
   delivery_address?: string | null;

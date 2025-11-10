@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from applications.customers.models import Customer
-from applications.orders.models import DeliveryType, OrderStatus
+from applications.orders.models import DeliveryType, LogisticsState, OrderStatus, PaymentStatus
 from applications.products.models import (
     Category,
     InstallerQualification,
@@ -66,6 +66,9 @@ class OrderApiTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         data = response.json()['data']
         self.assertEqual(data['status'], OrderStatus.NEW)
+        self.assertEqual(data['payment_status'], PaymentStatus.UNPAID)
+        self.assertIsNone(data['logistics_state'])
+        self.assertFalse(data['is_warehouse_received'])
         self.assertEqual(len(data['items']), 1)
         self.assertEqual(data['delivery_type'], DeliveryType.DELIVERY)
         self.assertEqual(data['customer']['id'], str(self.customer.pk))
@@ -102,6 +105,7 @@ class OrderApiTests(APITestCase):
         data = response.json()['data']
         self.assertEqual(len(data), 1)
         self.assertEqual(data[0]['status'], OrderStatus.ARCHIVED)
+        self.assertEqual(data[0]['payment_status'], PaymentStatus.UNPAID)
 
     def test_create_pickup_order_without_address_and_comment(self):
         url = reverse('orders:order-list')
@@ -155,6 +159,7 @@ class OrderApiTests(APITestCase):
         self.assertAlmostEqual(float(item['unit_price']), 11900.0, places=2)
         self.assertAlmostEqual(float(data['total_amount']), 12400.0, places=2)
         self.assertAlmostEqual(float(data['services_total_amount']), 500.0, places=2)
+        self.assertEqual(data['payment_status'], PaymentStatus.UNPAID)
 
     def test_installer_qualification_counted_once(self):
         url = reverse('orders:order-list')
@@ -192,6 +197,89 @@ class OrderApiTests(APITestCase):
         self.assertAlmostEqual(float(data['total_amount']), 5900.0, places=2)
         self.assertIn('items', data)
         self.assertEqual(len(data['items']), 1)
+
+    def test_update_payment_status_and_filter(self):
+        create_url = reverse('orders:orders-list')
+        payload = {
+            'installation_date': '2024-06-01',
+            'dismantle_date': '2024-06-05',
+            'items': [{'product_id': str(self.product.pk), 'quantity': 1, 'rental_days': 1}],
+        }
+        order_id = self.client.post(create_url, payload, format='json').json()['data']['id']
+
+        patch_url = reverse('orders:orders-update-payment-status', args=[order_id])
+        response = self.client.patch(
+            patch_url,
+            {'payment_status': PaymentStatus.PAID},
+            format='json',
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()['data']
+        self.assertEqual(data['payment_status'], PaymentStatus.PAID)
+        self.assertEqual(data['payment_status_label'], 'Оплачен')
+
+        list_url = reverse('orders:orders-list')
+        response = self.client.get(list_url, {'payment_status': [PaymentStatus.PAID]})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        result = response.json()['data']
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]['id'], order_id)
+
+    def test_logistics_state_flow_and_receive(self):
+        create_url = reverse('orders:orders-list')
+        payload = {
+            'installation_date': '2024-06-10',
+            'dismantle_date': '2024-06-12',
+            'items': [{'product_id': str(self.product.pk), 'quantity': 1, 'rental_days': 1}],
+        }
+        order_data = self.client.post(create_url, payload, format='json').json()['data']
+        order_id = order_data['id']
+
+        update_url = reverse('orders:orders-detail', args=[order_id])
+        response = self.client.patch(
+            update_url,
+            {
+                'logistics_state': LogisticsState.SHIPPED,
+                'shipment_date': '2024-06-15',
+            },
+            format='json',
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        updated = response.json()['data']
+        self.assertEqual(updated['logistics_state'], LogisticsState.SHIPPED)
+        self.assertEqual(updated['shipment_date'], '2024-06-15')
+
+        list_url = reverse('orders:orders-list')
+        response = self.client.get(list_url, {'logistics_state': [LogisticsState.SHIPPED]})
+        self.assertEqual(len(response.json()['data']), 1)
+
+        receive_url = reverse('orders:orders-receive', args=[order_id])
+        response = self.client.post(receive_url, {}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        received_data = response.json()['data']
+        self.assertTrue(received_data['is_warehouse_received'])
+        self.assertIsNotNone(received_data['warehouse_received_at'])
+        self.assertEqual(received_data['warehouse_received_by'], self.user.pk)
+
+        # idempotent call
+        response = self.client.post(receive_url, {}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        received_again = response.json()['data']
+        self.assertEqual(received_data['warehouse_received_at'], received_again['warehouse_received_at'])
+
+        response = self.client.get(
+            list_url,
+            {
+                'shipment_date_from': '2024-06-01',
+                'shipment_date_to': '2024-06-30',
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertGreaterEqual(len(response.json()['data']), 1)
+
+        response = self.client.get(list_url, {'logistics_state': ['null']})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()['data']), 0)
 
     def test_cannot_create_order_when_stock_is_insufficient(self):
         self.product.available_stock_qty = 1
