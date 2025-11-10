@@ -320,13 +320,17 @@ class Product(Date):
         default=False,
     )
 
-    setup_install_minutes = models.PositiveIntegerField(
+    setup_install_minutes = models.DecimalField(
         verbose_name='Монтаж, мин',
+        max_digits=12,
+        decimal_places=2,
         null=True,
         blank=True,
     )
-    setup_uninstall_minutes = models.PositiveIntegerField(
+    setup_uninstall_minutes = models.DecimalField(
         verbose_name='Демонтаж, мин',
+        max_digits=12,
+        decimal_places=2,
         null=True,
         blank=True,
     )
