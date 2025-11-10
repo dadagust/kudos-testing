@@ -144,13 +144,14 @@ class Command(BaseCommand):
 
         category = self._ensure_category(article['category_id'], categories)
 
-        product, was_created = Product.objects.get_or_create(
-            name=name,
-            defaults={'category': category},
-        )
-
-        if not was_created and product.category_id != category.id:
-            product.category = category
+        product = Product.objects.filter(name=name).first()
+        was_created = False
+        if product is None:
+            product = Product(name=name, category=category)
+            was_created = True
+        else:
+            if product.category_id != category.id:
+                product.category = category
 
         self._apply_product_data(
             product,
