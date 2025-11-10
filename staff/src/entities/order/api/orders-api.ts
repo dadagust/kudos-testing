@@ -1,15 +1,29 @@
 import { apiV1Client } from '@/shared/api/httpClient';
+import { ensureAbsoluteUrl } from '@/shared/lib/url';
 
 import {
   CreateOrderPayload,
   LogisticsState,
   OrderCalculationResponse,
+  OrderDetail,
   OrderDetailResponse,
   OrderListQuery,
   OrderListResponse,
+  OrderSummary,
   PaymentStatus,
   UpdateOrderPayload,
 } from '../model/types';
+
+const normalizeOrder = <T extends OrderSummary | OrderDetail>(order: T): T =>
+  ({
+    ...order,
+    items: order.items.map((item) => ({
+      ...item,
+      product: item.product
+        ? { ...item.product, thumbnail_url: ensureAbsoluteUrl(item.product.thumbnail_url) }
+        : null,
+    })),
+  }) as T;
 
 const buildListParams = (params: OrderListQuery) => {
   const searchParams = new URLSearchParams();
@@ -59,22 +73,24 @@ export const ordersApi = {
       params: buildListParams(params),
     });
 
-    return data;
+    return {
+      data: data.data.map((order) => normalizeOrder(order)),
+    };
   },
   details: async (orderId: number | string): Promise<OrderDetailResponse> => {
     const { data } = await apiV1Client.get<OrderDetailResponse>(`/orders/${orderId}/`);
-    return data;
+    return { data: normalizeOrder(data.data) };
   },
   create: async (payload: CreateOrderPayload): Promise<OrderDetailResponse> => {
     const { data } = await apiV1Client.post<OrderDetailResponse>('/orders/', payload);
-    return data;
+    return { data: normalizeOrder(data.data) };
   },
   update: async (
     orderId: number | string,
     payload: UpdateOrderPayload
   ): Promise<OrderDetailResponse> => {
     const { data } = await apiV1Client.put<OrderDetailResponse>(`/orders/${orderId}/`, payload);
-    return data;
+    return { data: normalizeOrder(data.data) };
   },
   calculateTotal: async (
     payload: CreateOrderPayload,
@@ -95,7 +111,7 @@ export const ordersApi = {
       `/orders/${orderId}/payment-status/`,
       { payment_status: paymentStatus }
     );
-    return data;
+    return { data: normalizeOrder(data.data) };
   },
   updateLogisticsState: async (
     orderId: number | string,
@@ -105,10 +121,10 @@ export const ordersApi = {
       `/orders/${orderId}/logistics-state/`,
       { logistics_state: logisticsState }
     );
-    return data;
+    return { data: normalizeOrder(data.data) };
   },
   receive: async (orderId: number | string): Promise<OrderDetailResponse> => {
     const { data } = await apiV1Client.post<OrderDetailResponse>(`/orders/${orderId}/receive/`, {});
-    return data;
+    return { data: normalizeOrder(data.data) };
   },
 };
