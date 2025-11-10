@@ -66,7 +66,7 @@ export default function LogisticsReceivingPage() {
 
       {isLoading ? (
         <div className={styles.stateRow}>
-          <Spinner size="lg" />
+          <Spinner />
         </div>
       ) : null}
 
@@ -111,8 +111,8 @@ export default function LogisticsReceivingPage() {
                       src={item.product.thumbnail_url}
                       alt={item.product.name}
                       className={styles.itemImage}
-                      width={48}
-                      height={48}
+                      width={120}
+                      height={120}
                       unoptimized
                     />
                   ) : null}
@@ -130,7 +130,7 @@ export default function LogisticsReceivingPage() {
       </div>
       {isFetching && !isLoading ? (
         <div className={styles.stateRow}>
-          <Spinner size="sm" />
+          <Spinner />
         </div>
       ) : null}
     </section>

@@ -233,7 +233,7 @@ export default function LogisticsPrepPage() {
 
       {isLoading ? (
         <div className={styles.stateRow}>
-          <Spinner size="lg" />
+          <Spinner />
         </div>
       ) : null}
 
@@ -249,7 +249,7 @@ export default function LogisticsPrepPage() {
             actions={
               <div className={styles.groupActions}>
                 <Tag tone="info">{group.items.length}</Tag>
-                {isFetching ? <Spinner size="sm" /> : null}
+                {isFetching ? <Spinner /> : null}
               </div>
             }
           >
@@ -298,8 +298,8 @@ export default function LogisticsPrepPage() {
                               src={item.product.thumbnail_url}
                               alt={item.product.name}
                               className={styles.itemImage}
-                              width={48}
-                              height={48}
+                              width={120}
+                              height={120}
                               unoptimized
                             />
                           ) : null}

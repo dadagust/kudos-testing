@@ -178,7 +178,6 @@ class OrderSummarySerializer(serializers.ModelSerializer):
         read_only=True,
     )
     is_warehouse_received = serializers.BooleanField(
-        source='is_warehouse_received',
         read_only=True,
     )
     items = OrderItemSerializer(many=True, read_only=True)
