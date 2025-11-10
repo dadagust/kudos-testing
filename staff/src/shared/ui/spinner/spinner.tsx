@@ -5,16 +5,27 @@ import { FC } from 'react';
 
 import styles from './spinner.module.sass';
 
+const SIZE_MAP = {
+  sm: 16,
+  md: 32,
+  lg: 48,
+} as const;
+
+type SpinnerSize = keyof typeof SIZE_MAP;
+
 interface SpinnerProps {
   label?: string;
   className?: string;
   fullscreen?: boolean;
+  size?: SpinnerSize;
 }
 
-export const Spinner: FC<SpinnerProps> = ({ label, className, fullscreen }) => {
+export const Spinner: FC<SpinnerProps> = ({ label, className, fullscreen, size = 'md' }) => {
+  const dimension = SIZE_MAP[size];
+
   const content = (
     <div className={clsx(styles.spinner, className)}>
-      <svg width={32} height={32} viewBox="0 0 24 24">
+      <svg width={dimension} height={dimension} viewBox="0 0 24 24">
         <circle
           cx="12"
           cy="12"

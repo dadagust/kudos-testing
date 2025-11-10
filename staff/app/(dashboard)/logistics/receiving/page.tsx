@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
+import type { OrderListQuery } from '@/entities/order';
 import { LOGISTICS_STATE_LABELS, ordersApi, useOrdersQuery } from '@/entities/order';
 import { formatDateDisplay } from '@/shared/lib/date';
 import { Button, FormField, Input, Spinner } from '@/shared/ui';
@@ -16,9 +17,9 @@ export default function LogisticsReceivingPage() {
   const [dateTo, setDateTo] = useState('');
   const [search, setSearch] = useState('');
 
-  const query = useMemo(
+  const query = useMemo<OrderListQuery>(
     () => ({
-      logistics_state: ['shipped'] as const,
+      logistics_state: ['shipped'],
       shipment_date_from: dateFrom || undefined,
       shipment_date_to: dateTo || undefined,
       q: search.trim() || undefined,
