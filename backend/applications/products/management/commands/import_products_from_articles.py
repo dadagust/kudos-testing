@@ -183,12 +183,19 @@ class Command(BaseCommand):
         return product, was_created
 
     def _ensure_category(
-        self, category_id: int, categories: dict[int, str]
+        self, category_id: int | None, categories: dict[int, str]
     ) -> Category:
-        try:
-            category_name = categories[int(category_id)]
-        except KeyError as exc:  # pragma: no cover - защитный код
-            raise CommandError(f'Не найдена категория с id={category_id}') from exc
+        if category_id is None:
+            category_name = 'Без категории'
+        else:
+            try:
+                category_name = categories[int(category_id)]
+            except (TypeError, ValueError):
+                raise CommandError(
+                    f'Некорректный идентификатор категории: {category_id!r}'
+                ) from None
+            except KeyError as exc:  # pragma: no cover - защитный код
+                raise CommandError(f'Не найдена категория с id={category_id}') from exc
 
         slug = make_slug(category_name)
         category, _ = Category.objects.get_or_create(
