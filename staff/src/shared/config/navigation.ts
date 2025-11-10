@@ -32,6 +32,13 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     permission: 'adminpanel_view_orders',
   },
   {
+    id: 'logistics',
+    label: 'Логистика',
+    href: '/logistics/prep',
+    icon: 'inventory',
+    permission: 'adminpanel_view_logistics',
+  },
+  {
     id: 'customers',
     label: 'Клиенты',
     href: '/customers',

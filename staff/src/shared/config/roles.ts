@@ -43,6 +43,7 @@ export const ADMIN_SECTIONS = [
   'dashboard',
   'products',
   'orders',
+  'logistics',
   'customers',
   'inventory',
   'documents',

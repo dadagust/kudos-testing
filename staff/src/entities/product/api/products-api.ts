@@ -1,4 +1,5 @@
-import { apiV1Client, API_ROOT } from '@/shared/api/httpClient';
+import { apiV1Client } from '@/shared/api/httpClient';
+import { ensureAbsoluteUrl, makeAbsoluteUrl } from '@/shared/lib/url';
 
 import {
   ProductCategoriesResponseItem,
@@ -31,20 +32,6 @@ const sanitizeParams = (params: ProductListQuery): Record<string, string | numbe
     result[key] = value as string | number | boolean;
   });
   return result;
-};
-
-const makeAbsoluteUrl = (url: string) => {
-  if (/^https?:\/\//i.test(url)) {
-    return url;
-  }
-  return `${API_ROOT}${url.startsWith('/') ? '' : '/'}${url}`;
-};
-
-const ensureAbsoluteUrl = (url: string | null | undefined): string | null | undefined => {
-  if (url === undefined || url === null) {
-    return url;
-  }
-  return makeAbsoluteUrl(url);
 };
 
 const normalizeImages = (images: ProductImage[]): ProductImage[] =>

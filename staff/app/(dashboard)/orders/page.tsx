@@ -20,6 +20,8 @@ import {
   CustomerSummary,
   DeliveryType,
   ORDER_STATUS_LABELS,
+  PAYMENT_STATUS_LABELS,
+  PaymentStatus,
   ordersApi,
   OrderStatus,
   OrderStatusGroup,
@@ -52,6 +54,7 @@ type CustomerOption = CustomerSummary | CustomerEntitySummary;
 
 type OrderFormState = {
   status: OrderStatus;
+  payment_status: PaymentStatus;
   installation_date: string;
   dismantle_date: string;
   customer: CustomerOption | null;
@@ -92,6 +95,12 @@ const STATUS_TAG_TONES: Record<OrderStatus, 'default' | 'info' | 'success' | 'wa
     archived: 'default',
     declined: 'danger',
   };
+
+const PAYMENT_TAG_TONES: Record<PaymentStatus, 'success' | 'warning' | 'danger'> = {
+  paid: 'success',
+  unpaid: 'danger',
+  partially_paid: 'warning',
+};
 
 const ERROR_FIELD_LABELS: Record<string, string | null> = {
   status: 'Статус',
@@ -279,6 +288,7 @@ const formatDate = (value: string) => {
 
 const createInitialFormState = (): OrderFormState => ({
   status: 'new',
+  payment_status: 'unpaid',
   installation_date: '',
   dismantle_date: '',
   customer: null,
@@ -392,6 +402,11 @@ const OrderFormContent = ({
     setForm((prev) => ({ ...prev, status: value }));
   };
 
+  const handlePaymentStatusChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value as PaymentStatus;
+    setForm((prev) => ({ ...prev, payment_status: value }));
+  };
+
   const handleInstallationDateChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
     setForm((prev) => ({ ...prev, installation_date: value }));
@@ -473,6 +488,17 @@ const OrderFormContent = ({
           {Object.entries(ORDER_STATUS_LABELS).map(([key, label]) => (
             <option key={key} value={key}>
               {label}
+            </option>
+          ))}
+        </Select>
+        <Select
+          label="Статус оплаты"
+          value={form.payment_status}
+          onChange={handlePaymentStatusChange}
+        >
+          {(Object.keys(PAYMENT_STATUS_LABELS) as PaymentStatus[]).map((status) => (
+            <option key={status} value={status}>
+              {PAYMENT_STATUS_LABELS[status]}
             </option>
           ))}
         </Select>
@@ -836,6 +862,7 @@ export default function OrdersPage() {
     const rentalDays = calculateRentalDays(form.installation_date, form.dismantle_date) ?? 1;
     return {
       status: form.status,
+      payment_status: form.payment_status,
       installation_date: toServerDateValue(form.installation_date),
       dismantle_date: toServerDateValue(form.dismantle_date),
       customer_id: form.customer?.id ?? null,
@@ -923,6 +950,7 @@ export default function OrdersPage() {
       });
       setEditForm({
         status: order.status,
+        payment_status: order.payment_status,
         installation_date: toDateInputValue(order.installation_date),
         dismantle_date: toDateInputValue(order.dismantle_date),
         customer: order.customer,
@@ -1335,6 +1363,15 @@ export default function OrdersPage() {
         key: 'status',
         header: 'Статус',
         render: (row) => <Tag tone={STATUS_TAG_TONES[row.status]}>{row.status_label}</Tag>,
+      },
+      {
+        key: 'payment_status',
+        header: 'Оплата',
+        render: (row) => (
+          <Tag tone={PAYMENT_TAG_TONES[row.payment_status]}>
+            {PAYMENT_STATUS_LABELS[row.payment_status]}
+          </Tag>
+        ),
       },
       {
         key: 'total_amount',
