@@ -443,7 +443,9 @@ class OrderWriteSerializer(serializers.ModelSerializer):
             reserve_stock=order.status != OrderStatus.DECLINED,
         )
         if return_items_data:
-            setattr(order, '_return_quantities', self._build_return_quantities(order, return_items_data))
+            setattr(
+                order, '_return_quantities', self._build_return_quantities(order, return_items_data)
+            )
         ensure_order_stock_transactions(
             order,
             return_quantities=getattr(order, '_return_quantities', None),
@@ -473,7 +475,11 @@ class OrderWriteSerializer(serializers.ModelSerializer):
                 reserve_stock=new_status != OrderStatus.DECLINED,
             )
         if return_items_data is not None:
-            setattr(instance, '_return_quantities', self._build_return_quantities(instance, return_items_data))
+            setattr(
+                instance,
+                '_return_quantities',
+                self._build_return_quantities(instance, return_items_data),
+            )
         elif hasattr(instance, '_return_quantities'):
             delattr(instance, '_return_quantities')
         ensure_order_stock_transactions(

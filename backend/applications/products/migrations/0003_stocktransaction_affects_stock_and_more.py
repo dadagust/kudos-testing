@@ -6,55 +6,54 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ("orders", "0002_order_services_total_amount"),
-        ("products", "0002_stocktransaction_created_by_and_more"),
+        ('orders', '0002_order_services_total_amount'),
+        ('products', '0002_stocktransaction_created_by_and_more'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name="stocktransaction",
-            name="affects_stock",
+            model_name='stocktransaction',
+            name='affects_stock',
             field=models.BooleanField(
                 default=True,
-                help_text="Если выключено, фактический складской остаток не изменится.",
-                verbose_name="Влияет на складской остаток",
+                help_text='Если выключено, фактический складской остаток не изменится.',
+                verbose_name='Влияет на складской остаток',
             ),
         ),
         migrations.AddField(
-            model_name="stocktransaction",
-            name="order",
+            model_name='stocktransaction',
+            name='order',
             field=models.ForeignKey(
                 blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                related_name="stock_transactions",
-                to="orders.order",
-                verbose_name="Заказ",
+                related_name='stock_transactions',
+                to='orders.order',
+                verbose_name='Заказ',
             ),
         ),
         migrations.AddField(
-            model_name="stocktransaction",
-            name="order_transaction_type",
+            model_name='stocktransaction',
+            name='order_transaction_type',
             field=models.CharField(
                 blank=True,
                 choices=[
-                    ("reservation", "Резервирование заказа"),
-                    ("issue", "Списание по заказу"),
-                    ("return", "Возврат по заказу"),
+                    ('reservation', 'Резервирование заказа'),
+                    ('issue', 'Списание по заказу'),
+                    ('return', 'Возврат по заказу'),
                 ],
                 max_length=32,
                 null=True,
-                verbose_name="Тип транзакции заказа",
+                verbose_name='Тип транзакции заказа',
             ),
         ),
         migrations.AddConstraint(
-            model_name="stocktransaction",
+            model_name='stocktransaction',
             constraint=models.UniqueConstraint(
-                fields=("order", "order_transaction_type", "product"),
-                name="unique_order_transaction_per_product",
+                fields=('order', 'order_transaction_type', 'product'),
+                name='unique_order_transaction_per_product',
             ),
         ),
     ]

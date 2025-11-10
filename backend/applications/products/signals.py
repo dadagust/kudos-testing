@@ -55,11 +55,11 @@ def store_previous_transaction_state(sender, instance: StockTransaction, **_) ->
         if previous is not None:
             previous_product_id = previous.product_id
             previous_stock_change, previous_available_change = _calculate_contribution(
-            previous.quantity_delta,
-            previous.affects_available,
-            getattr(previous, 'affects_stock', True),
-            previous.is_applied,
-        )
+                previous.quantity_delta,
+                previous.affects_available,
+                getattr(previous, 'affects_stock', True),
+                previous.is_applied,
+            )
 
     instance._previous_stock_change = previous_stock_change  # type: ignore[attr-defined]
     instance._previous_available_change = previous_available_change  # type: ignore[attr-defined]

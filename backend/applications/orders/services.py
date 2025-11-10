@@ -104,8 +104,7 @@ def ensure_order_stock_transactions(
         if return_quantities is None:
             raise ValueError('Return quantities must be provided for archived orders.')
         normalized_returns = {
-            product_id: return_quantities.get(product_id, 0)
-            for product_id in product_totals.keys()
+            product_id: return_quantities.get(product_id, 0) for product_id in product_totals.keys()
         }
         _sync_transaction_group(
             order,
@@ -190,15 +189,11 @@ def _sync_transaction_group(
         transaction.delete()
 
 
-def _delete_transaction_group(
-    order: Order, transaction_type: OrderStockTransactionType
-) -> None:
+def _delete_transaction_group(order: Order, transaction_type: OrderStockTransactionType) -> None:
     StockTransaction.objects.filter(order=order, order_transaction_type=transaction_type).delete()
 
 
-def _cleanup_orphan_transactions(
-    order: Order, products: dict[UUID, Product]
-) -> None:
+def _cleanup_orphan_transactions(order: Order, products: dict[UUID, Product]) -> None:
     """Remove order transactions that reference products no longer in the order."""
 
     valid_product_ids = set(products.keys())

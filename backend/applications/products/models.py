@@ -584,6 +584,7 @@ class StockTransaction(Date):
                 self.created_by_name = display_name
         super().save(*args, **kwargs)
 
+
 class ProductImage(Date):
     """Image for a product with explicit order."""
 

@@ -17,7 +17,7 @@ from .serializers import (
     OrderSummarySerializer,
     OrderWriteSerializer,
 )
-from .services import collect_order_item_totals, reset_order_transactions
+from .services import reset_order_transactions
 
 
 class OrderViewSet(viewsets.ModelViewSet):
