@@ -15,6 +15,7 @@ interface LogisticsLayoutProps {
 const TABS = [
   { href: '/logistics/prep', label: 'Подготовка заказа' },
   { href: '/logistics/receiving', label: 'Приёмка' },
+  { href: '/logistics/routes', label: 'Маршруты' },
 ];
 
 export default function LogisticsLayout({ children }: LogisticsLayoutProps) {

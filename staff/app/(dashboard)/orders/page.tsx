@@ -34,6 +34,7 @@ import {
 } from '@/entities/order';
 import { ProductListItem, productsApi, useInfiniteProductsQuery } from '@/entities/product';
 import { RoleGuard, usePermission } from '@/features/auth';
+import { YandexAddressInput, AddressValidationInfo } from '@/features/yandex-address-input';
 import { formatDateDisplay, toDateInputValue, toServerDateValue } from '@/shared/lib/date';
 import type { TableColumn } from '@/shared/ui';
 import {
@@ -49,8 +50,21 @@ import {
   Table,
   Tag,
 } from '@/shared/ui';
+import { YandexGeocodeResult } from '@/shared/api/yandexMaps';
 
 type CustomerOption = CustomerSummary | CustomerEntitySummary;
+
+type OrderAddressState = {
+  normalized: string;
+  lat: number | null;
+  lon: number | null;
+  kind: string;
+  precision: string;
+  uri: string;
+  exact: boolean;
+  validationStatus: AddressValidationInfo['status'];
+  needsServerValidation: boolean;
+};
 
 type OrderFormState = {
   status: OrderStatus;
@@ -60,6 +74,7 @@ type OrderFormState = {
   customer: CustomerOption | null;
   delivery_type: DeliveryType;
   delivery_address: string;
+  address: OrderAddressState;
   comment: string;
   productQuantities: Record<string, number>;
 };
@@ -286,6 +301,18 @@ const formatDate = (value: string) => {
   return formatted ?? value;
 };
 
+const createInitialAddressState = (): OrderAddressState => ({
+  normalized: '',
+  lat: null,
+  lon: null,
+  kind: '',
+  precision: '',
+  uri: '',
+  exact: false,
+  validationStatus: 'idle',
+  needsServerValidation: false,
+});
+
 const createInitialFormState = (): OrderFormState => ({
   status: 'new',
   payment_status: 'unpaid',
@@ -294,6 +321,7 @@ const createInitialFormState = (): OrderFormState => ({
   customer: null,
   delivery_type: 'delivery',
   delivery_address: '',
+  address: createInitialAddressState(),
   comment: '',
   productQuantities: {},
 });
@@ -419,16 +447,106 @@ const OrderFormContent = ({
 
   const handleDeliveryTypeChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value as DeliveryType;
-    setForm((prev) => ({
-      ...prev,
-      delivery_type: value,
-      delivery_address: value === 'pickup' ? '' : prev.delivery_address,
-    }));
+    setForm((prev) => {
+      if (value === 'pickup') {
+        return {
+          ...prev,
+          delivery_type: value,
+          delivery_address: '',
+          address: createInitialAddressState(),
+        };
+      }
+      const trimmed = prev.delivery_address.trim();
+      return {
+        ...prev,
+        delivery_type: value,
+        address: {
+          ...prev.address,
+          needsServerValidation: trimmed.length > 0 ? prev.address.needsServerValidation : false,
+        },
+      };
+    });
   };
 
-  const handleDeliveryAddressChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { value } = event.target;
-    setForm((prev) => ({ ...prev, delivery_address: value }));
+  const handleAddressInputChange = (nextValue: string) => {
+    setForm((prev) => {
+      if (prev.delivery_type === 'pickup') {
+        return {
+          ...prev,
+          delivery_address: '',
+          address: createInitialAddressState(),
+        };
+      }
+      const trimmed = nextValue.trim();
+      return {
+        ...prev,
+        delivery_address: nextValue,
+        address: {
+          ...createInitialAddressState(),
+          validationStatus: 'idle',
+          needsServerValidation: trimmed.length > 0,
+        },
+      };
+    });
+  };
+
+  const handleAddressValidationChange = ({
+    state,
+    geocode,
+  }: {
+    state: AddressValidationInfo;
+    geocode?: YandexGeocodeResult | null;
+  }) => {
+    setForm((prev) => {
+      if (prev.delivery_type === 'pickup') {
+        return prev;
+      }
+      if (state.status === 'pending') {
+        return {
+          ...prev,
+          address: {
+            ...prev.address,
+            validationStatus: 'pending',
+            needsServerValidation: true,
+          },
+        };
+      }
+      if (state.status === 'validated' && geocode) {
+        return {
+          ...prev,
+          address: {
+            normalized: geocode.normalized,
+            lat: geocode.lat,
+            lon: geocode.lon,
+            kind: geocode.kind,
+            precision: geocode.precision,
+            uri: geocode.uri,
+            exact: geocode.kind === 'house' && geocode.precision === 'exact',
+            validationStatus: 'validated',
+            needsServerValidation: true,
+          },
+        };
+      }
+      if (state.status === 'error') {
+        return {
+          ...prev,
+          address: {
+            ...createInitialAddressState(),
+            validationStatus: 'error',
+            needsServerValidation: false,
+          },
+        };
+      }
+      const trimmed = prev.delivery_address.trim();
+      return {
+        ...prev,
+        address: {
+          ...createInitialAddressState(),
+          validationStatus: 'idle',
+          needsServerValidation: trimmed.length > 0,
+        },
+      };
+    });
   };
 
   const handleCommentChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
@@ -521,12 +639,20 @@ const OrderFormContent = ({
           <option value="pickup">Самовывоз</option>
         </Select>
         {form.delivery_type === 'delivery' ? (
-          <Input
+          <YandexAddressInput
             label="Адрес доставки"
             placeholder="Город, улица, дом"
             value={form.delivery_address}
-            onChange={handleDeliveryAddressChange}
+            onChange={handleAddressInputChange}
+            onValidationChange={handleAddressValidationChange}
             required
+            helperText={
+              form.address.validationStatus === 'validated' && form.address.normalized
+                ? `Адрес подтверждён: ${form.address.normalized}`
+                : form.address.normalized
+                ? `Последняя проверка: ${form.address.normalized}`
+                : 'Введите адрес и выберите подсказку.'
+            }
           />
         ) : null}
       </div>
@@ -778,6 +904,11 @@ export default function OrdersPage() {
     orderId: number;
     payload: UpdateOrderPayload;
     items: ReturnItem[];
+    addressContext: {
+      deliveryType: DeliveryType;
+      input: string;
+      needsServerValidation: boolean;
+    };
   } | null>(null);
   const [returnQuantities, setReturnQuantities] = useState<Record<string, string>>({});
   const [returnModalError, setReturnModalError] = useState<string | null>(null);
@@ -955,7 +1086,20 @@ export default function OrdersPage() {
         dismantle_date: toDateInputValue(order.dismantle_date),
         customer: order.customer,
         delivery_type: order.delivery_type,
-        delivery_address: order.delivery_address ?? '',
+        delivery_address:
+          order.delivery_address_input || order.delivery_address_full || order.delivery_address || '',
+        address: {
+          normalized: order.delivery_address_full ?? '',
+          lat: order.delivery_lat ?? null,
+          lon: order.delivery_lon ?? null,
+          kind: order.delivery_address_kind ?? '',
+          precision: order.delivery_address_precision ?? '',
+          uri: order.yandex_uri ?? '',
+          exact: order.has_exact_address ?? false,
+          validationStatus:
+            order.delivery_lat !== null && order.delivery_lon !== null ? 'validated' : 'idle',
+          needsServerValidation: false,
+        },
         comment: order.comment ?? '',
         productQuantities: quantities,
       });
@@ -1134,6 +1278,9 @@ export default function OrdersPage() {
     if (form.delivery_type === 'delivery' && !form.delivery_address.trim()) {
       return 'Введите адрес доставки или выберите самовывоз.';
     }
+    if (form.delivery_type === 'delivery' && form.address.validationStatus === 'error') {
+      return 'Не удалось подтвердить адрес. Уточните адрес перед сохранением.';
+    }
     const hasItems = Object.values(form.productQuantities).some((quantity) => quantity > 0);
     if (!hasItems) {
       return 'Добавьте хотя бы один товар в заказ.';
@@ -1164,9 +1311,19 @@ export default function OrdersPage() {
       return;
     }
     setCreateError(null);
+    const formSnapshot = createForm;
     const payload = buildPayloadFromForm(createForm);
     createMutation.mutate(payload, {
-      onSuccess: () => {
+      onSuccess: async (response) => {
+        const orderId = response.data.id;
+        const addressInput = formSnapshot.delivery_address.trim();
+        if (formSnapshot.delivery_type === 'delivery' && addressInput) {
+          try {
+            await ordersApi.validateAddress(orderId, addressInput);
+          } catch (error_) {
+            console.error('Failed to validate address on server', error_);
+          }
+        }
         setIsCreateOpen(false);
         setCreateForm(createInitialFormState());
         setSuccessMessage('Заказ успешно создан. Список обновлён.');
@@ -1192,6 +1349,7 @@ export default function OrdersPage() {
       return;
     }
     setEditError(null);
+    const formSnapshot = editForm;
     const payload = buildPayloadFromForm(editForm);
 
     if (editForm.status === 'archived') {
@@ -1207,7 +1365,16 @@ export default function OrdersPage() {
           return acc;
         }, {});
         setReturnQuantities(initialQuantities);
-        setPendingReturn({ orderId: editOrderId, payload, items: returnItems });
+        setPendingReturn({
+          orderId: editOrderId,
+          payload,
+          items: returnItems,
+          addressContext: {
+            deliveryType: formSnapshot.delivery_type,
+            input: formSnapshot.delivery_address.trim(),
+            needsServerValidation: formSnapshot.address.needsServerValidation,
+          },
+        });
         setReturnModalError(null);
         setIsReturnModalOpen(true);
         return;
@@ -1220,7 +1387,19 @@ export default function OrdersPage() {
     updateMutation.mutate(
       { orderId: editOrderId, payload },
       {
-        onSuccess: () => {
+        onSuccess: async () => {
+          const addressInput = formSnapshot.delivery_address.trim();
+          if (
+            formSnapshot.delivery_type === 'delivery' &&
+            formSnapshot.address.needsServerValidation &&
+            addressInput
+          ) {
+            try {
+              await ordersApi.validateAddress(editOrderId, addressInput);
+            } catch (error_) {
+              console.error('Failed to validate address on server', error_);
+            }
+          }
           handleOrderUpdateSuccess();
         },
         onError: (mutationError) => {
@@ -1325,6 +1504,18 @@ export default function OrdersPage() {
           orderId: pendingReturn.orderId,
           payload: pendingReturn.payload,
         });
+        const { addressContext } = pendingReturn;
+        if (
+          addressContext.deliveryType === 'delivery' &&
+          addressContext.needsServerValidation &&
+          addressContext.input
+        ) {
+          try {
+            await ordersApi.validateAddress(pendingReturn.orderId, addressContext.input);
+          } catch (error_) {
+            console.error('Failed to validate address on server', error_);
+          }
+        }
         handleOrderUpdateSuccess();
         setIsReturnModalOpen(false);
         resetReturnModalState();
@@ -1397,7 +1588,25 @@ export default function OrdersPage() {
         key: 'delivery_address',
         header: 'Доставка',
         render: (row) =>
-          row.delivery_type === 'pickup' ? 'Самовывоз' : row.delivery_address || 'Адрес не указан',
+          row.delivery_type === 'pickup' ? (
+            'Самовывоз'
+          ) : (
+            <span style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <span>{row.delivery_address_full || row.delivery_address || 'Адрес не указан'}</span>
+              {row.delivery_lat !== null && row.delivery_lon !== null ? (
+                <span
+                  style={{
+                    fontSize: '0.75rem',
+                    color: row.has_exact_address
+                      ? 'var(--color-success)'
+                      : 'var(--color-warning)',
+                  }}
+                >
+                  {row.has_exact_address ? 'Адрес подтверждён' : 'Адрес требует уточнения'}
+                </span>
+              ) : null}
+            </span>
+          ),
       },
       {
         key: 'comment',
