@@ -106,8 +106,14 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         order_query = params.get('q')
         if order_query:
-            queryset = queryset.annotate(number_str=Cast('pk', output_field=models.CharField()))
-            queryset = queryset.filter(number_str__icontains=order_query.strip())
+            normalized_order_query = order_query.strip()
+            if normalized_order_query:
+                queryset = queryset.annotate(number_str=Cast('pk', output_field=models.CharField()))
+                queryset = queryset.filter(
+                    Q(number_str__icontains=normalized_order_query)
+                    | Q(delivery_address__icontains=normalized_order_query)
+                    | Q(comment__icontains=normalized_order_query)
+                )
 
         search = params.get('search')
         if search:

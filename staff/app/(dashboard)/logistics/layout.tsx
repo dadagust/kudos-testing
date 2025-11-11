@@ -1,10 +1,10 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { ReactNode } from 'react';
 
 import { RoleGuard } from '@/features/auth';
+import { Button } from '@/shared/ui';
 
 import styles from './layout.module.sass';
 
@@ -19,6 +19,7 @@ const TABS = [
 
 export default function LogisticsLayout({ children }: LogisticsLayoutProps) {
   const pathname = usePathname();
+  const router = useRouter();
 
   return (
     <RoleGuard allow="adminpanel_view_logistics">
@@ -32,13 +33,17 @@ export default function LogisticsLayout({ children }: LogisticsLayoutProps) {
             {TABS.map((tab) => {
               const isActive = pathname?.startsWith(tab.href) ?? false;
               return (
-                <Link
+                <Button
                   key={tab.href}
-                  href={tab.href}
-                  className={isActive ? `${styles.tab} ${styles.tabActive}` : styles.tab}
+                  type="button"
+                  variant={isActive ? 'primary' : 'ghost'}
+                  className={styles.tabButton}
+                  onClick={() => {
+                    router.push(tab.href);
+                  }}
                 >
                   {tab.label}
-                </Link>
+                </Button>
               );
             })}
           </nav>

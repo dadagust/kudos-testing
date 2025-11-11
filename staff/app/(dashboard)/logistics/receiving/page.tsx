@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { FormEvent, useMemo, useState } from 'react';
 
 import type { OrderListQuery } from '@/entities/order';
 import { LOGISTICS_STATE_LABELS, ordersApi, useOrdersQuery } from '@/entities/order';
@@ -15,16 +15,28 @@ import styles from './receiving.module.sass';
 export default function LogisticsReceivingPage() {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
-  const [search, setSearch] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSearchTerm(searchInput.trim());
+  };
+
+  const handleResetSearch = () => {
+    setSearchInput('');
+    setSearchTerm('');
+  };
 
   const query = useMemo<OrderListQuery>(
     () => ({
       logistics_state: ['shipped'],
       shipment_date_from: dateFrom || undefined,
       shipment_date_to: dateTo || undefined,
-      q: search.trim() || undefined,
+      search: searchTerm || undefined,
+      q: searchTerm || undefined,
     }),
-    [dateFrom, dateTo, search]
+    [dateFrom, dateTo, searchTerm]
   );
 
   const { data, isLoading, isFetching } = useOrdersQuery(query);
@@ -55,13 +67,18 @@ export default function LogisticsReceivingPage() {
         <FormField label="По">
           <Input type="date" value={dateTo} onChange={(event) => setDateTo(event.target.value)} />
         </FormField>
-        <FormField label="Поиск по номеру">
+        <form className={styles.searchForm} onSubmit={handleSearchSubmit}>
           <Input
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Например, 2048"
+            value={searchInput}
+            onChange={(event) => setSearchInput(event.target.value)}
+            placeholder="Поиск по адресу или комментарию"
+            className={styles.searchInput}
           />
-        </FormField>
+          <Button type="submit">Найти</Button>
+          <Button type="button" variant="ghost" onClick={handleResetSearch}>
+            Сбросить
+          </Button>
+        </form>
       </div>
 
       {isLoading ? (
