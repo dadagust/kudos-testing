@@ -23,6 +23,7 @@ SECRET_KEY = env('DJANGO_SECRET_KEY', default='change-me')
 DEBUG = env.bool('DJANGO_DEBUG', default=False)
 ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS', default=['localhost'])
 YANDEX_MAPS_SECRET = env('YANDEX_MAPS_SECRET', default=[''])
+GEOSUGGEST_KEY = env('GEOSUGGEST_KEY', default=[''])
 
 DATABASES = {
     'default': {
