@@ -1,8 +1,8 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import clsx from 'clsx';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 
 import { OrdersWithCoordsResponse, ordersApi } from '@/entities/order';
 import { Alert, Button, Spinner, Tag } from '@/shared/ui';
@@ -12,37 +12,96 @@ import styles from './routes.module.sass';
 const YANDEX_MAPS_KEY =
   process.env.NEXT_PUBLIC_YANDEX_MAPS_KEY ?? process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY ?? '';
 
+type Coordinates = [number, number];
+
+const toCoordinates = (lon: number, lat: number): Coordinates => [lon, lat];
+
+interface YMapLocation {
+  center: Coordinates;
+  zoom: number;
+}
+
+interface YMapChild {
+  destroy?: () => void;
+}
+
+interface YMapInstance {
+  addChild(child: YMapChild): void;
+  removeChild(child: YMapChild): void;
+  destroy(): void;
+  setLocation?(location: YMapLocation): void;
+  setBounds?(
+    bounds: [Coordinates, Coordinates],
+    options?: { duration?: number; padding?: number | number[] }
+  ): void;
+  update?(payload: { location?: YMapLocation }): void;
+}
+
+interface YMapMarkerInstance extends YMapChild {}
+
+interface YMapMarkerConstructor {
+  new (options: { coordinates: Coordinates }, element: HTMLElement): YMapMarkerInstance;
+}
+
+interface YMaps3Global {
+  ready: PromiseLike<unknown>;
+  YMap: new (container: HTMLElement, options: { location: YMapLocation }) => YMapInstance;
+  YMapDefaultSchemeLayer: new () => YMapChild;
+  YMapDefaultFeaturesLayer: new () => YMapChild;
+  YMapMarker: YMapMarkerConstructor;
+}
+
 declare global {
   interface Window {
-    ymaps3?: any;
+    ymaps3?: YMaps3Global;
   }
 }
 
-let ymapsPromise: Promise<any> | null = null;
+let ymapsPromise: Promise<YMaps3Global> | null = null;
 
-const loadYandexMaps = () => {
+const loadYandexMaps = (): Promise<YMaps3Global> => {
   if (typeof window === 'undefined') {
     return Promise.reject(new Error('Окружение без доступа к window.'));
   }
   if (window.ymaps3) {
-    return window.ymaps3.ready.then(() => window.ymaps3);
+    const ymaps = window.ymaps3;
+    return Promise.resolve(ymaps.ready).then(
+      () => ymaps,
+      (error) => {
+        window.ymaps3 = undefined;
+        ymapsPromise = null;
+        return Promise.reject(error);
+      }
+    );
   }
   if (!YANDEX_MAPS_KEY) {
     return Promise.reject(new Error('Переменная NEXT_PUBLIC_YANDEX_MAPS_KEY не задана.'));
   }
   if (!ymapsPromise) {
-    ymapsPromise = new Promise((resolve, reject) => {
+    ymapsPromise = new Promise<YMaps3Global>((resolve, reject) => {
       const script = document.createElement('script');
       script.src = `https://api-maps.yandex.ru/v3/?apikey=${YANDEX_MAPS_KEY}&lang=ru_RU`;
       script.async = true;
       script.onload = () => {
-        if (!window.ymaps3) {
+        const ymaps = window.ymaps3;
+        if (!ymaps) {
+          ymapsPromise = null;
           reject(new Error('API Яндекс Карт недоступно.'));
           return;
         }
-        window.ymaps3.ready.then(() => resolve(window.ymaps3)).catch(reject);
+        Promise.resolve(ymaps.ready).then(
+          () => resolve(ymaps),
+          (error) => {
+            window.ymaps3 = undefined;
+            ymapsPromise = null;
+            reject(error);
+          }
+        );
       };
-      script.onerror = () => reject(new Error('Не удалось загрузить скрипт Яндекс Карт.'));
+      script.onerror = () => {
+        ymapsPromise = null;
+        reject(new Error('Не удалось загрузить скрипт Яндекс Карт.'));
+      };
       document.head.appendChild(script);
     });
   }
@@ -50,14 +109,17 @@ const loadYandexMaps = () => {
 };
 
 interface MarkerRecord {
-  marker: any;
+  marker: YMapMarkerInstance;
   element: HTMLElement;
   handleClick: () => void;
 }
 
 export default function LogisticsRoutesPage() {
   const mapRef = useRef<HTMLDivElement | null>(null);
-  const mapInstanceRef = useRef<{ map: any; YMapMarker: any } | null>(null);
+  const mapInstanceRef = useRef<{
+    map: YMapInstance;
+    YMapMarker: YMapMarkerConstructor;
+  } | null>(null);
   const markersRef = useRef<Map<number, MarkerRecord>>(new Map());
   const [mapError, setMapError] = useState<string | null>(null);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
@@ -69,7 +131,7 @@ export default function LogisticsRoutesPage() {
       staleTime: 60_000,
     });
 
-  const orders = data?.items ?? [];
+  const orders = useMemo(() => data?.items ?? [], [data]);
   const selectedOrder = useMemo(
     () => orders.find((item) => item.id === selectedOrderId) ?? null,
     [orders, selectedOrderId]
@@ -87,6 +149,7 @@ export default function LogisticsRoutesPage() {
 
   useEffect(() => {
     let cancelled = false;
+    const markersMap = markersRef.current;
 
     loadYandexMaps()
       .then((ymaps3) => {
@@ -96,7 +159,7 @@ export default function LogisticsRoutesPage() {
         const { YMap, YMapDefaultSchemeLayer, YMapDefaultFeaturesLayer, YMapMarker } = ymaps3;
         const map = new YMap(mapRef.current, {
           location: {
-            center: [37.6176, 55.7558],
+            center: toCoordinates(37.6176, 55.7558),
             zoom: 9,
           },
         });
@@ -115,7 +178,7 @@ export default function LogisticsRoutesPage() {
 
     return () => {
       cancelled = true;
-      markersRef.current.forEach(({ marker, element, handleClick }) => {
+      markersMap.forEach(({ marker, element, handleClick }) => {
         try {
           marker && mapInstanceRef.current?.map?.removeChild?.(marker);
         } catch (error_) {
@@ -123,7 +186,7 @@ export default function LogisticsRoutesPage() {
         }
         element.removeEventListener('click', handleClick);
       });
-      markersRef.current.clear();
+      markersMap.clear();
       if (mapInstanceRef.current?.map) {
         mapInstanceRef.current.map.destroy();
       }
@@ -158,14 +221,14 @@ export default function LogisticsRoutesPage() {
       element.innerHTML = `<span>${order.id}</span>`;
       const handleClick = () => setSelectedOrderId(order.id);
       element.addEventListener('click', handleClick);
-      const marker = new YMapMarker({ coordinates: [order.lon, order.lat] }, element);
+      const marker = new YMapMarker({ coordinates: toCoordinates(order.lon, order.lat) }, element);
       map.addChild(marker);
       markersRef.current.set(order.id, { marker, element, handleClick });
     });
 
     if (orders.length === 1) {
       const [order] = orders;
-      const location = { center: [order.lon, order.lat], zoom: 12 };
+      const location: YMapLocation = { center: toCoordinates(order.lon, order.lat), zoom: 12 };
       if (typeof map.setLocation === 'function') {
         map.setLocation(location);
       } else {
@@ -179,16 +242,13 @@ export default function LogisticsRoutesPage() {
       const minLat = Math.min(...lats);
       const maxLat = Math.max(...lats);
       if (typeof map.setBounds === 'function') {
-        map.setBounds(
-          [
-            [minLon, minLat],
-            [maxLon, maxLat],
-          ],
-          { duration: 400, padding: 48 }
-        );
+        map.setBounds([toCoordinates(minLon, minLat), toCoordinates(maxLon, maxLat)], {
+          duration: 400,
+          padding: 48,
+        });
       } else {
         const location = {
-          center: [(minLon + maxLon) / 2, (minLat + maxLat) / 2],
+          center: toCoordinates((minLon + maxLon) / 2, (minLat + maxLat) / 2),
           zoom: 10,
         };
         if (typeof map.setLocation === 'function') {
@@ -206,8 +266,8 @@ export default function LogisticsRoutesPage() {
       return;
     }
     const { map } = instance;
-    const location = {
-      center: [selectedOrder.lon, selectedOrder.lat],
+    const location: YMapLocation = {
+      center: toCoordinates(selectedOrder.lon, selectedOrder.lat),
       zoom: 12,
     };
     if (typeof map.setLocation === 'function') {

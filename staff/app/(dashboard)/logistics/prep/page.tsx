@@ -165,15 +165,6 @@ export default function LogisticsPrepPage() {
     );
   };
 
-  const resetFilters = () => {
-    setPaymentFilters([]);
-    setLogisticsFilters([]);
-    setDateFrom('');
-    setDateTo('');
-    handleResetSearch();
-    void refetch();
-  };
-
   return (
     <section className={styles.wrapper}>
       <div className={styles.filters}>

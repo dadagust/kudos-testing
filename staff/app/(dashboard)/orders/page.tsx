@@ -35,6 +35,7 @@ import {
 import { ProductListItem, productsApi, useInfiniteProductsQuery } from '@/entities/product';
 import { RoleGuard, usePermission } from '@/features/auth';
 import { YandexAddressInput, AddressValidationInfo } from '@/features/yandex-address-input';
+import { YandexGeocodeResult } from '@/shared/api/yandexMaps';
 import { formatDateDisplay, toDateInputValue, toServerDateValue } from '@/shared/lib/date';
 import type { TableColumn } from '@/shared/ui';
 import {

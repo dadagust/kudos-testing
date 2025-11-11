@@ -3,13 +3,13 @@
 import clsx from 'clsx';
 import { ChangeEvent, FocusEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { Input, Spinner } from '@/shared/ui';
 import {
   YandexGeocodeResult,
   YandexSuggestItem,
   fetchAddressSuggestions,
   geocodeAddress,
 } from '@/shared/api/yandexMaps';
+import { Input, Spinner } from '@/shared/ui';
 
 import styles from './yandex-address-input.module.sass';
 

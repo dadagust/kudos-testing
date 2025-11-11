@@ -42,29 +42,43 @@ export const fetchAddressSuggestions = async (
     return [];
   }
   const payload = await response.json();
-  const results: any[] = payload?.results ?? [];
-  return results
-    .map((item) => {
-      const rawTitle: SuggestRawTitle | string = item?.title ?? '';
-      const rawSubtitle: SuggestRawTitle | string | undefined = item?.subtitle;
-      const rawAddress: SuggestRawAddress | undefined = item?.address;
-      const title = typeof rawTitle === 'string' ? rawTitle : (rawTitle?.text ?? '');
-      const subtitle =
-        typeof rawSubtitle === 'string' ? rawSubtitle : (rawSubtitle?.text ?? undefined);
-      const formatted = rawAddress?.formatted_address ?? rawAddress?.full_address ?? title;
-      const value = formatted || title;
-      const uri: string | undefined = typeof item?.uri === 'string' ? item.uri : undefined;
-      if (!value) {
-        return null;
-      }
-      return {
-        title: title || value,
-        subtitle,
-        value,
-        uri,
-      } satisfies YandexSuggestItem | null;
-    })
-    .filter((item): item is YandexSuggestItem => Boolean(item));
+  const rawResults = Array.isArray(payload?.results) ? (payload.results as unknown[]) : [];
+  const suggestions: YandexSuggestItem[] = [];
+
+  for (const item of rawResults) {
+    if (!item || typeof item !== 'object') {
+      continue;
+    }
+    const record = item as Record<string, unknown>;
+    const rawTitle: SuggestRawTitle | string =
+      (record.title as SuggestRawTitle | string | undefined) ?? '';
+    const rawSubtitle: SuggestRawTitle | string | undefined = record.subtitle as
+      | SuggestRawTitle
+      | string
+      | undefined;
+    const rawAddress: SuggestRawAddress | undefined = record.address as
+      | SuggestRawAddress
+      | undefined;
+    const title = typeof rawTitle === 'string' ? rawTitle : (rawTitle?.text ?? '');
+    const subtitle =
+      typeof rawSubtitle === 'string' ? rawSubtitle : (rawSubtitle?.text ?? undefined);
+    const formatted = rawAddress?.formatted_address ?? rawAddress?.full_address ?? title;
+    const value = formatted || title;
+    const uri = typeof record.uri === 'string' ? record.uri : undefined;
+
+    if (!value) {
+      continue;
+    }
+
+    suggestions.push({
+      title: title || value,
+      subtitle,
+      value,
+      uri,
+    });
+  }
+
+  return suggestions;
 };
 
 export interface YandexGeocodeResult {
@@ -101,21 +115,36 @@ export const geocodeAddress = async (
 
   const payload = await response.json();
   const collection = payload?.response?.GeoObjectCollection ?? {};
-  const members: any[] = collection?.featureMember ?? [];
-  if (!Array.isArray(members) || members.length === 0) {
+  const rawMembers = Array.isArray(collection?.featureMember)
+    ? (collection.featureMember as unknown[])
+    : [];
+  if (rawMembers.length === 0) {
     return null;
   }
 
-  const geoObject = members[0]?.GeoObject ?? {};
-  const meta = geoObject?.metaDataProperty?.GeocoderMetaData ?? {};
-  const pos = typeof geoObject?.Point?.pos === 'string' ? geoObject.Point.pos : '';
+  const firstMember = rawMembers[0];
+  if (!firstMember || typeof firstMember !== 'object') {
+    return null;
+  }
+
+  const geoObjectRecord = firstMember as Record<string, unknown>;
+  const geoObject = (geoObjectRecord.GeoObject as Record<string, unknown> | undefined) ?? {};
+  const metaDataProperty = geoObject.metaDataProperty as Record<string, unknown> | undefined;
+  const geocoderMeta = metaDataProperty?.GeocoderMetaData as Record<string, unknown> | undefined;
+  const address = geocoderMeta?.Address as Record<string, unknown> | undefined;
+  const posSource = geoObject.Point as Record<string, unknown> | undefined;
+  const pos = typeof posSource?.pos === 'string' ? posSource.pos : '';
   const [lonStr, latStr] = pos.split(' ');
   const lat = latStr ? Number(latStr) : null;
   const lon = lonStr ? Number(lonStr) : null;
-  const normalized = meta?.Address?.formatted ?? meta?.text ?? trimmed;
-  const kind = typeof meta?.kind === 'string' ? meta.kind : '';
-  const precision = typeof meta?.precision === 'string' ? meta.precision : '';
-  const uri = typeof geoObject?.uri === 'string' ? geoObject.uri : '';
+  const normalized =
+    (address?.formatted as string | undefined) ??
+    (geocoderMeta?.text as string | undefined) ??
+    trimmed;
+  const kind = typeof geocoderMeta?.kind === 'string' ? (geocoderMeta.kind as string) : '';
+  const precision =
+    typeof geocoderMeta?.precision === 'string' ? (geocoderMeta.precision as string) : '';
+  const uri = typeof geoObject?.uri === 'string' ? (geoObject.uri as string) : '';
 
   return {
     normalized,
