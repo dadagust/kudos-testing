@@ -36,7 +36,8 @@ class OrderAdmin(admin.ModelAdmin):
     search_fields = (
         'id',
         'comment',
-        'delivery_address',
+        'delivery_address_input',
+        'delivery_address_full',
         'customer__display_name',
     )
     raw_id_fields = ('customer',)

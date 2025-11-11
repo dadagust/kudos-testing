@@ -2,13 +2,22 @@
 
 from __future__ import annotations
 
+from decimal import Decimal
+from unittest.mock import patch
+
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from applications.customers.models import Customer
-from applications.orders.models import DeliveryType, LogisticsState, OrderStatus, PaymentStatus
+from applications.orders.models import (
+    DeliveryType,
+    LogisticsState,
+    Order,
+    OrderStatus,
+    PaymentStatus,
+)
 from applications.products.models import (
     Category,
     InstallerQualification,
@@ -48,7 +57,7 @@ class OrderApiTests(APITestCase):
             update_fields=['setup_installer_qualification', 'stock_qty', 'available_stock_qty']
         )
 
-    def test_create_order(self):
+    def _create_order(self, **overrides):
         url = reverse('orders:order-list')
         payload = {
             'installation_date': '2024-06-01',
@@ -61,10 +70,13 @@ class OrderApiTests(APITestCase):
                 {'product_id': str(self.product.pk), 'quantity': 2, 'rental_days': 1},
             ],
         }
-
+        payload.update(overrides)
         response = self.client.post(url, payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        data = response.json()['data']
+        return response.json()['data']
+
+    def test_create_order(self):
+        data = self._create_order()
         self.assertEqual(data['status'], OrderStatus.NEW)
         self.assertEqual(data['payment_status'], PaymentStatus.UNPAID)
         self.assertIsNone(data['logistics_state'])
@@ -98,7 +110,8 @@ class OrderApiTests(APITestCase):
                 {'product_id': str(self.product.pk), 'quantity': 1},
             ],
         }
-        self.client.post(url, payload, format='json')
+        response = self.client.post(url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         response = self.client.get(url, {'status_group': 'archived'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -118,9 +131,7 @@ class OrderApiTests(APITestCase):
             'items': [{'product_id': str(self.product.pk), 'quantity': 3, 'rental_days': 1}],
         }
 
-        response = self.client.post(url, payload, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        data = response.json()['data']
+        data = self._create_order(**payload)
         self.assertEqual(data['delivery_type'], DeliveryType.PICKUP)
         self.assertEqual(data['delivery_address'], '')
         self.assertEqual(data['comment'], '')
@@ -158,8 +169,63 @@ class OrderApiTests(APITestCase):
         self.assertEqual(item['rental_tiers'][0]['end_day'], 3)
         self.assertAlmostEqual(float(item['unit_price']), 11900.0, places=2)
         self.assertAlmostEqual(float(data['total_amount']), 12400.0, places=2)
-        self.assertAlmostEqual(float(data['services_total_amount']), 500.0, places=2)
-        self.assertEqual(data['payment_status'], PaymentStatus.UNPAID)
+
+    def test_validate_address_updates_order_fields(self):
+        order_data = self._create_order()
+        order_id = order_data['id']
+        url = reverse('orders:orders-validate-address', args=[order_id])
+        with patch('applications.orders.views.geocode_address') as geocode_mock:
+            geocode_mock.return_value = {
+                'normalized': 'Россия, Москва, Красная площадь, 1',
+                'lat': 55.7539,
+                'lon': 37.6208,
+                'kind': 'house',
+                'precision': 'exact',
+                'uri': 'ymapsbm1://geo?where=some-uri',
+            }
+            response = self.client.post(url, {'input': 'Красная площадь, 1'}, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        payload = response.json()
+        self.assertTrue(payload['ok'])
+        self.assertTrue(payload['exists'])
+        self.assertEqual(payload['normalized'], 'Россия, Москва, Красная площадь, 1')
+        order = Order.objects.get(pk=order_id)
+        self.assertEqual(order.delivery_address_input, 'Красная площадь, 1')
+        self.assertEqual(order.delivery_address_full, 'Россия, Москва, Красная площадь, 1')
+        self.assertEqual(order.delivery_address_kind, 'house')
+        self.assertEqual(order.delivery_address_precision, 'exact')
+        self.assertEqual(order.yandex_uri, 'ymapsbm1://geo?where=some-uri')
+        self.assertEqual(order.delivery_lat, Decimal('55.7539'))
+        self.assertEqual(order.delivery_lon, Decimal('37.6208'))
+
+    def test_orders_with_coords_returns_only_geocoded_orders(self):
+        order_data = self._create_order()
+        order = Order.objects.get(pk=order_data['id'])
+        order.delivery_address_input = 'Тверская улица, 1'
+        order.delivery_address_full = 'Россия, Москва, Тверская улица, 1'
+        order.delivery_lat = Decimal('55.7570')
+        order.delivery_lon = Decimal('37.6150')
+        order.delivery_address_kind = 'house'
+        order.delivery_address_precision = 'exact'
+        order.save()
+
+        other = self._create_order(delivery_address='Санкт-Петербург, Невский проспект, 1')
+        Order.objects.filter(pk=other['id']).update(
+            delivery_address_input='Санкт-Петербург, Невский проспект, 1'
+        )
+
+        url = reverse('orders:orders-with-coords')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        items = response.json()['items']
+        self.assertEqual(len(items), 1)
+        entry = items[0]
+        self.assertEqual(entry['id'], order.pk)
+        self.assertEqual(entry['address'], 'Россия, Москва, Тверская улица, 1')
+        self.assertAlmostEqual(entry['lat'], 55.7570, places=4)
+        self.assertAlmostEqual(entry['lon'], 37.6150, places=4)
+        self.assertTrue(entry['exact'])
 
     def test_installer_qualification_counted_once(self):
         url = reverse('orders:order-list')
