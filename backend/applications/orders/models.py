@@ -9,6 +9,7 @@ from django.core.validators import MinValueValidator
 from django.db import models
 
 from applications.core.models import Date
+from applications.customers.models import PhoneNormalizer
 from applications.products.choices import RentalMode
 from applications.products.models import Product
 
@@ -254,6 +255,45 @@ class Order(Date):
             self.delivery_address_kind == 'house'
             and self.delivery_address_precision == 'exact'
         )
+
+
+class OrderDriver(Date):
+    """Driver responsible for delivering a specific order."""
+
+    order = models.OneToOneField(
+        to=Order,
+        verbose_name='Заказ',
+        on_delete=models.CASCADE,
+        related_name='driver',
+    )
+    full_name = models.CharField(
+        verbose_name='ФИО водителя',
+        max_length=255,
+    )
+    phone = models.CharField(
+        verbose_name='Телефон',
+        max_length=32,
+        blank=True,
+    )
+    phone_normalized = models.CharField(
+        verbose_name='Телефон (нормализованный)',
+        max_length=32,
+        blank=True,
+    )
+
+    class Meta(Date.Meta):
+        verbose_name = 'Водитель заказа'
+        verbose_name_plural = 'Водители заказов'
+
+    def save(self, *args, **kwargs):
+        if self.phone:
+            self.phone_normalized = PhoneNormalizer.normalize(self.phone)
+        else:
+            self.phone_normalized = ''
+        super().save(*args, **kwargs)
+
+    def __str__(self) -> str:
+        return f'{self.full_name} ({self.phone or "нет телефона"})'
 
 
 class OrderItem(Date):

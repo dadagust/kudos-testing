@@ -11,7 +11,7 @@ from uuid import UUID
 from django.db import transaction
 from rest_framework import serializers
 
-from applications.customers.models import Customer
+from applications.customers.models import Customer, PhoneNormalizer
 from applications.products.choices import RentalMode
 from applications.products.models import Product
 
@@ -19,6 +19,7 @@ from .models import (
     DeliveryType,
     LogisticsState,
     Order,
+    OrderDriver,
     OrderItem,
     OrderStatus,
     PaymentStatus,
@@ -784,3 +785,48 @@ class OrderCalculationSerializer(OrderWriteSerializer):
                 for item in calculated_items
             ],
         }
+class OrderDriverSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderDriver
+        fields = (
+            'id',
+            'full_name',
+            'phone',
+            'created',
+            'modified',
+        )
+        read_only_fields = (
+            'id',
+            'created',
+            'modified',
+        )
+
+
+class OrderDriverAssignSerializer(serializers.Serializer):
+    full_name = serializers.CharField(max_length=255)
+    phone = serializers.CharField(max_length=32)
+
+    default_error_messages = {
+        'full_name_blank': 'Укажите имя водителя.',
+        'phone_blank': 'Укажите телефон водителя.',
+        'phone_invalid': 'Некорректный номер телефона.',
+    }
+
+    def validate_full_name(self, value: str) -> str:
+        normalized = (value or '').strip()
+        if not normalized:
+            self.fail('full_name_blank')
+        return normalized
+
+    def validate_phone(self, value: str) -> str:
+        normalized = (value or '').strip()
+        if not normalized:
+            self.fail('phone_blank')
+        digits = ''.join(ch for ch in normalized if ch.isdigit())
+        if len(digits) < 10:
+            self.fail('phone_invalid')
+        normalized_phone = PhoneNormalizer.normalize(normalized)
+        if not normalized_phone:
+            self.fail('phone_invalid')
+        return normalized_phone
+
