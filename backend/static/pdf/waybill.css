@@ -1,0 +1,230 @@
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../fonts/inter/Inter-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  src: url('../fonts/inter/Inter-Bold.ttf') format('truetype');
+}
+
+@page {
+  size: A4 landscape;
+  margin: 10mm;
+}
+
+body.page {
+  font-family: 'Inter', 'DejaVu Sans', sans-serif;
+  font-size: 11.5px;
+  color: #111827;
+}
+
+.header .logo {
+  height: 36px;
+}
+
+.header .logo-title {
+  display: flex;
+  align-items: center;
+  gap: 12mm;
+  margin-bottom: 6mm;
+}
+
+.header h1 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 0.2px;
+}
+
+.grid-header {
+  display: grid;
+  grid-template-columns: 1fr 0.9fr;
+  gap: 10mm;
+}
+
+.meta {
+  margin: 0;
+  padding: 0;
+}
+
+.meta div {
+  margin: 0 0 1.5mm;
+  line-height: 1.25;
+}
+
+.meta dt {
+  width: 48mm;
+  float: left;
+  color: #4b5563;
+  font-weight: 600;
+}
+
+.meta dd {
+  margin-left: 50mm;
+  margin-bottom: 0;
+}
+
+.meta:after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
+.landlord-title {
+  font-weight: 700;
+  margin: 0 0 1.2mm;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.landlord p {
+  margin: 0;
+}
+
+.generated-at {
+  margin-top: 4mm;
+  font-size: 10px;
+  color: #6b7280;
+}
+
+.checks {
+  list-style: none;
+  padding: 0;
+  margin: 4mm 0 0;
+}
+
+.checks li {
+  display: flex;
+  align-items: center;
+  gap: 2mm;
+  margin-bottom: 2.4mm;
+}
+
+.cb {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 1px solid #aeb1b7;
+  border-radius: 2px;
+}
+
+main {
+  margin-top: 6mm;
+}
+
+table.spec {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+table.spec thead th {
+  background: #f0f1f3;
+  border: 1px solid #d5d7db;
+  padding: 2mm;
+  font-weight: 600;
+  font-size: 11.5px;
+  box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.05);
+}
+
+table.spec tbody td {
+  border: 1px solid #d5d7db;
+  padding: 2mm;
+  vertical-align: top;
+  min-height: 12mm;
+}
+
+table.spec thead th:nth-child(2) {
+  width: 42mm;
+}
+
+table.spec thead th:nth-child(3) {
+  width: 28mm;
+}
+
+table.spec thead th:nth-child(4),
+table.spec thead th:nth-child(5) {
+  width: 28mm;
+  text-align: center;
+}
+
+table.spec thead th:nth-child(1) {
+  width: 8mm;
+  text-align: center;
+}
+
+table.spec td:nth-child(1),
+table.spec td:nth-child(4),
+table.spec td:nth-child(5) {
+  text-align: center;
+}
+
+table.spec td:nth-child(6),
+table.spec td:nth-child(7) {
+  min-width: 28mm;
+}
+
+table.spec td {
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+}
+
+thead {
+  display: table-header-group;
+}
+
+.place-ico {
+  width: 10mm;
+  height: auto;
+  margin-right: 2mm;
+  vertical-align: middle;
+}
+
+.sign-block {
+  margin-top: 6mm;
+  page-break-inside: avoid;
+}
+
+.sign-block h3 {
+  font-size: 12.5px;
+  margin: 0 0 2mm;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.sign-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6mm;
+  margin-bottom: 2mm;
+}
+
+.sign-row > div {
+  min-height: 12mm;
+}
+
+.line {
+  display: inline-block;
+  border-bottom: 1px solid #9ca3af;
+  width: 35mm;
+  height: 4mm;
+  margin: 0 1.5mm;
+}
+
+.line.wide {
+  width: 100%;
+  height: 6mm;
+}
+
+.note {
+  margin-top: 2mm;
+}
+
+.footer-placeholder {
+  height: 10mm;
+}
