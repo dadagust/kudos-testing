@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from decimal import Decimal
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from django.contrib.auth import get_user_model
+from django.test import override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -198,6 +199,40 @@ class OrderApiTests(APITestCase):
         self.assertEqual(order.yandex_uri, 'ymapsbm1://geo?where=some-uri')
         self.assertEqual(order.delivery_lat, Decimal('55.7539'))
         self.assertEqual(order.delivery_lon, Decimal('37.6208'))
+
+    @override_settings(GEOSUGGEST_KEY='test-geosuggest-key')
+    def test_yandex_suggest_proxies_response(self):
+        url = reverse('orders:ymaps-suggest')
+        payload = {'results': [{'title': {'text': 'Москва'}, 'address': {'formatted_address': 'Москва'}}]}
+
+        mock_response = Mock()
+        mock_response.ok = True
+        mock_response.status_code = status.HTTP_200_OK
+        mock_response.json.return_value = payload
+
+        with patch('applications.orders.views.requests.get', return_value=mock_response) as mock_get:
+            response = self.client.get(url, {'q': 'Москва'})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json(), payload)
+
+        self.assertTrue(mock_get.called)
+        _, kwargs = mock_get.call_args
+        params = kwargs['params']
+        self.assertEqual(params['apikey'], 'test-geosuggest-key')
+        self.assertEqual(params['text'], 'Москва')
+        self.assertEqual(params['lang'], 'ru_RU')
+        self.assertEqual(params['types'], 'geo')
+
+    @override_settings(GEOSUGGEST_KEY='test-geosuggest-key')
+    def test_yandex_suggest_skips_empty_query(self):
+        url = reverse('orders:ymaps-suggest')
+        with patch('applications.orders.views.requests.get') as mock_get:
+            response = self.client.get(url, {'q': '   '})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json(), {'results': []})
+        mock_get.assert_not_called()
 
     def test_orders_with_coords_returns_only_geocoded_orders(self):
         order_data = self._create_order()

@@ -1,8 +1,9 @@
+import axios from 'axios';
+
+import { apiV1Client } from './httpClient';
+
 const API_KEY =
   process.env.NEXT_PUBLIC_YANDEX_MAPS_KEY ?? process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY ?? '';
-
-const GEOSUGGEST_API_KEY =
-  process.env.NEXT_PUBLIC_GEOSUGGEST_KEY ?? process.env.NEXT_PUBLIC_GEOSUGGEST_KEY ?? '';
 
 interface SuggestRawTitle {
   text?: string;
@@ -22,30 +23,36 @@ export interface YandexSuggestItem {
 
 export const fetchAddressSuggestions = async (
   query: string,
-  options: { signal?: AbortSignal } = {}
+  options: { signal?: AbortSignal } = {},
 ): Promise<YandexSuggestItem[]> => {
   const trimmed = query.trim();
-  if (!API_KEY || !trimmed) {
+  if (!trimmed) {
     return [];
   }
 
-  const params = new URLSearchParams({
-    apikey: GEOSUGGEST_API_KEY,
-    text: trimmed,
-    lang: 'ru_RU',
-    type: 'geo',
-    print_address: '1',
-    results: '5',
-  });
-
-  const response = await fetch(`https://suggest-maps.yandex.ru/v1/suggest?${params.toString()}`, {
-    signal: options.signal,
-  });
-  if (!response.ok) {
-    return [];
+  let responseData: unknown;
+  try {
+    const response = await apiV1Client.get('/ymaps/suggest/', {
+      params: { q: trimmed },
+      signal: options.signal,
+    });
+    responseData = response.data;
+  } catch (error) {
+    if (axios.isCancel(error) || (error as Error).name === 'CanceledError') {
+      const abortError = new Error('Request aborted');
+      abortError.name = 'AbortError';
+      throw abortError;
+    }
+    if (axios.isAxiosError(error) && error.response) {
+      return [];
+    }
+    throw error;
   }
-  const payload = await response.json();
-  const rawResults = Array.isArray(payload?.results) ? (payload.results as unknown[]) : [];
+
+  const payload = (responseData ?? {}) as Record<string, unknown>;
+  const rawResults = Array.isArray(payload['results'])
+    ? (payload['results'] as unknown[])
+    : [];
   const suggestions: YandexSuggestItem[] = [];
 
   for (const item of rawResults) {
