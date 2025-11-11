@@ -63,6 +63,22 @@ const buildListParams = (params: OrderListQuery) => {
     searchParams.set('shipment_date_to', params.shipment_date_to);
   }
 
+  if (params.installation_date_from) {
+    searchParams.set('installation_date_from', params.installation_date_from);
+  }
+
+  if (params.installation_date_to) {
+    searchParams.set('installation_date_to', params.installation_date_to);
+  }
+
+  if (params.dismantle_date_from) {
+    searchParams.set('dismantle_date_from', params.dismantle_date_from);
+  }
+
+  if (params.dismantle_date_to) {
+    searchParams.set('dismantle_date_to', params.dismantle_date_to);
+  }
+
   if (params.q) {
     searchParams.set('q', params.q.trim());
   }

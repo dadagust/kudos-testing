@@ -137,6 +137,10 @@ export interface OrderListQuery {
   logistics_state?: Array<LogisticsState | 'null'>;
   shipment_date_from?: string;
   shipment_date_to?: string;
+  installation_date_from?: string;
+  installation_date_to?: string;
+  dismantle_date_from?: string;
+  dismantle_date_to?: string;
   q?: string;
 }
 

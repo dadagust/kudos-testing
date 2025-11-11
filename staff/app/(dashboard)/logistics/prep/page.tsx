@@ -54,22 +54,22 @@ const LogisticsStateToggle = ({ order, isUpdating, onChange }: LogisticsStateTog
   </div>
 );
 
-const formatShipmentGroup = (value: string | null) => {
+const formatInstallationGroup = (value: string | null) => {
   if (!value) {
     return 'Без даты';
   }
   const today = new Date();
-  const shipment = new Date(value);
+  const installation = new Date(value);
   const startOfToday = new Date(today);
   startOfToday.setHours(0, 0, 0, 0);
-  const diff = Math.floor((shipment.getTime() - startOfToday.getTime()) / (24 * 60 * 60 * 1000));
+  const diff = Math.floor((installation.getTime() - startOfToday.getTime()) / (24 * 60 * 60 * 1000));
   if (diff === 0) {
     return 'Сегодня';
   }
   if (diff === 1) {
     return 'Завтра';
   }
-  return shipment.toLocaleDateString('ru-RU');
+  return installation.toLocaleDateString('ru-RU');
 };
 
 export default function LogisticsPrepPage() {
@@ -103,8 +103,8 @@ export default function LogisticsPrepPage() {
     () => ({
       payment_status: paymentFilters.length ? paymentFilters : undefined,
       logistics_state: logisticsFilters.length ? logisticsFilters : undefined,
-      shipment_date_from: dateFrom || undefined,
-      shipment_date_to: dateTo || undefined,
+      installation_date_from: dateFrom || undefined,
+      installation_date_to: dateTo || undefined,
       search: searchTerm || undefined,
       q: searchTerm || undefined,
       status_group: 'current' as const,
@@ -136,7 +136,7 @@ export default function LogisticsPrepPage() {
     () =>
       Array.from(
         orders.reduce((acc, order) => {
-          const key = order.shipment_date ?? 'null';
+          const key = order.installation_date || 'null';
           const list = acc.get(key) ?? [];
           list.push(order);
           acc.set(key, list);
@@ -154,7 +154,7 @@ export default function LogisticsPrepPage() {
         })
         .map(([date, items]) => ({
           key: date,
-          label: formatShipmentGroup(date === 'null' ? null : date),
+          label: formatInstallationGroup(date === 'null' ? null : date),
           items,
         })),
     [orders]
@@ -228,7 +228,7 @@ export default function LogisticsPrepPage() {
           </div>
         </div>
         <div className={styles.dateRange}>
-          <FormField label="Отгрузка с">
+          <FormField label="Монтаж с">
             <Input
               type="date"
               value={dateFrom}
