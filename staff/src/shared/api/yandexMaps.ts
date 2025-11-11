@@ -1,6 +1,9 @@
 const API_KEY =
   process.env.NEXT_PUBLIC_YANDEX_MAPS_KEY ?? process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY ?? '';
 
+const GEOSUGGEST_API_KEY =
+  process.env.NEXT_PUBLIC_GEOSUGGEST_KEY ?? process.env.NEXT_PUBLIC_GEOSUGGEST_KEY ?? '';
+
 interface SuggestRawTitle {
   text?: string;
 }
@@ -27,7 +30,7 @@ export const fetchAddressSuggestions = async (
   }
 
   const params = new URLSearchParams({
-    apikey: API_KEY,
+    apikey: GEOSUGGEST_API_KEY,
     text: trimmed,
     lang: 'ru_RU',
     type: 'geo',
