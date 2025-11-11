@@ -70,16 +70,6 @@ class OrderViewSet(viewsets.ModelViewSet):
         if status_value:
             queryset = queryset.filter(status=status_value)
 
-        search = params.get('search')
-        if search:
-            queryset = queryset.filter(
-                Q(comment__icontains=search)
-                | Q(delivery_address__icontains=search)
-                | Q(customer__display_name__icontains=search)
-                | Q(customer__first_name__icontains=search)
-                | Q(customer__last_name__icontains=search)
-            )
-
         payment_status_values = params.getlist('payment_status')
         if payment_status_values:
             queryset = queryset.filter(payment_status__in=payment_status_values)
@@ -104,19 +94,27 @@ class OrderViewSet(viewsets.ModelViewSet):
         if shipment_to:
             queryset = queryset.filter(shipment_date__lte=shipment_to)
 
-        order_query = params.get('q')
-        if order_query:
-            queryset = queryset.annotate(number_str=Cast('pk', output_field=models.CharField()))
-            queryset = queryset.filter(number_str__icontains=order_query.strip())
+        normalized_search = (params.get('search') or '').strip()
+        normalized_order_query = (params.get('q') or '').strip()
 
-        search = params.get('search')
-        if search:
+        if normalized_search or normalized_order_query:
+            queryset = queryset.annotate(number_str=Cast('pk', output_field=models.CharField()))
+
+        if normalized_order_query:
             queryset = queryset.filter(
-                Q(comment__icontains=search)
-                | Q(delivery_address__icontains=search)
-                | Q(customer__display_name__icontains=search)
-                | Q(customer__first_name__icontains=search)
-                | Q(customer__last_name__icontains=search)
+                Q(number_str__icontains=normalized_order_query)
+                | Q(delivery_address__icontains=normalized_order_query)
+                | Q(comment__icontains=normalized_order_query)
+            )
+
+        if normalized_search:
+            queryset = queryset.filter(
+                Q(number_str__icontains=normalized_search)
+                | Q(comment__icontains=normalized_search)
+                | Q(delivery_address__icontains=normalized_search)
+                | Q(customer__display_name__icontains=normalized_search)
+                | Q(customer__first_name__icontains=normalized_search)
+                | Q(customer__last_name__icontains=normalized_search)
             )
 
         return queryset.order_by('-shipment_date', '-created')

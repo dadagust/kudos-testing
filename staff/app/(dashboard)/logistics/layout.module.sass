@@ -13,27 +13,12 @@
   color: var(--color-text-muted)
 
 .tabs
-  display: flex
-  gap: 8px
+  display: grid
+  grid-template-columns: repeat(2, minmax(0, 1fr))
+  gap: 12px
 
-.tab
-  display: inline-flex
-  align-items: center
-  justify-content: center
-  padding: 8px 16px
-  border-radius: 999px
-  border: 1px solid transparent
-  background: var(--color-surface-secondary)
-  color: var(--color-text-secondary)
-  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease
-
-.tab:hover
-  background: var(--color-surface)
-  border-color: var(--color-border)
-
-.tabActive
-  background: var(--color-primary)
-  color: var(--color-on-primary)
+.tabButton
+  width: 100%
 
 .content
   display: flex
