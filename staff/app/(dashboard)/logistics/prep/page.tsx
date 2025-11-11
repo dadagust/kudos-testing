@@ -250,11 +250,6 @@ export default function LogisticsPrepPage() {
             Сбросить
           </Button>
         </form>
-        <div className={styles.filterActions}>
-          <Button variant="ghost" onClick={resetFilters}>
-            Сбросить фильтры
-          </Button>
-        </div>
       </div>
 
       {isLoading ? (
