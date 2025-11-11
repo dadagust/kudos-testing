@@ -51,6 +51,7 @@ import {
   Table,
   Tag,
 } from '@/shared/ui';
+import { YandexGeocodeResult } from '@/shared/api/yandexMaps';
 
 type CustomerOption = CustomerSummary | CustomerEntitySummary;
 
