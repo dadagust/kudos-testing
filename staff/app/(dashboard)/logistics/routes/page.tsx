@@ -121,6 +121,7 @@ export default function LogisticsRoutesPage() {
     YMapMarker: YMapMarkerConstructor;
   } | null>(null);
   const markersRef = useRef<Map<number, MarkerRecord>>(new Map());
+  const [mapReadyToken, setMapReadyToken] = useState(0);
   const [mapError, setMapError] = useState<string | null>(null);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
 
@@ -166,6 +167,7 @@ export default function LogisticsRoutesPage() {
         map.addChild(new YMapDefaultSchemeLayer());
         map.addChild(new YMapDefaultFeaturesLayer());
         mapInstanceRef.current = { map, YMapMarker };
+        setMapReadyToken((token) => token + 1);
       })
       .catch((loadError: unknown) => {
         if (cancelled) {
@@ -258,7 +260,7 @@ export default function LogisticsRoutesPage() {
         }
       }
     }
-  }, [orders]);
+  }, [orders, mapReadyToken]);
 
   useEffect(() => {
     const instance = mapInstanceRef.current;
