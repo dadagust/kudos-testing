@@ -15,6 +15,7 @@ import {
   useOrdersQuery,
   useOrderWaybill,
 } from '@/entities/order';
+import { formatDateDisplay, toTimestamp } from '@/shared/lib/date';
 import { Accordion, Button, FormField, Input, Spinner, Tag } from '@/shared/ui';
 
 import { openWaybillPreviewWindow } from '../utils/openWaybillPreviewWindow';
@@ -58,18 +59,21 @@ const formatInstallationGroup = (value: string | null) => {
   if (!value) {
     return 'Без даты';
   }
-  const today = new Date();
-  const installation = new Date(value);
-  const startOfToday = new Date(today);
+  const formatted = formatDateDisplay(value);
+  const timestamp = toTimestamp(value);
+  if (!timestamp) {
+    return formatted ?? value;
+  }
+  const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
-  const diff = Math.floor((installation.getTime() - startOfToday.getTime()) / (24 * 60 * 60 * 1000));
+  const diff = Math.floor((timestamp - startOfToday.getTime()) / (24 * 60 * 60 * 1000));
   if (diff === 0) {
     return 'Сегодня';
   }
   if (diff === 1) {
     return 'Завтра';
   }
-  return installation.toLocaleDateString('ru-RU');
+  return formatted ?? new Date(timestamp).toLocaleDateString('ru-RU');
 };
 
 export default function LogisticsPrepPage() {
