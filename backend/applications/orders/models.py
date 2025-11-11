@@ -85,8 +85,28 @@ class Order(Date):
     installation_date = models.DateField(
         verbose_name='Дата монтажа',
     )
+    mount_datetime_from = models.TimeField(
+        verbose_name='Время начала монтажа',
+        blank=True,
+        null=True,
+    )
+    mount_datetime_to = models.TimeField(
+        verbose_name='Время окончания монтажа',
+        blank=True,
+        null=True,
+    )
     dismantle_date = models.DateField(
         verbose_name='Дата демонтажа',
+    )
+    dismount_datetime_from = models.TimeField(
+        verbose_name='Время начала демонтажа',
+        blank=True,
+        null=True,
+    )
+    dismount_datetime_to = models.TimeField(
+        verbose_name='Время окончания демонтажа',
+        blank=True,
+        null=True,
     )
     customer = models.ForeignKey(
         to='customers.Customer',

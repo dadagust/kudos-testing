@@ -36,7 +36,13 @@ import { ProductListItem, productsApi, useInfiniteProductsQuery } from '@/entiti
 import { RoleGuard, usePermission } from '@/features/auth';
 import { YandexAddressInput, AddressValidationInfo } from '@/features/yandex-address-input';
 import { YandexGeocodeResult } from '@/shared/api/yandexMaps';
-import { formatDateDisplay, toDateInputValue, toServerDateValue } from '@/shared/lib/date';
+import {
+  formatDateDisplay,
+  formatTimeDisplay,
+  toDateInputValue,
+  toServerDateValue,
+  toTimeInputValue,
+} from '@/shared/lib/date';
 import type { TableColumn } from '@/shared/ui';
 import {
   Accordion,
@@ -70,7 +76,11 @@ type OrderFormState = {
   status: OrderStatus;
   payment_status: PaymentStatus;
   installation_date: string;
+  mount_datetime_from: string;
+  mount_datetime_to: string;
   dismantle_date: string;
+  dismount_datetime_from: string;
+  dismount_datetime_to: string;
   customer: CustomerOption | null;
   delivery_type: DeliveryType;
   delivery_address: string;
@@ -120,7 +130,11 @@ const PAYMENT_TAG_TONES: Record<PaymentStatus, 'success' | 'warning' | 'danger'>
 const ERROR_FIELD_LABELS: Record<string, string | null> = {
   status: 'Статус',
   installation_date: 'Дата монтажа',
+  mount_datetime_from: 'Время начала монтажа',
+  mount_datetime_to: 'Время окончания монтажа',
   dismantle_date: 'Дата демонтажа',
+  dismount_datetime_from: 'Время начала демонтажа',
+  dismount_datetime_to: 'Время окончания демонтажа',
   customer_id: 'Клиент',
   customer: 'Клиент',
   delivery_type: 'Тип доставки',
@@ -293,12 +307,32 @@ const formatCurrency = (value: number | string) => {
   return currencyFormatter.format(amount);
 };
 
-const formatDate = (value: string) => {
+const formatDate = (value: string | null | undefined) => {
   if (!value) {
     return '—';
   }
   const formatted = formatDateDisplay(value);
   return formatted ?? value;
+};
+
+const formatTime = (value: string | null | undefined) => formatTimeDisplay(value) ?? '';
+
+const formatTimeRange = (
+  start: string | null | undefined,
+  end: string | null | undefined
+): string | null => {
+  const formattedStart = formatTime(start);
+  const formattedEnd = formatTime(end);
+  if (formattedStart && formattedEnd) {
+    return `${formattedStart}–${formattedEnd}`;
+  }
+  if (formattedStart) {
+    return `${formattedStart}–`;
+  }
+  if (formattedEnd) {
+    return `–${formattedEnd}`;
+  }
+  return null;
 };
 
 const createInitialAddressState = (): OrderAddressState => ({
@@ -317,7 +351,11 @@ const createInitialFormState = (): OrderFormState => ({
   status: 'new',
   payment_status: 'unpaid',
   installation_date: '',
+  mount_datetime_from: '',
+  mount_datetime_to: '',
   dismantle_date: '',
+  dismount_datetime_from: '',
+  dismount_datetime_to: '',
   customer: null,
   delivery_type: 'delivery',
   delivery_address: '',
@@ -440,9 +478,29 @@ const OrderFormContent = ({
     setForm((prev) => ({ ...prev, installation_date: value }));
   };
 
+  const handleMountTimeFromChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { value } = event.target;
+    setForm((prev) => ({ ...prev, mount_datetime_from: value }));
+  };
+
+  const handleMountTimeToChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { value } = event.target;
+    setForm((prev) => ({ ...prev, mount_datetime_to: value }));
+  };
+
   const handleDismantleDateChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
     setForm((prev) => ({ ...prev, dismantle_date: value }));
+  };
+
+  const handleDismountTimeFromChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { value } = event.target;
+    setForm((prev) => ({ ...prev, dismount_datetime_from: value }));
+  };
+
+  const handleDismountTimeToChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { value } = event.target;
+    setForm((prev) => ({ ...prev, dismount_datetime_to: value }));
   };
 
   const handleDeliveryTypeChange = (event: ChangeEvent<HTMLSelectElement>) => {
@@ -628,11 +686,35 @@ const OrderFormContent = ({
           required
         />
         <Input
+          type="time"
+          label="Время монтажа с"
+          value={form.mount_datetime_from}
+          onChange={handleMountTimeFromChange}
+        />
+        <Input
+          type="time"
+          label="Время монтажа до"
+          value={form.mount_datetime_to}
+          onChange={handleMountTimeToChange}
+        />
+        <Input
           type="date"
           label="Дата демонтажа"
           value={form.dismantle_date}
           onChange={handleDismantleDateChange}
           required
+        />
+        <Input
+          type="time"
+          label="Время демонтажа с"
+          value={form.dismount_datetime_from}
+          onChange={handleDismountTimeFromChange}
+        />
+        <Input
+          type="time"
+          label="Время демонтажа до"
+          value={form.dismount_datetime_to}
+          onChange={handleDismountTimeToChange}
         />
         <Select label="Тип доставки" value={form.delivery_type} onChange={handleDeliveryTypeChange}>
           <option value="delivery">Доставка</option>
@@ -991,11 +1073,16 @@ export default function OrdersPage() {
 
   const buildPayloadFromForm = useCallback((form: OrderFormState): CreateOrderPayload => {
     const rentalDays = calculateRentalDays(form.installation_date, form.dismantle_date) ?? 1;
+    const normalizeTime = (value: string) => (value?.trim() ? value : null);
     return {
       status: form.status,
       payment_status: form.payment_status,
       installation_date: toServerDateValue(form.installation_date),
+      mount_datetime_from: normalizeTime(form.mount_datetime_from),
+      mount_datetime_to: normalizeTime(form.mount_datetime_to),
       dismantle_date: toServerDateValue(form.dismantle_date),
+      dismount_datetime_from: normalizeTime(form.dismount_datetime_from),
+      dismount_datetime_to: normalizeTime(form.dismount_datetime_to),
       customer_id: form.customer?.id ?? null,
       delivery_type: form.delivery_type,
       delivery_address:
@@ -1083,7 +1170,11 @@ export default function OrdersPage() {
         status: order.status,
         payment_status: order.payment_status,
         installation_date: toDateInputValue(order.installation_date),
+        mount_datetime_from: toTimeInputValue(order.mount_datetime_from),
+        mount_datetime_to: toTimeInputValue(order.mount_datetime_to),
         dismantle_date: toDateInputValue(order.dismantle_date),
+        dismount_datetime_from: toTimeInputValue(order.dismount_datetime_from),
+        dismount_datetime_to: toTimeInputValue(order.dismount_datetime_to),
         customer: order.customer,
         delivery_type: order.delivery_type,
         delivery_address:
@@ -1575,12 +1666,36 @@ export default function OrdersPage() {
       {
         key: 'installation_date',
         header: 'Монтаж',
-        render: (row) => formatDate(row.installation_date),
+        render: (row) => {
+          const date = formatDate(row.installation_date);
+          const range = formatTimeRange(row.mount_datetime_from, row.mount_datetime_to);
+          if (!range) {
+            return date;
+          }
+          return (
+            <span style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <span>{date}</span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>{range}</span>
+            </span>
+          );
+        },
       },
       {
         key: 'dismantle_date',
         header: 'Демонтаж',
-        render: (row) => formatDate(row.dismantle_date),
+        render: (row) => {
+          const date = formatDate(row.dismantle_date);
+          const range = formatTimeRange(row.dismount_datetime_from, row.dismount_datetime_to);
+          if (!range) {
+            return date;
+          }
+          return (
+            <span style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <span>{date}</span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>{range}</span>
+            </span>
+          );
+        },
       },
       {
         key: 'customer',
