@@ -17,8 +17,9 @@ import {
 } from '@/entities/order';
 import { Accordion, Button, FormField, Input, Spinner, Tag } from '@/shared/ui';
 
-import styles from './prep.module.sass';
 import { openWaybillPreviewWindow } from '../utils/openWaybillPreviewWindow';
+
+import styles from './prep.module.sass';
 
 const PAYMENT_TONES: Record<PaymentStatus, 'success' | 'danger' | 'warning'> = {
   paid: 'success',

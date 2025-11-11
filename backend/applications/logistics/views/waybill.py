@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Iterable
 
 from django.conf import settings
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404, HttpRequest, HttpResponse
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -31,10 +31,9 @@ class WaybillItem:
     quantity_returned: str
 
 
-class OrderWaybillPdfView(LoginRequiredMixin, PermissionRequiredMixin, View):
+class OrderWaybillPdfView(LoginRequiredMixin, View):
     """Render a PDF waybill for a specific order using WeasyPrint."""
 
-    permission_required = ('orders.view_order', 'adminpanel.view_logistics')
     raise_exception = True
     template_name = 'pdf/waybill.html'
     _allowed_contexts = {'prep', 'receiving'}

@@ -6,12 +6,18 @@ import Link from 'next/link';
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 
 import type { OrderListQuery } from '@/entities/order';
-import { LOGISTICS_STATE_LABELS, ordersApi, useOrderWaybill, useOrdersQuery } from '@/entities/order';
+import {
+  LOGISTICS_STATE_LABELS,
+  ordersApi,
+  useOrderWaybill,
+  useOrdersQuery,
+} from '@/entities/order';
 import { formatDateDisplay } from '@/shared/lib/date';
 import { Button, FormField, Input, Spinner } from '@/shared/ui';
 
-import styles from './receiving.module.sass';
 import { openWaybillPreviewWindow } from '../utils/openWaybillPreviewWindow';
+
+import styles from './receiving.module.sass';
 
 export default function LogisticsReceivingPage() {
   const [dateFrom, setDateFrom] = useState('');
@@ -134,7 +140,9 @@ export default function LogisticsReceivingPage() {
                   variant="ghost"
                   iconLeft="print"
                   onClick={() => handleWaybillClick(order.id)}
-                  disabled={waybillMutation.isPending && waybillMutation.variables?.orderId === order.id}
+                  disabled={
+                    waybillMutation.isPending && waybillMutation.variables?.orderId === order.id
+                  }
                 >
                   Накладная
                 </Button>
