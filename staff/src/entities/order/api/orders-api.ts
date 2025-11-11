@@ -1,9 +1,10 @@
-import { apiV1Client } from '@/shared/api/httpClient';
+import { API_ROOT, apiV1Client, httpClient } from '@/shared/api/httpClient';
 import { ensureAbsoluteUrl } from '@/shared/lib/url';
 
 import {
   CreateOrderPayload,
   LogisticsState,
+  OrderWaybillContext,
   OrderCalculationResponse,
   OrderDetail,
   OrderDetailResponse,
@@ -141,6 +142,18 @@ export const ordersApi = {
   },
   listWithCoords: async (): Promise<OrdersWithCoordsResponse> => {
     const { data } = await apiV1Client.get<OrdersWithCoordsResponse>('/orders-with-coords/');
+    return data;
+  },
+  downloadWaybill: async (
+    orderId: number | string,
+    context: OrderWaybillContext
+  ): Promise<Blob> => {
+    const { data } = await httpClient.get<Blob>(`/logistics/orders/${orderId}/waybill.pdf`, {
+      baseURL: API_ROOT,
+      responseType: 'blob',
+      params: { context },
+    });
+
     return data;
   },
 };

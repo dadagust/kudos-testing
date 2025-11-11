@@ -11,6 +11,7 @@ urlpatterns = allow_optional_trailing_slash(
     [
         path('admin/', admin.site.urls),
         path('core/', include('applications.system.urls')),
+        path('logistics/', include('applications.logistics.urls')),
         path(
             'api/v1/',
             include(

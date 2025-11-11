@@ -36,6 +36,8 @@ export const LOGISTICS_STATE_LABELS: Record<LogisticsState, string> = {
   shipped: 'Отгружен',
 };
 
+export type OrderWaybillContext = 'prep' | 'receiving';
+
 export interface CustomerSummary {
   id: string;
   display_name: string;

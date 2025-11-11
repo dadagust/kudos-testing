@@ -13,10 +13,12 @@ import {
   PaymentStatus,
   ordersApi,
   useOrdersQuery,
+  useOrderWaybill,
 } from '@/entities/order';
 import { Accordion, Button, FormField, Input, Spinner, Tag } from '@/shared/ui';
 
 import styles from './prep.module.sass';
+import { openWaybillPreviewWindow } from '../utils/openWaybillPreviewWindow';
 
 const PAYMENT_TONES: Record<PaymentStatus, 'success' | 'danger' | 'warning'> = {
   paid: 'success',
@@ -121,6 +123,13 @@ export default function LogisticsPrepPage() {
       void queryClient.invalidateQueries({ queryKey: ['orders'] });
     },
   });
+
+  const waybillMutation = useOrderWaybill();
+
+  const handleWaybillClick = (orderId: number) => {
+    const targetWindow = openWaybillPreviewWindow(orderId);
+    waybillMutation.mutate({ orderId, context: 'prep', targetWindow });
+  };
 
   const groupedOrders = useMemo(
     () =>
@@ -268,6 +277,8 @@ export default function LogisticsPrepPage() {
             <div className={styles.list}>
               {group.items.map((order) => {
                 const isUpdating = updateStateMutation.isPending;
+                const isGeneratingWaybill =
+                  waybillMutation.isPending && waybillMutation.variables?.orderId === order.id;
                 return (
                   <article key={order.id} className={styles.card}>
                     <header className={styles.cardHeader}>
@@ -287,20 +298,30 @@ export default function LogisticsPrepPage() {
                           ) : null}
                         </div>
                       </div>
-                      <LogisticsStateToggle
-                        order={order}
-                        isUpdating={isUpdating}
-                        onChange={(state) =>
-                          updateStateMutation.mutate(
-                            { orderId: order.id, state },
-                            {
-                              onSuccess: () => {
-                                void refetch();
-                              },
-                            }
-                          )
-                        }
-                      />
+                      <div className={styles.cardActions}>
+                        <Button
+                          variant="ghost"
+                          iconLeft="print"
+                          onClick={() => handleWaybillClick(order.id)}
+                          disabled={isGeneratingWaybill}
+                        >
+                          Накладная
+                        </Button>
+                        <LogisticsStateToggle
+                          order={order}
+                          isUpdating={isUpdating}
+                          onChange={(state) =>
+                            updateStateMutation.mutate(
+                              { orderId: order.id, state },
+                              {
+                                onSuccess: () => {
+                                  void refetch();
+                                },
+                              }
+                            )
+                          }
+                        />
+                      </div>
                     </header>
                     <ul className={styles.items}>
                       {order.items.map((item) => (

@@ -6,11 +6,12 @@ import Link from 'next/link';
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 
 import type { OrderListQuery } from '@/entities/order';
-import { LOGISTICS_STATE_LABELS, ordersApi, useOrdersQuery } from '@/entities/order';
+import { LOGISTICS_STATE_LABELS, ordersApi, useOrderWaybill, useOrdersQuery } from '@/entities/order';
 import { formatDateDisplay } from '@/shared/lib/date';
 import { Button, FormField, Input, Spinner } from '@/shared/ui';
 
 import styles from './receiving.module.sass';
+import { openWaybillPreviewWindow } from '../utils/openWaybillPreviewWindow';
 
 export default function LogisticsReceivingPage() {
   const [dateFrom, setDateFrom] = useState('');
@@ -57,6 +58,13 @@ export default function LogisticsReceivingPage() {
       void queryClient.invalidateQueries({ queryKey: ['orders'] });
     },
   });
+
+  const waybillMutation = useOrderWaybill();
+
+  const handleWaybillClick = (orderId: number) => {
+    const targetWindow = openWaybillPreviewWindow(orderId);
+    waybillMutation.mutate({ orderId, context: 'receiving', targetWindow });
+  };
 
   const orders = useMemo(
     () => (data?.data ?? []).filter((order) => !order.is_warehouse_received),
@@ -121,13 +129,23 @@ export default function LogisticsReceivingPage() {
                   {order.comment ? <span className={styles.comment}>{order.comment}</span> : null}
                 </div>
               </div>
-              <Button
-                variant="primary"
-                onClick={() => receiveMutation.mutate(order.id)}
-                disabled={receiveMutation.isPending}
-              >
-                Принят на склад
-              </Button>
+              <div className={styles.cardActions}>
+                <Button
+                  variant="ghost"
+                  iconLeft="print"
+                  onClick={() => handleWaybillClick(order.id)}
+                  disabled={waybillMutation.isPending && waybillMutation.variables?.orderId === order.id}
+                >
+                  Накладная
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={() => receiveMutation.mutate(order.id)}
+                  disabled={receiveMutation.isPending}
+                >
+                  Принят на склад
+                </Button>
+              </div>
             </header>
             <ul className={styles.items}>
               {order.items.map((item) => (

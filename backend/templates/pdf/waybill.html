@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <title>Накладная — Заказ #{{ order.pk }}</title>
+  <link rel="stylesheet" href="{{ STATIC_URL }}pdf/waybill.css">
+</head>
+<body class="page">
+  <header class="header">
+    <div class="logo-title">
+      <img src="{{ STATIC_URL }}{{ logo_static }}" class="logo" alt="KUDOS" />
+      <h1>Заказ #{{ order.pk }}</h1>
+    </div>
+
+    <div class="grid-header">
+      <section class="left">
+        <dl class="meta">
+          <div>
+            <dt>Адрес доставки:</dt>
+            <dd>{{ delivery_address }}</dd>
+          </div>
+          <div>
+            <dt>Клиент:</dt>
+            <dd>{{ customer_label }}</dd>
+          </div>
+          <div>
+            <dt>Дата отгрузки:</dt>
+            <dd>{{ shipment_window }}</dd>
+          </div>
+          <div>
+            <dt>Монтаж:</dt>
+            <dd>{{ mount_window }}</dd>
+          </div>
+          <div>
+            <dt>Демонтаж:</dt>
+            <dd>{{ dismount_window }}</dd>
+          </div>
+          <div>
+            <dt>Комментарий к заказу:</dt>
+            <dd>{{ order_comment }}</dd>
+          </div>
+          <div>
+            <dt>Информация об оплате:</dt>
+            <dd>{{ payment_status_label }}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="right landlord">
+        <p class="landlord-title">Арендодатель:</p>
+        <p>{{ landlord.name }}<br />{{ landlord.addr }}</p>
+        <ul class="checks">
+          <li><span class="cb"></span> Сетка ______</li>
+          <li><span class="cb"></span> Угол ______</li>
+          <li><span class="cb"></span> Ящики для приборов ______</li>
+          <li><span class="cb"></span> Ящики для посуды ______</li>
+          <li><span class="cb"></span> Ящики для стекла ______</li>
+          <li><span class="cb"></span> Залог ______</li>
+          <li><span class="cb"></span> Транспортировочные чехлы ______</li>
+        </ul>
+        <p class="generated-at">Сформировано: {{ generated_at }}</p>
+      </section>
+    </div>
+  </header>
+
+  <main>
+    <table class="spec">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Наименование</th>
+          <th>Место</th>
+          <th>Количество получаемого</th>
+          <th>Количество возвращаемого</th>
+          <th>Утеря / бой / повреждение</th>
+          <th>Примечание</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        <tr>
+          <td>{{ item.index }}</td>
+          <td>{{ item.title }}</td>
+          <td>{{ item.place }}</td>
+          <td>{{ item.quantity_planned }}</td>
+          <td>{{ item.quantity_returned }}</td>
+          <td></td>
+          <td></td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7">Товары отсутствуют</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <section class="sign-block">
+      <h3>Выдача заказа</h3>
+      <div class="sign-row">
+        <div>Заказ выдал, количество и состояние проверил от Арендодателя: <span class="line"></span> / <span class="line"></span></div>
+        <div>Заказ принял, количество и состояние проверил от Арендатора: <span class="line"></span> / <span class="line"></span></div>
+      </div>
+      <div class="note">Примечание: <span class="line wide"></span></div>
+    </section>
+
+    <section class="sign-block">
+      <h3>Возврат заказа</h3>
+      <div class="sign-row">
+        <div>Заказ принял, количество и состояние проверил от Арендодателя: <span class="line"></span> / <span class="line"></span></div>
+        <div>Заказ передал, количество и состояние проверил от Арендатора: <span class="line"></span> / <span class="line"></span></div>
+      </div>
+      <div class="note">Примечание: <span class="line wide"></span></div>
+    </section>
+  </main>
+
+  <div class="footer-placeholder"></div>
+</body>
+</html>
