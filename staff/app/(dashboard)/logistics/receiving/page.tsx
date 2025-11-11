@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 
-import type { OrderListQuery } from '@/entities/order';
+import type { OrderListQuery, OrderSummary } from '@/entities/order';
 import {
   LOGISTICS_STATE_LABELS,
   ordersApi,
@@ -13,11 +13,19 @@ import {
   useOrdersQuery,
 } from '@/entities/order';
 import { formatDateDisplay } from '@/shared/lib/date';
-import { Button, FormField, Input, Spinner } from '@/shared/ui';
+import { Accordion, Button, FormField, Input, Spinner, Tag } from '@/shared/ui';
 
 import { openWaybillPreviewWindow } from '../utils/openWaybillPreviewWindow';
 
 import styles from './receiving.module.sass';
+
+const formatDismantleGroup = (value: string | null) => {
+  if (!value) {
+    return 'Без даты';
+  }
+
+  return formatDateDisplay(value) ?? value;
+};
 
 export default function LogisticsReceivingPage() {
   const [dateFrom, setDateFrom] = useState('');
@@ -47,8 +55,8 @@ export default function LogisticsReceivingPage() {
   const query = useMemo<OrderListQuery>(
     () => ({
       logistics_state: ['shipped'],
-      shipment_date_from: dateFrom || undefined,
-      shipment_date_to: dateTo || undefined,
+      dismantle_date_from: dateFrom || undefined,
+      dismantle_date_to: dateTo || undefined,
       search: searchTerm || undefined,
       q: searchTerm || undefined,
     }),
@@ -77,10 +85,38 @@ export default function LogisticsReceivingPage() {
     [data]
   );
 
+  const groupedOrders = useMemo(
+    () =>
+      Array.from(
+        orders.reduce((acc, order) => {
+          const key = order.dismantle_date || 'null';
+          const list = acc.get(key) ?? [];
+          list.push(order);
+          acc.set(key, list);
+          return acc;
+        }, new Map<string, OrderSummary[]>())
+      )
+        .sort((a, b) => {
+          if (a[0] === 'null') {
+            return 1;
+          }
+          if (b[0] === 'null') {
+            return -1;
+          }
+          return b[0].localeCompare(a[0]);
+        })
+        .map(([date, items]) => ({
+          key: date,
+          label: formatDismantleGroup(date === 'null' ? null : date),
+          items,
+        })),
+    [orders]
+  );
+
   return (
     <section className={styles.wrapper}>
       <div className={styles.filters}>
-        <FormField label="Отгрузка с">
+        <FormField label="Демонтаж с">
           <Input
             type="date"
             value={dateFrom}
@@ -110,81 +146,91 @@ export default function LogisticsReceivingPage() {
         </div>
       ) : null}
 
-      {!isLoading && orders.length === 0 ? (
+      {!isLoading && groupedOrders.length === 0 ? (
         <div className={styles.stateRow}>Нет заказов, ожидающих приёмку.</div>
       ) : null}
 
-      <div className={styles.list}>
-        {orders.map((order) => (
-          <article key={order.id} className={styles.card}>
-            <header className={styles.cardHeader}>
-              <div>
-                <Link href={`/orders/${order.id}`} className={styles.cardTitle}>
-                  Заказ #{order.id}
-                </Link>
-                <div className={styles.cardMeta}>
-                  <span>
-                    {order.delivery_type === 'delivery' ? 'Адресная доставка' : 'Самовывоз'}
-                  </span>
-                  {order.shipment_date ? (
-                    <span>
-                      Отгрузка: {formatDateDisplay(order.shipment_date) ?? order.shipment_date}
-                    </span>
-                  ) : null}
-                  <span>{LOGISTICS_STATE_LABELS[order.logistics_state ?? 'shipped']}</span>
-                  {order.comment ? <span className={styles.comment}>{order.comment}</span> : null}
-                </div>
+      {groupedOrders.map((group) => (
+        <div key={group.key} className={styles.group}>
+          <Accordion
+            title={group.label}
+            defaultOpen
+            actions={
+              <div className={styles.groupActions}>
+                <Tag tone="info">{group.items.length}</Tag>
+                {isFetching ? <Spinner /> : null}
               </div>
-              <div className={styles.cardActions}>
-                <Button
-                  variant="ghost"
-                  iconLeft="print"
-                  onClick={() => handleWaybillClick(order.id)}
-                  disabled={
-                    waybillMutation.isPending && waybillMutation.variables?.orderId === order.id
-                  }
-                >
-                  Накладная
-                </Button>
-                <Button
-                  variant="primary"
-                  onClick={() => receiveMutation.mutate(order.id)}
-                  disabled={receiveMutation.isPending}
-                >
-                  Принят на склад
-                </Button>
-              </div>
-            </header>
-            <ul className={styles.items}>
-              {order.items.map((item) => (
-                <li key={item.id} className={styles.itemRow}>
-                  {item.product?.thumbnail_url ? (
-                    <Image
-                      src={item.product.thumbnail_url}
-                      alt={item.product.name}
-                      className={styles.itemImage}
-                      width={120}
-                      height={120}
-                      unoptimized
-                    />
-                  ) : null}
-                  <div>
-                    <span className={styles.itemTitle}>
-                      {item.product?.name ?? item.product_name}
-                    </span>
-                    <span className={styles.itemMeta}>{item.quantity} шт.</span>
-                  </div>
-                </li>
+            }
+          >
+            <div className={styles.list}>
+              {group.items.map((order) => (
+                <article key={order.id} className={styles.card}>
+                  <header className={styles.cardHeader}>
+                    <div>
+                      <Link href={`/orders/${order.id}`} className={styles.cardTitle}>
+                        Заказ #{order.id}
+                      </Link>
+                      <div className={styles.cardMeta}>
+                        <span>
+                          {order.delivery_type === 'delivery'
+                            ? 'Адресная доставка'
+                            : 'Самовывоз'}
+                        </span>
+                        <span>Демонтаж: {formatDismantleGroup(order.dismantle_date)}</span>
+                        <span>{LOGISTICS_STATE_LABELS[order.logistics_state ?? 'shipped']}</span>
+                        {order.comment ? (
+                          <span className={styles.comment}>{order.comment}</span>
+                        ) : null}
+                      </div>
+                    </div>
+                    <div className={styles.cardActions}>
+                      <Button
+                        variant="ghost"
+                        iconLeft="print"
+                        onClick={() => handleWaybillClick(order.id)}
+                        disabled={
+                          waybillMutation.isPending && waybillMutation.variables?.orderId === order.id
+                        }
+                      >
+                        Накладная
+                      </Button>
+                      <Button
+                        variant="primary"
+                        onClick={() => receiveMutation.mutate(order.id)}
+                        disabled={receiveMutation.isPending}
+                      >
+                        Принят на склад
+                      </Button>
+                    </div>
+                  </header>
+                  <ul className={styles.items}>
+                    {order.items.map((item) => (
+                      <li key={item.id} className={styles.itemRow}>
+                        {item.product?.thumbnail_url ? (
+                          <Image
+                            src={item.product.thumbnail_url}
+                            alt={item.product.name}
+                            className={styles.itemImage}
+                            width={120}
+                            height={120}
+                            unoptimized
+                          />
+                        ) : null}
+                        <div>
+                          <span className={styles.itemTitle}>
+                            {item.product?.name ?? item.product_name}
+                          </span>
+                          <span className={styles.itemMeta}>{item.quantity} шт.</span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </article>
               ))}
-            </ul>
-          </article>
-        ))}
-      </div>
-      {isFetching && !isLoading ? (
-        <div className={styles.stateRow}>
-          <Spinner />
+            </div>
+          </Accordion>
         </div>
-      ) : null}
+      ))}
     </section>
   );
 }
