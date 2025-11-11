@@ -1,15 +1,7 @@
 'use client';
 
 import clsx from 'clsx';
-import {
-  ChangeEvent,
-  FocusEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { ChangeEvent, FocusEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Input, Spinner } from '@/shared/ui';
 import {
@@ -39,7 +31,10 @@ interface YandexAddressInputProps {
   disabled?: boolean;
   helperText?: string;
   error?: string;
-  onValidationChange?: (info: { state: AddressValidationInfo; geocode?: YandexGeocodeResult | null }) => void;
+  onValidationChange?: (info: {
+    state: AddressValidationInfo;
+    geocode?: YandexGeocodeResult | null;
+  }) => void;
 }
 
 const DEFAULT_VALIDATION: AddressValidationInfo = { status: 'idle' };

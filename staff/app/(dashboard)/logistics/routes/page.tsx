@@ -4,10 +4,7 @@ import clsx from 'clsx';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
-import {
-  OrdersWithCoordsResponse,
-  ordersApi,
-} from '@/entities/order';
+import { OrdersWithCoordsResponse, ordersApi } from '@/entities/order';
 import { Alert, Button, Spinner, Tag } from '@/shared/ui';
 
 import styles from './routes.module.sass';
@@ -65,11 +62,12 @@ export default function LogisticsRoutesPage() {
   const [mapError, setMapError] = useState<string | null>(null);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
 
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery<OrdersWithCoordsResponse>({
-    queryKey: ['orders-with-coords'],
-    queryFn: () => ordersApi.listWithCoords(),
-    staleTime: 60_000,
-  });
+  const { data, isLoading, isError, error, refetch, isFetching } =
+    useQuery<OrdersWithCoordsResponse>({
+      queryKey: ['orders-with-coords'],
+      queryFn: () => ordersApi.listWithCoords(),
+      staleTime: 60_000,
+    });
 
   const orders = data?.items ?? [];
   const selectedOrder = useMemo(
@@ -111,9 +109,7 @@ export default function LogisticsRoutesPage() {
           return;
         }
         const message =
-          loadError instanceof Error
-            ? loadError.message
-            : 'Не удалось инициализировать карту.';
+          loadError instanceof Error ? loadError.message : 'Не удалось инициализировать карту.';
         setMapError(message);
       });
 
@@ -231,10 +227,18 @@ export default function LogisticsRoutesPage() {
     }
     if (isError) {
       const message = error instanceof Error ? error.message : 'Не удалось загрузить заказы.';
-      return <Alert tone="danger" title="Ошибка загрузки">{message}</Alert>;
+      return (
+        <Alert tone="danger" title="Ошибка загрузки">
+          {message}
+        </Alert>
+      );
     }
     if (!orders.length) {
-      return <Alert tone="info" title="Нет заказов">Заказы с координатами не найдены.</Alert>;
+      return (
+        <Alert tone="info" title="Нет заказов">
+          Заказы с координатами не найдены.
+        </Alert>
+      );
     }
     return (
       <ul className={styles.list}>

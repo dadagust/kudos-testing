@@ -650,8 +650,8 @@ const OrderFormContent = ({
               form.address.validationStatus === 'validated' && form.address.normalized
                 ? `Адрес подтверждён: ${form.address.normalized}`
                 : form.address.normalized
-                ? `Последняя проверка: ${form.address.normalized}`
-                : 'Введите адрес и выберите подсказку.'
+                  ? `Последняя проверка: ${form.address.normalized}`
+                  : 'Введите адрес и выберите подсказку.'
             }
           />
         ) : null}
@@ -1087,7 +1087,10 @@ export default function OrdersPage() {
         customer: order.customer,
         delivery_type: order.delivery_type,
         delivery_address:
-          order.delivery_address_input || order.delivery_address_full || order.delivery_address || '',
+          order.delivery_address_input ||
+          order.delivery_address_full ||
+          order.delivery_address ||
+          '',
         address: {
           normalized: order.delivery_address_full ?? '',
           lat: order.delivery_lat ?? null,
@@ -1597,9 +1600,7 @@ export default function OrdersPage() {
                 <span
                   style={{
                     fontSize: '0.75rem',
-                    color: row.has_exact_address
-                      ? 'var(--color-success)'
-                      : 'var(--color-warning)',
+                    color: row.has_exact_address ? 'var(--color-success)' : 'var(--color-warning)',
                   }}
                 >
                   {row.has_exact_address ? 'Адрес подтверждён' : 'Адрес требует уточнения'}

@@ -48,9 +48,9 @@ export const fetchAddressSuggestions = async (
       const rawTitle: SuggestRawTitle | string = item?.title ?? '';
       const rawSubtitle: SuggestRawTitle | string | undefined = item?.subtitle;
       const rawAddress: SuggestRawAddress | undefined = item?.address;
-      const title = typeof rawTitle === 'string' ? rawTitle : rawTitle?.text ?? '';
+      const title = typeof rawTitle === 'string' ? rawTitle : (rawTitle?.text ?? '');
       const subtitle =
-        typeof rawSubtitle === 'string' ? rawSubtitle : rawSubtitle?.text ?? undefined;
+        typeof rawSubtitle === 'string' ? rawSubtitle : (rawSubtitle?.text ?? undefined);
       const formatted = rawAddress?.formatted_address ?? rawAddress?.full_address ?? title;
       const value = formatted || title;
       const uri: string | undefined = typeof item?.uri === 'string' ? item.uri : undefined;

@@ -7,13 +7,8 @@ from uuid import UUID
 
 from rest_framework import serializers
 
-from applications.products.models import (
-    OrderStockTransactionType,
-    Product,
-    StockTransaction,
-)
-
-from .models import Order, OrderStatus
+from ..models import Order, OrderStatus
+from ...products.models import Product, StockTransaction, OrderStockTransactionType
 
 ProductTotals = dict[str, int]
 
