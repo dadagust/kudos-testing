@@ -44,7 +44,6 @@ class OrderViewSet(viewsets.ModelViewSet):
     )
     permission_classes = (
         IsAuthenticated,
-        OrderAccessPolicy,
     )
 
     def get_serializer_class(self):
@@ -188,70 +187,6 @@ class OrderViewSet(viewsets.ModelViewSet):
         read_serializer = OrderSummarySerializer(order, context=self.get_serializer_context())
         return Response({'data': read_serializer.data})
 
-
-class YandexSuggestView(APIView):
-    """Proxy Yandex Geosuggest requests through the backend."""
-
-    permission_classes = (IsAuthenticated,)
-    request_timeout = 7
-    suggest_url = 'https://suggest-maps.yandex.ru/v1/suggest'
-
-    @staticmethod
-    def _resolve_api_key() -> str:
-        key = getattr(settings, 'GEOSUGGEST_KEY', '')
-        if isinstance(key, (list, tuple)):
-            key = next((value for value in key if value), '')
-        if not key:
-            key = getattr(settings, 'YANDEX_SUGGEST_KEY', '') or os.environ.get(
-                'YANDEX_SUGGEST_KEY', ''
-            )
-        return str(key or '')
-
-    def get(self, request):
-        query = (request.query_params.get('q') or '').strip()
-        if not query:
-            return Response({'results': []})
-
-        api_key = self._resolve_api_key()
-        if not api_key:
-            return Response(
-                {'detail': 'Geosuggest API key is not configured.'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-
-        params = {
-            'apikey': api_key,
-            'text': query,
-            'lang': 'ru_RU',
-            'types': 'geo',
-            'print_address': '1',
-            'results': '5',
-        }
-
-        try:
-            upstream_response = requests.get(
-                self.suggest_url, params=params, timeout=self.request_timeout
-            )
-        except requests.RequestException:
-            return Response(
-                {'detail': 'Failed to fetch suggestions from Yandex.'},
-                status=status.HTTP_502_BAD_GATEWAY,
-            )
-
-        try:
-            payload = upstream_response.json()
-        except ValueError:
-            payload = {}
-
-        if upstream_response.ok:
-            return Response(payload)
-
-        if isinstance(payload, dict) and payload:
-            detail = payload
-        else:
-            detail = {'detail': 'Failed to fetch suggestions from Yandex.'}
-        return Response(detail, status=status.HTTP_502_BAD_GATEWAY)
-
     @action(detail=True, methods=['patch'], url_path='logistics-state')
     def update_logistics_state(self, request, *args, **kwargs):
         order = self.get_object()
@@ -348,6 +283,62 @@ class YandexSuggestView(APIView):
             'order': read_serializer.data,
         }
         return Response(response_payload, status=status.HTTP_200_OK)
+
+
+class YandexSuggestView(APIView):
+    """Proxy Yandex Geosuggest requests through the backend."""
+
+    permission_classes = (IsAuthenticated,)
+    request_timeout = 7
+    suggest_url = 'https://suggest-maps.yandex.ru/v1/suggest'
+
+    @staticmethod
+    def _resolve_api_key() -> str:
+        key = settings.GEOSUGGEST_KEY
+        if isinstance(key, (list, tuple)):
+            key = next((value for value in key if value), '')
+        if not key:
+            key = getattr(settings, 'YANDEX_SUGGEST_KEY', '') or os.environ.get(
+                'YANDEX_SUGGEST_KEY', ''
+            )
+        return str(key or '')
+
+    def get(self, request):
+        query = (request.query_params.get('q') or '').strip()
+        if not query:
+            return Response({'results': []})
+
+        api_key = self._resolve_api_key()
+        if not api_key:
+            return Response({'detail': 'Geosuggest API key is not configured.'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        params = {
+            'apikey': api_key,
+            'text': query,
+            'lang': 'ru_RU',
+            'types': 'geo',
+            'print_address': '1',
+            'results': '5',
+        }
+
+        headers = {"Referer": os.environ.get("YandexReferer", "")} # апи яндекс карт - величие
+
+        try:
+            upstream = requests.get(
+                self.suggest_url, params=params, headers=headers, timeout=self.request_timeout
+            )
+        except requests.RequestException as exc:
+            return Response({'detail': f'Upstream error: {exc}'},
+                            status=status.HTTP_502_BAD_GATEWAY)
+
+        try:
+            payload = upstream.json()
+        except ValueError:
+            payload = {'detail': upstream.text[:500]}
+
+        return Response(payload, status=upstream.status_code)
+
 
 
 class OrderCalculationView(APIView):

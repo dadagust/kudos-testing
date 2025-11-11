@@ -1,11 +1,24 @@
-.wrapper
-  display: flex
-  gap: 16px
-  align-items: stretch
-  min-height: 560px
+/* routes.module.sass — без глобальных селекторов (CSS Modules) */
 
+/* === ЛЕЙАУТ: Sidebar и Map одинаковой высоты === */
+.wrapper
+  display: grid
+  /* Первая колонка — сайдбар: минимум 500px, может расти; правая — карта с возможностью сжиматься */
+  grid-template-columns: clamp(500px, 35vw, 640px) minmax(0, 1fr)
+  grid-template-rows: 1fr
+  gap: 16px
+  height: max(70vh, 560px)
+  align-items: stretch
+
+/* критично: дети грида должны растягиваться и позволять внутренний скролл */
+.sidebar, .mapContainer
+  min-height: 0
+  height: 100%
+  align-self: stretch
+
+/* === SIDEBAR === */
 .sidebar
-  width: 320px
+  /* width: 500px  ← убрано: ширину задаёт грид-трек выше */
   display: flex
   flex-direction: column
   gap: 16px
@@ -27,7 +40,8 @@
   display: flex
   flex-direction: column
   gap: 8px
-  flex: 1
+  flex: 1 1 auto
+  min-height: 0
   overflow-y: auto
 
 .listItem
@@ -72,13 +86,17 @@
   justify-content: center
   min-height: 160px
 
+/* === MAP === */
 .mapContainer
-  flex: 1
   position: relative
   border: 1px solid var(--color-border)
   border-radius: 16px
   overflow: hidden
-  min-height: 560px
+  /* чтобы правая колонка могла сжиматься и не выталкивала грид */
+  min-width: 0
+  /* если библиотека карты выставляет inline-стиль высоты — перебиваем */
+  height: 100% !important
+  max-height: 100%
 
 .map
   position: absolute

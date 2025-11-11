@@ -23,7 +23,7 @@ export interface YandexSuggestItem {
 
 export const fetchAddressSuggestions = async (
   query: string,
-  options: { signal?: AbortSignal } = {},
+  options: { signal?: AbortSignal } = {}
 ): Promise<YandexSuggestItem[]> => {
   const trimmed = query.trim();
   if (!trimmed) {
@@ -50,9 +50,7 @@ export const fetchAddressSuggestions = async (
   }
 
   const payload = (responseData ?? {}) as Record<string, unknown>;
-  const rawResults = Array.isArray(payload['results'])
-    ? (payload['results'] as unknown[])
-    : [];
+  const rawResults = Array.isArray(payload['results']) ? (payload['results'] as unknown[]) : [];
   const suggestions: YandexSuggestItem[] = [];
 
   for (const item of rawResults) {

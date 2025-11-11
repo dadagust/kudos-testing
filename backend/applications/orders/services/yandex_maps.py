@@ -7,7 +7,7 @@ from typing import Any, Dict, Optional
 
 import requests
 
-YANDEX_MAPS_KEY = os.environ.get("YANDEX_MAPS_KEY", "")
+YANDEX_MAPS_KEY = os.environ.get("YANDEX_MAPS_SECRET", "")
 
 
 class YandexMapsError(RuntimeError):
@@ -15,7 +15,7 @@ class YandexMapsError(RuntimeError):
 
 
 def _get_api_key() -> str:
-    key = YANDEX_MAPS_KEY or os.environ.get("YANDEX_MAPS_API_KEY", "")
+    key = YANDEX_MAPS_KEY or os.environ.get("YANDEX_MAPS_SECRET", "")
     if not key:
         raise YandexMapsError("YANDEX_MAPS_KEY is not configured")
     return key
@@ -38,7 +38,8 @@ def geocode_address(query: str, *, lang: str = "ru_RU", timeout: float = 7.0) ->
         "lang": lang,
         "format": "json",
     }
-    response = requests.get("https://geocode-maps.yandex.ru/v1/", params=params, timeout=timeout)
+    headers = {"Referer": os.environ.get("YandexReferer", "")} # апи яндекс карт - величие
+    response = requests.get("https://geocode-maps.yandex.ru/v1/", params=params,headers=headers, timeout=timeout)
     response.raise_for_status()
 
     payload = response.json()
