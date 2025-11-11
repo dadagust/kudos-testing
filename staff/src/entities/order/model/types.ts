@@ -72,7 +72,11 @@ export interface OrderSummary {
   total_amount: string;
   services_total_amount: string;
   installation_date: string;
+  mount_datetime_from: string | null;
+  mount_datetime_to: string | null;
   dismantle_date: string;
+  dismount_datetime_from: string | null;
+  dismount_datetime_to: string | null;
   shipment_date: string | null;
   customer: CustomerSummary | null;
   delivery_type: DeliveryType;
@@ -147,7 +151,11 @@ export interface CreateOrderPayload {
   payment_status?: PaymentStatus;
   logistics_state?: LogisticsState | null;
   installation_date: string;
+  mount_datetime_from: string | null;
+  mount_datetime_to: string | null;
   dismantle_date: string;
+  dismount_datetime_from: string | null;
+  dismount_datetime_to: string | null;
   shipment_date?: string | null;
   customer_id?: string | null;
   delivery_type: DeliveryType;

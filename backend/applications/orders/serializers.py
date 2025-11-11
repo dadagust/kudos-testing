@@ -193,6 +193,18 @@ class OrderSummarySerializer(serializers.ModelSerializer):
     delivery_address = serializers.CharField(read_only=True)
     delivery_address_input = serializers.CharField(read_only=True)
     delivery_address_full = serializers.CharField(read_only=True)
+    mount_datetime_from = serializers.TimeField(
+        format='%H:%M', allow_null=True, read_only=True
+    )
+    mount_datetime_to = serializers.TimeField(
+        format='%H:%M', allow_null=True, read_only=True
+    )
+    dismount_datetime_from = serializers.TimeField(
+        format='%H:%M', allow_null=True, read_only=True
+    )
+    dismount_datetime_to = serializers.TimeField(
+        format='%H:%M', allow_null=True, read_only=True
+    )
     delivery_lat = serializers.DecimalField(
         max_digits=9, decimal_places=6, read_only=True, allow_null=True
     )
@@ -225,7 +237,11 @@ class OrderSummarySerializer(serializers.ModelSerializer):
             'total_amount',
             'services_total_amount',
             'installation_date',
+            'mount_datetime_from',
+            'mount_datetime_to',
             'dismantle_date',
+            'dismount_datetime_from',
+            'dismount_datetime_to',
             'shipment_date',
             'customer',
             'delivery_type',
@@ -456,9 +472,33 @@ class OrderWriteSerializer(serializers.ModelSerializer):
         allow_null=True,
         required=False,
     )
+    mount_datetime_from = serializers.TimeField(
+        allow_null=True,
+        required=False,
+        format='%H:%M',
+        input_formats=['%H:%M', '%H:%M:%S', 'iso-8601'],
+    )
+    mount_datetime_to = serializers.TimeField(
+        allow_null=True,
+        required=False,
+        format='%H:%M',
+        input_formats=['%H:%M', '%H:%M:%S', 'iso-8601'],
+    )
     shipment_date = serializers.DateField(
         allow_null=True,
         required=False,
+    )
+    dismount_datetime_from = serializers.TimeField(
+        allow_null=True,
+        required=False,
+        format='%H:%M',
+        input_formats=['%H:%M', '%H:%M:%S', 'iso-8601'],
+    )
+    dismount_datetime_to = serializers.TimeField(
+        allow_null=True,
+        required=False,
+        format='%H:%M',
+        input_formats=['%H:%M', '%H:%M:%S', 'iso-8601'],
     )
     items = OrderItemInputSerializer(
         many=True,
@@ -477,7 +517,11 @@ class OrderWriteSerializer(serializers.ModelSerializer):
             'payment_status',
             'logistics_state',
             'installation_date',
+            'mount_datetime_from',
+            'mount_datetime_to',
             'dismantle_date',
+            'dismount_datetime_from',
+            'dismount_datetime_to',
             'shipment_date',
             'customer_id',
             'delivery_type',

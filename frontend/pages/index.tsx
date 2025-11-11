@@ -22,7 +22,11 @@ type LoginFormState = {
 
 type OrderFormState = {
   installationDate: string;
+  installationTimeFrom: string;
+  installationTimeTo: string;
   dismantleDate: string;
+  dismantleTimeFrom: string;
+  dismantleTimeTo: string;
   deliveryType: DeliveryOption;
   deliveryAddress: string;
   comment: string;
@@ -41,7 +45,11 @@ const createInitialLoginForm = (): LoginFormState => ({
 
 const createInitialOrderForm = (): OrderFormState => ({
   installationDate: '',
+  installationTimeFrom: '',
+  installationTimeTo: '',
   dismantleDate: '',
+  dismantleTimeFrom: '',
+  dismantleTimeTo: '',
   deliveryType: 'delivery',
   deliveryAddress: '',
   comment: '',
@@ -74,6 +82,35 @@ const ensureQuantities = (products: ProductSummary[], previous?: Record<string, 
     quantities[product.id] = sanitizeQuantity(product, previousValue);
   });
   return quantities;
+};
+
+const formatTimeRange = (start: string | null, end: string | null): string | null => {
+  const normalize = (value: string | null) => {
+    if (!value) {
+      return null;
+    }
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return null;
+    }
+    const [hours, minutes] = trimmed.split(':');
+    if (!hours || !minutes) {
+      return trimmed;
+    }
+    return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+  };
+  const fromFormatted = normalize(start);
+  const toFormatted = normalize(end);
+  if (fromFormatted && toFormatted) {
+    return `${fromFormatted}–${toFormatted}`;
+  }
+  if (fromFormatted) {
+    return `${fromFormatted}–`;
+  }
+  if (toFormatted) {
+    return `–${toFormatted}`;
+  }
+  return null;
 };
 
 export default function Home() {
@@ -267,6 +304,7 @@ export default function Home() {
         productQuantities: sanitizedQuantities,
       }));
 
+      const normalizeTime = (value: string) => (value?.trim() ? value : null);
       const items = latestProducts
         .map((product) => {
           const quantity = sanitizedQuantities[product.id] ?? 0;
@@ -284,7 +322,11 @@ export default function Home() {
       const payload: CreateOrderPayload = {
         status: 'new',
         installation_date: orderForm.installationDate,
+        mount_datetime_from: normalizeTime(orderForm.installationTimeFrom),
+        mount_datetime_to: normalizeTime(orderForm.installationTimeTo),
         dismantle_date: orderForm.dismantleDate,
+        dismount_datetime_from: normalizeTime(orderForm.dismantleTimeFrom),
+        dismount_datetime_to: normalizeTime(orderForm.dismantleTimeTo),
         delivery_type: orderForm.deliveryType,
         delivery_address:
           orderForm.deliveryType === 'pickup' ? null : orderForm.deliveryAddress.trim() || null,
@@ -409,6 +451,66 @@ export default function Home() {
                       setOrderForm((prev) => ({ ...prev, dismantleDate: event.target.value }))
                     }
                     required
+                  />
+                </div>
+              </div>
+              <div className={styles.formRow}>
+                <div className={styles.fieldGroup}>
+                  <label className={styles.label} htmlFor="installation-time-from">
+                    Время монтажа с
+                  </label>
+                  <input
+                    id="installation-time-from"
+                    type="time"
+                    className={styles.input}
+                    value={orderForm.installationTimeFrom}
+                    onChange={(event) =>
+                      setOrderForm((prev) => ({ ...prev, installationTimeFrom: event.target.value }))
+                    }
+                  />
+                </div>
+                <div className={styles.fieldGroup}>
+                  <label className={styles.label} htmlFor="installation-time-to">
+                    Время монтажа до
+                  </label>
+                  <input
+                    id="installation-time-to"
+                    type="time"
+                    className={styles.input}
+                    value={orderForm.installationTimeTo}
+                    onChange={(event) =>
+                      setOrderForm((prev) => ({ ...prev, installationTimeTo: event.target.value }))
+                    }
+                  />
+                </div>
+              </div>
+              <div className={styles.formRow}>
+                <div className={styles.fieldGroup}>
+                  <label className={styles.label} htmlFor="dismantle-time-from">
+                    Время демонтажа с
+                  </label>
+                  <input
+                    id="dismantle-time-from"
+                    type="time"
+                    className={styles.input}
+                    value={orderForm.dismantleTimeFrom}
+                    onChange={(event) =>
+                      setOrderForm((prev) => ({ ...prev, dismantleTimeFrom: event.target.value }))
+                    }
+                  />
+                </div>
+                <div className={styles.fieldGroup}>
+                  <label className={styles.label} htmlFor="dismantle-time-to">
+                    Время демонтажа до
+                  </label>
+                  <input
+                    id="dismantle-time-to"
+                    type="time"
+                    className={styles.input}
+                    value={orderForm.dismantleTimeTo}
+                    onChange={(event) =>
+                      setOrderForm((prev) => ({ ...prev, dismantleTimeTo: event.target.value }))
+                    }
                   />
                 </div>
               </div>
@@ -565,7 +667,15 @@ export default function Home() {
                   Статус: <strong>{orderSuccess.status_label}</strong>
                 </p>
                 <p>Дата монтажа: {orderSuccess.installation_date}</p>
+                <p>
+                  Время монтажа:{' '}
+                  {formatTimeRange(orderSuccess.mount_datetime_from, orderSuccess.mount_datetime_to) ?? '—'}
+                </p>
                 <p>Дата демонтажа: {orderSuccess.dismantle_date}</p>
+                <p>
+                  Время демонтажа:{' '}
+                  {formatTimeRange(orderSuccess.dismount_datetime_from, orderSuccess.dismount_datetime_to) ?? '—'}
+                </p>
                 <p>
                   Доставка:{' '}
                   {orderSuccess.delivery_type === 'delivery'

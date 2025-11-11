@@ -160,7 +160,11 @@ export interface ProductListResponse {
 
 export interface CreateOrderPayload {
   installation_date: string;
+  mount_datetime_from: string | null;
+  mount_datetime_to: string | null;
   dismantle_date: string;
+  dismount_datetime_from: string | null;
+  dismount_datetime_to: string | null;
   delivery_type: 'delivery' | 'pickup';
   delivery_address?: string | null;
   comment?: string | null;
@@ -183,7 +187,11 @@ export interface OrderDetail {
   status: string;
   status_label: string;
   installation_date: string;
+  mount_datetime_from: string | null;
+  mount_datetime_to: string | null;
   dismantle_date: string;
+  dismount_datetime_from: string | null;
+  dismount_datetime_to: string | null;
   delivery_type: 'delivery' | 'pickup';
   delivery_address: string;
   comment: string;

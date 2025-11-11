@@ -4,6 +4,7 @@ const DISPLAY_DATE_PATTERN = /^(\d{2})\.(\d{2})\.(\d{4})(?:\s+(\d{2}):(\d{2})(?:
 const ISO_DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const ISO_DATE_TIME_PATTERN = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/;
 const ISO_DATE_TIME_WITH_SECONDS_PATTERN = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}/;
+const TIME_ONLY_PATTERN = /^(\d{2}):(\d{2})(?::(\d{2}))?$/;
 
 interface ParsedDateParts {
   year: number;
@@ -175,3 +176,24 @@ export const ensureDateDisplay = (value: string | null | undefined, fallback = '
 
 export const ensureDateTimeDisplay = (value: string | null | undefined, fallback = '—'): string =>
   formatDateTimeDisplay(value) ?? (value ? value : fallback);
+
+export const formatTimeDisplay = (value: string | null | undefined): string | null => {
+  const trimmed = value?.trim() ?? '';
+  if (!trimmed) {
+    return null;
+  }
+  const match = TIME_ONLY_PATTERN.exec(trimmed);
+  if (!match) {
+    return null;
+  }
+  const [, hours, minutes] = match;
+  return `${hours}:${minutes}`;
+};
+
+export const ensureTimeDisplay = (value: string | null | undefined, fallback = '—'): string =>
+  formatTimeDisplay(value) ?? (value ? value : fallback);
+
+export const toTimeInputValue = (value: string | null | undefined): string => {
+  const formatted = formatTimeDisplay(value);
+  return formatted ?? '';
+};

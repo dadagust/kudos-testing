@@ -5,13 +5,33 @@ import { useRouter } from 'next/navigation';
 
 import { OrderDetail, OrderStatus, ORDER_STATUS_LABELS, useOrderQuery } from '@/entities/order';
 import { RoleGuard } from '@/features/auth';
-import { ensureDateDisplay, ensureDateTimeDisplay } from '@/shared/lib/date';
+import { ensureDateDisplay, ensureDateTimeDisplay, ensureTimeDisplay } from '@/shared/lib/date';
 import { Alert, Badge, Button, Spinner, Table, Tag } from '@/shared/ui';
 import type { TableColumn } from '@/shared/ui';
 
 const formatDate = (value: string) => ensureDateDisplay(value);
 
 const formatDateTime = (value: string) => ensureDateTimeDisplay(value);
+
+const formatTime = (value: string | null | undefined) => ensureTimeDisplay(value);
+
+const formatTimeRange = (
+  start: string | null | undefined,
+  end: string | null | undefined
+): string | null => {
+  const startFormatted = formatTime(start);
+  const endFormatted = formatTime(end);
+  if (startFormatted !== '—' && endFormatted !== '—') {
+    return `${startFormatted}–${endFormatted}`;
+  }
+  if (startFormatted !== '—') {
+    return `${startFormatted}–`;
+  }
+  if (endFormatted !== '—') {
+    return `–${endFormatted}`;
+  }
+  return null;
+};
 
 const currencyFormatter = new Intl.NumberFormat('ru-RU', {
   style: 'currency',
@@ -141,10 +161,27 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                      Время монтажа
+                    </dt>
+                    <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
+                      {formatTimeRange(order.mount_datetime_from, order.mount_datetime_to) ?? '—'}
+                    </dd>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
                       Дата демонтажа
                     </dt>
                     <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
                       {formatDate(order.dismantle_date)}
+                    </dd>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                      Время демонтажа
+                    </dt>
+                    <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
+                      {formatTimeRange(order.dismount_datetime_from, order.dismount_datetime_to) ??
+                        '—'}
                     </dd>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>

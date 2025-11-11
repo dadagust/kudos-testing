@@ -62,7 +62,11 @@ class OrderApiTests(APITestCase):
         url = reverse('orders:order-list')
         payload = {
             'installation_date': '2024-06-01',
+            'mount_datetime_from': '09:00',
+            'mount_datetime_to': '11:00',
             'dismantle_date': '2024-06-05',
+            'dismount_datetime_from': '18:00',
+            'dismount_datetime_to': '20:00',
             'customer_id': str(self.customer.pk),
             'delivery_type': DeliveryType.DELIVERY,
             'delivery_address': 'Москва, ул. Тестовая, д. 1',
@@ -86,7 +90,11 @@ class OrderApiTests(APITestCase):
         self.assertEqual(data['delivery_type'], DeliveryType.DELIVERY)
         self.assertEqual(data['customer']['id'], str(self.customer.pk))
         self.assertEqual(data['installation_date'], '2024-06-01')
+        self.assertEqual(data['mount_datetime_from'], '09:00')
+        self.assertEqual(data['mount_datetime_to'], '11:00')
         self.assertEqual(data['dismantle_date'], '2024-06-05')
+        self.assertEqual(data['dismount_datetime_from'], '18:00')
+        self.assertEqual(data['dismount_datetime_to'], '20:00')
         self.assertGreater(float(data['total_amount']), 0)
         self.assertAlmostEqual(float(data['services_total_amount']), 500.0, places=2)
         item = data['items'][0]
