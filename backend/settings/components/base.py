@@ -58,7 +58,7 @@ ROOT_URLCONF = 'settings.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -88,6 +88,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
 MEDIA_URL = env('DJANGO_MEDIA_URL', default='/media/')
 MEDIA_ROOT = Path(env('DJANGO_MEDIA_ROOT', default=str(BASE_DIR / 'media')))
@@ -124,3 +125,8 @@ DATETIME_INPUT_FORMATS = [
     '%Y-%m-%dT%H:%M:%S',
     '%Y-%m-%dT%H:%M:%S.%fZ',
 ]
+
+WAYBILL_LANDLORD_NAME = 'ИП Климовицкий Алексей Михайлович'
+WAYBILL_LANDLORD_ADDR = '105187, г. Москва, г. Москва, Вернисажная ул., 6'
+WAYBILL_LOGO_PATH = 'img/kudos-logo.svg'
+WAYBILL_DEFAULT_FONT = 'DejaVu Sans'
