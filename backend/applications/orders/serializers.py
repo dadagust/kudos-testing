@@ -173,7 +173,7 @@ class OrderSummarySerializer(serializers.ModelSerializer):
         read_only=True,
     )
     logistics_state_label = serializers.SerializerMethodField()
-    delivery_address = serializers.CharField(source='delivery_address', read_only=True)
+    delivery_address = serializers.CharField(read_only=True)
     delivery_address_input = serializers.CharField(read_only=True)
     delivery_address_full = serializers.CharField(read_only=True)
     delivery_lat = serializers.DecimalField(
