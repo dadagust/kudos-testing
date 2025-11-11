@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { FormEvent, useMemo, useState } from 'react';
 
 import {
   LOGISTICS_STATE_LABELS,
@@ -74,7 +74,18 @@ export default function LogisticsPrepPage() {
   const [logisticsFilters, setLogisticsFilters] = useState<Array<LogisticsState | 'null'>>([]);
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
-  const [search, setSearch] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSearchTerm(searchInput.trim());
+  };
+
+  const handleResetSearch = () => {
+    setSearchInput('');
+    setSearchTerm('');
+  };
 
   const query = useMemo(
     () => ({
@@ -82,10 +93,11 @@ export default function LogisticsPrepPage() {
       logistics_state: logisticsFilters.length ? logisticsFilters : undefined,
       shipment_date_from: dateFrom || undefined,
       shipment_date_to: dateTo || undefined,
-      q: search.trim() || undefined,
+      search: searchTerm || undefined,
+      q: searchTerm || undefined,
       status_group: 'current' as const,
     }),
-    [paymentFilters, logisticsFilters, dateFrom, dateTo, search]
+    [paymentFilters, logisticsFilters, dateFrom, dateTo, searchTerm]
   );
 
   const { data, isLoading, isFetching, refetch } = useOrdersQuery(query);
@@ -149,7 +161,7 @@ export default function LogisticsPrepPage() {
     setLogisticsFilters([]);
     setDateFrom('');
     setDateTo('');
-    setSearch('');
+    handleResetSearch();
     void refetch();
   };
 
@@ -217,13 +229,18 @@ export default function LogisticsPrepPage() {
             <Input type="date" value={dateTo} onChange={(event) => setDateTo(event.target.value)} />
           </FormField>
         </div>
-        <FormField label="Поиск по номеру">
+        <form className={styles.searchForm} onSubmit={handleSearchSubmit}>
           <Input
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Например, 1024"
+            value={searchInput}
+            onChange={(event) => setSearchInput(event.target.value)}
+            placeholder="Поиск по адресу или комментарию"
+            className={styles.searchInput}
           />
-        </FormField>
+          <Button type="submit">Найти</Button>
+          <Button type="button" variant="ghost" onClick={handleResetSearch}>
+            Сбросить
+          </Button>
+        </form>
         <div className={styles.filterActions}>
           <Button variant="ghost" onClick={resetFilters}>
             Сбросить фильтры
