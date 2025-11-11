@@ -133,8 +133,42 @@ class Order(Date):
         null=True,
         related_name='received_orders',
     )
-    delivery_address = models.CharField(
-        verbose_name='Адрес доставки',
+    delivery_address_input = models.CharField(
+        verbose_name='Адрес доставки (ввод)',
+        max_length=255,
+        blank=True,
+    )
+    delivery_address_full = models.CharField(
+        verbose_name='Адрес доставки (нормализованный)',
+        max_length=512,
+        blank=True,
+    )
+    delivery_lat = models.DecimalField(
+        verbose_name='Широта',
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True,
+    )
+    delivery_lon = models.DecimalField(
+        verbose_name='Долгота',
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True,
+    )
+    delivery_address_kind = models.CharField(
+        verbose_name='Тип объекта (kind)',
+        max_length=32,
+        blank=True,
+    )
+    delivery_address_precision = models.CharField(
+        verbose_name='Точность (precision)',
+        max_length=32,
+        blank=True,
+    )
+    yandex_uri = models.CharField(
+        verbose_name='URI в Яндекс',
         max_length=255,
         blank=True,
     )
@@ -188,6 +222,18 @@ class Order(Date):
     @property
     def is_warehouse_received(self) -> bool:
         return self.warehouse_received_at is not None
+
+    @property
+    def delivery_address(self) -> str:
+        """Return the preferred address representation for backward compatibility."""
+
+        return self.delivery_address_full or self.delivery_address_input
+
+    def has_exact_address(self) -> bool:
+        return (
+            self.delivery_address_kind == 'house'
+            and self.delivery_address_precision == 'exact'
+        )
 
 
 class OrderItem(Date):

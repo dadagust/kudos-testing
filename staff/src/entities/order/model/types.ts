@@ -78,6 +78,14 @@ export interface OrderSummary {
   delivery_type: DeliveryType;
   delivery_type_label: string;
   delivery_address: string;
+  delivery_address_input: string;
+  delivery_address_full: string;
+  delivery_lat: number | null;
+  delivery_lon: number | null;
+  delivery_address_kind: string;
+  delivery_address_precision: string;
+  yandex_uri: string;
+  has_exact_address: boolean;
   comment: string;
   warehouse_received_at: string | null;
   warehouse_received_by: number | null;
@@ -149,3 +157,27 @@ export interface CreateOrderPayload {
 }
 
 export type UpdateOrderPayload = CreateOrderPayload;
+
+export interface OrderValidateAddressResponse {
+  ok: boolean;
+  exists: boolean;
+  normalized: string;
+  lat: number | null;
+  lon: number | null;
+  kind: string;
+  precision: string;
+  uri: string;
+  order: OrderSummary;
+}
+
+export interface OrderWithCoordsItem {
+  id: number;
+  address: string;
+  lat: number;
+  lon: number;
+  exact: boolean;
+}
+
+export interface OrdersWithCoordsResponse {
+  items: OrderWithCoordsItem[];
+}

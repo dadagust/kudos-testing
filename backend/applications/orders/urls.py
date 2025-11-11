@@ -4,7 +4,7 @@ from django.urls import path
 
 from applications.common.url_utils import allow_optional_trailing_slash
 
-from .views import OrderCalculationView, OrderViewSet
+from .views import OrderCalculationView, OrderViewSet, OrdersWithCoordsView
 
 app_name = 'orders'
 
@@ -65,6 +65,11 @@ urlpatterns = allow_optional_trailing_slash(
             name='order-receive',
         ),
         path(
+            'order/<int:pk>/validate-address/',
+            OrderViewSet.as_view({'post': 'validate_address'}),
+            name='order-validate-address',
+        ),
+        path(
             'orders/',
             OrderViewSet.as_view(
                 {
@@ -112,6 +117,16 @@ urlpatterns = allow_optional_trailing_slash(
                 }
             ),
             name='orders-receive',
+        ),
+        path(
+            'orders/<int:pk>/validate-address/',
+            OrderViewSet.as_view({'post': 'validate_address'}),
+            name='orders-validate-address',
+        ),
+        path(
+            'orders-with-coords/',
+            OrdersWithCoordsView.as_view(),
+            name='orders-with-coords',
         ),
     ]
 )

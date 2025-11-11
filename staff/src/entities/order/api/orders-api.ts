@@ -10,7 +10,9 @@ import {
   OrderListQuery,
   OrderListResponse,
   OrderSummary,
+  OrderValidateAddressResponse,
   PaymentStatus,
+  OrdersWithCoordsResponse,
   UpdateOrderPayload,
 } from '../model/types';
 
@@ -126,5 +128,19 @@ export const ordersApi = {
   receive: async (orderId: number | string): Promise<OrderDetailResponse> => {
     const { data } = await apiV1Client.post<OrderDetailResponse>(`/orders/${orderId}/receive/`, {});
     return { data: normalizeOrder(data.data) };
+  },
+  validateAddress: async (
+    orderId: number | string,
+    input: string
+  ): Promise<OrderValidateAddressResponse> => {
+    const { data } = await apiV1Client.post<OrderValidateAddressResponse>(
+      `/orders/${orderId}/validate-address/`,
+      { input }
+    );
+    return { ...data, order: normalizeOrder(data.order) };
+  },
+  listWithCoords: async (): Promise<OrdersWithCoordsResponse> => {
+    const { data } = await apiV1Client.get<OrdersWithCoordsResponse>('/orders-with-coords/');
+    return data;
   },
 };

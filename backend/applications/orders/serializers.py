@@ -173,6 +173,19 @@ class OrderSummarySerializer(serializers.ModelSerializer):
         read_only=True,
     )
     logistics_state_label = serializers.SerializerMethodField()
+    delivery_address = serializers.CharField(source='delivery_address', read_only=True)
+    delivery_address_input = serializers.CharField(read_only=True)
+    delivery_address_full = serializers.CharField(read_only=True)
+    delivery_lat = serializers.DecimalField(
+        max_digits=9, decimal_places=6, read_only=True, allow_null=True
+    )
+    delivery_lon = serializers.DecimalField(
+        max_digits=9, decimal_places=6, read_only=True, allow_null=True
+    )
+    delivery_address_kind = serializers.CharField(read_only=True)
+    delivery_address_precision = serializers.CharField(read_only=True)
+    yandex_uri = serializers.CharField(read_only=True)
+    has_exact_address = serializers.SerializerMethodField()
     warehouse_received_by = serializers.IntegerField(
         source='warehouse_received_by_id',
         read_only=True,
@@ -201,6 +214,14 @@ class OrderSummarySerializer(serializers.ModelSerializer):
             'delivery_type',
             'delivery_type_label',
             'delivery_address',
+            'delivery_address_input',
+            'delivery_address_full',
+            'delivery_lat',
+            'delivery_lon',
+            'delivery_address_kind',
+            'delivery_address_precision',
+            'yandex_uri',
+            'has_exact_address',
             'comment',
             'warehouse_received_at',
             'warehouse_received_by',
@@ -222,6 +243,9 @@ class OrderSummarySerializer(serializers.ModelSerializer):
         if not state:
             return None
         return dict(LogisticsState.choices).get(state)
+
+    def get_has_exact_address(self, obj: Order) -> bool:
+        return obj.has_exact_address()
 
 
 class OrderDetailSerializer(OrderSummarySerializer):
@@ -405,6 +429,7 @@ class OrderWriteSerializer(serializers.ModelSerializer):
         required=False,
     )
     delivery_address = serializers.CharField(
+        source='delivery_address_input',
         allow_blank=True,
         allow_null=True,
         required=False,
@@ -451,14 +476,20 @@ class OrderWriteSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         delivery_type = attrs.get('delivery_type') or getattr(self.instance, 'delivery_type', None)
-        delivery_address_input = attrs.get('delivery_address', serializers.empty)
+        delivery_address_input = attrs.get('delivery_address_input', serializers.empty)
+        current_input = getattr(self.instance, 'delivery_address_input', '')
+        current_full = getattr(self.instance, 'delivery_address_full', '')
+        normalized_provided_input = None
         if delivery_address_input is serializers.empty:
-            delivery_address = getattr(self.instance, 'delivery_address', '')
+            delivery_address = current_input or current_full
         elif delivery_address_input in (None, ''):
             delivery_address = ''
-            attrs['delivery_address'] = ''
+            attrs['delivery_address_input'] = ''
+            normalized_provided_input = ''
         else:
-            delivery_address = delivery_address_input
+            normalized_provided_input = str(delivery_address_input).strip()
+            attrs['delivery_address_input'] = normalized_provided_input
+            delivery_address = normalized_provided_input
         if delivery_type == DeliveryType.DELIVERY and not delivery_address:
             raise serializers.ValidationError(
                 {'delivery_address': 'Укажите адрес доставки или выберите самовывоз.'}
@@ -481,7 +512,11 @@ class OrderWriteSerializer(serializers.ModelSerializer):
         if items is not None and len(items) == 0:
             raise serializers.ValidationError({'items': 'Добавьте хотя бы один товар.'})
         if delivery_type == DeliveryType.PICKUP:
-            attrs['delivery_address'] = ''
+            attrs['delivery_address_input'] = ''
+            self._reset_delivery_metadata(attrs)
+        elif normalized_provided_input is not None:
+            if normalized_provided_input != (current_input or '').strip():
+                self._reset_delivery_metadata(attrs)
         if 'comment' in attrs and attrs['comment'] in (None, ''):
             attrs['comment'] = ''
 
@@ -572,6 +607,15 @@ class OrderWriteSerializer(serializers.ModelSerializer):
         instance.recalculate_total_amount()
         instance.save(update_fields=['total_amount', 'services_total_amount'])
         return instance
+
+    @staticmethod
+    def _reset_delivery_metadata(attrs: dict[str, Any]) -> None:
+        attrs['delivery_address_full'] = ''
+        attrs['delivery_lat'] = None
+        attrs['delivery_lon'] = None
+        attrs['delivery_address_kind'] = ''
+        attrs['delivery_address_precision'] = ''
+        attrs['yandex_uri'] = ''
 
     def _replace_items(
         self,

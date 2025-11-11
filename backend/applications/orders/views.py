@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from decimal import Decimal
+
+import requests
 from django.db import models, transaction
 from django.db.models import Q
 from django.db.models.functions import Cast
@@ -25,6 +28,7 @@ from .serializers import (
     OrderWriteSerializer,
 )
 from .services import reset_order_transactions
+from .services.yandex_maps import YandexMapsError, geocode_address
 
 
 class OrderViewSet(viewsets.ModelViewSet):
@@ -103,7 +107,8 @@ class OrderViewSet(viewsets.ModelViewSet):
         if normalized_order_query:
             queryset = queryset.filter(
                 Q(number_str__icontains=normalized_order_query)
-                | Q(delivery_address__icontains=normalized_order_query)
+                | Q(delivery_address_input__icontains=normalized_order_query)
+                | Q(delivery_address_full__icontains=normalized_order_query)
                 | Q(comment__icontains=normalized_order_query)
             )
 
@@ -111,7 +116,8 @@ class OrderViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(
                 Q(number_str__icontains=normalized_search)
                 | Q(comment__icontains=normalized_search)
-                | Q(delivery_address__icontains=normalized_search)
+                | Q(delivery_address_input__icontains=normalized_search)
+                | Q(delivery_address_full__icontains=normalized_search)
                 | Q(customer__display_name__icontains=normalized_search)
                 | Q(customer__first_name__icontains=normalized_search)
                 | Q(customer__last_name__icontains=normalized_search)
@@ -206,6 +212,70 @@ class OrderViewSet(viewsets.ModelViewSet):
         read_serializer = OrderSummarySerializer(order, context=self.get_serializer_context())
         return Response({'data': read_serializer.data})
 
+    @action(detail=True, methods=['post'], url_path='validate-address')
+    def validate_address(self, request, *args, **kwargs):
+        order = self.get_object()
+        query = (request.data.get('input') or '').strip()
+        if not query:
+            return Response(
+                {'ok': False, 'reason': 'empty', 'message': 'Укажите адрес для валидации.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            geocoded = geocode_address(query)
+        except YandexMapsError as exc:
+            return Response(
+                {'ok': False, 'reason': 'configuration', 'message': str(exc)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        except requests.RequestException as exc:
+            return Response(
+                {'ok': False, 'reason': 'network', 'message': str(exc)},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+
+        if not geocoded:
+            return Response(
+                {'ok': False, 'reason': 'not_found', 'message': 'Адрес не найден.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        order.delivery_address_input = query
+        order.delivery_address_full = geocoded.get('normalized', '') or ''
+        lat = geocoded.get('lat')
+        lon = geocoded.get('lon')
+        order.delivery_lat = Decimal(str(lat)) if lat is not None else None
+        order.delivery_lon = Decimal(str(lon)) if lon is not None else None
+        order.delivery_address_kind = geocoded.get('kind', '') or ''
+        order.delivery_address_precision = geocoded.get('precision', '') or ''
+        order.yandex_uri = geocoded.get('uri', '') or ''
+        order.save(
+            update_fields=[
+                'delivery_address_input',
+                'delivery_address_full',
+                'delivery_lat',
+                'delivery_lon',
+                'delivery_address_kind',
+                'delivery_address_precision',
+                'yandex_uri',
+            ]
+        )
+
+        read_serializer = OrderSummarySerializer(order, context=self.get_serializer_context())
+        response_payload = {
+            'ok': True,
+            'exists': order.has_exact_address(),
+            'normalized': order.delivery_address_full,
+            'lat': lat,
+            'lon': lon,
+            'kind': order.delivery_address_kind,
+            'precision': order.delivery_address_precision,
+            'uri': order.yandex_uri,
+            'order': read_serializer.data,
+        }
+        return Response(response_payload, status=status.HTTP_200_OK)
+
 
 class OrderCalculationView(APIView):
     permission_classes = (
@@ -221,3 +291,26 @@ class OrderCalculationView(APIView):
         serializer.is_valid(raise_exception=True)
         result = serializer.calculate()
         return Response({'data': result}, status=status.HTTP_200_OK)
+
+
+class OrdersWithCoordsView(APIView):
+    permission_classes = (
+        IsAuthenticated,
+        OrderAccessPolicy,
+    )
+
+    def get(self, request, *args, **kwargs):
+        queryset = (
+            Order.objects.exclude(delivery_lat__isnull=True).exclude(delivery_lon__isnull=True)
+        )
+        items = [
+            {
+                'id': order.pk,
+                'address': order.delivery_address_full or order.delivery_address_input,
+                'lat': float(order.delivery_lat),
+                'lon': float(order.delivery_lon),
+                'exact': order.has_exact_address(),
+            }
+            for order in queryset
+        ]
+        return Response({'items': items}, status=status.HTTP_200_OK)
