@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
 import Link from 'next/link';
-import { FormEvent, useMemo, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
 
 import {
   LOGISTICS_STATE_LABELS,
@@ -79,13 +79,22 @@ export default function LogisticsPrepPage() {
 
   const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setSearchTerm(searchInput.trim());
   };
 
   const handleResetSearch = () => {
     setSearchInput('');
     setSearchTerm('');
   };
+
+  useEffect(() => {
+    const normalizedInput = searchInput.trim();
+
+    if (normalizedInput === searchTerm) {
+      return;
+    }
+
+    setSearchTerm(normalizedInput);
+  }, [searchInput, searchTerm]);
 
   const query = useMemo(
     () => ({
@@ -233,7 +242,7 @@ export default function LogisticsPrepPage() {
           <Input
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}
-            placeholder="Поиск по адресу или комментарию"
+            placeholder="Поиск по номеру, адресу или комментарию"
             className={styles.searchInput}
           />
           <Button type="submit">Найти</Button>
