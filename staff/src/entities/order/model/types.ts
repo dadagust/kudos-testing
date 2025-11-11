@@ -111,6 +111,18 @@ export interface OrderDetailResponse {
   data: OrderDetail;
 }
 
+export interface OrderDriverSummary {
+  id: number;
+  full_name: string;
+  phone: string;
+  created: string;
+  modified: string;
+}
+
+export interface OrderDriverResponse {
+  data: OrderDriverSummary;
+}
+
 export interface OrderCalculationItem {
   product_id: string;
   quantity: number;
@@ -190,8 +202,14 @@ export interface OrderWithCoordsItem {
   lat: number;
   lon: number;
   exact: boolean;
+  driver: OrderDriverSummary | null;
 }
 
 export interface OrdersWithCoordsResponse {
   items: OrderWithCoordsItem[];
+}
+
+export interface AssignOrderDriverPayload {
+  full_name: string;
+  phone: string;
 }

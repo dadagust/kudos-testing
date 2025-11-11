@@ -16,6 +16,7 @@ from applications.orders.models import (
     DeliveryType,
     LogisticsState,
     Order,
+    OrderDriver,
     OrderStatus,
     PaymentStatus,
 )
@@ -281,6 +282,28 @@ class OrderApiTests(APITestCase):
         self.assertAlmostEqual(entry['lat'], 55.7570, places=4)
         self.assertAlmostEqual(entry['lon'], 37.6150, places=4)
         self.assertTrue(entry['exact'])
+        self.assertIsNone(entry['driver'])
+
+    def test_orders_with_coords_includes_driver(self):
+        order_data = self._create_order()
+        order = Order.objects.get(pk=order_data['id'])
+        order.delivery_address_input = 'Санкт-Петербург, Невский проспект, 10'
+        order.delivery_address_full = 'Россия, Санкт-Петербург, Невский проспект, 10'
+        order.delivery_lat = Decimal('59.9343')
+        order.delivery_lon = Decimal('30.3351')
+        order.save()
+
+        OrderDriver.objects.create(order=order, full_name='Алексей Смирнов', phone='+79995556677')
+
+        url = reverse('orders:orders-with-coords')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        items = response.json()['items']
+        self.assertEqual(len(items), 1)
+        entry = items[0]
+        self.assertIsNotNone(entry['driver'])
+        self.assertEqual(entry['driver']['full_name'], 'Алексей Смирнов')
+        self.assertEqual(entry['driver']['phone'], '+79995556677')
 
     def test_installer_qualification_counted_once(self):
         url = reverse('orders:order-list')
@@ -373,6 +396,37 @@ class OrderApiTests(APITestCase):
         list_url = reverse('orders:orders-list')
         response = self.client.get(list_url, {'logistics_state': [LogisticsState.SHIPPED]})
         self.assertEqual(len(response.json()['data']), 1)
+
+    def test_assign_driver_creates_and_updates(self):
+        order_data = self._create_order()
+        order_id = order_data['id']
+        url = reverse('orders:orders-assign-driver', args=[order_id])
+
+        response = self.client.post(
+            url,
+            {'full_name': 'Иван Петров', 'phone': '+7 (999) 111-22-33'},
+            format='json',
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        payload = response.json()['data']
+        self.assertEqual(payload['full_name'], 'Иван Петров')
+        self.assertEqual(payload['phone'], '+79991112233')
+        driver = OrderDriver.objects.get(order_id=order_id)
+        self.assertEqual(driver.full_name, 'Иван Петров')
+        self.assertEqual(driver.phone, '+79991112233')
+
+        response = self.client.post(
+            url,
+            {'full_name': 'Александр Иванов', 'phone': '+7 (999) 444-55-66'},
+            format='json',
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        payload = response.json()['data']
+        self.assertEqual(payload['full_name'], 'Александр Иванов')
+        self.assertEqual(payload['phone'], '+79994445566')
+        driver.refresh_from_db()
+        self.assertEqual(driver.full_name, 'Александр Иванов')
+        self.assertEqual(driver.phone, '+79994445566')
 
         receive_url = reverse('orders:orders-receive', args=[order_id])
         response = self.client.post(receive_url, {}, format='json')

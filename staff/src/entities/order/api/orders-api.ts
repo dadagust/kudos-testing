@@ -2,18 +2,20 @@ import { API_ROOT, apiV1Client, httpClient } from '@/shared/api/httpClient';
 import { ensureAbsoluteUrl } from '@/shared/lib/url';
 
 import {
+  AssignOrderDriverPayload,
   CreateOrderPayload,
   LogisticsState,
   OrderWaybillContext,
   OrderCalculationResponse,
   OrderDetail,
   OrderDetailResponse,
+  OrderDriverResponse,
   OrderListQuery,
   OrderListResponse,
   OrderSummary,
   OrderValidateAddressResponse,
-  PaymentStatus,
   OrdersWithCoordsResponse,
+  PaymentStatus,
   UpdateOrderPayload,
 } from '../model/types';
 
@@ -158,6 +160,16 @@ export const ordersApi = {
   },
   listWithCoords: async (): Promise<OrdersWithCoordsResponse> => {
     const { data } = await apiV1Client.get<OrdersWithCoordsResponse>('/orders-with-coords/');
+    return data;
+  },
+  assignDriver: async (
+    orderId: number | string,
+    payload: AssignOrderDriverPayload
+  ): Promise<OrderDriverResponse> => {
+    const { data } = await apiV1Client.post<OrderDriverResponse>(
+      `/orders/${orderId}/driver/`,
+      payload
+    );
     return data;
   },
   downloadWaybill: async (

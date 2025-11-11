@@ -70,6 +70,11 @@ urlpatterns = allow_optional_trailing_slash(
             name='order-validate-address',
         ),
         path(
+            'order/<int:pk>/driver/',
+            OrderViewSet.as_view({'post': 'assign_driver'}),
+            name='order-assign-driver',
+        ),
+        path(
             'orders/',
             OrderViewSet.as_view(
                 {
@@ -122,6 +127,11 @@ urlpatterns = allow_optional_trailing_slash(
             'orders/<int:pk>/validate-address/',
             OrderViewSet.as_view({'post': 'validate_address'}),
             name='orders-validate-address',
+        ),
+        path(
+            'orders/<int:pk>/driver/',
+            OrderViewSet.as_view({'post': 'assign_driver'}),
+            name='orders-assign-driver',
         ),
         path(
             'orders-with-coords/',

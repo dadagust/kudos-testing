@@ -18,10 +18,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Order, OrderStatus
+from .models import Order, OrderDriver, OrderStatus
 from .permissions import OrderAccessPolicy
 from .serializers import (
     OrderAddressValidationSerializer,
+    OrderDriverAssignSerializer,
+    OrderDriverSerializer,
     OrderLogisticsStateUpdateSerializer,
     OrderCalculationSerializer,
     OrderDetailSerializer,
@@ -174,6 +176,28 @@ class OrderViewSet(viewsets.ModelViewSet):
         if instance.status != OrderStatus.DECLINED:
             reset_order_transactions(instance)
         super().perform_destroy(instance)
+
+    @action(detail=True, methods=['post'], url_path='driver')
+    def assign_driver(self, request, *args, **kwargs):
+        order = self.get_object()
+        serializer = OrderDriverAssignSerializer(data=request.data or {})
+        serializer.is_valid(raise_exception=True)
+        payload = serializer.validated_data
+
+        created = False
+        try:
+            driver = order.driver
+        except OrderDriver.DoesNotExist:
+            driver = OrderDriver(order=order)
+            created = True
+
+        driver.full_name = payload['full_name']
+        driver.phone = payload['phone']
+        driver.save()
+
+        read_serializer = OrderDriverSerializer(driver)
+        status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
+        return Response({'data': read_serializer.data}, status=status_code)
 
     @action(detail=True, methods=['patch'], url_path='payment-status')
     def update_payment_status(self, request, *args, **kwargs):
@@ -365,16 +389,29 @@ class OrdersWithCoordsView(APIView):
 
     def get(self, request, *args, **kwargs):
         queryset = (
-            Order.objects.exclude(delivery_lat__isnull=True).exclude(delivery_lon__isnull=True)
+            Order.objects.exclude(delivery_lat__isnull=True)
+            .exclude(delivery_lon__isnull=True)
+            .select_related('driver')
         )
-        items = [
-            {
-                'id': order.pk,
-                'address': order.delivery_address_full or order.delivery_address_input,
-                'lat': float(order.delivery_lat),
-                'lon': float(order.delivery_lon),
-                'exact': order.has_exact_address(),
-            }
-            for order in queryset
-        ]
+        items = []
+        for order in queryset:
+            driver = getattr(order, 'driver', None)
+            items.append(
+                {
+                    'id': order.pk,
+                    'address': order.delivery_address_full or order.delivery_address_input,
+                    'lat': float(order.delivery_lat),
+                    'lon': float(order.delivery_lon),
+                    'exact': order.has_exact_address(),
+                    'driver': (
+                        {
+                            'id': driver.pk,
+                            'full_name': driver.full_name,
+                            'phone': driver.phone,
+                        }
+                        if driver
+                        else None
+                    ),
+                }
+            )
         return Response({'items': items}, status=status.HTTP_200_OK)

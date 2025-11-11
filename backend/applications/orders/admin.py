@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from django.contrib import admin
 
-from .models import Order, OrderItem
+from .models import Order, OrderDriver, OrderItem
 
 
 class OrderItemInline(admin.TabularInline):
@@ -62,3 +62,20 @@ class OrderItemAdmin(admin.ModelAdmin):
         'order',
         'product',
     )
+
+
+@admin.register(OrderDriver)
+class OrderDriverAdmin(admin.ModelAdmin):
+    list_display = (
+        'order',
+        'full_name',
+        'phone',
+        'created',
+    )
+    search_fields = (
+        'order__id',
+        'full_name',
+        'phone',
+        'phone_normalized',
+    )
+    raw_id_fields = ('order',)
