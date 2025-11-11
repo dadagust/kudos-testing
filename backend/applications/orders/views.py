@@ -21,6 +21,7 @@ from rest_framework.views import APIView
 from .models import Order, OrderStatus
 from .permissions import OrderAccessPolicy
 from .serializers import (
+    OrderAddressValidationSerializer,
     OrderLogisticsStateUpdateSerializer,
     OrderCalculationSerializer,
     OrderDetailSerializer,
@@ -281,12 +282,18 @@ class YandexSuggestView(APIView):
     @action(detail=True, methods=['post'], url_path='validate-address')
     def validate_address(self, request, *args, **kwargs):
         order = self.get_object()
-        query = (request.data.get('input') or '').strip()
-        if not query:
+        serializer = OrderAddressValidationSerializer(data=request.data)
+        if not serializer.is_valid():
+            error_message = serializer.errors.get('input')
+            if isinstance(error_message, list) and error_message:
+                message = str(error_message[0])
+            else:
+                message = 'Укажите адрес для валидации.'
             return Response(
-                {'ok': False, 'reason': 'empty', 'message': 'Укажите адрес для валидации.'},
+                {'ok': False, 'reason': 'empty', 'message': message},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        query = serializer.validated_data['input']
 
         try:
             geocoded = geocode_address(query)

@@ -200,6 +200,18 @@ class OrderApiTests(APITestCase):
         self.assertEqual(order.delivery_lat, Decimal('55.7539'))
         self.assertEqual(order.delivery_lon, Decimal('37.6208'))
 
+    def test_validate_address_requires_input(self):
+        order_data = self._create_order()
+        url = reverse('orders:orders-validate-address', args=[order_data['id']])
+
+        response = self.client.post(url, {'input': '   '}, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        payload = response.json()
+        self.assertFalse(payload['ok'])
+        self.assertEqual(payload['reason'], 'empty')
+        self.assertEqual(payload['message'], 'Укажите адрес для валидации.')
+
     @override_settings(GEOSUGGEST_KEY='test-geosuggest-key')
     def test_yandex_suggest_proxies_response(self):
         url = reverse('orders:ymaps-suggest')

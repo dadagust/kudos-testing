@@ -164,6 +164,23 @@ class OrderItemSerializer(serializers.ModelSerializer):
         return tiers
 
 
+class OrderAddressValidationSerializer(serializers.Serializer):
+    """Validate the payload for the address validation endpoint."""
+
+    input = serializers.CharField(allow_blank=False, trim_whitespace=True)
+
+    default_error_messages = {
+        'blank': 'Укажите адрес для валидации.',
+        'empty': 'Укажите адрес для валидации.',
+    }
+
+    def validate_input(self, value: str) -> str:
+        value = (value or '').strip()
+        if not value:
+            self.fail('empty')
+        return value
+
+
 class OrderSummarySerializer(serializers.ModelSerializer):
     customer = CustomerSummarySerializer(read_only=True)
     status_label = serializers.CharField(source='get_status_display', read_only=True)
