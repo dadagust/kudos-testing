@@ -4,7 +4,7 @@ from django.urls import path
 
 from applications.common.url_utils import allow_optional_trailing_slash
 
-from .views import OrderCalculationView, OrderViewSet, OrdersWithCoordsView
+from .views import OrderCalculationView, OrderViewSet, OrdersWithCoordsView, YandexSuggestView
 
 app_name = 'orders'
 
@@ -128,5 +128,6 @@ urlpatterns = allow_optional_trailing_slash(
             OrdersWithCoordsView.as_view(),
             name='orders-with-coords',
         ),
+        path('ymaps/suggest/', YandexSuggestView.as_view(), name='ymaps-suggest'),
     ]
 )
