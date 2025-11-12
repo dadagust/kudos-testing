@@ -1,7 +1,6 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import Image from 'next/image';
 import Link from 'next/link';
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 
@@ -12,7 +11,7 @@ import {
   useOrderWaybill,
   useOrdersQuery,
 } from '@/entities/order';
-import { formatDateDisplay } from '@/shared/lib/date';
+import { formatDateDisplay, formatTimeDisplay } from '@/shared/lib/date';
 import { Accordion, Button, FormField, Input, Spinner, Tag } from '@/shared/ui';
 
 import { openWaybillPreviewWindow } from '../utils/openWaybillPreviewWindow';
@@ -25,6 +24,25 @@ const formatDismantleGroup = (value: string | null) => {
   }
 
   return formatDateDisplay(value) ?? value;
+};
+
+const formatTimeRange = (
+  start: string | null | undefined,
+  end: string | null | undefined
+): string | null => {
+  const formattedStart = formatTimeDisplay(start) ?? '';
+  const formattedEnd = formatTimeDisplay(end) ?? '';
+
+  if (formattedStart && formattedEnd) {
+    return `${formattedStart}–${formattedEnd}`;
+  }
+  if (formattedStart) {
+    return `${formattedStart}–`;
+  }
+  if (formattedEnd) {
+    return `–${formattedEnd}`;
+  }
+  return null;
 };
 
 export default function LogisticsReceivingPage() {
@@ -163,74 +181,69 @@ export default function LogisticsReceivingPage() {
             }
           >
             <div className={styles.list}>
-              {group.items.map((order) => (
-                <article key={order.id} className={styles.card}>
-                  <header className={styles.cardHeader}>
-                    <div>
-                      <Link href={`/orders/${order.id}`} className={styles.cardTitle}>
-                        Заказ #{order.id}
-                      </Link>
-                      <div className={styles.cardMeta}>
-                        <span>
-                          {order.delivery_type === 'delivery' ? 'Адресная доставка' : 'Самовывоз'}
-                        </span>
-                        <span>Демонтаж: {formatDismantleGroup(order.dismantle_date)}</span>
-                        <span>{LOGISTICS_STATE_LABELS[order.logistics_state ?? 'shipped']}</span>
-                        {order.comment ? (
-                          <span className={styles.comment}>{order.comment}</span>
-                        ) : null}
-                        {order.comment_for_waybill ? (
-                          <span className={styles.comment}>
-                            Накладная: {order.comment_for_waybill}
+              {group.items.map((order) => {
+                const totalQuantity = order.items.reduce((sum, item) => sum + item.quantity, 0);
+                const uniqueProducts = new Set(
+                  order.items.map((item) => item.product?.id ?? `custom:${item.product_name}`)
+                ).size;
+                const address = order.delivery_address_full || order.delivery_address;
+                const dismountRange = formatTimeRange(
+                  order.dismount_datetime_from,
+                  order.dismount_datetime_to
+                );
+                return (
+                  <article key={order.id} className={styles.card}>
+                    <header className={styles.cardHeader}>
+                      <div>
+                        <Link href={`/orders/${order.id}`} className={styles.cardTitle}>
+                          Заказ #{order.id}
+                        </Link>
+                        <div className={styles.cardMeta}>
+                          <span>
+                            {order.delivery_type === 'delivery' ? 'Адресная доставка' : 'Самовывоз'}
                           </span>
-                        ) : null}
-                      </div>
-                    </div>
-                    <div className={styles.cardActions}>
-                      <Button
-                        variant="ghost"
-                        iconLeft="print"
-                        onClick={() => handleWaybillClick(order.id)}
-                        disabled={
-                          waybillMutation.isPending &&
-                          waybillMutation.variables?.orderId === order.id
-                        }
-                      >
-                        Накладная
-                      </Button>
-                      <Button
-                        variant="primary"
-                        onClick={() => receiveMutation.mutate(order.id)}
-                        disabled={receiveMutation.isPending}
-                      >
-                        Принят на склад
-                      </Button>
-                    </div>
-                  </header>
-                  <ul className={styles.items}>
-                    {order.items.map((item) => (
-                      <li key={item.id} className={styles.itemRow}>
-                        {item.product?.thumbnail_url ? (
-                          <Image
-                            src={item.product.thumbnail_url}
-                            alt={item.product.name}
-                            className={styles.itemImage}
-                            width={120}
-                            height={120}
-                            unoptimized
-                          />
-                        ) : null}
-                        <div>
-                          <span className={styles.itemTitle}>
-                            {item.product?.name ?? item.product_name}
-                          </span>
-                          <span className={styles.itemMeta}>{item.quantity} шт.</span>
+                          {address ? <span>{address}</span> : null}
+                          <span>Демонтаж: {formatDismantleGroup(order.dismantle_date)}</span>
+                          <span>Время демонтажа: {dismountRange ?? '—'}</span>
+                          <span>{LOGISTICS_STATE_LABELS[order.logistics_state ?? 'shipped']}</span>
+                          {order.comment ? (
+                            <span className={styles.comment}>{order.comment}</span>
+                          ) : null}
+                          {order.comment_for_waybill ? (
+                            <span className={styles.comment}>
+                              Накладная: {order.comment_for_waybill}
+                            </span>
+                          ) : null}
                         </div>
-                      </li>
-                    ))}
-                  </ul>
-                </article>
-              ))}
+                      </div>
+                      <div className={styles.cardActions}>
+                        <Button
+                          variant="ghost"
+                          iconLeft="print"
+                          onClick={() => handleWaybillClick(order.id)}
+                          disabled={
+                            waybillMutation.isPending &&
+                            waybillMutation.variables?.orderId === order.id
+                          }
+                        >
+                          Накладная
+                        </Button>
+                        <Button
+                          variant="primary"
+                          onClick={() => receiveMutation.mutate(order.id)}
+                          disabled={receiveMutation.isPending}
+                        >
+                          Принят на склад
+                        </Button>
+                      </div>
+                    </header>
+                    <div className={styles.itemsSummary}>
+                      <span>Всего товаров: {totalQuantity} шт.</span>
+                      <span>Наименований: {uniqueProducts}</span>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           </Accordion>
         </div>
