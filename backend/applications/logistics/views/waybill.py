@@ -72,7 +72,7 @@ class OrderWaybillPdfView(View):
                 order.dismantle_date, order.dismount_datetime_from, order.dismount_datetime_to
             ),
             'payment_status_label': self._resolve_payment_status(order),
-            'order_comment': order.comment or '—',
+            'order_comment': order.comment_for_waybill or order.comment or '—',
             'generated_at': date_format(localdate(timezone.now()), 'd.m.Y'),
         }
 

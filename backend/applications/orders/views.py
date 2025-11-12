@@ -112,12 +112,14 @@ class OrderViewSet(viewsets.ModelViewSet):
                 | Q(delivery_address_input__icontains=normalized_order_query)
                 | Q(delivery_address_full__icontains=normalized_order_query)
                 | Q(comment__icontains=normalized_order_query)
+                | Q(comment_for_waybill__icontains=normalized_order_query)
             )
 
         if normalized_search:
             queryset = queryset.filter(
                 Q(number_str__icontains=normalized_search)
                 | Q(comment__icontains=normalized_search)
+                | Q(comment_for_waybill__icontains=normalized_search)
                 | Q(delivery_address_input__icontains=normalized_search)
                 | Q(delivery_address_full__icontains=normalized_search)
                 | Q(customer__display_name__icontains=normalized_search)

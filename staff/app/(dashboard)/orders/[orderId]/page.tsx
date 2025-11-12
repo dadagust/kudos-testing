@@ -131,6 +131,11 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
               {order.comment ? (
                 <p style={{ color: 'var(--color-text-muted)', lineHeight: 1.6 }}>{order.comment}</p>
               ) : null}
+              {order.comment_for_waybill ? (
+                <p style={{ color: 'var(--color-text-muted)', lineHeight: 1.6 }}>
+                  <strong>Комментарий для накладной:</strong> {order.comment_for_waybill}
+                </p>
+              ) : null}
             </header>
 
             <section
@@ -198,6 +203,14 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                     </dt>
                     <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
                       {formatDateTime(order.modified)}
+                    </dd>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                      Комментарий для накладной
+                    </dt>
+                    <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
+                      {order.comment_for_waybill || '—'}
                     </dd>
                   </div>
                 </dl>
@@ -286,7 +299,7 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                   {formatCurrency(order.total_amount)}
                 </div>
               </div>
-              {order.comment ? null : <span />}
+              {order.comment || order.comment_for_waybill ? null : <span />}
             </footer>
           </article>
         ) : null}

@@ -72,6 +72,7 @@ class OrderApiTests(APITestCase):
             'delivery_type': DeliveryType.DELIVERY,
             'delivery_address': 'Москва, ул. Тестовая, д. 1',
             'comment': 'Проверочный заказ',
+            'comment_for_waybill': 'Комментарий для накладной',
             'items': [
                 {'product_id': str(self.product.pk), 'quantity': 2, 'rental_days': 1},
             ],
@@ -98,6 +99,7 @@ class OrderApiTests(APITestCase):
         self.assertEqual(data['dismount_datetime_to'], '20:00')
         self.assertGreater(float(data['total_amount']), 0)
         self.assertAlmostEqual(float(data['services_total_amount']), 500.0, places=2)
+        self.assertEqual(data['comment_for_waybill'], 'Комментарий для накладной')
         item = data['items'][0]
         self.assertEqual(item['rental_days'], 1)
         self.assertEqual(item['rental_mode'], 'standard')
@@ -138,6 +140,7 @@ class OrderApiTests(APITestCase):
             'delivery_type': DeliveryType.PICKUP,
             'delivery_address': '',
             'comment': '',
+            'comment_for_waybill': '',
             'items': [{'product_id': str(self.product.pk), 'quantity': 3, 'rental_days': 1}],
         }
 
@@ -145,6 +148,7 @@ class OrderApiTests(APITestCase):
         self.assertEqual(data['delivery_type'], DeliveryType.PICKUP)
         self.assertEqual(data['delivery_address'], '')
         self.assertEqual(data['comment'], '')
+        self.assertEqual(data['comment_for_waybill'], '')
         self.assertIn('services_total_amount', data)
 
     def test_create_order_with_special_rental(self):

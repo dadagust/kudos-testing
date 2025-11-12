@@ -36,6 +36,7 @@ class OrderAdmin(admin.ModelAdmin):
     search_fields = (
         'id',
         'comment',
+        'comment_for_waybill',
         'delivery_address_input',
         'delivery_address_full',
         'customer__display_name',

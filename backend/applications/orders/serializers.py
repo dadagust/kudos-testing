@@ -249,6 +249,7 @@ class OrderSummarySerializer(serializers.ModelSerializer):
             'yandex_uri',
             'has_exact_address',
             'comment',
+            'comment_for_waybill',
             'warehouse_received_at',
             'warehouse_received_by',
             'is_warehouse_received',
@@ -465,6 +466,11 @@ class OrderWriteSerializer(serializers.ModelSerializer):
         allow_null=True,
         required=False,
     )
+    comment_for_waybill = serializers.CharField(
+        allow_blank=True,
+        allow_null=True,
+        required=False,
+    )
     mount_datetime_from = serializers.TimeField(
         allow_null=True,
         required=False,
@@ -520,6 +526,7 @@ class OrderWriteSerializer(serializers.ModelSerializer):
             'delivery_type',
             'delivery_address',
             'comment',
+            'comment_for_waybill',
             'items',
             'return_items',
         )
@@ -573,6 +580,8 @@ class OrderWriteSerializer(serializers.ModelSerializer):
                 self._reset_delivery_metadata(attrs)
         if 'comment' in attrs and attrs['comment'] in (None, ''):
             attrs['comment'] = ''
+        if 'comment_for_waybill' in attrs and attrs['comment_for_waybill'] in (None, ''):
+            attrs['comment_for_waybill'] = ''
 
         logistics_state = attrs.get('logistics_state', serializers.empty)
         if logistics_state == '':

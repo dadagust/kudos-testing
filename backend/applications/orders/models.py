@@ -197,6 +197,10 @@ class Order(Date):
         verbose_name='Комментарий',
         blank=True,
     )
+    comment_for_waybill = models.TextField(
+        verbose_name='Комментарий для накладной',
+        blank=True,
+    )
 
     objects = OrderQuerySet.as_manager()
 

@@ -247,7 +247,7 @@ export default function LogisticsPrepPage() {
           <Input
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}
-            placeholder="Поиск по номеру, адресу или комментарию"
+            placeholder="Поиск по номеру, адресу или комментариям"
             className={styles.searchInput}
           />
           <Button type="submit">Найти</Button>
@@ -300,6 +300,11 @@ export default function LogisticsPrepPage() {
                           </span>
                           {order.comment ? (
                             <span className={styles.comment}>{order.comment}</span>
+                          ) : null}
+                          {order.comment_for_waybill ? (
+                            <span className={styles.comment}>
+                              Накладная: {order.comment_for_waybill}
+                            </span>
                           ) : null}
                         </div>
                       </div>
