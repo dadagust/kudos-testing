@@ -40,10 +40,12 @@ class CustomerSummarySerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'display_name',
+            'phone',
         )
         read_only_fields = (
             'id',
             'display_name',
+            'phone',
         )
 
     def get_display_name(self, obj: Customer) -> str:

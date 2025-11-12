@@ -195,7 +195,7 @@ export interface OrderDetail {
   delivery_type: 'delivery' | 'pickup';
   delivery_address: string;
   comment: string;
-  customer: { id: string; display_name: string } | null;
+  customer: { id: string; display_name: string; phone: string } | null;
   items: OrderItem[];
 }
 

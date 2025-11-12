@@ -41,6 +41,7 @@ export type OrderWaybillContext = 'prep' | 'receiving';
 export interface CustomerSummary {
   id: string;
   display_name: string;
+  phone: string;
 }
 
 export interface OrderItemProductSummary {
