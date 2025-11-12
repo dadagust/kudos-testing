@@ -1,6 +1,7 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import Link from 'next/link';
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
@@ -3112,6 +3113,7 @@ export default function ProductsPage() {
                 {transactions.map((item) => {
                   const createdByLabel =
                     item.created_by_name?.trim() || item.created_by || 'Неизвестный пользователь';
+                  const orderId = item.order_id;
 
                   return (
                     <li
@@ -3161,6 +3163,17 @@ export default function ProductsPage() {
                             ? 'Доступный остаток изменён'
                             : 'Доступный остаток не изменён'}
                         </span>
+                        {orderId ? (
+                          <span>
+                            Заказ:{' '}
+                            <Link
+                              href={`/orders/${orderId}`}
+                              style={{ color: 'var(--color-primary)' }}
+                            >
+                              №{orderId}
+                            </Link>
+                          </span>
+                        ) : null}
                         {!item.is_applied ? <span>Не применено</span> : null}
                         {item.scheduled_for ? (
                           <span>Запланировано: {formatDateTime(item.scheduled_for)}</span>

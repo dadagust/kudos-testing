@@ -199,10 +199,13 @@ export interface ProductStockTransaction {
   id: string;
   product_id: string;
   quantity_delta: number;
+  affects_stock: boolean;
   affects_available: boolean;
   is_applied: boolean;
   scheduled_for: string | null;
   note?: string | null;
+  order_id?: string | number | null;
+  order_transaction_type?: string | null;
   created: string;
   created_by: string | null;
   created_by_name?: string | null;
