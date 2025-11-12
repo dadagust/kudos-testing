@@ -1,7 +1,7 @@
 'use client';
 
-import { isAxiosError } from 'axios';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { isAxiosError } from 'axios';
 import clsx from 'clsx';
 import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -453,10 +453,7 @@ export default function LogisticsRoutesPage() {
                     <span className={styles.listItemTitle}>Заказ №{order.id}</span>
                     <span className={styles.listItemAddress}>{order.address}</span>
                   </div>
-                  <Tag
-                    tone={order.exact ? 'success' : 'warning'}
-                    className={styles.listItemTag}
-                  >
+                  <Tag tone={order.exact ? 'success' : 'warning'} className={styles.listItemTag}>
                     {order.exact ? 'Точный адрес' : 'Требует уточнения'}
                   </Tag>
                 </button>
@@ -547,20 +544,14 @@ export default function LogisticsRoutesPage() {
             <Button type="button" variant="ghost" onClick={handleCloseDriverModal}>
               Отмена
             </Button>
-            <Button type="submit" disabled={assignDriverMutation.isLoading}>
-              {driverModalOrder?.driver ? 'Сохранить' : 'Создать'}
-            </Button>
+            <Button type="submit">{driverModalOrder?.driver ? 'Сохранить' : 'Создать'}</Button>
           </div>
         </form>
       </Modal>
       <Modal
         open={isDriverInfoOpen}
         onClose={handleCloseDriverInfo}
-        title={
-          driverInfoOrder
-            ? `Водитель заказа №${driverInfoOrder.id}`
-            : 'Информация о водителе'
-        }
+        title={driverInfoOrder ? `Водитель заказа №${driverInfoOrder.id}` : 'Информация о водителе'}
       >
         {driverInfoOrder?.driver ? (
           <div className={styles.driverInfo}>

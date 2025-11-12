@@ -251,10 +251,7 @@ class Order(Date):
         return self.delivery_address_full or self.delivery_address_input
 
     def has_exact_address(self) -> bool:
-        return (
-            self.delivery_address_kind == 'house'
-            and self.delivery_address_precision == 'exact'
-        )
+        return self.delivery_address_kind == 'house' and self.delivery_address_precision == 'exact'
 
 
 class OrderDriver(Date):

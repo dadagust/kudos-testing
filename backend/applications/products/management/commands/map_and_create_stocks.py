@@ -1,22 +1,15 @@
 from __future__ import annotations
 
 import json
-from collections.abc import Iterable
 from dataclasses import dataclass
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 
 from django.core.management.base import BaseCommand, CommandError
-from django.db import transaction
 
-from applications.products.management.commands._slug import make_slug
 from applications.products.models import (
-    Category,
-    Color,
     DimensionShape,
-    InstallerQualification,
     Product,
-    TransportRestriction,
 )
 
 
@@ -87,18 +80,15 @@ class Command(BaseCommand):
         if not articles_path.exists():
             raise CommandError(f'Файл с товарами не найден: {articles_path}')
 
-
         articles_data = self._load_json(articles_path)
         stocks_data = self._load_json(stocks_path)
 
         for stock in stocks_data:
             article_id = stock['article_id']
-            item = next((x for x in articles_data if x.get("id") == article_id), None)
+            item = next((x for x in articles_data if x.get('id') == article_id), None)
             if item:
-                product = Product.objects.get(name=item["name"])
+                product = Product.objects.get(name=item['name'])
                 product.stock_qty = stock['quantity']
                 product.available_stock_qty = stock['quantity']
                 product.save()
                 print(f'saved: {product.name} with stock: {product.stock_qty}')
-
-

@@ -224,14 +224,18 @@ class OrderApiTests(APITestCase):
     @override_settings(GEOSUGGEST_KEY='test-geosuggest-key')
     def test_yandex_suggest_proxies_response(self):
         url = reverse('orders:ymaps-suggest')
-        payload = {'results': [{'title': {'text': 'Москва'}, 'address': {'formatted_address': 'Москва'}}]}
+        payload = {
+            'results': [{'title': {'text': 'Москва'}, 'address': {'formatted_address': 'Москва'}}]
+        }
 
         mock_response = Mock()
         mock_response.ok = True
         mock_response.status_code = status.HTTP_200_OK
         mock_response.json.return_value = payload
 
-        with patch('applications.orders.views.requests.get', return_value=mock_response) as mock_get:
+        with patch(
+            'applications.orders.views.requests.get', return_value=mock_response
+        ) as mock_get:
             response = self.client.get(url, {'q': 'Москва'})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -440,7 +444,9 @@ class OrderApiTests(APITestCase):
         response = self.client.post(receive_url, {}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         received_again = response.json()['data']
-        self.assertEqual(received_data['warehouse_received_at'], received_again['warehouse_received_at'])
+        self.assertEqual(
+            received_data['warehouse_received_at'], received_again['warehouse_received_at']
+        )
 
         response = self.client.get(
             list_url,

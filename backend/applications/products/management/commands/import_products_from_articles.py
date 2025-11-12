@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from collections.abc import Iterable
 from dataclasses import dataclass
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 
 from django.core.management.base import BaseCommand, CommandError
@@ -182,9 +182,7 @@ class Command(BaseCommand):
 
         return product, was_created
 
-    def _ensure_category(
-        self, category_id: int | None, categories: dict[int, str]
-    ) -> Category:
+    def _ensure_category(self, category_id: int | None, categories: dict[int, str]) -> Category:
         if category_id is None:
             category_name = 'Без категории'
         else:
@@ -250,9 +248,7 @@ class Command(BaseCommand):
         is_arrangement_mandatory = bool(article.get('is_arrangement_mandatory'))
         product.setup_self_setup_allowed = not is_arrangement_mandatory
 
-        product.delivery_transport_restriction = self._ensure_transport(
-            article.get('vehicle')
-        )
+        product.delivery_transport_restriction = self._ensure_transport(article.get('vehicle'))
 
         product.visibility_show_on_site = bool(article.get('is_shown_in_catalog'))
         product.visibility_show_in_new = bool(article.get('show_in_new'))

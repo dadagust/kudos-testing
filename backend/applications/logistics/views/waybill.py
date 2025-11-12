@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
 
 from django.conf import settings
 from django.http import Http404, HttpRequest, HttpResponse
@@ -30,7 +30,7 @@ class WaybillItem:
     quantity_returned: str
 
 
-class OrderWaybillPdfView( View):
+class OrderWaybillPdfView(View):
     """Render a PDF waybill for a specific order using WeasyPrint."""
 
     template_name = 'pdf/waybill.html'
@@ -65,8 +65,12 @@ class OrderWaybillPdfView( View):
             'delivery_address': self._resolve_delivery_address(order),
             'customer_label': self._resolve_customer(order),
             'shipment_window': self._format_date(order.shipment_date),
-            'mount_window': self._format_window(order.installation_date, order.mount_datetime_from, order.mount_datetime_to),
-            'dismount_window': self._format_window(order.dismantle_date, order.dismount_datetime_from, order.dismount_datetime_to),
+            'mount_window': self._format_window(
+                order.installation_date, order.mount_datetime_from, order.mount_datetime_to
+            ),
+            'dismount_window': self._format_window(
+                order.dismantle_date, order.dismount_datetime_from, order.dismount_datetime_to
+            ),
             'payment_status_label': self._resolve_payment_status(order),
             'order_comment': order.comment or '—',
             'generated_at': date_format(localdate(timezone.now()), 'd.m.Y'),

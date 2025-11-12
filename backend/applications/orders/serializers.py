@@ -194,18 +194,10 @@ class OrderSummarySerializer(serializers.ModelSerializer):
     delivery_address = serializers.CharField(read_only=True)
     delivery_address_input = serializers.CharField(read_only=True)
     delivery_address_full = serializers.CharField(read_only=True)
-    mount_datetime_from = serializers.TimeField(
-        format='%H:%M', allow_null=True, read_only=True
-    )
-    mount_datetime_to = serializers.TimeField(
-        format='%H:%M', allow_null=True, read_only=True
-    )
-    dismount_datetime_from = serializers.TimeField(
-        format='%H:%M', allow_null=True, read_only=True
-    )
-    dismount_datetime_to = serializers.TimeField(
-        format='%H:%M', allow_null=True, read_only=True
-    )
+    mount_datetime_from = serializers.TimeField(format='%H:%M', allow_null=True, read_only=True)
+    mount_datetime_to = serializers.TimeField(format='%H:%M', allow_null=True, read_only=True)
+    dismount_datetime_from = serializers.TimeField(format='%H:%M', allow_null=True, read_only=True)
+    dismount_datetime_to = serializers.TimeField(format='%H:%M', allow_null=True, read_only=True)
     delivery_lat = serializers.DecimalField(
         max_digits=9, decimal_places=6, read_only=True, allow_null=True
     )
@@ -785,6 +777,8 @@ class OrderCalculationSerializer(OrderWriteSerializer):
                 for item in calculated_items
             ],
         }
+
+
 class OrderDriverSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderDriver
@@ -829,4 +823,3 @@ class OrderDriverAssignSerializer(serializers.Serializer):
         if not normalized_phone:
             self.fail('phone_invalid')
         return normalized_phone
-

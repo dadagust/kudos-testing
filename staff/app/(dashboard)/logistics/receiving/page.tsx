@@ -172,9 +172,7 @@ export default function LogisticsReceivingPage() {
                       </Link>
                       <div className={styles.cardMeta}>
                         <span>
-                          {order.delivery_type === 'delivery'
-                            ? 'Адресная доставка'
-                            : 'Самовывоз'}
+                          {order.delivery_type === 'delivery' ? 'Адресная доставка' : 'Самовывоз'}
                         </span>
                         <span>Демонтаж: {formatDismantleGroup(order.dismantle_date)}</span>
                         <span>{LOGISTICS_STATE_LABELS[order.logistics_state ?? 'shipped']}</span>
@@ -189,7 +187,8 @@ export default function LogisticsReceivingPage() {
                         iconLeft="print"
                         onClick={() => handleWaybillClick(order.id)}
                         disabled={
-                          waybillMutation.isPending && waybillMutation.variables?.orderId === order.id
+                          waybillMutation.isPending &&
+                          waybillMutation.variables?.orderId === order.id
                         }
                       >
                         Накладная

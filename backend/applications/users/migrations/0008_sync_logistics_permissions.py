@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from django.db import migrations
 
-
 ACTION_LABELS = {
     'view': 'Can view',
     'change': 'Can change',
@@ -38,7 +37,7 @@ def ensure_logistics_permissions(apps, schema_editor):
     for action in sorted(required_actions):
         codename = f'{action}_logistics'
         verbose_model = 'logistics'
-        name = f"{ACTION_LABELS.get(action, action.title())} {verbose_model}".strip()
+        name = f'{ACTION_LABELS.get(action, action.title())} {verbose_model}'.strip()
         permission, _ = permission_model.objects.update_or_create(
             codename=codename,
             content_type=content_type,
@@ -89,7 +88,9 @@ def remove_logistics_permissions(apps, schema_editor):
             if group is not None:
                 group.permissions.remove(*permissions)
 
-        permission_model.objects.filter(pk__in=[permission.pk for permission in permissions]).delete()
+        permission_model.objects.filter(
+            pk__in=[permission.pk for permission in permissions]
+        ).delete()
 
     content_type.delete()
 

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from django.db import migrations
 
-
 ACTION_LABELS = {
     'view': 'Can view',
     'change': 'Can change',

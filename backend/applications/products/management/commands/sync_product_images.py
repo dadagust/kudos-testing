@@ -3,9 +3,9 @@ from __future__ import annotations
 import csv
 import json
 import logging
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
 
 import requests
 from django.core.files.base import ContentFile
@@ -64,7 +64,7 @@ class Command(BaseCommand):
                     processed_products += 1
                 else:
                     failed_products += 1
-            except Exception:  # pragma: no cover - defensively log unexpected errors
+            except Exception:
                 failed_products += 1
                 logger.exception('Не удалось обновить изображения для товара "%s"', product.name)
 
@@ -195,7 +195,7 @@ class Command(BaseCommand):
                 if name:
                     storage.delete(name)
                 image.delete()
-            except Exception:  # pragma: no cover - best effort cleanup
+            except Exception:
                 logger.exception('Не удалось удалить предыдущее изображение товара %s', product.pk)
 
     def _build_filename(self, product: Product, entry: ManifestImage) -> str:

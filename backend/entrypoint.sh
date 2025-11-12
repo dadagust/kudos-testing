@@ -13,6 +13,7 @@ echo "Postgres is ready."
 
 python manage.py migrate --noinput
 
+python manage.py collectstatic || true
 python manage.py seed_categories || true
 python manage.py seed_installer_qualifications || true
 python manage.py seed_product_enums || true

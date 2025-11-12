@@ -465,7 +465,10 @@ export default function Home() {
                     className={styles.input}
                     value={orderForm.installationTimeFrom}
                     onChange={(event) =>
-                      setOrderForm((prev) => ({ ...prev, installationTimeFrom: event.target.value }))
+                      setOrderForm((prev) => ({
+                        ...prev,
+                        installationTimeFrom: event.target.value,
+                      }))
                     }
                   />
                 </div>
@@ -669,12 +672,18 @@ export default function Home() {
                 <p>Дата монтажа: {orderSuccess.installation_date}</p>
                 <p>
                   Время монтажа:{' '}
-                  {formatTimeRange(orderSuccess.mount_datetime_from, orderSuccess.mount_datetime_to) ?? '—'}
+                  {formatTimeRange(
+                    orderSuccess.mount_datetime_from,
+                    orderSuccess.mount_datetime_to
+                  ) ?? '—'}
                 </p>
                 <p>Дата демонтажа: {orderSuccess.dismantle_date}</p>
                 <p>
                   Время демонтажа:{' '}
-                  {formatTimeRange(orderSuccess.dismount_datetime_from, orderSuccess.dismount_datetime_to) ?? '—'}
+                  {formatTimeRange(
+                    orderSuccess.dismount_datetime_from,
+                    orderSuccess.dismount_datetime_to
+                  ) ?? '—'}
                 </p>
                 <p>
                   Доставка:{' '}

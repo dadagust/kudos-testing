@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('products', '0003_stocktransaction_affects_stock_and_more'),
     ]
@@ -13,11 +12,15 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='product',
             name='setup_install_minutes',
-            field=models.DecimalField(blank=True, decimal_places=2, max_digits=12, null=True, verbose_name='Монтаж, мин'),
+            field=models.DecimalField(
+                blank=True, decimal_places=2, max_digits=12, null=True, verbose_name='Монтаж, мин'
+            ),
         ),
         migrations.AlterField(
             model_name='product',
             name='setup_uninstall_minutes',
-            field=models.DecimalField(blank=True, decimal_places=2, max_digits=12, null=True, verbose_name='Демонтаж, мин'),
+            field=models.DecimalField(
+                blank=True, decimal_places=2, max_digits=12, null=True, verbose_name='Демонтаж, мин'
+            ),
         ),
     ]

@@ -22,11 +22,11 @@ from .models import Order, OrderDriver, OrderStatus
 from .permissions import OrderAccessPolicy
 from .serializers import (
     OrderAddressValidationSerializer,
+    OrderCalculationSerializer,
+    OrderDetailSerializer,
     OrderDriverAssignSerializer,
     OrderDriverSerializer,
     OrderLogisticsStateUpdateSerializer,
-    OrderCalculationSerializer,
-    OrderDetailSerializer,
     OrderPaymentStatusUpdateSerializer,
     OrderReceiveSerializer,
     OrderSummarySerializer,
@@ -44,9 +44,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         .select_related('customer', 'warehouse_received_by')
         .prefetch_related('items__product')
     )
-    permission_classes = (
-        IsAuthenticated,
-    )
+    permission_classes = (IsAuthenticated,)
 
     def get_serializer_class(self):
         if self.action in {'create', 'update', 'partial_update'}:
@@ -334,8 +332,10 @@ class YandexSuggestView(APIView):
 
         api_key = self._resolve_api_key()
         if not api_key:
-            return Response({'detail': 'Geosuggest API key is not configured.'},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {'detail': 'Geosuggest API key is not configured.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         params = {
             'apikey': api_key,
@@ -346,15 +346,16 @@ class YandexSuggestView(APIView):
             'results': '5',
         }
 
-        headers = {"Referer": os.environ.get("YandexReferer", "")} # апи яндекс карт - величие
+        headers = {'Referer': os.environ.get('YandexReferer', '')}  # апи яндекс карт - величие
 
         try:
             upstream = requests.get(
                 self.suggest_url, params=params, headers=headers, timeout=self.request_timeout
             )
         except requests.RequestException as exc:
-            return Response({'detail': f'Upstream error: {exc}'},
-                            status=status.HTTP_502_BAD_GATEWAY)
+            return Response(
+                {'detail': f'Upstream error: {exc}'}, status=status.HTTP_502_BAD_GATEWAY
+            )
 
         try:
             payload = upstream.json()
@@ -362,7 +363,6 @@ class YandexSuggestView(APIView):
             payload = {'detail': upstream.text[:500]}
 
         return Response(payload, status=upstream.status_code)
-
 
 
 class OrderCalculationView(APIView):
