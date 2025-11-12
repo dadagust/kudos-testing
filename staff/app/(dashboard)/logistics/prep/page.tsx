@@ -1,7 +1,6 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import Image from 'next/image';
 import Link from 'next/link';
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 
@@ -15,7 +14,7 @@ import {
   useOrdersQuery,
   useOrderWaybill,
 } from '@/entities/order';
-import { formatDateDisplay, toTimestamp } from '@/shared/lib/date';
+import { formatDateDisplay, formatTimeDisplay, toTimestamp } from '@/shared/lib/date';
 import { Accordion, Button, FormField, Input, Spinner, Tag } from '@/shared/ui';
 
 import { openWaybillPreviewWindow } from '../utils/openWaybillPreviewWindow';
@@ -29,6 +28,25 @@ const PAYMENT_TONES: Record<PaymentStatus, 'success' | 'danger' | 'warning'> = {
 };
 
 const LOGISTICS_STATES: LogisticsState[] = ['handover_to_picking', 'picked', 'shipped'];
+
+const formatTimeRange = (
+  start: string | null | undefined,
+  end: string | null | undefined
+): string | null => {
+  const formattedStart = formatTimeDisplay(start) ?? '';
+  const formattedEnd = formatTimeDisplay(end) ?? '';
+
+  if (formattedStart && formattedEnd) {
+    return `${formattedStart}–${formattedEnd}`;
+  }
+  if (formattedStart) {
+    return `${formattedStart}–`;
+  }
+  if (formattedEnd) {
+    return `–${formattedEnd}`;
+  }
+  return null;
+};
 
 interface LogisticsStateToggleProps {
   order: OrderSummary;
@@ -284,6 +302,15 @@ export default function LogisticsPrepPage() {
                 const isUpdating = updateStateMutation.isPending;
                 const isGeneratingWaybill =
                   waybillMutation.isPending && waybillMutation.variables?.orderId === order.id;
+                const totalQuantity = order.items.reduce((sum, item) => sum + item.quantity, 0);
+                const uniqueProducts = new Set(
+                  order.items.map((item) => item.product?.id ?? `custom:${item.product_name}`)
+                ).size;
+                const address = order.delivery_address_full || order.delivery_address;
+                const mountRange = formatTimeRange(
+                  order.mount_datetime_from,
+                  order.mount_datetime_to
+                );
                 return (
                   <article key={order.id} className={styles.card}>
                     <header className={styles.cardHeader}>
@@ -298,6 +325,8 @@ export default function LogisticsPrepPage() {
                           <span>
                             {order.delivery_type === 'delivery' ? 'Адресная доставка' : 'Самовывоз'}
                           </span>
+                          {address ? <span>{address}</span> : null}
+                          <span>Монтаж: {mountRange ?? '—'}</span>
                           {order.comment ? (
                             <span className={styles.comment}>{order.comment}</span>
                           ) : null}
@@ -333,28 +362,10 @@ export default function LogisticsPrepPage() {
                         />
                       </div>
                     </header>
-                    <ul className={styles.items}>
-                      {order.items.map((item) => (
-                        <li key={item.id} className={styles.itemRow}>
-                          {item.product?.thumbnail_url ? (
-                            <Image
-                              src={item.product.thumbnail_url}
-                              alt={item.product.name}
-                              className={styles.itemImage}
-                              width={120}
-                              height={120}
-                              unoptimized
-                            />
-                          ) : null}
-                          <div>
-                            <span className={styles.itemTitle}>
-                              {item.product?.name ?? item.product_name}
-                            </span>
-                            <span className={styles.itemMeta}>{item.quantity} шт.</span>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
+                    <div className={styles.itemsSummary}>
+                      <span>Всего товаров: {totalQuantity} шт.</span>
+                      <span>Наименований: {uniqueProducts}</span>
+                    </div>
                   </article>
                 );
               })}

@@ -325,7 +325,9 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                             {customerPhone}
                           </a>
                         ) : (
-                          <span style={{ color: 'var(--color-text-muted)', fontWeight: 500 }}>—</span>
+                          <span style={{ color: 'var(--color-text-muted)', fontWeight: 500 }}>
+                            —
+                          </span>
                         )}
                       </dd>
                     </div>
