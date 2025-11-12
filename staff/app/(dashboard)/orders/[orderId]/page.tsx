@@ -83,6 +83,7 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
   const router = useRouter();
   const { data, isLoading, isError, error } = useOrderQuery(params.orderId);
   const order = data?.data;
+  const customerPhone = order?.customer?.phone?.trim() ?? '';
 
   return (
     <RoleGuard allow={['adminpanel_view_orders', 'orders_view_order']}>
@@ -243,8 +244,27 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                       <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
                         Имя
                       </dt>
-                      <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
-                        {order.customer.display_name}
+                      <dd
+                        style={{
+                          fontWeight: 600,
+                          marginInlineStart: 0,
+                          display: 'flex',
+                          gap: '8px',
+                          alignItems: 'center',
+                          flexWrap: 'wrap',
+                        }}
+                      >
+                        <span>{order.customer.display_name}</span>
+                        {customerPhone ? (
+                          <a
+                            href={`tel:${customerPhone.replace(/[^+\d]/g, '')}`}
+                            style={{ color: 'var(--color-primary)', fontWeight: 500 }}
+                          >
+                            {customerPhone}
+                          </a>
+                        ) : (
+                          <span style={{ color: 'var(--color-text-muted)', fontWeight: 500 }}>—</span>
+                        )}
                       </dd>
                     </div>
                     <Link
