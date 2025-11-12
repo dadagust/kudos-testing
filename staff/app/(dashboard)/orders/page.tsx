@@ -86,6 +86,7 @@ type OrderFormState = {
   delivery_address: string;
   address: OrderAddressState;
   comment: string;
+  comment_for_waybill: string;
   productQuantities: Record<string, number>;
 };
 
@@ -140,6 +141,7 @@ const ERROR_FIELD_LABELS: Record<string, string | null> = {
   delivery_type: 'Тип доставки',
   delivery_address: 'Адрес доставки',
   comment: 'Комментарий',
+  comment_for_waybill: 'Комментарий для накладной',
   items: 'Товары',
   product_id: 'Товар',
   product: 'Товар',
@@ -361,6 +363,7 @@ const createInitialFormState = (): OrderFormState => ({
   delivery_address: '',
   address: createInitialAddressState(),
   comment: '',
+  comment_for_waybill: '',
   productQuantities: {},
 });
 
@@ -610,6 +613,11 @@ const OrderFormContent = ({
   const handleCommentChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = event.target;
     setForm((prev) => ({ ...prev, comment: value }));
+  };
+
+  const handleWaybillCommentChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    const { value } = event.target;
+    setForm((prev) => ({ ...prev, comment_for_waybill: value }));
   };
 
   const content: ReactNode = isLoading ? (
@@ -916,6 +924,23 @@ const OrderFormContent = ({
         />
       </FormField>
 
+      <FormField label="Комментарий для накладной">
+        <textarea
+          value={form.comment_for_waybill}
+          onChange={handleWaybillCommentChange}
+          placeholder="Комментарий, который будет напечатан в накладной"
+          style={{
+            width: '100%',
+            minHeight: 96,
+            padding: '12px',
+            borderRadius: '12px',
+            border: '1px solid var(--color-border)',
+            font: 'inherit',
+            resize: 'vertical',
+          }}
+        />
+      </FormField>
+
       <div
         style={{
           display: 'flex',
@@ -1088,6 +1113,7 @@ export default function OrdersPage() {
       delivery_address:
         form.delivery_type === 'pickup' ? null : form.delivery_address.trim() || null,
       comment: form.comment.trim() || null,
+      comment_for_waybill: form.comment_for_waybill.trim() || null,
       items: Object.entries(form.productQuantities)
         .filter(([, quantity]) => quantity > 0)
         .map(([productId, quantity]) => ({
@@ -1195,6 +1221,7 @@ export default function OrdersPage() {
           needsServerValidation: false,
         },
         comment: order.comment ?? '',
+        comment_for_waybill: order.comment_for_waybill ?? '',
         productQuantities: quantities,
       });
       setCustomerSearch(order.customer?.display_name ?? '');
@@ -1730,6 +1757,11 @@ export default function OrdersPage() {
         render: (row) => row.comment || '—',
       },
       {
+        key: 'comment_for_waybill',
+        header: 'Комментарий для накладной',
+        render: (row) => row.comment_for_waybill || '—',
+      },
+      {
         key: 'actions',
         header: 'Действия',
         render: (row) => (
@@ -1811,7 +1843,7 @@ export default function OrdersPage() {
           }}
         >
           <Input
-            placeholder="Поиск по адресу или комментарию"
+            placeholder="Поиск по адресу или комментариям"
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}
             style={{ width: '100%' }}

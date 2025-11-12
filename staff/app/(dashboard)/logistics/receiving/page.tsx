@@ -130,7 +130,7 @@ export default function LogisticsReceivingPage() {
           <Input
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}
-            placeholder="Поиск по номеру, адресу или комментарию"
+            placeholder="Поиск по номеру, адресу или комментариям"
             className={styles.searchInput}
           />
           <Button type="submit">Найти</Button>
@@ -178,6 +178,11 @@ export default function LogisticsReceivingPage() {
                         <span>{LOGISTICS_STATE_LABELS[order.logistics_state ?? 'shipped']}</span>
                         {order.comment ? (
                           <span className={styles.comment}>{order.comment}</span>
+                        ) : null}
+                        {order.comment_for_waybill ? (
+                          <span className={styles.comment}>
+                            Накладная: {order.comment_for_waybill}
+                          </span>
                         ) : null}
                       </div>
                     </div>

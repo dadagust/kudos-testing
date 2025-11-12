@@ -93,6 +93,7 @@ export interface OrderSummary {
   yandex_uri: string;
   has_exact_address: boolean;
   comment: string;
+  comment_for_waybill: string;
   warehouse_received_at: string | null;
   warehouse_received_by: number | null;
   is_warehouse_received: boolean;
@@ -179,6 +180,7 @@ export interface CreateOrderPayload {
   delivery_type: DeliveryType;
   delivery_address?: string | null;
   comment?: string | null;
+  comment_for_waybill?: string | null;
   items: OrderItemPayload[];
 }
 
