@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -60,7 +61,55 @@ interface OrderDetailsPageProps {
   params: { orderId: string };
 }
 
+const ITEM_THUMBNAIL_SIZE = 80;
+
+const renderItemThumbnail = (item: OrderDetail['items'][number]) => {
+  const name = item.product?.name ?? item.product_name ?? 'Фото товара';
+
+  if (item.product?.thumbnail_url) {
+    return (
+      <Image
+        src={item.product.thumbnail_url}
+        alt={name}
+        width={ITEM_THUMBNAIL_SIZE}
+        height={ITEM_THUMBNAIL_SIZE}
+        style={{
+          width: `${ITEM_THUMBNAIL_SIZE}px`,
+          height: `${ITEM_THUMBNAIL_SIZE}px`,
+          borderRadius: '12px',
+          objectFit: 'cover',
+        }}
+        unoptimized
+      />
+    );
+  }
+
+  return (
+    <div
+      style={{
+        width: `${ITEM_THUMBNAIL_SIZE}px`,
+        height: `${ITEM_THUMBNAIL_SIZE}px`,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: '12px',
+        background: 'var(--color-surface-muted)',
+        color: 'var(--color-text-muted)',
+        fontSize: '0.75rem',
+        fontWeight: 500,
+      }}
+    >
+      Нет фото
+    </div>
+  );
+};
+
 const itemColumns: TableColumn<OrderDetail['items'][number]>[] = [
+  {
+    key: 'thumbnail',
+    header: 'Фото',
+    render: renderItemThumbnail,
+  },
   {
     key: 'product',
     header: 'Товар',
