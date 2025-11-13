@@ -148,7 +148,7 @@ export default function LogisticsReceivingPage() {
           <Input
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}
-            placeholder="Поиск по номеру, адресу или комментариям"
+            placeholder="Поиск по номеру, адресу, клиенту или комментариям"
             className={styles.searchInput}
           />
           <Button type="submit">Найти</Button>
