@@ -21,6 +21,7 @@ import {
   OrdersWithCoordsResponse,
   ordersApi,
 } from '@/entities/order';
+import { formatDateDisplay, formatTimeDisplay } from '@/shared/lib/date';
 import { formatPhoneDisplay, formatPhoneInput, normalizePhoneNumber } from '@/shared/lib/phone';
 import { Alert, Button, Icon, Input, Modal, Select, Spinner, Tag } from '@/shared/ui';
 
@@ -128,6 +129,29 @@ const loadYandexMaps = (): Promise<YMaps3Global> => {
 const UNASSIGNED_DRIVER_KEY = 'unassigned';
 const CUSTOM_DRIVER_OPTION = 'custom';
 
+const UPCOMING_DAYS_COUNT = 7;
+
+const formatDateInputValue = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, '0');
+  const day = `${date.getDate()}`.padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const formatDateButtonLabel = (formatter: Intl.DateTimeFormat, date: Date): string => {
+  const rawLabel = formatter.format(date).replace(/\.$/, '');
+  return rawLabel.charAt(0).toUpperCase() + rawLabel.slice(1);
+};
+
+const buildTimeRange = (from: string | null, to: string | null): string | null => {
+  const fromDisplay = formatTimeDisplay(from);
+  const toDisplay = formatTimeDisplay(to);
+  if (fromDisplay && toDisplay) {
+    return `${fromDisplay} – ${toDisplay}`;
+  }
+  return fromDisplay ?? toDisplay ?? null;
+};
+
 const buildDriverKey = (fullName?: string | null, phone?: string | null): string => {
   const normalizedName = (fullName ?? '').trim().toLowerCase();
   const normalizedPhone = normalizePhoneNumber(phone ?? '') ?? '';
@@ -201,6 +225,7 @@ export default function LogisticsRoutesPage() {
   const markersRef = useRef<Map<number, MarkerRecord>>(new Map());
   const [mapReadyToken, setMapReadyToken] = useState(0);
   const [mapError, setMapError] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const [driverModalOrderId, setDriverModalOrderId] = useState<number | null>(null);
   const [driverNameInput, setDriverNameInput] = useState('');
@@ -221,10 +246,57 @@ export default function LogisticsRoutesPage() {
       staleTime: 60_000,
     });
 
-  const orders = useMemo(() => data?.items ?? [], [data]);
+  const dateButtonFormatter = useMemo(
+    () =>
+      new Intl.DateTimeFormat('ru-RU', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+      }),
+    []
+  );
+
+  const quickDateButtons = useMemo(() => {
+    const now = new Date();
+    return Array.from({ length: UPCOMING_DAYS_COUNT }, (_, index) => {
+      const date = new Date(now);
+      date.setDate(now.getDate() + index);
+      return {
+        value: formatDateInputValue(date),
+        label: formatDateButtonLabel(dateButtonFormatter, date),
+      };
+    });
+  }, [dateButtonFormatter]);
+
+  const allOrders = useMemo(() => data?.items ?? [], [data]);
+
+  const filteredOrders = useMemo(() => {
+    if (!selectedDate) {
+      return allOrders;
+    }
+    return allOrders.filter((order) => order.installation_date === selectedDate);
+  }, [allOrders, selectedDate]);
+
+  const filteredOrderIds = useMemo(
+    () => new Set(filteredOrders.map((order) => order.id)),
+    [filteredOrders]
+  );
+
+  const dateCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    allOrders.forEach((order) => {
+      if (order.installation_date) {
+        counts.set(
+          order.installation_date,
+          (counts.get(order.installation_date) ?? 0) + 1
+        );
+      }
+    });
+    return counts;
+  }, [allOrders]);
 
   const {
-    groups: driverGroups,
+    groups: allDriverGroups,
     orderToGroup,
     driverOptions,
   } = useMemo(() => {
@@ -236,7 +308,7 @@ export default function LogisticsRoutesPage() {
     });
     const orderGroupMap = new Map<number, string>();
 
-    orders.forEach((order) => {
+    allOrders.forEach((order) => {
       const driver = order.driver;
       const groupKey = driver
         ? buildDriverKey(driver.full_name, driver.phone)
@@ -299,29 +371,52 @@ export default function LogisticsRoutesPage() {
       orderToGroup: orderGroupMap,
       driverOptions: Array.from(uniqueDrivers.values()),
     };
-  }, [orders]);
+  }, [allOrders]);
+
+  const driverGroups = useMemo(
+    () =>
+      allDriverGroups
+        .map((group) => ({
+          ...group,
+          orders: group.orders.filter((order) => filteredOrderIds.has(order.id)),
+        }))
+        .filter((group) => group.key === UNASSIGNED_DRIVER_KEY || group.orders.length > 0),
+    [allDriverGroups, filteredOrderIds]
+  );
+
+  const handleDateChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    setSelectedDate(event.target.value);
+  }, []);
+
+  const handleClearDateFilter = useCallback(() => {
+    setSelectedDate('');
+  }, []);
+
+  const handleDateButtonClick = useCallback((value: string) => {
+    setSelectedDate((current) => (current === value ? '' : value));
+  }, []);
   const selectedOrder = useMemo(
-    () => orders.find((item) => item.id === selectedOrderId) ?? null,
-    [orders, selectedOrderId]
+    () => filteredOrders.find((item) => item.id === selectedOrderId) ?? null,
+    [filteredOrders, selectedOrderId]
   );
   const driverModalOrder = useMemo(
-    () => orders.find((item) => item.id === driverModalOrderId) ?? null,
-    [orders, driverModalOrderId]
+    () => allOrders.find((item) => item.id === driverModalOrderId) ?? null,
+    [allOrders, driverModalOrderId]
   );
   const driverInfoOrder = useMemo(
-    () => orders.find((item) => item.id === driverInfoOrderId) ?? null,
-    [orders, driverInfoOrderId]
+    () => allOrders.find((item) => item.id === driverInfoOrderId) ?? null,
+    [allOrders, driverInfoOrderId]
   );
 
   useEffect(() => {
-    if (orders.length === 0) {
+    if (filteredOrders.length === 0) {
       setSelectedOrderId(null);
       return;
     }
-    if (!selectedOrderId || !orders.some((item) => item.id === selectedOrderId)) {
-      setSelectedOrderId(orders[0].id);
+    if (!selectedOrderId || !filteredOrders.some((item) => item.id === selectedOrderId)) {
+      setSelectedOrderId(filteredOrders[0].id);
     }
-  }, [orders, selectedOrderId]);
+  }, [filteredOrders, selectedOrderId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -388,11 +483,11 @@ export default function LogisticsRoutesPage() {
     });
     markersRef.current.clear();
 
-    if (!orders.length) {
+    if (!filteredOrders.length) {
       return;
     }
 
-    orders.forEach((order) => {
+    filteredOrders.forEach((order) => {
       const element = document.createElement('div');
       element.className = clsx(styles.marker, !order.exact && styles.markerApprox);
       element.innerHTML = `<span>${order.id}</span>`;
@@ -403,8 +498,8 @@ export default function LogisticsRoutesPage() {
       markersRef.current.set(order.id, { marker, element, handleClick });
     });
 
-    if (orders.length === 1) {
-      const [order] = orders;
+    if (filteredOrders.length === 1) {
+      const [order] = filteredOrders;
       const location: YMapLocation = { center: toCoordinates(order.lon, order.lat), zoom: 12 };
       if (typeof map.setLocation === 'function') {
         map.setLocation(location);
@@ -412,8 +507,8 @@ export default function LogisticsRoutesPage() {
         map.update?.({ location });
       }
     } else {
-      const lons = orders.map((item) => item.lon);
-      const lats = orders.map((item) => item.lat);
+      const lons = filteredOrders.map((item) => item.lon);
+      const lats = filteredOrders.map((item) => item.lat);
       const minLon = Math.min(...lons);
       const maxLon = Math.max(...lons);
       const minLat = Math.min(...lats);
@@ -435,7 +530,7 @@ export default function LogisticsRoutesPage() {
         }
       }
     }
-  }, [orders, mapReadyToken]);
+  }, [filteredOrders, mapReadyToken]);
 
   useEffect(() => {
     const instance = mapInstanceRef.current;
@@ -517,7 +612,7 @@ export default function LogisticsRoutesPage() {
 
   const handleOpenDriverModal = useCallback(
     (orderId: number) => {
-      const order = orders.find((item) => item.id === orderId);
+      const order = allOrders.find((item) => item.id === orderId);
       setDriverModalOrderId(orderId);
       const driver = order?.driver ?? null;
       const driverKey = driver
@@ -533,7 +628,7 @@ export default function LogisticsRoutesPage() {
       setDriverActionError(null);
       assignDriverMutation.reset();
     },
-    [orders, driverOptions, assignDriverMutation]
+    [allOrders, driverOptions, assignDriverMutation]
   );
 
   const handleCloseDriverModal = useCallback(() => {
@@ -737,10 +832,20 @@ export default function LogisticsRoutesPage() {
         </Alert>
       );
     }
-    if (!orders.length) {
+    if (!allOrders.length) {
       return (
         <Alert tone="info" title="Нет заказов">
           Заказы с координатами не найдены.
+        </Alert>
+      );
+    }
+    if (!filteredOrders.length) {
+      const selectedDateText = formatDateDisplay(selectedDate) ?? selectedDate;
+      return (
+        <Alert tone="info" title="Нет заказов">
+          {selectedDate
+            ? `Заказы с координатами для даты монтажа ${selectedDateText || '—'} не найдены.`
+            : 'Заказы с координатами не найдены.'}
         </Alert>
       );
     }
@@ -788,6 +893,16 @@ export default function LogisticsRoutesPage() {
                       const isPending =
                         pendingOrderId === order.id &&
                         (changeDriverMutation.isPending || removeDriverMutation.isPending);
+                      const installationDate = formatDateDisplay(order.installation_date) ?? '—';
+                      const installationTimeRange = buildTimeRange(
+                        order.mount_datetime_from,
+                        order.mount_datetime_to
+                      );
+                      const dismantleDate = formatDateDisplay(order.dismantle_date) ?? '—';
+                      const dismantleTimeRange = buildTimeRange(
+                        order.dismount_datetime_from,
+                        order.dismount_datetime_to
+                      );
                       return (
                         <li key={order.id}>
                           <div
@@ -808,8 +923,26 @@ export default function LogisticsRoutesPage() {
                               disabled={isPending}
                             >
                               <div className={styles.listItemContent}>
-                                <span className={styles.listItemTitle}>Заказ №{order.id}</span>
-                                <span className={styles.listItemAddress}>{order.address}</span>
+                                <div className={styles.listItemMain}>
+                                  <span className={styles.listItemTitle}>Заказ №{order.id}</span>
+                                  <span className={styles.listItemAddress}>{order.address}</span>
+                                </div>
+                                <div className={styles.listItemSchedule}>
+                                  <div className={styles.scheduleRow}>
+                                    <span className={styles.scheduleLabel}>Монтаж</span>
+                                    <span className={styles.scheduleValue}>
+                                      {installationDate}
+                                      {installationTimeRange ? ` • ${installationTimeRange}` : ''}
+                                    </span>
+                                  </div>
+                                  <div className={styles.scheduleRow}>
+                                    <span className={styles.scheduleLabel}>Демонтаж</span>
+                                    <span className={styles.scheduleValue}>
+                                      {dismantleDate}
+                                      {dismantleTimeRange ? ` • ${dismantleTimeRange}` : ''}
+                                    </span>
+                                  </div>
+                                </div>
                               </div>
                               <Tag
                                 tone={order.exact ? 'success' : 'warning'}
@@ -880,6 +1013,48 @@ export default function LogisticsRoutesPage() {
 
   return (
     <>
+      <div className={styles.filters}>
+        <div className={styles.filtersControls}>
+          <div className={styles.filtersDateField}>
+            <Input
+              type="date"
+              label="Дата монтажа"
+              value={selectedDate}
+              onChange={handleDateChange}
+            />
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={handleClearDateFilter}
+            disabled={!selectedDate}
+          >
+            Сбросить
+          </Button>
+        </div>
+        <div className={styles.dateButtons}>
+          {quickDateButtons.map((item) => {
+            const count = dateCounts.get(item.value) ?? 0;
+            const isActive = selectedDate === item.value;
+            const hasOrders = count > 0;
+            return (
+              <button
+                key={item.value}
+                type="button"
+                className={clsx(
+                  styles.dateButton,
+                  isActive && styles.dateButtonActive,
+                  !hasOrders && styles.dateButtonMuted
+                )}
+                onClick={() => handleDateButtonClick(item.value)}
+              >
+                <span className={styles.dateButtonLabel}>{item.label}</span>
+                <span className={styles.dateButtonCount}>{count}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
       <div className={styles.wrapper}>
         <aside className={styles.sidebar}>
           <div className={styles.sidebarHeader}>

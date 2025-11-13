@@ -423,6 +423,24 @@ class OrdersWithCoordsView(APIView):
                     'lat': float(order.delivery_lat),
                     'lon': float(order.delivery_lon),
                     'exact': order.has_exact_address(),
+                    'installation_date': order.installation_date.isoformat()
+                    if order.installation_date
+                    else None,
+                    'mount_datetime_from': order.mount_datetime_from.strftime('%H:%M')
+                    if order.mount_datetime_from
+                    else None,
+                    'mount_datetime_to': order.mount_datetime_to.strftime('%H:%M')
+                    if order.mount_datetime_to
+                    else None,
+                    'dismantle_date': order.dismantle_date.isoformat()
+                    if order.dismantle_date
+                    else None,
+                    'dismount_datetime_from': order.dismount_datetime_from.strftime('%H:%M')
+                    if order.dismount_datetime_from
+                    else None,
+                    'dismount_datetime_to': order.dismount_datetime_to.strftime('%H:%M')
+                    if order.dismount_datetime_to
+                    else None,
                     'driver': (
                         {
                             'id': driver.pk,
