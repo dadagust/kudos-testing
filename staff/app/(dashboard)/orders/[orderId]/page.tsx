@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { OrderDetail, OrderStatus, ORDER_STATUS_LABELS, useOrderQuery } from '@/entities/order';
-import { RoleGuard } from '@/features/auth';
+import { RoleGuard, usePermission } from '@/features/auth';
 import { ensureDateDisplay, ensureDateTimeDisplay, ensureTimeDisplay } from '@/shared/lib/date';
 import { Alert, Badge, Button, Spinner, Table, Tag } from '@/shared/ui';
 import type { TableColumn } from '@/shared/ui';
@@ -133,6 +133,7 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
   const { data, isLoading, isError, error } = useOrderQuery(params.orderId);
   const order = data?.data;
   const customerPhone = order?.customer?.phone?.trim() ?? '';
+  const canManageOrders = usePermission('orders_change_order');
 
   return (
     <RoleGuard allow={['adminpanel_view_orders', 'orders_view_order']}>
@@ -147,6 +148,15 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
               <Badge tone={order.delivery_type === 'pickup' ? 'info' : 'success'}>
                 {order.delivery_type === 'pickup' ? 'Самовывоз' : 'Доставка'}
               </Badge>
+              {canManageOrders ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => router.push(`/orders?edit=${order.id}`)}
+                >
+                  Редактировать
+                </Button>
+              ) : null}
             </div>
           ) : null}
         </div>

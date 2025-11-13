@@ -2,6 +2,7 @@
 
 import axios from 'axios';
 import Link from 'next/link';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
   ChangeEvent,
   Dispatch,
@@ -982,6 +983,9 @@ const OrderFormContent = ({
 
 export default function OrdersPage() {
   const canManageOrders = usePermission('orders_change_order');
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const [statusGroup, setStatusGroup] = useState<OrderStatusGroup>('current');
   const [searchInput, setSearchInput] = useState('');
@@ -1020,6 +1024,28 @@ export default function OrdersPage() {
   const [returnQuantities, setReturnQuantities] = useState<Record<string, string>>({});
   const [returnModalError, setReturnModalError] = useState<string | null>(null);
   const [isSubmittingReturns, setIsSubmittingReturns] = useState(false);
+
+  useEffect(() => {
+    if (!canManageOrders) {
+      return;
+    }
+    const editParam = searchParams.get('edit');
+    if (!editParam) {
+      return;
+    }
+    const parsed = Number.parseInt(editParam, 10);
+    if (Number.isNaN(parsed) || parsed <= 0) {
+      return;
+    }
+    if (isEditOpen && editOrderId === parsed) {
+      return;
+    }
+    setEditOrderId(parsed);
+    setEditError(null);
+    setCustomerSearch('');
+    setProductSearch('');
+    setIsEditOpen(true);
+  }, [canManageOrders, editOrderId, isEditOpen, searchParams]);
 
   const productQueryParams = useMemo(
     () => ({
@@ -1366,6 +1392,16 @@ export default function OrdersPage() {
     setIsCreateOpen(false);
   };
 
+  const replaceSearchParams = useCallback(
+    (updater: (params: URLSearchParams) => void) => {
+      const params = new URLSearchParams(searchParams.toString());
+      updater(params);
+      const query = params.toString();
+      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    },
+    [pathname, router, searchParams]
+  );
+
   const handleOpenEdit = useCallback(
     (orderId: number) => {
       if (!canManageOrders) {
@@ -1376,8 +1412,11 @@ export default function OrdersPage() {
       setCustomerSearch('');
       setProductSearch('');
       setIsEditOpen(true);
+      replaceSearchParams((params) => {
+        params.set('edit', String(orderId));
+      });
     },
-    [canManageOrders]
+    [canManageOrders, replaceSearchParams]
   );
 
   const closeEditDrawer = () => {
@@ -1386,6 +1425,9 @@ export default function OrdersPage() {
     }
     setIsEditOpen(false);
     setEditOrderId(null);
+    replaceSearchParams((params) => {
+      params.delete('edit');
+    });
   };
 
   const ensurePayloadValid = (form: OrderFormState): string | null => {
@@ -1414,6 +1456,9 @@ export default function OrdersPage() {
     setEditOrderId(null);
     setSuccessMessage('Изменения сохранены.');
     void refetch();
+    replaceSearchParams((params) => {
+      params.delete('edit');
+    });
   };
 
   const handleOrderUpdateError = (mutationError: unknown) => {
