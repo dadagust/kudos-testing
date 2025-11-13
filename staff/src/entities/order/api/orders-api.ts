@@ -172,6 +172,9 @@ export const ordersApi = {
     );
     return data;
   },
+  removeDriver: async (orderId: number | string): Promise<void> => {
+    await apiV1Client.delete(`/orders/${orderId}/driver/`);
+  },
   downloadWaybill: async (
     orderId: number | string,
     context: OrderWaybillContext

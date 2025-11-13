@@ -466,6 +466,27 @@ class OrderApiTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()['data']), 0)
 
+    def test_remove_driver_is_idempotent(self):
+        order_data = self._create_order()
+        order_id = order_data['id']
+        url = reverse('orders:orders-assign-driver', args=[order_id])
+
+        response = self.client.post(
+            url,
+            {'full_name': 'Иван Петров', 'phone': '+7 (999) 111-22-33'},
+            format='json',
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(OrderDriver.objects.filter(order_id=order_id).exists())
+
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(OrderDriver.objects.filter(order_id=order_id).exists())
+
+        # deleting again should remain idempotent
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
     def test_cannot_create_order_when_stock_is_insufficient(self):
         self.product.available_stock_qty = 1
         self.product.save(update_fields=['available_stock_qty'])

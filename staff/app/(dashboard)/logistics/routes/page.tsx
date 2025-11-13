@@ -3,7 +3,16 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import clsx from 'clsx';
-import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ChangeEvent,
+  DragEvent,
+  FormEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import {
   AssignOrderDriverPayload,
@@ -12,7 +21,7 @@ import {
   ordersApi,
 } from '@/entities/order';
 import { formatPhoneDisplay, formatPhoneInput, normalizePhoneNumber } from '@/shared/lib/phone';
-import { Alert, Button, Icon, Input, Modal, Spinner, Tag } from '@/shared/ui';
+import { Alert, Button, Icon, Input, Modal, Select, Spinner, Tag } from '@/shared/ui';
 
 import styles from './routes.module.sass';
 
@@ -115,6 +124,66 @@ const loadYandexMaps = (): Promise<YMaps3Global> => {
   return ymapsPromise;
 };
 
+const UNASSIGNED_DRIVER_KEY = 'unassigned';
+const CUSTOM_DRIVER_OPTION = 'custom';
+
+const buildDriverKey = (fullName?: string | null, phone?: string | null): string => {
+  const normalizedName = (fullName ?? '').trim().toLowerCase();
+  const normalizedPhone = normalizePhoneNumber(phone ?? '') ?? '';
+  return `${normalizedName}|${normalizedPhone}`;
+};
+
+const extractDriverErrorMessage = (error: unknown, fallback: string): string => {
+  const message = fallback;
+  if (isAxiosError(error)) {
+    const responseData = error.response?.data;
+    if (typeof responseData === 'string') {
+      return responseData;
+    }
+    if (responseData && typeof responseData === 'object') {
+      const dataRecord = responseData as Record<string, unknown>;
+      const detail = dataRecord.detail;
+      if (typeof detail === 'string') {
+        return detail;
+      }
+      const extractFieldMessage = (field: string): string | null => {
+        const value = dataRecord[field];
+        if (Array.isArray(value) && value.length && typeof value[0] === 'string') {
+          return value[0];
+        }
+        return null;
+      };
+      return (
+        extractFieldMessage('phone') ??
+        extractFieldMessage('full_name') ??
+        extractFieldMessage('non_field_errors') ??
+        message
+      );
+    }
+  } else if (error instanceof Error && error.message) {
+    return error.message;
+  }
+  return message;
+};
+
+type OrderWithCoordsItem = OrdersWithCoordsResponse['items'][number];
+
+interface DriverInfo {
+  fullName: string;
+  phone: string;
+}
+
+interface DriverGroup {
+  key: string;
+  driver: DriverInfo | null;
+  orders: OrderWithCoordsItem[];
+}
+
+interface DriverOption extends DriverInfo {
+  key: string;
+  label: string;
+}
+
 interface MarkerRecord {
   marker: YMapMarkerInstance;
   element: HTMLElement;
@@ -136,6 +205,12 @@ export default function LogisticsRoutesPage() {
   const [driverPhoneInput, setDriverPhoneInput] = useState('');
   const [driverError, setDriverError] = useState<string | null>(null);
   const [driverInfoOrderId, setDriverInfoOrderId] = useState<number | null>(null);
+  const [driverActionError, setDriverActionError] = useState<string | null>(null);
+  const [selectedDriverOption, setSelectedDriverOption] = useState<string>(CUSTOM_DRIVER_OPTION);
+  const [draggedOrderId, setDraggedOrderId] = useState<number | null>(null);
+  const [dragSourceKey, setDragSourceKey] = useState<string | null>(null);
+  const [dropTargetKey, setDropTargetKey] = useState<string | null>(null);
+  const [pendingOrderId, setPendingOrderId] = useState<number | null>(null);
 
   const { data, isLoading, isError, error, refetch, isFetching } =
     useQuery<OrdersWithCoordsResponse>({
@@ -145,6 +220,84 @@ export default function LogisticsRoutesPage() {
     });
 
   const orders = useMemo(() => data?.items ?? [], [data]);
+
+  const {
+    groups: driverGroups,
+    orderToGroup,
+    driverOptions,
+  } = useMemo(() => {
+    const groupsMap = new Map<string, DriverGroup>();
+    groupsMap.set(UNASSIGNED_DRIVER_KEY, {
+      key: UNASSIGNED_DRIVER_KEY,
+      driver: null,
+      orders: [],
+    });
+    const orderGroupMap = new Map<number, string>();
+
+    orders.forEach((order) => {
+      const driver = order.driver;
+      const groupKey = driver
+        ? buildDriverKey(driver.full_name, driver.phone)
+        : UNASSIGNED_DRIVER_KEY;
+      if (!groupsMap.has(groupKey)) {
+        groupsMap.set(groupKey, {
+          key: groupKey,
+          driver: driver
+            ? {
+                fullName: driver.full_name,
+                phone: driver.phone,
+              }
+            : null,
+          orders: [],
+        });
+      }
+      const group = groupsMap.get(groupKey)!;
+      if (driver && !group.driver) {
+        group.driver = { fullName: driver.full_name, phone: driver.phone };
+      }
+      group.orders.push(order);
+      orderGroupMap.set(order.id, groupKey);
+    });
+
+    const groups = Array.from(groupsMap.values());
+    groups.sort((a, b) => {
+      if (a.key === UNASSIGNED_DRIVER_KEY) {
+        return b.key === UNASSIGNED_DRIVER_KEY ? 0 : -1;
+      }
+      if (b.key === UNASSIGNED_DRIVER_KEY) {
+        return 1;
+      }
+      const nameA = a.driver?.fullName.toLowerCase() ?? '';
+      const nameB = b.driver?.fullName.toLowerCase() ?? '';
+      if (nameA !== nameB) {
+        return nameA.localeCompare(nameB, 'ru');
+      }
+      const phoneA = a.driver ? (normalizePhoneNumber(a.driver.phone) ?? a.driver.phone) : '';
+      const phoneB = b.driver ? (normalizePhoneNumber(b.driver.phone) ?? b.driver.phone) : '';
+      return phoneA.localeCompare(phoneB, 'ru');
+    });
+
+    const uniqueDrivers = new Map<string, DriverOption>();
+    groups.forEach((group) => {
+      if (group.driver && group.key !== UNASSIGNED_DRIVER_KEY) {
+        const formattedPhone = formatPhoneDisplay(group.driver.phone);
+        uniqueDrivers.set(group.key, {
+          key: group.key,
+          fullName: group.driver.fullName,
+          phone: group.driver.phone,
+          label: formattedPhone
+            ? `${group.driver.fullName} (${formattedPhone})`
+            : group.driver.fullName,
+        });
+      }
+    });
+
+    return {
+      groups,
+      orderToGroup: orderGroupMap,
+      driverOptions: Array.from(uniqueDrivers.values()),
+    };
+  }, [orders]);
   const selectedOrder = useMemo(
     () => orders.find((item) => item.id === selectedOrderId) ?? null,
     [orders, selectedOrderId]
@@ -310,38 +463,53 @@ export default function LogisticsRoutesPage() {
       setDriverNameInput('');
       setDriverPhoneInput('');
       setDriverError(null);
+      setSelectedDriverOption(CUSTOM_DRIVER_OPTION);
+      setDriverActionError(null);
       void refetch();
     },
     onError: (error: unknown) => {
-      let message = 'Не удалось назначить водителя.';
-      if (isAxiosError(error)) {
-        const responseData = error.response?.data;
-        if (typeof responseData === 'string') {
-          message = responseData;
-        } else if (responseData && typeof responseData === 'object') {
-          const dataRecord = responseData as Record<string, unknown>;
-          const detail = dataRecord.detail;
-          if (typeof detail === 'string') {
-            message = detail;
-          } else {
-            const extractFieldMessage = (field: string): string | null => {
-              const value = dataRecord[field];
-              if (Array.isArray(value) && value.length && typeof value[0] === 'string') {
-                return value[0];
-              }
-              return null;
-            };
-            message =
-              extractFieldMessage('phone') ??
-              extractFieldMessage('full_name') ??
-              extractFieldMessage('non_field_errors') ??
-              message;
-          }
-        }
-      } else if (error instanceof Error && error.message) {
-        message = error.message;
-      }
+      const message = extractDriverErrorMessage(error, 'Не удалось назначить водителя.');
       setDriverError(message);
+    },
+  });
+
+  const changeDriverMutation = useMutation<
+    OrderDriverResponse,
+    unknown,
+    { orderId: number; payload: AssignOrderDriverPayload }
+  >({
+    mutationFn: ({ orderId, payload }) => ordersApi.assignDriver(orderId, payload),
+    onMutate: ({ orderId }) => {
+      setPendingOrderId(orderId);
+      setDriverActionError(null);
+    },
+    onSuccess: () => {
+      void refetch();
+    },
+    onError: (error: unknown) => {
+      const message = extractDriverErrorMessage(error, 'Не удалось изменить водителя.');
+      setDriverActionError(message);
+    },
+    onSettled: () => {
+      setPendingOrderId(null);
+    },
+  });
+
+  const removeDriverMutation = useMutation<void, unknown, number>({
+    mutationFn: (orderId: number) => ordersApi.removeDriver(orderId),
+    onMutate: (orderId: number) => {
+      setPendingOrderId(orderId);
+      setDriverActionError(null);
+    },
+    onSuccess: () => {
+      void refetch();
+    },
+    onError: (error: unknown) => {
+      const message = extractDriverErrorMessage(error, 'Не удалось удалить водителя.');
+      setDriverActionError(message);
+    },
+    onSettled: () => {
+      setPendingOrderId(null);
     },
   });
 
@@ -349,12 +517,21 @@ export default function LogisticsRoutesPage() {
     (orderId: number) => {
       const order = orders.find((item) => item.id === orderId);
       setDriverModalOrderId(orderId);
-      setDriverNameInput(order?.driver?.full_name ?? '');
-      setDriverPhoneInput(formatPhoneInput(order?.driver?.phone ?? ''));
+      const driver = order?.driver ?? null;
+      const driverKey = driver
+        ? buildDriverKey(driver.full_name, driver.phone)
+        : CUSTOM_DRIVER_OPTION;
+      const hasPresetOption =
+        driverKey !== CUSTOM_DRIVER_OPTION &&
+        driverOptions.some((option) => option.key === driverKey);
+      setSelectedDriverOption(hasPresetOption ? driverKey : CUSTOM_DRIVER_OPTION);
+      setDriverNameInput(driver?.full_name ?? '');
+      setDriverPhoneInput(driver?.phone ? formatPhoneInput(driver.phone) : '');
       setDriverError(null);
+      setDriverActionError(null);
       assignDriverMutation.reset();
     },
-    [orders, assignDriverMutation]
+    [orders, driverOptions, assignDriverMutation]
   );
 
   const handleCloseDriverModal = useCallback(() => {
@@ -362,16 +539,38 @@ export default function LogisticsRoutesPage() {
     setDriverNameInput('');
     setDriverPhoneInput('');
     setDriverError(null);
+    setSelectedDriverOption(CUSTOM_DRIVER_OPTION);
     assignDriverMutation.reset();
   }, [assignDriverMutation]);
 
   const handleDriverNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     setDriverNameInput(event.target.value);
+    setSelectedDriverOption(CUSTOM_DRIVER_OPTION);
   }, []);
 
   const handleDriverPhoneChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     setDriverPhoneInput(formatPhoneInput(event.target.value));
+    setSelectedDriverOption(CUSTOM_DRIVER_OPTION);
   }, []);
+
+  const handleDriverOptionChange = useCallback(
+    (event: ChangeEvent<HTMLSelectElement>) => {
+      const value = event.target.value;
+      if (value === CUSTOM_DRIVER_OPTION) {
+        setSelectedDriverOption(CUSTOM_DRIVER_OPTION);
+        return;
+      }
+      const option = driverOptions.find((item) => item.key === value);
+      if (!option) {
+        setSelectedDriverOption(CUSTOM_DRIVER_OPTION);
+        return;
+      }
+      setSelectedDriverOption(option.key);
+      setDriverNameInput(option.fullName);
+      setDriverPhoneInput(option.phone ? formatPhoneInput(option.phone) : '');
+    },
+    [driverOptions]
+  );
 
   const handleDriverSubmit = useCallback(
     (event: FormEvent<HTMLFormElement>) => {
@@ -390,6 +589,7 @@ export default function LogisticsRoutesPage() {
         return;
       }
       setDriverError(null);
+      setDriverActionError(null);
       assignDriverMutation.mutate({
         orderId: driverModalOrderId,
         payload: {
@@ -408,6 +608,113 @@ export default function LogisticsRoutesPage() {
   const handleCloseDriverInfo = useCallback(() => {
     setDriverInfoOrderId(null);
   }, []);
+
+  const resetDragState = useCallback(() => {
+    setDraggedOrderId(null);
+    setDragSourceKey(null);
+    setDropTargetKey(null);
+  }, []);
+
+  const handleOrderDragStart = useCallback(
+    (event: DragEvent<HTMLDivElement>, orderId: number) => {
+      const sourceKey = orderToGroup.get(orderId) ?? UNASSIGNED_DRIVER_KEY;
+      setDraggedOrderId(orderId);
+      setDragSourceKey(sourceKey);
+      setDropTargetKey(null);
+      setDriverActionError(null);
+      if (event.dataTransfer) {
+        event.dataTransfer.setData('text/plain', String(orderId));
+        event.dataTransfer.effectAllowed = 'move';
+      }
+    },
+    [orderToGroup]
+  );
+
+  const handleOrderDragEnd = useCallback(() => {
+    resetDragState();
+  }, [resetDragState]);
+
+  const handleGroupDragOver = useCallback(
+    (event: DragEvent<HTMLDivElement>, groupKey: string) => {
+      if (draggedOrderId === null) {
+        return;
+      }
+      event.preventDefault();
+      if (dropTargetKey !== groupKey) {
+        setDropTargetKey(groupKey);
+      }
+    },
+    [draggedOrderId, dropTargetKey]
+  );
+
+  const handleGroupDragLeave = useCallback(
+    (event: DragEvent<HTMLDivElement>, groupKey: string) => {
+      if (draggedOrderId === null) {
+        return;
+      }
+      if (event.currentTarget.contains(event.relatedTarget as Node)) {
+        return;
+      }
+      if (dropTargetKey === groupKey) {
+        setDropTargetKey(null);
+      }
+    },
+    [draggedOrderId, dropTargetKey]
+  );
+
+  const handleGroupDrop = useCallback(
+    (event: DragEvent<HTMLDivElement>, targetKey: string) => {
+      event.preventDefault();
+      if (draggedOrderId === null) {
+        resetDragState();
+        return;
+      }
+      const orderId = draggedOrderId;
+      if (dragSourceKey === targetKey) {
+        resetDragState();
+        return;
+      }
+      if (targetKey === UNASSIGNED_DRIVER_KEY) {
+        resetDragState();
+        removeDriverMutation.mutate(orderId, {
+          onSettled: () => {
+            resetDragState();
+          },
+        });
+        return;
+      }
+      const targetGroup = driverGroups.find((group) => group.key === targetKey);
+      if (!targetGroup?.driver) {
+        resetDragState();
+        return;
+      }
+      const normalizedPhone =
+        normalizePhoneNumber(targetGroup.driver.phone) ?? targetGroup.driver.phone;
+      resetDragState();
+      changeDriverMutation.mutate(
+        {
+          orderId,
+          payload: {
+            full_name: targetGroup.driver.fullName,
+            phone: normalizedPhone,
+          },
+        },
+        {
+          onSettled: () => {
+            resetDragState();
+          },
+        }
+      );
+    },
+    [
+      changeDriverMutation,
+      dragSourceKey,
+      draggedOrderId,
+      driverGroups,
+      removeDriverMutation,
+      resetDragState,
+    ]
+  );
 
   const isDriverModalOpen = driverModalOrderId !== null;
   const isDriverInfoOpen = Boolean(driverInfoOrder?.driver);
@@ -435,48 +742,126 @@ export default function LogisticsRoutesPage() {
         </Alert>
       );
     }
+    const isDriverMutationInFlight =
+      changeDriverMutation.isPending || removeDriverMutation.isPending;
+
     return (
-      <ul className={styles.list}>
-        {orders.map((order) => {
-          const isActive = order.id === selectedOrderId;
-          const hasDriver = Boolean(order.driver);
-          const buttonLabel = hasDriver ? 'Смена водителя' : 'Назначить водителя';
+      <div className={styles.groups}>
+        {driverActionError ? (
+          <Alert tone="danger" title="Ошибка обновления водителя">
+            {driverActionError}
+          </Alert>
+        ) : null}
+        {driverGroups.map((group) => {
+          const isDropTarget = dropTargetKey === group.key && draggedOrderId !== null;
+          const groupTitle = group.driver ? group.driver.fullName : 'Не распределены';
+          const groupSubtitle = group.driver?.phone ? formatPhoneDisplay(group.driver.phone) : null;
           return (
-            <li key={order.id}>
-              <div className={clsx(styles.listItem, isActive && styles.listItemActive)}>
-                <button
-                  type="button"
-                  className={styles.listItemBody}
-                  onClick={() => setSelectedOrderId(order.id)}
-                >
-                  <div className={styles.listItemContent}>
-                    <span className={styles.listItemTitle}>Заказ №{order.id}</span>
-                    <span className={styles.listItemAddress}>{order.address}</span>
-                  </div>
-                  <Tag tone={order.exact ? 'success' : 'warning'} className={styles.listItemTag}>
-                    {order.exact ? 'Точный адрес' : 'Требует уточнения'}
-                  </Tag>
-                </button>
-                <div className={styles.listItemActions}>
-                  <Button type="button" onClick={() => handleOpenDriverModal(order.id)}>
-                    {buttonLabel}
-                  </Button>
-                  {hasDriver ? (
-                    <button
-                      type="button"
-                      className={styles.iconButton}
-                      onClick={() => handleOpenDriverInfo(order.id)}
-                      aria-label={`Информация о водителе заказа №${order.id}`}
-                    >
-                      <Icon name="info" size={18} />
-                    </button>
+            <section
+              key={group.key}
+              className={clsx(
+                styles.group,
+                group.key === UNASSIGNED_DRIVER_KEY && styles.groupUnassigned,
+                isDropTarget && styles.groupDropTarget
+              )}
+              onDragOver={(event) => handleGroupDragOver(event, group.key)}
+              onDragLeave={(event) => handleGroupDragLeave(event, group.key)}
+              onDrop={(event) => handleGroupDrop(event, group.key)}
+            >
+              <div className={styles.groupHeader}>
+                <div className={styles.groupHeaderInfo}>
+                  <span className={styles.groupTitle}>{groupTitle}</span>
+                  {groupSubtitle ? (
+                    <span className={styles.groupSubtitle}>{groupSubtitle}</span>
                   ) : null}
                 </div>
+                <span className={styles.groupCounter}>{group.orders.length}</span>
               </div>
-            </li>
+              <div className={styles.groupBody}>
+                {group.orders.length ? (
+                  <ul className={styles.list}>
+                    {group.orders.map((order) => {
+                      const isActive = order.id === selectedOrderId;
+                      const hasDriver = Boolean(order.driver);
+                      const isPending =
+                        pendingOrderId === order.id &&
+                        (changeDriverMutation.isPending || removeDriverMutation.isPending);
+                      return (
+                        <li key={order.id}>
+                          <div
+                            className={clsx(
+                              styles.listItem,
+                              isActive && styles.listItemActive,
+                              styles.listItemDraggable,
+                              isPending && styles.listItemProcessing
+                            )}
+                            draggable={!isDriverMutationInFlight && !isPending}
+                            onDragStart={(event) => handleOrderDragStart(event, order.id)}
+                            onDragEnd={handleOrderDragEnd}
+                          >
+                            <button
+                              type="button"
+                              className={styles.listItemBody}
+                              onClick={() => setSelectedOrderId(order.id)}
+                              disabled={isPending}
+                            >
+                              <div className={styles.listItemContent}>
+                                <span className={styles.listItemTitle}>Заказ №{order.id}</span>
+                                <span className={styles.listItemAddress}>{order.address}</span>
+                              </div>
+                              <Tag
+                                tone={order.exact ? 'success' : 'warning'}
+                                className={styles.listItemTag}
+                              >
+                                {order.exact ? 'Точный адрес' : 'Требует уточнения'}
+                              </Tag>
+                            </button>
+                            <div className={styles.listItemActions}>
+                              {hasDriver ? (
+                                <Button
+                                  type="button"
+                                  variant="danger"
+                                  onClick={() => removeDriverMutation.mutate(order.id)}
+                                  disabled={isDriverMutationInFlight || isPending}
+                                >
+                                  {isPending && removeDriverMutation.isPending
+                                    ? 'Удаление...'
+                                    : 'Удалить водителя'}
+                                </Button>
+                              ) : (
+                                <Button
+                                  type="button"
+                                  onClick={() => handleOpenDriverModal(order.id)}
+                                  disabled={assignDriverMutation.isPending}
+                                >
+                                  Назначить водителя
+                                </Button>
+                              )}
+                              {hasDriver ? (
+                                <button
+                                  type="button"
+                                  className={styles.iconButton}
+                                  onClick={() => handleOpenDriverInfo(order.id)}
+                                  aria-label={`Информация о водителе заказа №${order.id}`}
+                                  disabled={isPending}
+                                >
+                                  <Icon name="info" size={18} />
+                                </button>
+                              ) : null}
+                            </div>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                ) : (
+                  <div className={styles.groupEmpty}>Нет заказов</div>
+                )}
+              </div>
+            </section>
           );
         })}
-      </ul>
+      </div>
     );
   };
 
@@ -486,7 +871,15 @@ export default function LogisticsRoutesPage() {
         <aside className={styles.sidebar}>
           <div className={styles.sidebarHeader}>
             <h2>Маршруты доставок</h2>
-            <Button type="button" variant="ghost" onClick={() => refetch()} disabled={isFetching}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => {
+                setDriverActionError(null);
+                void refetch();
+              }}
+              disabled={isFetching}
+            >
               Обновить
             </Button>
           </div>
@@ -521,6 +914,20 @@ export default function LogisticsRoutesPage() {
         }
       >
         <form className={styles.driverForm} onSubmit={handleDriverSubmit}>
+          {driverOptions.length ? (
+            <Select
+              label="Выберите водителя"
+              value={selectedDriverOption}
+              onChange={handleDriverOptionChange}
+            >
+              <option value={CUSTOM_DRIVER_OPTION}>Новый водитель</option>
+              {driverOptions.map((option) => (
+                <option key={option.key} value={option.key}>
+                  {option.label}
+                </option>
+              ))}
+            </Select>
+          ) : null}
           <Input
             label="Имя водителя"
             value={driverNameInput}
@@ -544,7 +951,9 @@ export default function LogisticsRoutesPage() {
             <Button type="button" variant="ghost" onClick={handleCloseDriverModal}>
               Отмена
             </Button>
-            <Button type="submit">{driverModalOrder?.driver ? 'Сохранить' : 'Создать'}</Button>
+            <Button type="submit" disabled={assignDriverMutation.isPending}>
+              {assignDriverMutation.isPending ? 'Сохранение...' : 'Сохранить'}
+            </Button>
           </div>
         </form>
       </Modal>
