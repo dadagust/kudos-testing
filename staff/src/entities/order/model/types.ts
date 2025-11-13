@@ -206,6 +206,12 @@ export interface OrderWithCoordsItem {
   lon: number;
   exact: boolean;
   driver: OrderDriverSummary | null;
+  installation_date: string | null;
+  mount_datetime_from: string | null;
+  mount_datetime_to: string | null;
+  dismantle_date: string | null;
+  dismount_datetime_from: string | null;
+  dismount_datetime_to: string | null;
 }
 
 export interface OrdersWithCoordsResponse {

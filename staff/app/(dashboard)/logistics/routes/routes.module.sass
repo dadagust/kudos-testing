@@ -33,6 +33,72 @@
   justify-content: space-between
   gap: 8px
 
+.filters
+  display: flex
+  flex-direction: column
+  gap: 12px
+  margin-bottom: 16px
+
+.filtersControls
+  display: flex
+  align-items: flex-end
+  flex-wrap: wrap
+  gap: 12px
+
+.filtersDateField
+  min-width: 200px
+  max-width: 240px
+
+.dateButtons
+  display: flex
+  flex-wrap: wrap
+  gap: 8px
+
+.dateButton
+  display: inline-flex
+  flex-direction: column
+  align-items: flex-start
+  gap: 6px
+  padding: 10px 14px
+  border-radius: 10px
+  border: 1px solid var(--color-border)
+  background: var(--color-surface)
+  color: inherit
+  cursor: pointer
+  min-width: 120px
+  text-align: left
+  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease
+
+.dateButton:hover,
+.dateButton:focus-visible
+  border-color: var(--color-primary)
+  background: var(--color-surface-muted)
+  outline: none
+
+.dateButtonActive
+  border-color: var(--color-primary)
+  background: var(--color-surface-muted)
+  color: var(--color-primary)
+
+.dateButtonActive .dateButtonCount
+  background: var(--color-primary)
+  color: #fff
+
+.dateButtonMuted
+  opacity: 0.6
+
+.dateButtonLabel
+  font-weight: 600
+  font-size: 0.9rem
+
+.dateButtonCount
+  font-size: 0.75rem
+  font-weight: 600
+  padding: 2px 8px
+  border-radius: 999px
+  background: var(--color-surface-muted)
+  color: var(--color-text-muted)
+
 .groups
   display: flex
   flex-direction: column
@@ -167,9 +233,33 @@
 .listItemContent
   display: flex
   flex-direction: column
-  gap: 6px
+  gap: 10px
   flex: 1 1 auto
   min-width: 0
+
+.listItemMain
+  display: flex
+  flex-direction: column
+  gap: 6px
+
+.listItemSchedule
+  display: flex
+  flex-direction: column
+  gap: 6px
+
+.scheduleRow
+  display: flex
+  align-items: baseline
+  flex-wrap: wrap
+  gap: 6px
+  font-size: 0.8rem
+
+.scheduleLabel
+  font-weight: 600
+  color: var(--color-text-muted)
+
+.scheduleValue
+  color: inherit
 
 .listItemTitle
   font-weight: 600

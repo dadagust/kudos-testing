@@ -291,6 +291,14 @@ class OrderApiTests(APITestCase):
         self.assertAlmostEqual(entry['lon'], 37.6150, places=4)
         self.assertTrue(entry['exact'])
         self.assertIsNone(entry['driver'])
+        self.assertEqual(entry['installation_date'], order.installation_date.isoformat())
+        self.assertEqual(entry['mount_datetime_from'], order.mount_datetime_from.strftime('%H:%M'))
+        self.assertEqual(entry['mount_datetime_to'], order.mount_datetime_to.strftime('%H:%M'))
+        self.assertEqual(entry['dismantle_date'], order.dismantle_date.isoformat())
+        self.assertEqual(
+            entry['dismount_datetime_from'], order.dismount_datetime_from.strftime('%H:%M')
+        )
+        self.assertEqual(entry['dismount_datetime_to'], order.dismount_datetime_to.strftime('%H:%M'))
 
     def test_orders_with_coords_includes_driver(self):
         order_data = self._create_order()
@@ -312,6 +320,8 @@ class OrderApiTests(APITestCase):
         self.assertIsNotNone(entry['driver'])
         self.assertEqual(entry['driver']['full_name'], 'Алексей Смирнов')
         self.assertEqual(entry['driver']['phone'], '+79995556677')
+        self.assertEqual(entry['installation_date'], order.installation_date.isoformat())
+        self.assertEqual(entry['dismantle_date'], order.dismantle_date.isoformat())
 
     def test_installer_qualification_counted_once(self):
         url = reverse('orders:order-list')
