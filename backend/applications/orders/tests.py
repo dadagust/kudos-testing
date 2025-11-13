@@ -405,6 +405,29 @@ class OrderApiTests(APITestCase):
         response = self.client.get(list_url, {'logistics_state': [LogisticsState.SHIPPED]})
         self.assertEqual(len(response.json()['data']), 1)
 
+    def test_search_orders_by_customer_details(self):
+        self._create_order()
+        other_customer = Customer.objects.create(
+            display_name='Анна Иванова',
+            phone='+7 (999) 123-45-67',
+        )
+        matched_order = self._create_order(customer_id=str(other_customer.pk))
+
+        list_url = reverse('orders:orders-list')
+
+        response = self.client.get(list_url, {'q': 'Анна', 'search': 'Анна'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()['data']
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]['id'], matched_order['id'])
+
+        phone_query = '9991234567'
+        response = self.client.get(list_url, {'q': phone_query, 'search': phone_query})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()['data']
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]['id'], matched_order['id'])
+
     def test_assign_driver_creates_and_updates(self):
         order_data = self._create_order()
         order_id = order_data['id']

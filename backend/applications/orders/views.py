@@ -18,6 +18,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from applications.customers.models import PhoneNormalizer
+
 from .models import Order, OrderDriver, OrderStatus
 from .permissions import OrderAccessPolicy
 from .serializers import (
@@ -103,29 +105,36 @@ class OrderViewSet(viewsets.ModelViewSet):
         normalized_search = (params.get('search') or '').strip()
         normalized_order_query = (params.get('q') or '').strip()
 
+        def build_order_search_filter(term: str) -> Q:
+            normalized_phone = PhoneNormalizer.normalize(term)
+            customer_filter = (
+                Q(customer__display_name__icontains=term)
+                | Q(customer__first_name__icontains=term)
+                | Q(customer__last_name__icontains=term)
+                | Q(customer__middle_name__icontains=term)
+                | Q(customer__phone__icontains=term)
+                | Q(customer__id__icontains=term)
+            )
+            if normalized_phone:
+                customer_filter |= Q(customer__phone_normalized__icontains=normalized_phone)
+
+            return (
+                Q(number_str__icontains=term)
+                | Q(delivery_address_input__icontains=term)
+                | Q(delivery_address_full__icontains=term)
+                | Q(comment__icontains=term)
+                | Q(comment_for_waybill__icontains=term)
+                | customer_filter
+            )
+
         if normalized_search or normalized_order_query:
             queryset = queryset.annotate(number_str=Cast('pk', output_field=models.CharField()))
 
         if normalized_order_query:
-            queryset = queryset.filter(
-                Q(number_str__icontains=normalized_order_query)
-                | Q(delivery_address_input__icontains=normalized_order_query)
-                | Q(delivery_address_full__icontains=normalized_order_query)
-                | Q(comment__icontains=normalized_order_query)
-                | Q(comment_for_waybill__icontains=normalized_order_query)
-            )
+            queryset = queryset.filter(build_order_search_filter(normalized_order_query))
 
         if normalized_search:
-            queryset = queryset.filter(
-                Q(number_str__icontains=normalized_search)
-                | Q(comment__icontains=normalized_search)
-                | Q(comment_for_waybill__icontains=normalized_search)
-                | Q(delivery_address_input__icontains=normalized_search)
-                | Q(delivery_address_full__icontains=normalized_search)
-                | Q(customer__display_name__icontains=normalized_search)
-                | Q(customer__first_name__icontains=normalized_search)
-                | Q(customer__last_name__icontains=normalized_search)
-            )
+            queryset = queryset.filter(build_order_search_filter(normalized_search))
 
         return queryset.order_by('-shipment_date', '-created')
 
