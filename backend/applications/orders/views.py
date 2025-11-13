@@ -186,9 +186,18 @@ class OrderViewSet(viewsets.ModelViewSet):
             reset_order_transactions(instance)
         super().perform_destroy(instance)
 
-    @action(detail=True, methods=['post'], url_path='driver')
+    @action(detail=True, methods=['post', 'delete'], url_path='driver')
     def assign_driver(self, request, *args, **kwargs):
         order = self.get_object()
+        if request.method == 'DELETE':
+            try:
+                driver = order.driver
+            except OrderDriver.DoesNotExist:
+                return Response(status=status.HTTP_204_NO_CONTENT)
+
+            driver.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
         serializer = OrderDriverAssignSerializer(data=request.data or {})
         serializer.is_valid(raise_exception=True)
         payload = serializer.validated_data
