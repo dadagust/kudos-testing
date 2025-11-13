@@ -1012,7 +1012,7 @@ export default function LogisticsRoutesPage() {
   };
 
   return (
-    <>
+    <div className={styles.page}>
       <div className={styles.filters}>
         <div className={styles.filtersControls}>
           <div className={styles.filtersDateField}>
@@ -1165,6 +1165,6 @@ export default function LogisticsRoutesPage() {
           </div>
         ) : null}
       </Modal>
-    </>
+    </div>
   );
 }
