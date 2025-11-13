@@ -3,6 +3,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import clsx from 'clsx';
+import Link from 'next/link';
 import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
@@ -444,19 +445,33 @@ export default function LogisticsRoutesPage() {
           return (
             <li key={order.id}>
               <div className={clsx(styles.listItem, isActive && styles.listItemActive)}>
-                <button
-                  type="button"
+                <div
+                  role="button"
+                  tabIndex={0}
                   className={styles.listItemBody}
                   onClick={() => setSelectedOrderId(order.id)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      setSelectedOrderId(order.id);
+                    }
+                  }}
                 >
                   <div className={styles.listItemContent}>
-                    <span className={styles.listItemTitle}>Заказ №{order.id}</span>
+                    <Link
+                      href={`/orders/${order.id}`}
+                      className={styles.listItemTitleLink}
+                      onClick={(event) => event.stopPropagation()}
+                      onKeyDown={(event) => event.stopPropagation()}
+                    >
+                      <span className={styles.listItemTitle}>Заказ №{order.id}</span>
+                    </Link>
                     <span className={styles.listItemAddress}>{order.address}</span>
                   </div>
                   <Tag tone={order.exact ? 'success' : 'warning'} className={styles.listItemTag}>
                     {order.exact ? 'Точный адрес' : 'Требует уточнения'}
                   </Tag>
-                </button>
+                </div>
                 <div className={styles.listItemActions}>
                   <Button type="button" onClick={() => handleOpenDriverModal(order.id)}>
                     {buttonLabel}
