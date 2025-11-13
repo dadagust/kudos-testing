@@ -1,13 +1,22 @@
 /* routes.module.sass — без глобальных селекторов (CSS Modules) */
 
 /* === ЛЕЙАУТ: Sidebar и Map одинаковой высоты === */
+.page
+  display: flex
+  flex-direction: column
+  gap: 24px
+  flex: 1 1 auto
+  min-height: 0
+  overflow: hidden
+
 .wrapper
   display: grid
   /* Первая колонка — сайдбар: минимум 500px, может расти; правая — карта с возможностью сжиматься */
   grid-template-columns: clamp(500px, 35vw, 640px) minmax(0, 1fr)
   grid-template-rows: 1fr
   gap: 16px
-  height: max(70vh, 560px)
+  flex: 1 1 auto
+  min-height: 0
   align-items: stretch
 
 /* критично: дети грида должны растягиваться и позволять внутренний скролл */
@@ -36,23 +45,24 @@
 .filters
   display: flex
   flex-direction: column
-  gap: 12px
-  margin-bottom: 16px
+  gap: 16px
 
 .filtersControls
   display: flex
   align-items: flex-end
   flex-wrap: wrap
   gap: 12px
+  width: 100%
 
 .filtersDateField
   min-width: 200px
   max-width: 240px
 
 .dateButtons
-  display: flex
-  flex-wrap: wrap
+  display: grid
+  width: 100%
   gap: 8px
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr))
 
 .dateButton
   display: inline-flex
