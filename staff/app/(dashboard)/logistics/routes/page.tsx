@@ -3,6 +3,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import clsx from 'clsx';
+import { useRouter } from 'next/navigation';
 import {
   ChangeEvent,
   DragEvent,
@@ -191,6 +192,7 @@ interface MarkerRecord {
 }
 
 export default function LogisticsRoutesPage() {
+  const router = useRouter();
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<{
     map: YMapInstance;
@@ -848,6 +850,17 @@ export default function LogisticsRoutesPage() {
                                   <Icon name="info" size={18} />
                                 </button>
                               ) : null}
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  router.push(`/orders/${order.id}`);
+                                }}
+                                disabled={isDriverMutationInFlight || isPending}
+                              >
+                                Подробнее
+                              </Button>
                             </div>
                           </div>
                         </li>
