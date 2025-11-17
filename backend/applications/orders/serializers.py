@@ -24,6 +24,10 @@ from .models import (
     OrderStatus,
     PaymentStatus,
 )
+from .services.delivery_pricing import (
+    DeliveryPricingError,
+    calculate_delivery_pricing,
+)
 from .services.setup_pricing import build_setup_requirements, calculate_setup_pricing
 from .services.stock import (
     collect_order_item_totals,
@@ -328,7 +332,7 @@ def _calculate_items_pricing(
     product_ids = {str(item['product_id']) for item in items_data}
     products_qs = (
         Product.objects.filter(pk__in=product_ids)
-        .select_related('setup_installer_qualification')
+        .select_related('setup_installer_qualification', 'delivery_transport_restriction')
         .prefetch_related('complementary_products__setup_installer_qualification')
     )
     products = {str(product.pk): product for product in products_qs}
@@ -626,6 +630,7 @@ class OrderWriteSerializer(serializers.ModelSerializer):
                 'services_total_amount',
                 'installation_total_amount',
                 'dismantle_total_amount',
+                'delivery_total_amount',
             ]
         )
         return order
@@ -680,6 +685,7 @@ class OrderWriteSerializer(serializers.ModelSerializer):
                 'services_total_amount',
                 'installation_total_amount',
                 'dismantle_total_amount',
+                'delivery_total_amount',
             ]
         )
         return instance
@@ -784,6 +790,41 @@ class OrderCalculationSerializer(OrderWriteSerializer):
         setup_pricing = calculate_setup_pricing(setup_requirements)
         total += setup_pricing.services_total
         delivery_total = Decimal('0.00')
+        delivery_details: dict[str, Any] | None = None
+        delivery_type = self.validated_data.get('delivery_type', DeliveryType.DELIVERY)
+        delivery_address = (
+            self.validated_data.get('delivery_address_input')
+            or self.validated_data.get('delivery_address_full')
+            or ''
+        )
+        if product_totals and delivery_type == DeliveryType.DELIVERY:
+            try:
+                delivery_pricing = calculate_delivery_pricing(
+                    delivery_type=delivery_type,
+                    delivery_address=delivery_address,
+                    product_totals=product_totals,
+                    products=products,
+                )
+            except DeliveryPricingError as exc:
+                raise serializers.ValidationError({'delivery': str(exc)}) from exc
+            if delivery_pricing:
+                delivery_total = delivery_pricing.total_delivery_cost
+                delivery_details = {
+                    'transport': {
+                        'value': delivery_pricing.transport.value,
+                        'label': delivery_pricing.transport.label,
+                    },
+                    'transport_count': delivery_pricing.transport_count,
+                    'distance_km': format(
+                        delivery_pricing.distance_km.quantize(
+                            Decimal('0.01'), rounding=ROUND_HALF_UP
+                        ),
+                        '.2f',
+                    ),
+                    'cost_per_transport': format(
+                        delivery_pricing.delivery_cost_per_transport, '.2f'
+                    ),
+                }
         total += delivery_total
 
         def _format_decimal(value: Decimal) -> str:
@@ -795,6 +836,7 @@ class OrderCalculationSerializer(OrderWriteSerializer):
             'installation_total_amount': _format_decimal(setup_pricing.installation_total),
             'dismantle_total_amount': _format_decimal(setup_pricing.dismantle_total),
             'delivery_total_amount': _format_decimal(delivery_total),
+            'delivery_pricing': delivery_details,
             'items': [
                 {
                     'product_id': str(item['product'].pk),

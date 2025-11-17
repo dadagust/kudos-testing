@@ -108,6 +108,9 @@ class TransportRestrictionAdmin(admin.ModelAdmin):
     list_display = (
         'label',
         'value',
+        'capacity_volume_cm3',
+        'cost_per_km_rub',
+        'cost_per_transport_rub',
         'created',
         'modified',
     )
