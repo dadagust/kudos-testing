@@ -63,8 +63,8 @@ class ProductApiTests(APITestCase):
             },
             'occupancy': {'cleaning_days': 1},
             'setup': {
-                'install_minutes': 20,
-                'uninstall_minutes': 10,
+                'install_minutes': 20.5,
+                'uninstall_minutes': 10.25,
                 'installer_qualification': str(self.installer_qualification.id),
                 'min_installers': 1,
                 'self_setup_allowed': True,
@@ -114,6 +114,12 @@ class ProductApiTests(APITestCase):
         self.assertEqual(product['rental']['mode'], RentalMode.SPECIAL)
         self.assertEqual(len(product['rental']['tiers']), 2)
         self.assertEqual(product['rental']['tiers'][0]['end_day'], 3)
+        self.assertAlmostEqual(
+            product['setup']['install_minutes'], payload['setup']['install_minutes']
+        )
+        self.assertAlmostEqual(
+            product['setup']['uninstall_minutes'], payload['setup']['uninstall_minutes']
+        )
 
     def test_list_with_filters_and_cursor(self):
         product = Product.objects.create(

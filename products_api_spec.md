@@ -429,7 +429,7 @@
 1. **Габариты**: набор обязательных полей зависит от `dimensions.shape` (см. 3.1.1).
 2. **Числовые поля**:
    - `price_rub`, `loss_compensation_rub` — `>= 0`.
-   - Время (`install_minutes`, `uninstall_minutes`) — целые `>= 0`.
+   - Время (`install_minutes`, `uninstall_minutes`) — десятичные числа `>= 0` (до двух знаков).
    - `delivery.weight_kg`, `delivery.volume_cm3` — `> 0` (если не вычисляется).
 3. **Сетап**:
    - `min_installers` ∈ {1,2,3,4}.
