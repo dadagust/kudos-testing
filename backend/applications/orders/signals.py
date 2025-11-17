@@ -7,7 +7,7 @@ from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
 from .models import Order
-from .services import ensure_order_stock_transactions
+from .services.stock import ensure_order_stock_transactions
 
 
 @receiver(pre_save, sender=Order)

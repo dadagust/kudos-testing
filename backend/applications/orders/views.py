@@ -34,7 +34,7 @@ from .serializers import (
     OrderSummarySerializer,
     OrderWriteSerializer,
 )
-from .services import reset_order_transactions
+from .services.stock import reset_order_transactions
 from .services.yandex_maps import YandexMapsError, geocode_address
 
 
