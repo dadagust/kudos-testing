@@ -190,9 +190,17 @@ export interface ProductDetail extends ProductListItem {
   complementary_products?: ProductComplementarySummary[];
 }
 
+export interface ProductListTotals {
+  positions: number;
+  total_stock_qty: number;
+  available_stock_qty: number;
+  reserved_stock_qty: number;
+}
+
 export interface ProductListResponse {
   results: ProductListItem[];
   next_cursor: string | null;
+  totals?: ProductListTotals;
 }
 
 export interface ProductStockTransaction {

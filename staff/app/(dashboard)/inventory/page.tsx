@@ -1,10 +1,10 @@
 'use client';
 
-import { useMemo } from 'react';
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useInfiniteProductsQuery } from '@/entities/product';
 import { RoleGuard } from '@/features/auth';
-import { Alert, Badge, Button, Spinner, Table } from '@/shared/ui';
+import { Alert, Badge, Button, Input, Spinner, Table } from '@/shared/ui';
 
 type InventoryRow = {
   id: string;
@@ -14,7 +14,15 @@ type InventoryRow = {
   availableQty: number;
 };
 
+type InventorySummary = {
+  positions: number;
+  totalStock: number;
+  available: number;
+  reserved: number;
+};
+
 const PAGE_SIZE = 50;
+const SEARCH_DEBOUNCE_MS = 300;
 const numberFormatter = new Intl.NumberFormat('ru-RU');
 const formatQuantity = (value: number) => numberFormatter.format(value);
 
@@ -38,6 +46,27 @@ const SummaryCard = ({ label, value }: { label: string; value: string }) => (
 );
 
 export default function InventoryPage() {
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedSearch(search.trim());
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [search]);
+
+  const queryParams = useMemo(
+    () => ({
+      limit: PAGE_SIZE,
+      ordering: 'name' as const,
+      q: debouncedSearch || undefined,
+    }),
+    [debouncedSearch]
+  );
+
   const {
     data,
     error,
@@ -47,7 +76,24 @@ export default function InventoryPage() {
     hasNextPage,
     isFetchingNextPage,
     refetch,
-  } = useInfiniteProductsQuery({ limit: PAGE_SIZE, ordering: 'name' });
+  } = useInfiniteProductsQuery(queryParams);
+
+  useEffect(() => {
+    if (!hasNextPage) {
+      return;
+    }
+    const element = loadMoreRef.current;
+    if (!element) {
+      return;
+    }
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0]?.isIntersecting && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const inventoryRows = useMemo<InventoryRow[]>(() => {
     if (!data?.pages.length) {
@@ -69,7 +115,7 @@ export default function InventoryPage() {
     );
   }, [data]);
 
-  const summaryTotals = useMemo(() => {
+  const derivedSummary = useMemo<InventorySummary>(() => {
     return inventoryRows.reduce(
       (acc, row) => {
         acc.totalStock += row.totalQty;
@@ -77,9 +123,26 @@ export default function InventoryPage() {
         acc.reserved += row.reservedQty;
         return acc;
       },
-      { totalStock: 0, available: 0, reserved: 0 }
+      { positions: inventoryRows.length, totalStock: 0, available: 0, reserved: 0 }
     );
   }, [inventoryRows]);
+
+  const summaryTotals: InventorySummary = useMemo(() => {
+    const apiTotals = data?.pages[0]?.totals;
+    if (!apiTotals) {
+      return derivedSummary;
+    }
+    return {
+      positions: apiTotals.positions,
+      totalStock: apiTotals.total_stock_qty,
+      available: apiTotals.available_stock_qty,
+      reserved: apiTotals.reserved_stock_qty,
+    };
+  }, [data, derivedSummary]);
+
+  const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setSearch(event.target.value);
+  };
 
   const isInitialLoading = isLoading && inventoryRows.length === 0;
   const hasErrorWithoutData = isError && inventoryRows.length === 0;
@@ -91,6 +154,16 @@ export default function InventoryPage() {
         В таблице отображаются фактические остатки товаров из каталога. Склад один, поэтому локацию
         не указываем.
       </p>
+
+      <div style={{ marginBottom: '24px', maxWidth: 420 }}>
+        <Input
+          type="search"
+          label="Поиск по названию"
+          placeholder="Например, стул или стол"
+          value={search}
+          onChange={handleSearchChange}
+        />
+      </div>
 
       {hasErrorWithoutData ? (
         <Alert tone="danger" title="Не удалось загрузить остатки">
@@ -115,7 +188,7 @@ export default function InventoryPage() {
               marginBottom: '24px',
             }}
           >
-            <SummaryCard label="Позиции" value={formatQuantity(inventoryRows.length)} />
+            <SummaryCard label="Позиции" value={formatQuantity(summaryTotals.positions)} />
             <SummaryCard label="Всего единиц" value={formatQuantity(summaryTotals.totalStock)} />
             <SummaryCard label="Доступно" value={formatQuantity(summaryTotals.available)} />
             <SummaryCard label="В резерве" value={formatQuantity(summaryTotals.reserved)} />
@@ -159,13 +232,12 @@ export default function InventoryPage() {
             </div>
           ) : null}
 
-          {hasNextPage ? (
-            <div style={{ marginTop: '16px' }}>
-              <Button onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
-                {isFetchingNextPage ? 'Загружаем...' : 'Загрузить ещё'}
-              </Button>
+          {isFetchingNextPage ? (
+            <div style={{ marginTop: 16, display: 'flex', justifyContent: 'center' }}>
+              <Spinner size="sm" label="Загружаем ещё товары" />
             </div>
           ) : null}
+          <div ref={loadMoreRef} />
         </>
       )}
     </RoleGuard>

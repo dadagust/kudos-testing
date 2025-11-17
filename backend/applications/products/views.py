@@ -198,6 +198,37 @@ class ProductViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer: ProductBaseSerializer):  # type: ignore[override]
         serializer.save()
 
+    def list(self, request: Request, *args, **kwargs):  # type: ignore[override]
+        queryset = self.filter_queryset(self.get_queryset())
+        totals = self._calculate_totals(queryset)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            response = self.get_paginated_response(serializer.data)
+            response.data['totals'] = totals
+            return response
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({'results': serializer.data, 'next_cursor': None, 'totals': totals})
+
+    @staticmethod
+    def _calculate_totals(queryset):
+        aggregates = queryset.aggregate(
+            positions=models.Count('id', distinct=True),
+            total_stock=models.Sum('stock_qty'),
+            available_stock=models.Sum('available_stock_qty'),
+        )
+
+        total_stock = int(aggregates.get('total_stock') or 0)
+        available_stock = int(aggregates.get('available_stock') or 0)
+        reserved_stock = max(total_stock - available_stock, 0)
+
+        return {
+            'positions': int(aggregates.get('positions') or 0),
+            'total_stock_qty': total_stock,
+            'available_stock_qty': available_stock,
+            'reserved_stock_qty': reserved_stock,
+        }
+
     def perform_update(self, serializer: ProductBaseSerializer):  # type: ignore[override]
         serializer.save()
 
