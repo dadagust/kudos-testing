@@ -39,9 +39,17 @@ class OrderApiTests(APITestCase):
         self.client.force_authenticate(self.user)
         self.customer = Customer.objects.create(display_name='Тестовый клиент')
         self.category = Category.objects.create(name='Текстиль', slug='textile')
+        self.any_qualification = InstallerQualification.objects.create(
+            name='Любой',
+            price_rub='0.00',
+            minimal_price_rub='0.00',
+            hour_price_rub='0.00',
+        )
         self.installer_qualification = InstallerQualification.objects.create(
             name='Квалификация A',
-            price_rub='500.00',
+            price_rub='0.00',
+            minimal_price_rub='500.00',
+            hour_price_rub='400.00',
         )
         self.product = Product.objects.create(
             name='Скатерть Амори',
@@ -53,10 +61,20 @@ class OrderApiTests(APITestCase):
             delivery_volume_cm3=1000,
         )
         self.product.setup_installer_qualification = self.installer_qualification
+        self.product.setup_install_minutes = Decimal('90')
+        self.product.setup_uninstall_minutes = Decimal('45')
+        self.product.setup_min_installers = 2
         self.product.stock_qty = 10
         self.product.available_stock_qty = 10
         self.product.save(
-            update_fields=['setup_installer_qualification', 'stock_qty', 'available_stock_qty']
+            update_fields=[
+                'setup_installer_qualification',
+                'setup_install_minutes',
+                'setup_uninstall_minutes',
+                'setup_min_installers',
+                'stock_qty',
+                'available_stock_qty',
+            ]
         )
 
     def _create_order(self, **overrides):
@@ -98,14 +116,17 @@ class OrderApiTests(APITestCase):
         self.assertEqual(data['dismount_datetime_from'], '18:00')
         self.assertEqual(data['dismount_datetime_to'], '20:00')
         self.assertGreater(float(data['total_amount']), 0)
-        self.assertAlmostEqual(float(data['services_total_amount']), 500.0, places=2)
+        self.assertAlmostEqual(float(data['services_total_amount']), 3600.0, places=2)
+        self.assertAlmostEqual(float(data['installation_total_amount']), 2400.0, places=2)
+        self.assertAlmostEqual(float(data['dismantle_total_amount']), 1200.0, places=2)
+        self.assertAlmostEqual(float(data['delivery_total_amount']), 0.0, places=2)
         self.assertEqual(data['comment_for_waybill'], 'Комментарий для накладной')
         item = data['items'][0]
         self.assertEqual(item['rental_days'], 1)
         self.assertEqual(item['rental_mode'], 'standard')
         self.assertIsNone(item['rental_tiers'])
         self.assertAlmostEqual(float(item['unit_price']), 2700.0, places=2)
-        self.assertAlmostEqual(float(data['total_amount']), 5900.0, places=2)
+        self.assertAlmostEqual(float(data['total_amount']), 9000.0, places=2)
 
         self.product.refresh_from_db()
         self.assertEqual(self.product.available_stock_qty, 8)
@@ -149,6 +170,9 @@ class OrderApiTests(APITestCase):
         self.assertEqual(data['comment'], '')
         self.assertEqual(data['comment_for_waybill'], '')
         self.assertIn('services_total_amount', data)
+        self.assertIn('installation_total_amount', data)
+        self.assertIn('dismantle_total_amount', data)
+        self.assertIn('delivery_total_amount', data)
 
     def test_create_order_with_special_rental(self):
         self.product.rental_mode = 'special'
@@ -338,9 +362,11 @@ class OrderApiTests(APITestCase):
         response = self.client.post(url, payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         data = response.json()['data']
-        # unit price 2700 * (1 + 2) = 8100, qualification price 500 added once
-        self.assertAlmostEqual(float(data['total_amount']), 8600.0, places=2)
-        self.assertAlmostEqual(float(data['services_total_amount']), 500.0, places=2)
+        # unit price 2700 * (1 + 2) = 8100, услуги по сетапу зависят от общего времени
+        self.assertAlmostEqual(float(data['total_amount']), 13500.0, places=2)
+        self.assertAlmostEqual(float(data['services_total_amount']), 5400.0, places=2)
+        self.assertAlmostEqual(float(data['installation_total_amount']), 3600.0, places=2)
+        self.assertAlmostEqual(float(data['dismantle_total_amount']), 1800.0, places=2)
 
     def test_calculate_total_endpoint(self):
         url = reverse('orders:order-calculate-total')
@@ -357,7 +383,11 @@ class OrderApiTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()['data']
         self.assertIn('total_amount', data)
-        self.assertAlmostEqual(float(data['total_amount']), 5900.0, places=2)
+        self.assertAlmostEqual(float(data['total_amount']), 9000.0, places=2)
+        self.assertAlmostEqual(float(data['services_total_amount']), 3600.0, places=2)
+        self.assertAlmostEqual(float(data['installation_total_amount']), 2400.0, places=2)
+        self.assertAlmostEqual(float(data['dismantle_total_amount']), 1200.0, places=2)
+        self.assertAlmostEqual(float(data['delivery_total_amount']), 0.0, places=2)
         self.assertIn('items', data)
         self.assertEqual(len(data['items']), 1)
 

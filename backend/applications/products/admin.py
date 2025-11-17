@@ -72,10 +72,21 @@ class InstallerQualificationAdmin(admin.ModelAdmin):
     list_display = (
         'name',
         'price_rub',
+        'minimal_price_rub',
+        'hour_price_rub',
         'created',
         'modified',
     )
     search_fields = ('name',)
+    fields = (
+        'name',
+        'price_rub',
+        'minimal_price_rub',
+        'hour_price_rub',
+        'created',
+        'modified',
+    )
+    readonly_fields = ('created', 'modified')
 
 
 @admin.register(Color)

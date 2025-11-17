@@ -10,6 +10,10 @@ from django.db import models
 
 from applications.core.models import Date
 from applications.customers.models import PhoneNormalizer
+from applications.orders.services.setup_pricing import (
+    build_setup_requirements,
+    calculate_setup_pricing,
+)
 from applications.products.choices import RentalMode
 from applications.products.models import Product
 
@@ -79,6 +83,24 @@ class Order(Date):
     )
     services_total_amount = models.DecimalField(
         verbose_name='Сумма услуг (монтаж/доставка)',
+        max_digits=12,
+        decimal_places=2,
+        default=Decimal('0.00'),
+    )
+    delivery_total_amount = models.DecimalField(
+        verbose_name='Стоимость доставки',
+        max_digits=12,
+        decimal_places=2,
+        default=Decimal('0.00'),
+    )
+    installation_total_amount = models.DecimalField(
+        verbose_name='Стоимость монтажа',
+        max_digits=12,
+        decimal_places=2,
+        default=Decimal('0.00'),
+    )
+    dismantle_total_amount = models.DecimalField(
+        verbose_name='Стоимость демонтажа',
         max_digits=12,
         decimal_places=2,
         default=Decimal('0.00'),
@@ -222,25 +244,26 @@ class Order(Date):
         items = list(self.items.select_related('product__setup_installer_qualification'))
         total = sum((item.subtotal for item in items), Decimal('0.00'))
 
-        qualification_total = Decimal('0.00')
-        seen_products: set[int] = set()
+        product_totals: dict[str, int] = {}
+        products: dict[str, Product] = {}
         for item in items:
             product = item.product
-            if not product:
+            if not product or product.pk is None:
                 continue
-            product_id = product.pk
-            if product_id is None:
-                continue
-            if product_id in seen_products:
-                continue
-            seen_products.add(product_id)
-            qualification = product.setup_installer_qualification
-            if not qualification:
-                continue
-            qualification_total += qualification.price_rub or Decimal('0.00')
+            product_key = str(product.pk)
+            product_totals[product_key] = product_totals.get(product_key, 0) + item.quantity
+            products.setdefault(product_key, product)
 
-        total += qualification_total
-        self.services_total_amount = qualification_total
+        setup_requirements = build_setup_requirements(product_totals, products)
+        setup_pricing = calculate_setup_pricing(setup_requirements)
+
+        self.installation_total_amount = setup_pricing.installation_total
+        self.dismantle_total_amount = setup_pricing.dismantle_total
+        services_without_delivery = setup_pricing.services_total
+        services_total = services_without_delivery + (self.delivery_total_amount or Decimal('0.00'))
+        self.services_total_amount = services_total
+
+        total += services_total
         self.total_amount = total
         return total
 

@@ -75,6 +75,9 @@ export interface OrderSummary {
   logistics_state_label: string | null;
   total_amount: string;
   services_total_amount: string;
+  delivery_total_amount: string;
+  installation_total_amount: string;
+  dismantle_total_amount: string;
   installation_date: string;
   mount_datetime_from: string | null;
   mount_datetime_to: string | null;
@@ -140,7 +143,10 @@ export interface OrderCalculationItem {
 
 export interface OrderCalculationSummary {
   total_amount: string;
-  qualification_total: string;
+  services_total_amount: string;
+  delivery_total_amount: string;
+  installation_total_amount: string;
+  dismantle_total_amount: string;
   items: OrderCalculationItem[];
 }
 

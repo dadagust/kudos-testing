@@ -289,10 +289,26 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
-                      Стоимость услуг (монтаж/доставка)
+                      Стоимость доставки
                     </dt>
                     <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
-                      {formatCurrency(order.services_total_amount)}
+                      {formatCurrency(order.delivery_total_amount)}
+                    </dd>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                      Стоимость монтажа
+                    </dt>
+                    <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
+                      {formatCurrency(order.installation_total_amount)}
+                    </dd>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                      Стоимость демонтажа
+                    </dt>
+                    <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
+                      {formatCurrency(order.dismantle_total_amount)}
                     </dd>
                   </div>
                   {order.delivery_type === 'delivery' ? (

@@ -24,7 +24,8 @@ from .models import (
     OrderStatus,
     PaymentStatus,
 )
-from .services import (
+from .services.setup_pricing import build_setup_requirements, calculate_setup_pricing
+from .services.stock import (
     collect_order_item_totals,
     ensure_order_stock_transactions,
     reset_order_transactions,
@@ -231,6 +232,9 @@ class OrderSummarySerializer(serializers.ModelSerializer):
             'logistics_state_label',
             'total_amount',
             'services_total_amount',
+            'delivery_total_amount',
+            'installation_total_amount',
+            'dismantle_total_amount',
             'installation_date',
             'mount_datetime_from',
             'mount_datetime_to',
@@ -263,6 +267,9 @@ class OrderSummarySerializer(serializers.ModelSerializer):
             'id',
             'total_amount',
             'services_total_amount',
+            'delivery_total_amount',
+            'installation_total_amount',
+            'dismantle_total_amount',
             'created',
             'modified',
         )
@@ -331,12 +338,9 @@ def _calculate_items_pricing(
         raise serializers.ValidationError({'items': f'Товар {missing[0]} не найден'})
 
     calculated: OrderedDict[tuple[str, int], dict[str, Any]] = OrderedDict()
-    qualification_total = Decimal('0.00')
-    seen_products: set[str] = set()
     product_totals: dict[str, int] = {}
 
     def _add_product_item(product: Product, quantity: int, rental_days: int) -> None:
-        nonlocal qualification_total
         if quantity <= 0:
             return
 
@@ -366,13 +370,6 @@ def _calculate_items_pricing(
                 'rental_tiers_snapshot': tiers_snapshot,
                 'subtotal': subtotal_increment,
             }
-
-        product_key = str(product.pk)
-        if product_key not in seen_products:
-            seen_products.add(product_key)
-            qualification = product.setup_installer_qualification
-            if qualification:
-                qualification_total += qualification.price_rub or Decimal('0.00')
 
     for item in items_data:
         product_id = str(item['product_id'])
@@ -411,7 +408,7 @@ def _calculate_items_pricing(
                 continue
             _add_product_item(complementary, quantity, rental_days)
 
-    return list(calculated.values()), qualification_total, product_totals
+    return list(calculated.values()), product_totals, products
 
 
 class OrderReturnItemInputSerializer(serializers.Serializer):
@@ -623,7 +620,14 @@ class OrderWriteSerializer(serializers.ModelSerializer):
         if hasattr(order, '_return_quantities'):
             delattr(order, '_return_quantities')
         order.recalculate_total_amount()
-        order.save(update_fields=['total_amount', 'services_total_amount'])
+        order.save(
+            update_fields=[
+                'total_amount',
+                'services_total_amount',
+                'installation_total_amount',
+                'dismantle_total_amount',
+            ]
+        )
         return order
 
     @transaction.atomic
@@ -670,7 +674,14 @@ class OrderWriteSerializer(serializers.ModelSerializer):
         if hasattr(instance, '_return_quantities'):
             delattr(instance, '_return_quantities')
         instance.recalculate_total_amount()
-        instance.save(update_fields=['total_amount', 'services_total_amount'])
+        instance.save(
+            update_fields=[
+                'total_amount',
+                'services_total_amount',
+                'installation_total_amount',
+                'dismantle_total_amount',
+            ]
+        )
         return instance
 
     @staticmethod
@@ -690,7 +701,7 @@ class OrderWriteSerializer(serializers.ModelSerializer):
         *,
         reserve_stock: bool,
     ) -> None:
-        calculated_items, _, product_totals = _calculate_items_pricing(
+        calculated_items, product_totals, _ = _calculate_items_pricing(
             items_data, default_rental_days
         )
         if reserve_stock and product_totals:
@@ -765,18 +776,25 @@ class OrderCalculationSerializer(OrderWriteSerializer):
 
     def calculate(self) -> dict[str, Any]:
         items_data = self.validated_data.get('items', [])
-        calculated_items, qualification_total, _ = _calculate_items_pricing(
+        calculated_items, product_totals, products = _calculate_items_pricing(
             items_data, self._default_rental_days
         )
         total = sum((item['subtotal'] for item in calculated_items), Decimal('0.00'))
-        total += qualification_total
+        setup_requirements = build_setup_requirements(product_totals, products)
+        setup_pricing = calculate_setup_pricing(setup_requirements)
+        total += setup_pricing.services_total
+        delivery_total = Decimal('0.00')
+        total += delivery_total
 
         def _format_decimal(value: Decimal) -> str:
             return format(value.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP), '.2f')
 
         return {
             'total_amount': _format_decimal(total),
-            'qualification_total': _format_decimal(qualification_total),
+            'services_total_amount': _format_decimal(setup_pricing.services_total + delivery_total),
+            'installation_total_amount': _format_decimal(setup_pricing.installation_total),
+            'dismantle_total_amount': _format_decimal(setup_pricing.dismantle_total),
+            'delivery_total_amount': _format_decimal(delivery_total),
             'items': [
                 {
                     'product_id': str(item['product'].pk),

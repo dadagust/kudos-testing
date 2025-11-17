@@ -120,6 +120,8 @@ class Category(Date):
 class InstallerQualification(Date):
     """Qualification required for product installation."""
 
+    ANY_QUALIFICATION_NAME = 'Любой'
+
     id = models.UUIDField(
         primary_key=True,
         default=uuid.uuid4,
@@ -137,6 +139,20 @@ class InstallerQualification(Date):
         validators=[MinValueValidator(Decimal('0'))],
         default=Decimal('0.00'),
     )
+    minimal_price_rub = models.DecimalField(
+        verbose_name='Минимальная стоимость работ, руб',
+        max_digits=12,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal('0'))],
+        default=Decimal('0.00'),
+    )
+    hour_price_rub = models.DecimalField(
+        verbose_name='Почасовая ставка, руб',
+        max_digits=12,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal('0'))],
+        default=Decimal('0.00'),
+    )
 
     class Meta(Date.Meta):
         verbose_name = 'Квалификация монтажников'
@@ -145,6 +161,18 @@ class InstallerQualification(Date):
 
     def __str__(self) -> str:
         return self.name
+
+    @property
+    def is_any(self) -> bool:
+        return self.name.strip().lower() == self.ANY_QUALIFICATION_NAME.lower()
+
+    @classmethod
+    def get_any(cls) -> InstallerQualification | None:
+        return (
+            cls.objects.filter(name__iexact=cls.ANY_QUALIFICATION_NAME)
+            .order_by('name')
+            .first()
+        )
 
 
 class Product(Date):
