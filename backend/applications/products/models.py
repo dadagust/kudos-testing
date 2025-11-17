@@ -64,6 +64,31 @@ class TransportRestriction(Date):
         verbose_name='Название',
         max_length=255,
     )
+    capacity_volume_cm3 = models.PositiveIntegerField(
+        verbose_name='Вмещаемый объём, см³',
+        help_text='Максимальный объём груза, который помещается в один транспорт.',
+        validators=[MinValueValidator(1)],
+        null=True,
+        blank=True,
+    )
+    cost_per_km_rub = models.DecimalField(
+        verbose_name='Стоимость за км, руб',
+        help_text='Стоимость одного километра пути для транспорта данного типа.',
+        max_digits=12,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal('0.00'))],
+        null=True,
+        blank=True,
+    )
+    cost_per_transport_rub = models.DecimalField(
+        verbose_name='Стоимость за транспорт, руб',
+        help_text='Фиксированная стоимость подачи единицы транспорта.',
+        max_digits=12,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal('0.00'))],
+        null=True,
+        blank=True,
+    )
 
     class Meta(Date.Meta):
         verbose_name = 'Ограничение по транспорту'

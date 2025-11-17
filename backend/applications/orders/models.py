@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from decimal import Decimal
+import logging
 
 from django.conf import settings
 from django.core.validators import MinValueValidator
@@ -10,6 +11,10 @@ from django.db import models
 
 from applications.core.models import Date
 from applications.customers.models import PhoneNormalizer
+from applications.orders.services.delivery_pricing import (
+    DeliveryPricingError,
+    calculate_delivery_pricing,
+)
 from applications.orders.services.setup_pricing import (
     build_setup_requirements,
     calculate_setup_pricing,
@@ -241,7 +246,11 @@ class Order(Date):
         return f'Заказ #{self.pk}'
 
     def recalculate_total_amount(self) -> Decimal:
-        items = list(self.items.select_related('product__setup_installer_qualification'))
+        items = list(
+            self.items.select_related(
+                'product__setup_installer_qualification', 'product__delivery_transport_restriction'
+            )
+        )
         total = sum((item.subtotal for item in items), Decimal('0.00'))
 
         product_totals: dict[str, int] = {}
@@ -260,7 +269,24 @@ class Order(Date):
         self.installation_total_amount = setup_pricing.installation_total
         self.dismantle_total_amount = setup_pricing.dismantle_total
         services_without_delivery = setup_pricing.services_total
-        services_total = services_without_delivery + (self.delivery_total_amount or Decimal('0.00'))
+
+        delivery_total = Decimal('0.00')
+        if self.delivery_type == DeliveryType.DELIVERY and product_totals:
+            try:
+                delivery_pricing = calculate_delivery_pricing(
+                    delivery_type=self.delivery_type,
+                    delivery_address=self.delivery_address,
+                    product_totals=product_totals,
+                    products=products,
+                )
+            except DeliveryPricingError as exc:
+                logger.warning('Failed to calculate delivery pricing for order %s: %s', self.pk, exc)
+            else:
+                if delivery_pricing:
+                    delivery_total = delivery_pricing.total_delivery_cost
+        self.delivery_total_amount = delivery_total
+
+        services_total = services_without_delivery + delivery_total
         self.services_total_amount = services_total
 
         total += services_total
@@ -381,3 +407,5 @@ class OrderItem(Date):
     @property
     def subtotal(self) -> Decimal:
         return self.unit_price * self.quantity
+logger = logging.getLogger(__name__)
+

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import os
+from decimal import Decimal, ROUND_HALF_UP
+from math import atan2, cos, radians, sin, sqrt
 from typing import Any
 
 import requests
@@ -69,3 +71,59 @@ def geocode_address(
         'precision': meta.get('precision', ''),
         'uri': geo_object.get('uri', ''),
     }
+
+
+def _request_router_distance(
+    origin: tuple[float, float], destination: tuple[float, float], timeout: float
+) -> Decimal:
+    params = {
+        'apikey': _get_api_key(),
+        'mode': 'driving',
+        'waypoints': f'{origin[1]},{origin[0]}|{destination[1]},{destination[0]}',
+    }
+    response = requests.get(
+        'https://api.routing.yandex.net/v2/route', params=params, timeout=timeout
+    )
+    response.raise_for_status()
+    payload = response.json()
+    routes = payload.get('routes') or []
+    if not routes:
+        raise YandexMapsError('Маршрут не найден в ответе Яндекс.Карт.')
+    try:
+        distance_meters = routes[0]['legs'][0]['distance']['value']
+    except (KeyError, IndexError, TypeError) as exc:
+        raise YandexMapsError('Некорректный ответ от API маршрутизации Яндекс.') from exc
+    return (Decimal(distance_meters) / Decimal('1000')).quantize(
+        Decimal('0.01'), rounding=ROUND_HALF_UP
+    )
+
+
+def _geodesic_distance(origin: tuple[float, float], destination: tuple[float, float]) -> Decimal:
+    radius_km = 6371.0
+    lat1, lon1 = origin
+    lat2, lon2 = destination
+    dlat = radians(lat2 - lat1)
+    dlon = radians(lon2 - lon1)
+    a = sin(dlat / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+    return Decimal(radius_km * c).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+
+def calculate_route_distance_km(
+    origin_address: str, destination_address: str, *, timeout: float = 7.0
+) -> Decimal:
+    """Calculate distance between two addresses using Yandex Maps data."""
+
+    origin = geocode_address(origin_address)
+    destination = geocode_address(destination_address)
+    if not origin or not destination:
+        raise YandexMapsError('Не удалось получить координаты для расчёта расстояния.')
+    if None in (origin.get('lat'), origin.get('lon'), destination.get('lat'), destination.get('lon')):
+        raise YandexMapsError('Яндекс.Карты не вернули координаты адреса.')
+    origin_coords = (float(origin['lat']), float(origin['lon']))
+    destination_coords = (float(destination['lat']), float(destination['lon']))
+
+    try:
+        return _request_router_distance(origin_coords, destination_coords, timeout)
+    except (requests.RequestException, YandexMapsError):  # pragma: no cover - network fallback
+        return _geodesic_distance(origin_coords, destination_coords)
