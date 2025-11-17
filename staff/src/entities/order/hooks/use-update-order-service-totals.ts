@@ -12,8 +12,9 @@ export const useUpdateOrderServiceTotalsMutation = () => {
   const queryClient = useQueryClient();
   return useMutation<OrderDetailResponse, unknown, UpdateOrderServiceTotalsArgs>({
     mutationFn: ({ orderId, payload }) => ordersApi.updateServiceTotals(orderId, payload),
-    onSuccess: (_, { orderId }) => {
-      void queryClient.invalidateQueries({ queryKey: ['order', orderId] });
+    onSuccess: (response, { orderId }) => {
+      const orderQueryKey = ['order', String(orderId)] as const;
+      queryClient.setQueryData<OrderDetailResponse>(orderQueryKey, response);
       void queryClient.invalidateQueries({ queryKey: ['orders'] });
     },
   });

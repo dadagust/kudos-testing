@@ -403,7 +403,16 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                       {formatCurrency(order.dismantle_total_amount)}
                     </dd>
                   </div>
-                  {order.delivery_type === 'delivery' ? (
+                </dl>
+                {canManageOrders ? (
+                  <div>
+                    <Button type="button" variant="ghost" onClick={handleOpenServiceTotalsModal}>
+                      Изменить стоимости
+                    </Button>
+                  </div>
+                ) : null}
+                {order.delivery_type === 'delivery' ? (
+                  <dl style={{ display: 'grid', gap: '12px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                       <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
                         Адрес
@@ -412,8 +421,8 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                         {order.delivery_address || 'Адрес не указан'}
                       </dd>
                     </div>
-                  ) : null}
-                </dl>
+                  </dl>
+                ) : null}
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
