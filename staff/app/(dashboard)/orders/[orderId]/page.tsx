@@ -354,7 +354,22 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <h2 style={{ fontSize: '1.125rem', margin: 0 }}>Доставка</h2>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: '12px',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <h2 style={{ fontSize: '1.125rem', margin: 0 }}>Доставка</h2>
+                  {canManageOrders ? (
+                    <Button type="button" variant="ghost" onClick={handleOpenServiceTotalsModal}>
+                      Изменить стоимости
+                    </Button>
+                  ) : null}
+                </div>
                 <dl style={{ display: 'grid', gap: '12px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
