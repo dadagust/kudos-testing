@@ -11,6 +11,7 @@ import {
   ProductImagesReorderPayload,
   ProductListQuery,
   ProductListResponse,
+  ProductListTotals,
   ProductUpdatePayload,
   ProductStockTransaction,
   CreateProductStockTransactionPayload,
@@ -45,8 +46,15 @@ export const productsApi = {
     const { data } = await apiV1Client.get<ProductListResponse>('/products', {
       params: sanitizeParams(params),
     });
+    const totals: ProductListTotals = {
+      positions: data.totals?.positions ?? 0,
+      total_stock_qty: data.totals?.total_stock_qty ?? 0,
+      available_stock_qty: data.totals?.available_stock_qty ?? 0,
+      reserved_stock_qty: data.totals?.reserved_stock_qty ?? 0,
+    };
     return {
       ...data,
+      totals,
       results: data.results.map((product) => ({
         ...product,
         thumbnail_url: ensureAbsoluteUrl(product.thumbnail_url),

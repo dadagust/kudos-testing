@@ -127,6 +127,8 @@ class ProductApiTests(APITestCase):
         product.delivery_self_pickup_allowed = True
         product.delivery_transport_restriction_id = 'truck_only'
         product.delivery_volume_cm3 = 10
+        product.stock_qty = 15
+        product.available_stock_qty = 10
         product.save()
 
         url = reverse('products:product-list')
@@ -135,10 +137,47 @@ class ProductApiTests(APITestCase):
         body = response.json()
         self.assertIn('results', body)
         self.assertIsNotNone(body['next_cursor'])
+        self.assertIn('totals', body)
+        self.assertEqual(body['totals']['positions'], 1)
+        self.assertEqual(body['totals']['total_stock_qty'], 15)
+        self.assertEqual(body['totals']['available_stock_qty'], 10)
+        self.assertEqual(body['totals']['reserved_stock_qty'], 5)
         item = body['results'][0]
         self.assertEqual(item['id'], str(product.id))
         self.assertIn('delivery', item)
         self.assertIn('seo', item)
+
+    def test_list_totals_calculated_for_full_queryset(self):
+        first = Product.objects.create(
+            name='Стол',
+            category=self.category,
+            price_rub='3200',
+            dimensions_shape=DimensionShape.LINE_LENGTH,
+            line_length_cm=120,
+            delivery_weight_kg='5.00',
+            stock_qty=20,
+            available_stock_qty=14,
+        )
+        second = Product.objects.create(
+            name='Стул',
+            category=self.category,
+            price_rub='900',
+            dimensions_shape=DimensionShape.LINE_LENGTH,
+            line_length_cm=80,
+            delivery_weight_kg='2.00',
+            stock_qty=5,
+            available_stock_qty=2,
+        )
+
+        response = self.client.get(reverse('products:product-list'), {'limit': 1, 'ordering': 'name'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        totals = response.json()['totals']
+        self.assertEqual(totals['positions'], 2)
+        self.assertEqual(totals['total_stock_qty'], first.stock_qty + second.stock_qty)
+        self.assertEqual(
+            totals['available_stock_qty'], first.available_stock_qty + second.available_stock_qty
+        )
+        self.assertEqual(totals['reserved_stock_qty'], 9)
 
     def test_category_tree_and_enums(self):
         child = Category.objects.create(name='Скатерти', slug='skater', parent=self.category)
