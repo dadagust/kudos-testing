@@ -1,4 +1,5 @@
 import type { RentalMode, RentalTier } from '@/entities/product';
+import type { PaginationLinks, PaginationMeta } from '@/shared/api/types';
 
 export type OrderStatus = 'new' | 'reserved' | 'rented' | 'in_work' | 'archived' | 'declined';
 
@@ -107,6 +108,10 @@ export interface OrderDetail extends OrderSummary {}
 
 export interface OrderListResponse {
   data: OrderSummary[];
+  meta?: {
+    pagination: PaginationMeta;
+  };
+  links?: PaginationLinks;
 }
 
 export interface OrderDetailResponse {
@@ -156,6 +161,8 @@ export interface OrderListQuery {
   dismantle_date_from?: string;
   dismantle_date_to?: string;
   q?: string;
+  page?: number;
+  page_size?: number;
 }
 
 export interface OrderItemPayload {
