@@ -176,13 +176,19 @@ class ProductDeliverySerializer(serializers.Serializer):
 
 
 class ProductSetupSerializer(serializers.Serializer):
-    install_minutes = serializers.IntegerField(
-        min_value=0,
+    install_minutes = serializers.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        min_value=Decimal('0'),
         required=False,
+        coerce_to_string=False,
     )
-    uninstall_minutes = serializers.IntegerField(
-        min_value=0,
+    uninstall_minutes = serializers.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        min_value=Decimal('0'),
         required=False,
+        coerce_to_string=False,
     )
     installer_qualification = OptionalInstallerQualificationField(
         queryset=InstallerQualification.objects.all(),
@@ -771,8 +777,8 @@ def serialize_delivery(product: Product) -> dict:
 
 def serialize_setup(product: Product) -> dict:
     return {
-        'install_minutes': product.setup_install_minutes,
-        'uninstall_minutes': product.setup_uninstall_minutes,
+        'install_minutes': decimal_to_float(product.setup_install_minutes),
+        'uninstall_minutes': decimal_to_float(product.setup_uninstall_minutes),
         'installer_qualification': (
             str(product.setup_installer_qualification_id)
             if product.setup_installer_qualification_id

@@ -2731,7 +2731,7 @@ export default function ProductsPage() {
                   <Input
                     label="Монтаж, минут"
                     type="text"
-                    {...makeIntegerMask(createForm.setup.install_minutes, (next) =>
+                    {...makeDecimalMask(createForm.setup.install_minutes, (next) =>
                       setCreateForm((prev) => ({
                         ...prev,
                         setup: { ...prev.setup, install_minutes: next },
@@ -2742,7 +2742,7 @@ export default function ProductsPage() {
                   <Input
                     label="Демонтаж, минут"
                     type="text"
-                    {...makeIntegerMask(createForm.setup.uninstall_minutes, (next) =>
+                    {...makeDecimalMask(createForm.setup.uninstall_minutes, (next) =>
                       setCreateForm((prev) => ({
                         ...prev,
                         setup: { ...prev.setup, uninstall_minutes: next },
