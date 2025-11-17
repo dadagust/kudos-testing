@@ -47,12 +47,10 @@ class Command(BaseCommand):
                     updated += 1
                     self.stdout.write(
                         self.style.NOTICE(
-                            (
-                                'Обновлена квалификация: '
-                                f"{obj.name} (стоимость: {obj.price_rub},"
-                                f" минимум: {obj.minimal_price_rub},"
-                                f" часовая ставка: {obj.hour_price_rub})"
-                            )
+                            'Обновлена квалификация: '
+                            f'{obj.name} (стоимость: {obj.price_rub},'
+                            f' минимум: {obj.minimal_price_rub},'
+                            f' часовая ставка: {obj.hour_price_rub})'
                         )
                     )
 

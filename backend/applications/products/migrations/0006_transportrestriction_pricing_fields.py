@@ -1,10 +1,10 @@
-from django.db import migrations, models
-from django.core.validators import MinValueValidator
 from decimal import Decimal
+
+from django.core.validators import MinValueValidator
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('products', '0005_installerqualification_pricing_fields'),
     ]

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Iterable, Mapping, MutableMapping
 from dataclasses import dataclass
 from decimal import ROUND_HALF_UP, Decimal
-from typing import Iterable, Mapping, MutableMapping
 
 from applications.products.models import InstallerQualification, Product
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
 from math import atan2, cos, radians, sin, sqrt
 from typing import Any
 
@@ -113,16 +113,19 @@ def calculate_route_distance_km(
     origin_address: str, destination_address: str, *, timeout: float = 7.0
 ) -> Decimal:
     """Calculate distance between two addresses using Yandex Maps data."""
-
     origin = geocode_address(origin_address)
     destination = geocode_address(destination_address)
     if not origin or not destination:
         raise YandexMapsError('Не удалось получить координаты для расчёта расстояния.')
-    if None in (origin.get('lat'), origin.get('lon'), destination.get('lat'), destination.get('lon')):
+    if None in (
+        origin.get('lat'),
+        origin.get('lon'),
+        destination.get('lat'),
+        destination.get('lon'),
+    ):
         raise YandexMapsError('Яндекс.Карты не вернули координаты адреса.')
     origin_coords = (float(origin['lat']), float(origin['lon']))
     destination_coords = (float(destination['lat']), float(destination['lon']))
-
     try:
         return _request_router_distance(origin_coords, destination_coords, timeout)
     except (requests.RequestException, YandexMapsError):  # pragma: no cover - network fallback

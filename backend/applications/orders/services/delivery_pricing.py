@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
 from typing import TYPE_CHECKING
 
 from applications.products.models import Product, TransportRestriction
@@ -104,9 +104,7 @@ def calculate_delivery_pricing(
 
     transport = _select_transport(products)
     if not transport.capacity_volume_cm3 or transport.capacity_volume_cm3 <= 0:
-        raise DeliveryPricingError(
-            f'У транспорта "{transport.label}" не задан вмещаемый объём.'
-        )
+        raise DeliveryPricingError(f'У транспорта "{transport.label}" не задан вмещаемый объём.')
     if transport.cost_per_km_rub is None:
         raise DeliveryPricingError(
             f'Не указана стоимость за километр для транспорта "{transport.label}".'
@@ -130,13 +128,11 @@ def calculate_delivery_pricing(
 
     transport_capacity = int(transport.capacity_volume_cm3)
     transport_count = max(1, (total_volume + transport_capacity - 1) // transport_capacity)
-
     per_transport_cost = cost_per_transport + (cost_per_km * distance_km)
     per_transport_cost = per_transport_cost.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
     total_cost = (per_transport_cost * transport_count).quantize(
         Decimal('0.01'), rounding=ROUND_HALF_UP
     )
-
     return DeliveryPricingResult(
         transport=transport,
         transport_count=transport_count,

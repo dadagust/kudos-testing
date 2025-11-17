@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from decimal import Decimal
 import logging
+from decimal import Decimal
 
 from django.conf import settings
 from django.core.validators import MinValueValidator
@@ -280,7 +280,9 @@ class Order(Date):
                     products=products,
                 )
             except DeliveryPricingError as exc:
-                logger.warning('Failed to calculate delivery pricing for order %s: %s', self.pk, exc)
+                logger.warning(
+                    'Failed to calculate delivery pricing for order %s: %s', self.pk, exc
+                )
             else:
                 if delivery_pricing:
                     delivery_total = delivery_pricing.total_delivery_cost
@@ -407,5 +409,6 @@ class OrderItem(Date):
     @property
     def subtotal(self) -> Decimal:
         return self.unit_price * self.quantity
-logger = logging.getLogger(__name__)
 
+
+logger = logging.getLogger(__name__)

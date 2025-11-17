@@ -193,11 +193,7 @@ class InstallerQualification(Date):
 
     @classmethod
     def get_any(cls) -> InstallerQualification | None:
-        return (
-            cls.objects.filter(name__iexact=cls.ANY_QUALIFICATION_NAME)
-            .order_by('name')
-            .first()
-        )
+        return cls.objects.filter(name__iexact=cls.ANY_QUALIFICATION_NAME).order_by('name').first()
 
 
 class Product(Date):
