@@ -286,10 +286,7 @@ export default function LogisticsRoutesPage() {
     const counts = new Map<string, number>();
     allOrders.forEach((order) => {
       if (order.installation_date) {
-        counts.set(
-          order.installation_date,
-          (counts.get(order.installation_date) ?? 0) + 1
-        );
+        counts.set(order.installation_date, (counts.get(order.installation_date) ?? 0) + 1);
       }
     });
     return counts;
