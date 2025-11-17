@@ -196,9 +196,18 @@ export interface CreateOrderPayload {
   comment?: string | null;
   comment_for_waybill?: string | null;
   items: OrderItemPayload[];
+  delivery_total_amount?: string | null;
+  installation_total_amount?: string | null;
+  dismantle_total_amount?: string | null;
 }
 
 export type UpdateOrderPayload = CreateOrderPayload;
+
+export interface UpdateOrderServiceTotalsPayload {
+  delivery_total_amount: string;
+  installation_total_amount: string;
+  dismantle_total_amount: string;
+}
 
 export interface OrderValidateAddressResponse {
   ok: boolean;

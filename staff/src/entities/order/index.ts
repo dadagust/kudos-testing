@@ -4,4 +4,5 @@ export * from './hooks/use-order';
 export * from './hooks/use-create-order';
 export * from './hooks/use-update-order';
 export * from './hooks/use-order-waybill';
+export * from './hooks/use-update-order-service-totals';
 export * from './model/types';

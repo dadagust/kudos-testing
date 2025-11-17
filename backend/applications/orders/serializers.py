@@ -511,6 +511,24 @@ class OrderWriteSerializer(serializers.ModelSerializer):
         allow_empty=True,
         write_only=True,
     )
+    delivery_total_amount = serializers.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        min_value=Decimal('0.00'),
+        required=False,
+    )
+    installation_total_amount = serializers.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        min_value=Decimal('0.00'),
+        required=False,
+    )
+    dismantle_total_amount = serializers.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        min_value=Decimal('0.00'),
+        required=False,
+    )
 
     class Meta:
         model = Order
@@ -532,6 +550,9 @@ class OrderWriteSerializer(serializers.ModelSerializer):
             'comment_for_waybill',
             'items',
             'return_items',
+            'delivery_total_amount',
+            'installation_total_amount',
+            'dismantle_total_amount',
         )
 
     def __init__(self, *args, **kwargs) -> None:
@@ -604,6 +625,7 @@ class OrderWriteSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def create(self, validated_data: dict[str, Any]) -> Order:
+        manual_totals = self._extract_manual_totals(validated_data)
         items_data = validated_data.pop('items', [])
         return_items_data = validated_data.pop('return_items', None)
         order = Order.objects.create(**validated_data)
@@ -624,6 +646,7 @@ class OrderWriteSerializer(serializers.ModelSerializer):
         if hasattr(order, '_return_quantities'):
             delattr(order, '_return_quantities')
         order.recalculate_total_amount()
+        self._apply_manual_totals(order, manual_totals)
         order.save(
             update_fields=[
                 'total_amount',
@@ -637,6 +660,7 @@ class OrderWriteSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def update(self, instance: Order, validated_data: dict[str, Any]) -> Order:
+        manual_totals = self._extract_manual_totals(validated_data)
         items_data = validated_data.pop('items', None)
         return_items_data = validated_data.pop('return_items', None)
         previous_status = instance.status
@@ -679,6 +703,7 @@ class OrderWriteSerializer(serializers.ModelSerializer):
         if hasattr(instance, '_return_quantities'):
             delattr(instance, '_return_quantities')
         instance.recalculate_total_amount()
+        self._apply_manual_totals(instance, manual_totals)
         instance.save(
             update_fields=[
                 'total_amount',
@@ -774,6 +799,36 @@ class OrderWriteSerializer(serializers.ModelSerializer):
                 }
             )
         return result
+
+    @staticmethod
+    def _extract_manual_totals(attrs: dict[str, Any]) -> dict[str, Decimal]:
+        manual_fields = (
+            'delivery_total_amount',
+            'installation_total_amount',
+            'dismantle_total_amount',
+        )
+        manual: dict[str, Decimal] = {}
+        for field in manual_fields:
+            value = attrs.pop(field, serializers.empty)
+            if value is not serializers.empty and value is not None:
+                manual[field] = value
+        return manual
+
+    @staticmethod
+    def _apply_manual_totals(order: Order, manual_totals: dict[str, Decimal]) -> None:
+        if not manual_totals:
+            return
+        items_total = order.total_amount - order.services_total_amount
+        installation_total = manual_totals.get(
+            'installation_total_amount', order.installation_total_amount
+        )
+        dismantle_total = manual_totals.get('dismantle_total_amount', order.dismantle_total_amount)
+        delivery_total = manual_totals.get('delivery_total_amount', order.delivery_total_amount)
+        order.installation_total_amount = installation_total
+        order.dismantle_total_amount = dismantle_total
+        order.delivery_total_amount = delivery_total
+        order.services_total_amount = installation_total + dismantle_total + delivery_total
+        order.total_amount = items_total + order.services_total_amount
 
 
 class OrderCalculationSerializer(OrderWriteSerializer):

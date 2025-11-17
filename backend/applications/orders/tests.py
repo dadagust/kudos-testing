@@ -157,6 +157,35 @@ class OrderApiTests(APITestCase):
         self.assertAlmostEqual(float(data['delivery_total_amount']), 450.0, places=2)
         self.assertAlmostEqual(float(data['services_total_amount']), 4050.0, places=2)
 
+    def test_update_manual_service_totals(self):
+        data = self._create_order()
+        order_id = data['id']
+        url = reverse('orders:order-detail', args=[order_id])
+
+        payload = {
+            'delivery_total_amount': '1500.00',
+            'installation_total_amount': '1000.00',
+            'dismantle_total_amount': '500.00',
+        }
+
+        response = self.client.patch(url, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        updated = response.json()['data']
+
+        self.assertAlmostEqual(float(updated['delivery_total_amount']), 1500.0, places=2)
+        self.assertAlmostEqual(float(updated['installation_total_amount']), 1000.0, places=2)
+        self.assertAlmostEqual(float(updated['dismantle_total_amount']), 500.0, places=2)
+
+        services_total = Decimal(updated['services_total_amount'])
+        self.assertEqual(services_total, Decimal('3000.00'))
+
+        items_total = Decimal(updated['total_amount']) - services_total
+        self.assertGreater(items_total, Decimal('0.00'))
+        self.assertEqual(
+            Decimal(updated['total_amount']),
+            items_total + services_total,
+        )
+
     def test_list_orders_filtered_by_group(self):
         url = reverse('orders:order-list')
         payload = {
