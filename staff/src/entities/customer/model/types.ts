@@ -1,3 +1,5 @@
+import type { PaginationLinks, PaginationMeta } from '@/shared/api/types';
+
 export type CustomerType = 'personal' | 'business';
 
 export interface CustomerCompany {
@@ -64,27 +66,12 @@ export interface CustomerCompanyInput {
   notes?: string;
 }
 
-export interface PaginationMeta {
-  page: number;
-  page_size: number;
-  total_items: number;
-  total_pages: number;
-  has_next: boolean;
-  has_prev: boolean;
-}
-
 export interface CustomerListResponse {
   data: CustomerSummary[];
   meta?: {
     pagination: PaginationMeta;
   };
-  links?: {
-    self: string;
-    first: string;
-    last: string;
-    next: string | null;
-    prev: string | null;
-  };
+  links?: PaginationLinks;
 }
 
 export interface CustomerDetailResponse {

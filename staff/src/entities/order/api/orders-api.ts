@@ -85,6 +85,14 @@ const buildListParams = (params: OrderListQuery) => {
     searchParams.set('q', params.q.trim());
   }
 
+  if (params.page) {
+    searchParams.set('page', String(params.page));
+  }
+
+  if (params.page_size) {
+    searchParams.set('page_size', String(params.page_size));
+  }
+
   return searchParams;
 };
 
@@ -96,6 +104,8 @@ export const ordersApi = {
 
     return {
       data: data.data.map((order) => normalizeOrder(order)),
+      meta: data.meta,
+      links: data.links,
     };
   },
   details: async (orderId: number | string): Promise<OrderDetailResponse> => {
