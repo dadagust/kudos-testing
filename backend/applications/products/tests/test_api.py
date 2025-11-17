@@ -175,7 +175,9 @@ class ProductApiTests(APITestCase):
             available_stock_qty=2,
         )
 
-        response = self.client.get(reverse('products:product-list'), {'limit': 1, 'ordering': 'name'})
+        response = self.client.get(
+            reverse('products:product-list'), {'limit': 1, 'ordering': 'name'}
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         totals = response.json()['totals']
         self.assertEqual(totals['positions'], 2)

@@ -106,7 +106,7 @@ class OrderWaybillPdfView(View):
             if product and getattr(product, 'category', None):
                 place = product.category.name or ''
 
-            planned = str(item.quantity) if context_kind == 'prep' else ''
+            planned = str(item.quantity)
             returned = ''
             if context_kind == 'receiving' and item.product_id:
                 returned_value = return_quantities.get(str(item.product_id))
@@ -149,9 +149,9 @@ class OrderWaybillPdfView(View):
 
     def _resolve_payment_status(self, order: Order) -> str:
         mapping = {
-            PaymentStatus.PAID: 'оплачен',
-            PaymentStatus.UNPAID: 'не оплачен',
-            PaymentStatus.PARTIALLY_PAID: 'частично оплачен',
+            PaymentStatus.PAID: 'Оплачен',
+            PaymentStatus.UNPAID: 'Не оплачен',
+            PaymentStatus.PARTIALLY_PAID: 'Частично оплачен',
         }
         return mapping.get(order.payment_status, order.get_payment_status_display() or '—')
 

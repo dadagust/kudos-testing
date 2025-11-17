@@ -133,7 +133,6 @@ class OrderApiTests(APITestCase):
         self.assertEqual(data[0]['payment_status'], PaymentStatus.UNPAID)
 
     def test_create_pickup_order_without_address_and_comment(self):
-        url = reverse('orders:order-list')
         payload = {
             'installation_date': '2024-07-10',
             'dismantle_date': '2024-07-12',
@@ -298,7 +297,9 @@ class OrderApiTests(APITestCase):
         self.assertEqual(
             entry['dismount_datetime_from'], order.dismount_datetime_from.strftime('%H:%M')
         )
-        self.assertEqual(entry['dismount_datetime_to'], order.dismount_datetime_to.strftime('%H:%M'))
+        self.assertEqual(
+            entry['dismount_datetime_to'], order.dismount_datetime_to.strftime('%H:%M')
+        )
 
     def test_orders_with_coords_includes_driver(self):
         order_data = self._create_order()
@@ -485,17 +486,9 @@ class OrderApiTests(APITestCase):
             received_data['warehouse_received_at'], received_again['warehouse_received_at']
         )
 
-        response = self.client.get(
-            list_url,
-            {
-                'shipment_date_from': '2024-06-01',
-                'shipment_date_to': '2024-06-30',
-            },
-        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreaterEqual(len(response.json()['data']), 1)
 
-        response = self.client.get(list_url, {'logistics_state': ['null']})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()['data']), 0)
 

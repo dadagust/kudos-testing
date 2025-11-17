@@ -710,7 +710,7 @@ export default function LogisticsRoutesPage() {
   }, []);
 
   const handleOrderDragStart = useCallback(
-    (event: DragEvent<HTMLDivElement>, orderId: number) => {
+    (event: DragEvent<HTMLElement>, orderId: number) => {
       const sourceKey = orderToGroup.get(orderId) ?? UNASSIGNED_DRIVER_KEY;
       setDraggedOrderId(orderId);
       setDragSourceKey(sourceKey);
@@ -729,7 +729,7 @@ export default function LogisticsRoutesPage() {
   }, [resetDragState]);
 
   const handleGroupDragOver = useCallback(
-    (event: DragEvent<HTMLDivElement>, groupKey: string) => {
+    (event: DragEvent<HTMLElement>, groupKey: string) => {
       if (draggedOrderId === null) {
         return;
       }
@@ -742,7 +742,7 @@ export default function LogisticsRoutesPage() {
   );
 
   const handleGroupDragLeave = useCallback(
-    (event: DragEvent<HTMLDivElement>, groupKey: string) => {
+    (event: DragEvent<HTMLElement>, groupKey: string) => {
       if (draggedOrderId === null) {
         return;
       }
@@ -757,7 +757,7 @@ export default function LogisticsRoutesPage() {
   );
 
   const handleGroupDrop = useCallback(
-    (event: DragEvent<HTMLDivElement>, targetKey: string) => {
+    (event: DragEvent<HTMLElement>, targetKey: string) => {
       event.preventDefault();
       if (draggedOrderId === null) {
         resetDragState();

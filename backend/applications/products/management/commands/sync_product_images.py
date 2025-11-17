@@ -68,12 +68,12 @@ class Command(BaseCommand):
                 failed_products += 1
                 logger.exception('Не удалось обновить изображения для товара "%s"', product.name)
 
-        self.stdout.write(
-            self.style.SUCCESS(
-                'Готово. Обновлено товаров: %s, пропущено: %s, с ошибками: %s.'
-                % (processed_products, skipped_products, failed_products)
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f'Готово. Обновлено товаров: {processed_products}, '
+                    f'пропущено: {skipped_products}, с ошибками: {failed_products}.'
+                )
             )
-        )
 
     def _load_manifest(self, path: Path) -> list[ManifestImage]:
         if path.suffix.lower() == '.json':
@@ -208,7 +208,7 @@ class Command(BaseCommand):
             return value
         if isinstance(value, str):
             return value.strip().lower() in {'1', 'true', 'yes', 'y', 'да'}
-        if isinstance(value, (int, float)):
+        if isinstance(value, int | float):
             return bool(value)
         return False
 

@@ -24,9 +24,9 @@ export const DELIVERY_TYPE_LABELS: Record<DeliveryType, string> = {
 export type PaymentStatus = 'paid' | 'unpaid' | 'partially_paid';
 
 export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
-  paid: 'оплачен',
-  unpaid: 'не оплачен',
-  partially_paid: 'частично оплачен',
+  paid: 'Оплачен',
+  unpaid: 'Не оплачен',
+  partially_paid: 'Частично оплачен',
 };
 
 export type LogisticsState = 'handover_to_picking' | 'picked' | 'shipped';

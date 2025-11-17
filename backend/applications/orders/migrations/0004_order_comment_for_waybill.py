@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('orders', '0003_orderdriver_remove_order_delivery_address_and_more'),
     ]

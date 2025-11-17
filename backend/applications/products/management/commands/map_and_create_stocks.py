@@ -91,4 +91,3 @@ class Command(BaseCommand):
                 product.stock_qty = stock['quantity']
                 product.available_stock_qty = stock['quantity']
                 product.save()
-                print(f'saved: {product.name} with stock: {product.stock_qty}')

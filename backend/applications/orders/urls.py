@@ -130,7 +130,7 @@ urlpatterns = allow_optional_trailing_slash(
         ),
         path(
             'orders/<int:pk>/driver/',
-            OrderViewSet.as_view({'post': 'assign_driver'}),
+            OrderViewSet.as_view({'post': 'assign_driver', 'delete': 'assign_driver'}),
             name='orders-assign-driver',
         ),
         path(

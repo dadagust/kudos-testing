@@ -337,7 +337,7 @@ class YandexSuggestView(APIView):
     @staticmethod
     def _resolve_api_key() -> str:
         key = settings.GEOSUGGEST_KEY
-        if isinstance(key, (list, tuple)):
+        if isinstance(key, list | tuple):
             key = next((value for value in key if value), '')
         if not key:
             key = getattr(settings, 'YANDEX_SUGGEST_KEY', '') or os.environ.get(
