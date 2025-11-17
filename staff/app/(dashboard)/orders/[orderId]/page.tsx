@@ -3,11 +3,18 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { ChangeEvent, FormEvent, useState } from 'react';
 
-import { OrderDetail, OrderStatus, ORDER_STATUS_LABELS, useOrderQuery } from '@/entities/order';
+import {
+  OrderDetail,
+  OrderStatus,
+  ORDER_STATUS_LABELS,
+  useOrderQuery,
+  useUpdateOrderServiceTotalsMutation,
+} from '@/entities/order';
 import { RoleGuard, usePermission } from '@/features/auth';
 import { ensureDateDisplay, ensureDateTimeDisplay, ensureTimeDisplay } from '@/shared/lib/date';
-import { Alert, Badge, Button, Spinner, Table, Tag } from '@/shared/ui';
+import { Alert, Badge, Button, Input, Modal, Spinner, Table, Tag } from '@/shared/ui';
 import type { TableColumn } from '@/shared/ui';
 
 const formatDate = (value: string) => ensureDateDisplay(value);
@@ -128,12 +135,82 @@ const itemColumns: TableColumn<OrderDetail['items'][number]>[] = [
   },
 ];
 
+type ServiceTotalsFormState = {
+  delivery_total_amount: string;
+  installation_total_amount: string;
+  dismantle_total_amount: string;
+};
+
 export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
   const router = useRouter();
   const { data, isLoading, isError, error } = useOrderQuery(params.orderId);
   const order = data?.data;
   const customerPhone = order?.customer?.phone?.trim() ?? '';
   const canManageOrders = usePermission('orders_change_order');
+  const [isServiceTotalsModalOpen, setIsServiceTotalsModalOpen] = useState(false);
+  const [serviceTotalsForm, setServiceTotalsForm] = useState<ServiceTotalsFormState>({
+    delivery_total_amount: '',
+    installation_total_amount: '',
+    dismantle_total_amount: '',
+  });
+  const [serviceTotalsError, setServiceTotalsError] = useState<string | null>(null);
+  const updateServiceTotalsMutation = useUpdateOrderServiceTotalsMutation();
+  const isSavingServiceTotals = updateServiceTotalsMutation.isPending;
+
+  const handleOpenServiceTotalsModal = () => {
+    if (!order) {
+      return;
+    }
+    setServiceTotalsForm({
+      delivery_total_amount: order.delivery_total_amount ?? '',
+      installation_total_amount: order.installation_total_amount ?? '',
+      dismantle_total_amount: order.dismantle_total_amount ?? '',
+    });
+    setServiceTotalsError(null);
+    setIsServiceTotalsModalOpen(true);
+  };
+
+  const handleCloseServiceTotalsModal = () => {
+    if (isSavingServiceTotals) {
+      return;
+    }
+    setIsServiceTotalsModalOpen(false);
+  };
+
+  const handleServiceTotalsChange =
+    (field: keyof ServiceTotalsFormState) => (event: ChangeEvent<HTMLInputElement>) => {
+      const { value } = event.target;
+      setServiceTotalsForm((prev) => ({ ...prev, [field]: value }));
+    };
+
+  const normalizeAmountInput = (value: string) => {
+    const normalized = value.replace(',', '.').trim();
+    return normalized || '0';
+  };
+
+  const handleServiceTotalsSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!order) {
+      return;
+    }
+    setServiceTotalsError(null);
+    const payload = {
+      delivery_total_amount: normalizeAmountInput(serviceTotalsForm.delivery_total_amount),
+      installation_total_amount: normalizeAmountInput(serviceTotalsForm.installation_total_amount),
+      dismantle_total_amount: normalizeAmountInput(serviceTotalsForm.dismantle_total_amount),
+    };
+    updateServiceTotalsMutation.mutate(
+      { orderId: order.id, payload },
+      {
+        onSuccess: () => {
+          setIsServiceTotalsModalOpen(false);
+        },
+        onError: () => {
+          setServiceTotalsError('Не удалось сохранить изменения. Попробуйте ещё раз.');
+        },
+      }
+    );
+  };
 
   return (
     <RoleGuard allow={['adminpanel_view_orders', 'orders_view_order']}>
@@ -311,7 +388,16 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                       {formatCurrency(order.dismantle_total_amount)}
                     </dd>
                   </div>
-                  {order.delivery_type === 'delivery' ? (
+                </dl>
+                {canManageOrders ? (
+                  <div>
+                    <Button type="button" variant="ghost" onClick={handleOpenServiceTotalsModal}>
+                      Изменить стоимости
+                    </Button>
+                  </div>
+                ) : null}
+                {order.delivery_type === 'delivery' ? (
+                  <dl style={{ display: 'grid', gap: '12px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                       <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
                         Адрес
@@ -320,8 +406,8 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                         {order.delivery_address || 'Адрес не указан'}
                       </dd>
                     </div>
-                  ) : null}
-                </dl>
+                  </dl>
+                ) : null}
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -401,6 +487,68 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
           </article>
         ) : null}
       </div>
+      <Modal
+        open={isServiceTotalsModalOpen}
+        onClose={handleCloseServiceTotalsModal}
+        title="Редактирование стоимости услуг"
+      >
+        <form
+          onSubmit={handleServiceTotalsSubmit}
+          style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '24px' }}
+        >
+          <Input
+            label="Стоимость доставки, ₽"
+            type="number"
+            min="0"
+            step="0.01"
+            inputMode="decimal"
+            value={serviceTotalsForm.delivery_total_amount}
+            onChange={handleServiceTotalsChange('delivery_total_amount')}
+            required
+            disabled={isSavingServiceTotals}
+          />
+          <Input
+            label="Стоимость монтажа, ₽"
+            type="number"
+            min="0"
+            step="0.01"
+            inputMode="decimal"
+            value={serviceTotalsForm.installation_total_amount}
+            onChange={handleServiceTotalsChange('installation_total_amount')}
+            required
+            disabled={isSavingServiceTotals}
+          />
+          <Input
+            label="Стоимость демонтажа, ₽"
+            type="number"
+            min="0"
+            step="0.01"
+            inputMode="decimal"
+            value={serviceTotalsForm.dismantle_total_amount}
+            onChange={handleServiceTotalsChange('dismantle_total_amount')}
+            required
+            disabled={isSavingServiceTotals}
+          />
+          {serviceTotalsError ? (
+            <Alert tone="danger" title="Ошибка">
+              {serviceTotalsError}
+            </Alert>
+          ) : null}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={handleCloseServiceTotalsModal}
+              disabled={isSavingServiceTotals}
+            >
+              Отмена
+            </Button>
+            <Button type="submit" disabled={isSavingServiceTotals}>
+              Сохранить
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </RoleGuard>
   );
 }

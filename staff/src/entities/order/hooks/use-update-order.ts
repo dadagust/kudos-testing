@@ -15,7 +15,7 @@ export const useUpdateOrderMutation = () => {
     mutationFn: ({ orderId, payload }) => ordersApi.update(orderId, payload),
     onSuccess: (_, variables) => {
       void queryClient.invalidateQueries({ queryKey: ['orders'] });
-      void queryClient.invalidateQueries({ queryKey: ['order', variables.orderId] });
+      void queryClient.invalidateQueries({ queryKey: ['order', String(variables.orderId)] });
     },
   });
 };

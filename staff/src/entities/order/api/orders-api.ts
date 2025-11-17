@@ -5,9 +5,9 @@ import {
   AssignOrderDriverPayload,
   CreateOrderPayload,
   LogisticsState,
+  OrderDetail,
   OrderWaybillContext,
   OrderCalculationResponse,
-  OrderDetail,
   OrderDetailResponse,
   OrderDriverResponse,
   OrderListQuery,
@@ -17,6 +17,7 @@ import {
   OrdersWithCoordsResponse,
   PaymentStatus,
   UpdateOrderPayload,
+  UpdateOrderServiceTotalsPayload,
 } from '../model/types';
 
 const normalizeOrder = <T extends OrderSummary | OrderDetail>(order: T): T =>
@@ -121,6 +122,13 @@ export const ordersApi = {
     payload: UpdateOrderPayload
   ): Promise<OrderDetailResponse> => {
     const { data } = await apiV1Client.put<OrderDetailResponse>(`/orders/${orderId}/`, payload);
+    return { data: normalizeOrder(data.data) };
+  },
+  updateServiceTotals: async (
+    orderId: number | string,
+    payload: UpdateOrderServiceTotalsPayload
+  ): Promise<OrderDetailResponse> => {
+    const { data } = await apiV1Client.patch<OrderDetailResponse>(`/orders/${orderId}/`, payload);
     return { data: normalizeOrder(data.data) };
   },
   calculateTotal: async (
