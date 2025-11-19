@@ -238,6 +238,8 @@ export default function LogisticsRoutesPage() {
   const [dragSourceKey, setDragSourceKey] = useState<string | null>(null);
   const [dropTargetKey, setDropTargetKey] = useState<string | null>(null);
   const [pendingOrderId, setPendingOrderId] = useState<number | null>(null);
+  const pageRef = useRef<HTMLDivElement | null>(null);
+  const [contentViewportHeight, setContentViewportHeight] = useState<number | null>(null);
 
   const { data, isLoading, isError, error, refetch, isFetching } =
     useQuery<OrdersWithCoordsResponse>({
@@ -404,6 +406,48 @@ export default function LogisticsRoutesPage() {
     () => allOrders.find((item) => item.id === driverInfoOrderId) ?? null,
     [allOrders, driverInfoOrderId]
   );
+
+  const updateContentViewportHeight = useCallback(() => {
+    if (!pageRef.current) {
+      setContentViewportHeight(null);
+      return;
+    }
+    const pageElement = pageRef.current;
+    const rect = pageElement.getBoundingClientRect();
+    const mainElement = pageElement.closest('main');
+    let bottomPadding = 0;
+    if (mainElement) {
+      const computed = window.getComputedStyle(mainElement);
+      bottomPadding = Number.parseFloat(computed.paddingBottom) || 0;
+    }
+    const availableHeight = window.innerHeight - rect.top - bottomPadding;
+    setContentViewportHeight(availableHeight > 0 ? availableHeight : null);
+  }, []);
+
+  useEffect(() => {
+    updateContentViewportHeight();
+    window.addEventListener('resize', updateContentViewportHeight);
+    return () => {
+      window.removeEventListener('resize', updateContentViewportHeight);
+    };
+  }, [updateContentViewportHeight]);
+
+  useEffect(() => {
+    if (!pageRef.current || typeof ResizeObserver === 'undefined') {
+      return undefined;
+    }
+    const observer = new ResizeObserver(() => {
+      updateContentViewportHeight();
+    });
+    observer.observe(pageRef.current);
+    const parentElement = pageRef.current.parentElement;
+    if (parentElement) {
+      observer.observe(parentElement);
+    }
+    return () => {
+      observer.disconnect();
+    };
+  }, [updateContentViewportHeight]);
 
   useEffect(() => {
     if (filteredOrders.length === 0) {
@@ -1009,7 +1053,7 @@ export default function LogisticsRoutesPage() {
   };
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} ref={pageRef}>
       <div className={styles.filters}>
         <div className={styles.filtersControls}>
           <div className={styles.filtersDateField}>
@@ -1052,7 +1096,10 @@ export default function LogisticsRoutesPage() {
           })}
         </div>
       </div>
-      <div className={styles.wrapper}>
+      <div
+        className={styles.wrapper}
+        style={contentViewportHeight ? { height: contentViewportHeight } : undefined}
+      >
         <aside className={styles.sidebar}>
           <div className={styles.sidebarHeader}>
             <h2>Маршруты доставок</h2>
