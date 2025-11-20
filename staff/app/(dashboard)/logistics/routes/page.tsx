@@ -23,7 +23,7 @@ import {
 } from '@/entities/order';
 import { formatDateDisplay, formatTimeDisplay } from '@/shared/lib/date';
 import { formatPhoneDisplay, formatPhoneInput, normalizePhoneNumber } from '@/shared/lib/phone';
-import { Alert, Button, Icon, Input, Modal, Select, Spinner, Tag } from '@/shared/ui';
+import { Alert, Button, DateInput, Icon, Input, Modal, Select, Spinner, Tag } from '@/shared/ui';
 
 import styles from './routes.module.sass';
 
@@ -383,8 +383,8 @@ export default function LogisticsRoutesPage() {
     [allDriverGroups, filteredOrderIds]
   );
 
-  const handleDateChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
-    setSelectedDate(event.target.value);
+  const handleDateChange = useCallback((nextValue: string) => {
+    setSelectedDate(nextValue);
   }, []);
 
   const handleClearDateFilter = useCallback(() => {
@@ -1057,12 +1057,7 @@ export default function LogisticsRoutesPage() {
       <div className={styles.filters}>
         <div className={styles.filtersControls}>
           <div className={styles.filtersDateField}>
-            <Input
-              type="date"
-              label="Дата монтажа"
-              value={selectedDate}
-              onChange={handleDateChange}
-            />
+            <DateInput label="Дата монтажа" value={selectedDate} onChange={handleDateChange} />
           </div>
           <Button
             type="button"

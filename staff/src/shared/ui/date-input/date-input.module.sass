@@ -1,0 +1,72 @@
+.inputWrapper
+  display: flex
+  flex-direction: column
+  gap: var(--space-xs)
+
+.label
+  font-size: var(--font-size-xs)
+  color: var(--color-text-muted)
+
+.control
+  position: relative
+
+.input
+  width: 100%
+  padding: var(--space-sm) calc(var(--space-lg) + var(--space-md)) var(--space-sm) var(--space-md)
+  border: 1px solid var(--color-border)
+  border-radius: 10px
+  font-size: var(--font-size-base)
+  background-color: var(--color-surface)
+  color: var(--color-text)
+  transition: border-color 0.2s ease, box-shadow 0.2s ease
+
+  &:focus
+    outline: none
+    border-color: var(--color-primary)
+    box-shadow: 0 0 0 3px rgba(75, 94, 255, 0.15)
+
+.error
+  border-color: var(--color-error)
+
+.helper
+  font-size: var(--font-size-xs)
+  color: var(--color-text-muted)
+
+.helperError
+  color: var(--color-error)
+
+.calendarButton
+  position: absolute
+  top: 50%
+  right: var(--space-sm)
+  transform: translateY(-50%)
+  display: inline-flex
+  align-items: center
+  justify-content: center
+  width: 32px
+  height: 32px
+  border: none
+  border-radius: 8px
+  background: transparent
+  color: var(--color-text-muted)
+  cursor: pointer
+  transition: background-color 0.2s ease, color 0.2s ease
+
+  &:hover
+    background: var(--color-border)
+
+  &:focus-visible
+    outline: 2px solid var(--color-primary)
+    outline-offset: 2px
+
+.calendarButtonDisabled
+  cursor: not-allowed
+  opacity: 0.6
+
+.hiddenDateInput
+  position: absolute
+  inset: 0
+  opacity: 0
+  pointer-events: none
+  width: 0
+  height: 0
