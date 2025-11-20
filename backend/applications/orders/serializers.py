@@ -27,6 +27,7 @@ from .models import (
 from .services.delivery_pricing import (
     DeliveryPricingError,
     calculate_delivery_pricing,
+    calculate_delivery_pricing_for_order,
 )
 from .services.setup_pricing import build_setup_requirements, calculate_setup_pricing
 from .services.stock import (
@@ -289,8 +290,21 @@ class OrderSummarySerializer(serializers.ModelSerializer):
 
 
 class OrderDetailSerializer(OrderSummarySerializer):
+    delivery_pricing = serializers.SerializerMethodField()
+
     class Meta(OrderSummarySerializer.Meta):
-        fields = OrderSummarySerializer.Meta.fields
+        fields = OrderSummarySerializer.Meta.fields + (
+            'delivery_pricing',
+        )
+
+    def get_delivery_pricing(self, obj: Order) -> dict[str, Any] | None:
+        try:
+            pricing = calculate_delivery_pricing_for_order(obj)
+        except DeliveryPricingError:
+            return None
+        if not pricing:
+            return None
+        return _format_delivery_pricing_details(pricing)
 
 
 class OrderItemInputSerializer(serializers.Serializer):
@@ -831,6 +845,42 @@ class OrderWriteSerializer(serializers.ModelSerializer):
         order.total_amount = items_total + order.services_total_amount
 
 
+def _format_delivery_pricing_details(pricing) -> dict[str, Any]:
+    transports = []
+    for allocation in pricing.allocations:
+        total_capacity_cm3 = allocation.capacity_volume_cm3 * allocation.transport_count
+        transports.append(
+            {
+                'transport': {
+                    'value': allocation.transport.value,
+                    'label': allocation.transport.label,
+                    'capacity_volume_cm3': allocation.transport.capacity_volume_cm3,
+                },
+                'transport_count': allocation.transport_count,
+                'required_volume_cm3': allocation.required_volume_cm3,
+                'capacity_volume_cm3': allocation.capacity_volume_cm3,
+                'total_capacity_cm3': total_capacity_cm3,
+                'cost_per_transport': format(allocation.delivery_cost_per_transport, '.2f'),
+                'total_cost': format(allocation.total_delivery_cost, '.2f'),
+            }
+        )
+
+    return {
+        'transport': {
+            'value': pricing.transport.value,
+            'label': pricing.transport.label,
+            'capacity_volume_cm3': pricing.transport.capacity_volume_cm3,
+        },
+        'transport_count': pricing.transport_count,
+        'distance_km': format(pricing.distance_km, '.2f'),
+        'cost_per_transport': format(pricing.delivery_cost_per_transport, '.2f'),
+        'total_delivery_cost': format(pricing.total_delivery_cost, '.2f'),
+        'total_volume_cm3': pricing.total_volume_cm3,
+        'total_capacity_cm3': pricing.total_capacity_cm3,
+        'transports': transports,
+    }
+
+
 class OrderCalculationSerializer(OrderWriteSerializer):
     class Meta(OrderWriteSerializer.Meta):
         pass
@@ -864,37 +914,7 @@ class OrderCalculationSerializer(OrderWriteSerializer):
                 raise serializers.ValidationError({'delivery': str(exc)}) from exc
             if delivery_pricing:
                 delivery_total = delivery_pricing.total_delivery_cost
-                transports = [
-                    {
-                        'transport': {
-                            'value': allocation.transport.value,
-                            'label': allocation.transport.label,
-                        },
-                        'transport_count': allocation.transport_count,
-                        'cost_per_transport': format(
-                            allocation.delivery_cost_per_transport, '.2f'
-                        ),
-                        'total_cost': format(allocation.total_delivery_cost, '.2f'),
-                    }
-                    for allocation in delivery_pricing.allocations
-                ]
-                delivery_details = {
-                    'transport': {
-                        'value': delivery_pricing.transport.value,
-                        'label': delivery_pricing.transport.label,
-                    },
-                    'transport_count': delivery_pricing.transport_count,
-                    'distance_km': format(
-                        delivery_pricing.distance_km.quantize(
-                            Decimal('0.01'), rounding=ROUND_HALF_UP
-                        ),
-                        '.2f',
-                    ),
-                    'cost_per_transport': format(
-                        delivery_pricing.delivery_cost_per_transport, '.2f'
-                    ),
-                    'transports': transports,
-                }
+                delivery_details = _format_delivery_pricing_details(delivery_pricing)
         total += delivery_total
 
         def _format_decimal(value: Decimal) -> str:

@@ -55,6 +55,30 @@ const formatCurrency = (value: string) => {
   return currencyFormatter.format(amount);
 };
 
+const formatVolume = (value: number | string | null | undefined) => {
+  if (value === null || value === undefined) {
+    return '—';
+  }
+  const numericValue = typeof value === 'string' ? Number(value) : value;
+  if (Number.isNaN(numericValue)) {
+    return '—';
+  }
+  const cubicMeters = numericValue / 1_000_000;
+  const fractionDigits = cubicMeters >= 10 ? 1 : 2;
+  return `${cubicMeters.toFixed(fractionDigits)} м³`;
+};
+
+const formatDistance = (value: string | null | undefined) => {
+  if (!value) {
+    return '—';
+  }
+  const numericValue = Number(value);
+  if (Number.isNaN(numericValue)) {
+    return value;
+  }
+  return `${numericValue.toFixed(2)} км`;
+};
+
 const STATUS_TONE: Record<OrderStatus, 'default' | 'info' | 'success' | 'warning' | 'danger'> = {
   new: 'info',
   reserved: 'warning',
@@ -417,6 +441,135 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                       </dd>
                     </div>
                   </dl>
+                ) : null}
+                {order.delivery_pricing ? (
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '12px',
+                      padding: '12px',
+                      background: 'var(--color-surface-muted)',
+                      borderRadius: '12px',
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        justifyContent: 'space-between',
+                        gap: '8px',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <h3 style={{ margin: 0, fontSize: '1rem' }}>Детали доставки</h3>
+                      <Tag tone="info">{order.delivery_pricing.transport.label}</Tag>
+                    </div>
+                    <dl style={{ display: 'grid', gap: '12px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                          Количество машин
+                        </dt>
+                        <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
+                          {order.delivery_pricing.transport_count}
+                        </dd>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                          Объём заказа
+                        </dt>
+                        <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
+                          {formatVolume(order.delivery_pricing.total_volume_cm3)}
+                        </dd>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                          Вмещаемый объём транспорта
+                        </dt>
+                        <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
+                          {formatVolume(order.delivery_pricing.total_capacity_cm3)}
+                        </dd>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                          Расстояние маршрута
+                        </dt>
+                        <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
+                          {formatDistance(order.delivery_pricing.distance_km)}
+                        </dd>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <dt style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                          Средняя стоимость машины
+                        </dt>
+                        <dd style={{ fontWeight: 600, marginInlineStart: 0 }}>
+                          {order.delivery_pricing.cost_per_transport
+                            ? formatCurrency(order.delivery_pricing.cost_per_transport)
+                            : '—'}
+                        </dd>
+                      </div>
+                    </dl>
+                    {order.delivery_pricing.transports?.length ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <strong style={{ fontSize: '0.95rem' }}>Распределение по машинам</strong>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          {order.delivery_pricing.transports.map((transport, index) => (
+                            <div
+                              key={`${transport.transport.value}-${index}`}
+                              style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+                                gap: '8px',
+                                padding: '12px',
+                                border: '1px solid var(--color-border)',
+                                borderRadius: '12px',
+                                background: 'var(--color-surface)',
+                              }}
+                            >
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
+                                  Транспорт
+                                </span>
+                                <span style={{ fontWeight: 600 }}>{transport.transport.label}</span>
+                              </div>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
+                                  Машин
+                                </span>
+                                <span style={{ fontWeight: 600 }}>{transport.transport_count}</span>
+                              </div>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
+                                  Объём заказа
+                                </span>
+                                <span style={{ fontWeight: 600 }}>
+                                  {formatVolume(transport.required_volume_cm3)}
+                                </span>
+                              </div>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
+                                  Вместимость машин
+                                </span>
+                                <span style={{ fontWeight: 600 }}>
+                                  {formatVolume(transport.total_capacity_cm3)}
+                                </span>
+                              </div>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
+                                  Стоимость
+                                </span>
+                                <span style={{ fontWeight: 600 }}>
+                                  {transport.total_cost
+                                    ? formatCurrency(transport.total_cost)
+                                    : '—'}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
                 ) : null}
               </div>
 
