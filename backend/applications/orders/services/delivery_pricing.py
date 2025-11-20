@@ -14,9 +14,6 @@ if TYPE_CHECKING:  # pragma: no cover - type check only
     from applications.orders.models import Order
 
 
-WAREHOUSE_ADDRESS = '105187, г. Москва, г. Москва, Вернисажная ул., 6'
-
-
 class DeliveryPricingError(RuntimeError):
     """Raised when delivery pricing cannot be calculated."""
 
@@ -85,6 +82,16 @@ def _calculate_total_volume_cm3(
     return total_volume
 
 
+def _get_warehouse_address() -> str:
+    from applications.orders.models import DeliverySettings
+
+    settings = DeliverySettings.objects.first()
+    address = (settings.warehouse_address if settings else '').strip()
+    if not address:
+        raise DeliveryPricingError('Не указан адрес склада для расчёта доставки.')
+    return address
+
+
 def calculate_delivery_pricing(
     *,
     delivery_type: str,
@@ -122,7 +129,7 @@ def calculate_delivery_pricing(
     cost_per_transport = Decimal(transport.cost_per_transport_rub)
 
     try:
-        distance_km = calculate_route_distance_km(WAREHOUSE_ADDRESS, destination)
+        distance_km = calculate_route_distance_km(_get_warehouse_address(), destination)
     except YandexMapsError as exc:  # pragma: no cover - network errors are handled by caller
         raise DeliveryPricingError(str(exc)) from exc
 
