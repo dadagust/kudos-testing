@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from decimal import ROUND_HALF_UP, Decimal
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from applications.products.models import Product, TransportRestriction
 
@@ -218,6 +218,42 @@ def calculate_delivery_pricing(
         total_capacity_cm3=total_capacity_cm3,
         allocations=tuple(allocations),
     )
+
+
+def format_delivery_pricing_details(pricing: DeliveryPricingResult) -> dict[str, Any]:
+    transports = []
+    for allocation in pricing.allocations:
+        total_capacity_cm3 = allocation.capacity_volume_cm3 * allocation.transport_count
+        transports.append(
+            {
+                'transport': {
+                    'value': allocation.transport.value,
+                    'label': allocation.transport.label,
+                    'capacity_volume_cm3': allocation.transport.capacity_volume_cm3,
+                },
+                'transport_count': allocation.transport_count,
+                'required_volume_cm3': allocation.required_volume_cm3,
+                'capacity_volume_cm3': allocation.capacity_volume_cm3,
+                'total_capacity_cm3': total_capacity_cm3,
+                'cost_per_transport': format(allocation.delivery_cost_per_transport, '.2f'),
+                'total_cost': format(allocation.total_delivery_cost, '.2f'),
+            }
+        )
+
+    return {
+        'transport': {
+            'value': pricing.transport.value,
+            'label': pricing.transport.label,
+            'capacity_volume_cm3': pricing.transport.capacity_volume_cm3,
+        },
+        'transport_count': pricing.transport_count,
+        'distance_km': format(pricing.distance_km, '.2f'),
+        'cost_per_transport': format(pricing.delivery_cost_per_transport, '.2f'),
+        'total_delivery_cost': format(pricing.total_delivery_cost, '.2f'),
+        'total_volume_cm3': pricing.total_volume_cm3,
+        'total_capacity_cm3': pricing.total_capacity_cm3,
+        'transports': transports,
+    }
 
 
 def calculate_delivery_pricing_for_order(order: Order) -> DeliveryPricingResult | None:

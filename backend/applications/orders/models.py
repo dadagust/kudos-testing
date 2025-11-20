@@ -14,6 +14,7 @@ from applications.customers.models import PhoneNormalizer
 from applications.orders.services.delivery_pricing import (
     DeliveryPricingError,
     calculate_delivery_pricing,
+    format_delivery_pricing_details,
 )
 from applications.orders.services.setup_pricing import (
     build_setup_requirements,
@@ -243,6 +244,11 @@ class Order(Date):
         verbose_name='Комментарий для накладной',
         blank=True,
     )
+    delivery_pricing_details = models.JSONField(
+        verbose_name='Детали расчёта доставки',
+        default=dict,
+        blank=True,
+    )
 
     objects = OrderQuerySet.as_manager()
 
@@ -286,6 +292,7 @@ class Order(Date):
         services_without_delivery = setup_pricing.services_total
 
         delivery_total = Decimal('0.00')
+        delivery_details: dict[str, object] = {}
         if self.delivery_type == DeliveryType.DELIVERY and product_totals:
             try:
                 delivery_pricing = calculate_delivery_pricing(
@@ -301,7 +308,9 @@ class Order(Date):
             else:
                 if delivery_pricing:
                     delivery_total = delivery_pricing.total_delivery_cost
+                    delivery_details = format_delivery_pricing_details(delivery_pricing)
         self.delivery_total_amount = delivery_total
+        self.delivery_pricing_details = delivery_details
 
         services_total = services_without_delivery + delivery_total
         self.services_total_amount = services_total

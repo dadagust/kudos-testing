@@ -177,6 +177,7 @@ export interface OrderCalculationSummary {
   delivery_total_amount: string;
   installation_total_amount: string;
   dismantle_total_amount: string;
+  delivery_pricing?: DeliveryPricingSummary | null;
   items: OrderCalculationItem[];
 }
 
@@ -237,6 +238,7 @@ export interface UpdateOrderServiceTotalsPayload {
   delivery_total_amount: string;
   installation_total_amount: string;
   dismantle_total_amount: string;
+  delivery_pricing?: DeliveryPricingSummary | null;
 }
 
 export interface OrderValidateAddressResponse {

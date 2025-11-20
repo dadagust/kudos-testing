@@ -28,6 +28,7 @@ from .services.delivery_pricing import (
     DeliveryPricingError,
     calculate_delivery_pricing,
     calculate_delivery_pricing_for_order,
+    format_delivery_pricing_details,
 )
 from .services.setup_pricing import build_setup_requirements, calculate_setup_pricing
 from .services.stock import (
@@ -298,13 +299,16 @@ class OrderDetailSerializer(OrderSummarySerializer):
         )
 
     def get_delivery_pricing(self, obj: Order) -> dict[str, Any] | None:
+        details = getattr(obj, 'delivery_pricing_details', None)
+        if details is not None:
+            return details
         try:
             pricing = calculate_delivery_pricing_for_order(obj)
         except DeliveryPricingError:
             return None
         if not pricing:
             return None
-        return _format_delivery_pricing_details(pricing)
+        return format_delivery_pricing_details(pricing)
 
 
 class OrderItemInputSerializer(serializers.Serializer):
@@ -531,6 +535,10 @@ class OrderWriteSerializer(serializers.ModelSerializer):
         min_value=Decimal('0.00'),
         required=False,
     )
+    delivery_pricing = serializers.JSONField(
+        required=False,
+        allow_null=True,
+    )
     installation_total_amount = serializers.DecimalField(
         max_digits=12,
         decimal_places=2,
@@ -565,6 +573,7 @@ class OrderWriteSerializer(serializers.ModelSerializer):
             'items',
             'return_items',
             'delivery_total_amount',
+            'delivery_pricing',
             'installation_total_amount',
             'dismantle_total_amount',
         )
@@ -640,6 +649,7 @@ class OrderWriteSerializer(serializers.ModelSerializer):
     @transaction.atomic
     def create(self, validated_data: dict[str, Any]) -> Order:
         manual_totals = self._extract_manual_totals(validated_data)
+        manual_pricing = self._extract_delivery_pricing(validated_data)
         items_data = validated_data.pop('items', [])
         return_items_data = validated_data.pop('return_items', None)
         order = Order.objects.create(**validated_data)
@@ -661,6 +671,7 @@ class OrderWriteSerializer(serializers.ModelSerializer):
             delattr(order, '_return_quantities')
         order.recalculate_total_amount()
         self._apply_manual_totals(order, manual_totals)
+        self._apply_delivery_pricing_details(order, manual_pricing)
         order.save(
             update_fields=[
                 'total_amount',
@@ -668,6 +679,7 @@ class OrderWriteSerializer(serializers.ModelSerializer):
                 'installation_total_amount',
                 'dismantle_total_amount',
                 'delivery_total_amount',
+                'delivery_pricing_details',
             ]
         )
         return order
@@ -675,6 +687,7 @@ class OrderWriteSerializer(serializers.ModelSerializer):
     @transaction.atomic
     def update(self, instance: Order, validated_data: dict[str, Any]) -> Order:
         manual_totals = self._extract_manual_totals(validated_data)
+        manual_pricing = self._extract_delivery_pricing(validated_data)
         items_data = validated_data.pop('items', None)
         return_items_data = validated_data.pop('return_items', None)
         previous_status = instance.status
@@ -718,6 +731,7 @@ class OrderWriteSerializer(serializers.ModelSerializer):
             delattr(instance, '_return_quantities')
         instance.recalculate_total_amount()
         self._apply_manual_totals(instance, manual_totals)
+        self._apply_delivery_pricing_details(instance, manual_pricing)
         instance.save(
             update_fields=[
                 'total_amount',
@@ -725,6 +739,7 @@ class OrderWriteSerializer(serializers.ModelSerializer):
                 'installation_total_amount',
                 'dismantle_total_amount',
                 'delivery_total_amount',
+                'delivery_pricing_details',
             ]
         )
         return instance
@@ -829,6 +844,15 @@ class OrderWriteSerializer(serializers.ModelSerializer):
         return manual
 
     @staticmethod
+    def _extract_delivery_pricing(attrs: dict[str, Any]) -> dict[str, Any] | None:
+        value = attrs.pop('delivery_pricing', serializers.empty)
+        if value is serializers.empty:
+            return None
+        if value is None:
+            return {}
+        return value
+
+    @staticmethod
     def _apply_manual_totals(order: Order, manual_totals: dict[str, Decimal]) -> None:
         if not manual_totals:
             return
@@ -843,6 +867,18 @@ class OrderWriteSerializer(serializers.ModelSerializer):
         order.delivery_total_amount = delivery_total
         order.services_total_amount = installation_total + dismantle_total + delivery_total
         order.total_amount = items_total + order.services_total_amount
+
+    @staticmethod
+    def _apply_delivery_pricing_details(
+        order: Order, manual_details: dict[str, Any] | None
+    ) -> None:
+        if order.delivery_type == DeliveryType.PICKUP:
+            order.delivery_pricing_details = {}
+            return
+        if manual_details is not None:
+            order.delivery_pricing_details = manual_details or {}
+        elif not getattr(order, 'delivery_pricing_details', None):
+            order.delivery_pricing_details = {}
 
 
 def _format_delivery_pricing_details(pricing) -> dict[str, Any]:
@@ -914,7 +950,7 @@ class OrderCalculationSerializer(OrderWriteSerializer):
                 raise serializers.ValidationError({'delivery': str(exc)}) from exc
             if delivery_pricing:
                 delivery_total = delivery_pricing.total_delivery_cost
-                delivery_details = _format_delivery_pricing_details(delivery_pricing)
+                delivery_details = format_delivery_pricing_details(delivery_pricing)
         total += delivery_total
 
         def _format_decimal(value: Decimal) -> str:
