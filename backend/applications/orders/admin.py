@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from django.contrib import admin
 
-from .models import Order, OrderDriver, OrderItem
+from .models import DeliverySettings, Order, OrderDriver, OrderItem
 
 
 class OrderItemInline(admin.TabularInline):
@@ -80,3 +80,18 @@ class OrderDriverAdmin(admin.ModelAdmin):
         'phone_normalized',
     )
     raw_id_fields = ('order',)
+
+
+@admin.register(DeliverySettings)
+class DeliverySettingsAdmin(admin.ModelAdmin):
+    list_display = (
+        'warehouse_address',
+        'created',
+        'modified',
+    )
+    search_fields = ('warehouse_address',)
+
+    def has_add_permission(self, request):  # pragma: no cover - admin guard
+        if DeliverySettings.objects.exists():
+            return False
+        return super().has_add_permission(request)

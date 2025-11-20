@@ -9,7 +9,7 @@ from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
 
-from applications.core.models import Date
+from applications.core.models import Date, Single
 from applications.customers.models import PhoneNormalizer
 from applications.orders.services.delivery_pricing import (
     DeliveryPricingError,
@@ -47,6 +47,21 @@ class LogisticsState(models.TextChoices):
     HANDOVER_TO_PICKING = 'handover_to_picking', 'Передан на сборку'
     PICKED = 'picked', 'Собран'
     SHIPPED = 'shipped', 'Отгружен'
+
+
+class DeliverySettings(Single, Date):
+    """Настройки доставки заказа."""
+
+    warehouse_address = models.CharField(
+        verbose_name='Адрес склада',
+        max_length=512,
+        help_text='Адрес отправки заказов для расчёта маршрута доставки.',
+        default='105187, г. Москва, г. Москва, Вернисажная ул., 6',
+    )
+
+    class Meta:
+        verbose_name = 'Настройки доставки'
+        verbose_name_plural = 'Настройки доставки'
 
 
 STATUS_GROUP_MAP: dict[str, tuple[str, ...]] = {
