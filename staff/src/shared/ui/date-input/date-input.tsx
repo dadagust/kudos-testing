@@ -92,7 +92,9 @@ export const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
       onChange?.(event.target.value, event);
     };
 
-    const handlePickerOpen = () => {
+    const inputPlaceholder = useMemo(() => rest.placeholder ?? 'dd/mm/yyyy', [rest.placeholder]);
+
+    const openPicker = () => {
       if (disabled) {
         return;
       }
@@ -108,8 +110,6 @@ export const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
       }
     };
 
-    const inputPlaceholder = useMemo(() => rest.placeholder ?? 'dd/mm/yyyy', [rest.placeholder]);
-
     return (
       <label className={styles.inputWrapper}>
         {label ? <span className={styles.label}>{label}</span> : null}
@@ -124,15 +124,6 @@ export const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
             inputMode="numeric"
             disabled={disabled}
           />
-          <button
-            type="button"
-            className={clsx(styles.calendarButton, disabled && styles.calendarButtonDisabled)}
-            onClick={handlePickerOpen}
-            aria-label="Выбрать дату"
-            disabled={disabled}
-          >
-            <Icon name="calendar" size={18} />
-          </button>
           <input
             ref={pickerRef}
             type="date"
@@ -140,9 +131,17 @@ export const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
             value={value ?? ''}
             onChange={handlePickerChange}
             tabIndex={-1}
-            aria-hidden
             disabled={disabled}
           />
+          <button
+            type="button"
+            className={clsx(styles.calendarButton, disabled && styles.calendarButtonDisabled)}
+            aria-label="Выбрать дату"
+            disabled={disabled}
+            onClick={openPicker}
+          >
+            <Icon name="calendar" size={18} />
+          </button>
         </div>
         {error ? <span className={clsx(styles.helper, styles.helperError)}>{error}</span> : null}
         {!error && helperText ? <span className={styles.helper}>{helperText}</span> : null}
