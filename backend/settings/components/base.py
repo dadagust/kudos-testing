@@ -106,17 +106,20 @@ if not products_media_url.startswith('/'):
 PRODUCTS_MEDIA_URL = products_media_url
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-DATE_FORMAT = 'd.m.Y'
-DATETIME_FORMAT = 'd.m.Y H:i'
+DATE_FORMAT = 'd/m/Y'
+DATETIME_FORMAT = 'd/m/Y H:i'
 SHORT_DATE_FORMAT = DATE_FORMAT
 SHORT_DATETIME_FORMAT = DATETIME_FORMAT
 USE_L10N = False
 
 DATE_INPUT_FORMATS = [
+    '%d/%m/%Y',
     '%d.%m.%Y',
     '%Y-%m-%d',
 ]
 DATETIME_INPUT_FORMATS = [
+    '%d/%m/%Y %H:%M',
+    '%d/%m/%Y %H:%M:%S',
     '%d.%m.%Y %H:%M',
     '%d.%m.%Y %H:%M:%S',
     '%Y-%m-%d %H:%M',

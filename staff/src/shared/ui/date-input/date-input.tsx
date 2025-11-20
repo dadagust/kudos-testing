@@ -97,10 +97,14 @@ export const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
         return;
       }
       const picker = pickerRef.current;
-      if (picker?.showPicker) {
+      if (!picker) {
+        return;
+      }
+      picker.focus({ preventScroll: true });
+      if (picker.showPicker) {
         picker.showPicker();
       } else {
-        picker?.click();
+        picker.click();
       }
     };
 
