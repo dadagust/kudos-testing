@@ -37,6 +37,35 @@ export const LOGISTICS_STATE_LABELS: Record<LogisticsState, string> = {
   shipped: 'Отгружен',
 };
 
+export interface DeliveryTransportSummary {
+  transport: {
+    value: string;
+    label: string;
+    capacity_volume_cm3?: number | null;
+  };
+  transport_count: number;
+  required_volume_cm3?: number | null;
+  capacity_volume_cm3?: number | null;
+  total_capacity_cm3?: number | null;
+  cost_per_transport?: string;
+  total_cost?: string;
+}
+
+export interface DeliveryPricingSummary {
+  transport: {
+    value: string;
+    label: string;
+    capacity_volume_cm3?: number | null;
+  };
+  transport_count: number;
+  distance_km?: string | null;
+  cost_per_transport?: string | null;
+  total_delivery_cost?: string | null;
+  total_volume_cm3?: number | null;
+  total_capacity_cm3?: number | null;
+  transports?: DeliveryTransportSummary[];
+}
+
 export type OrderWaybillContext = 'prep' | 'receiving';
 
 export interface CustomerSummary {
@@ -105,6 +134,7 @@ export interface OrderSummary {
   created: string;
   modified: string;
   items: OrderItem[];
+  delivery_pricing?: DeliveryPricingSummary | null;
 }
 
 export interface OrderDetail extends OrderSummary {}

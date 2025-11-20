@@ -27,6 +27,8 @@ class DeliveryPricingResult:
     distance_km: Decimal
     delivery_cost_per_transport: Decimal
     total_delivery_cost: Decimal
+    total_volume_cm3: int
+    total_capacity_cm3: int
     allocations: tuple['TransportAllocation', ...]
 
 
@@ -36,6 +38,8 @@ class TransportAllocation:
 
     transport: TransportRestriction
     transport_count: int
+    capacity_volume_cm3: int
+    required_volume_cm3: int
     delivery_cost_per_transport: Decimal
     total_delivery_cost: Decimal
 
@@ -142,6 +146,7 @@ def calculate_delivery_pricing(
 
     remaining_volume = {key: value for key, value in volume_by_transport.items()}
     allocations: list[TransportAllocation] = []
+    total_capacity_cm3 = 0
     for index, transport in enumerate(transports):
         transport_capacity = int(transport.capacity_volume_cm3 or 0)
         if transport_capacity <= 0:
@@ -179,10 +184,14 @@ def calculate_delivery_pricing(
         total_cost = (per_transport_cost * transport_count).quantize(
             Decimal('0.01'), rounding=ROUND_HALF_UP
         )
+        allocation_capacity_cm3 = transport_capacity * transport_count
+        total_capacity_cm3 += allocation_capacity_cm3
         allocations.append(
             TransportAllocation(
                 transport=transport,
                 transport_count=transport_count,
+                capacity_volume_cm3=transport_capacity,
+                required_volume_cm3=required_volume,
                 delivery_cost_per_transport=per_transport_cost,
                 total_delivery_cost=total_cost,
             )
@@ -205,6 +214,8 @@ def calculate_delivery_pricing(
         distance_km=distance_km.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
         delivery_cost_per_transport=avg_transport_cost,
         total_delivery_cost=total_cost,
+        total_volume_cm3=total_volume,
+        total_capacity_cm3=total_capacity_cm3,
         allocations=tuple(allocations),
     )
 
