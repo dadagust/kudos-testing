@@ -864,6 +864,20 @@ class OrderCalculationSerializer(OrderWriteSerializer):
                 raise serializers.ValidationError({'delivery': str(exc)}) from exc
             if delivery_pricing:
                 delivery_total = delivery_pricing.total_delivery_cost
+                transports = [
+                    {
+                        'transport': {
+                            'value': allocation.transport.value,
+                            'label': allocation.transport.label,
+                        },
+                        'transport_count': allocation.transport_count,
+                        'cost_per_transport': format(
+                            allocation.delivery_cost_per_transport, '.2f'
+                        ),
+                        'total_cost': format(allocation.total_delivery_cost, '.2f'),
+                    }
+                    for allocation in delivery_pricing.allocations
+                ]
                 delivery_details = {
                     'transport': {
                         'value': delivery_pricing.transport.value,
@@ -879,6 +893,7 @@ class OrderCalculationSerializer(OrderWriteSerializer):
                     'cost_per_transport': format(
                         delivery_pricing.delivery_cost_per_transport, '.2f'
                     ),
+                    'transports': transports,
                 }
         total += delivery_total
 
