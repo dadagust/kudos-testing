@@ -12,7 +12,7 @@ import {
   useOrdersQuery,
 } from '@/entities/order';
 import { formatDateDisplay, formatTimeDisplay } from '@/shared/lib/date';
-import { Accordion, Button, FormField, Input, Spinner, Tag } from '@/shared/ui';
+import { Accordion, Button, DateInput, FormField, Input, Spinner, Tag } from '@/shared/ui';
 
 import { openWaybillPreviewWindow } from '../utils/openWaybillPreviewWindow';
 
@@ -135,14 +135,10 @@ export default function LogisticsReceivingPage() {
     <section className={styles.wrapper}>
       <div className={styles.filters}>
         <FormField label="Демонтаж с">
-          <Input
-            type="date"
-            value={dateFrom}
-            onChange={(event) => setDateFrom(event.target.value)}
-          />
+          <DateInput value={dateFrom} onChange={setDateFrom} />
         </FormField>
         <FormField label="По">
-          <Input type="date" value={dateTo} onChange={(event) => setDateTo(event.target.value)} />
+          <DateInput value={dateTo} onChange={setDateTo} />
         </FormField>
         <form className={styles.searchForm} onSubmit={handleSearchSubmit}>
           <Input
