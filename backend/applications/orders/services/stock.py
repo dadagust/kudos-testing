@@ -5,7 +5,7 @@ from uuid import UUID
 
 from rest_framework import serializers
 
-from applications.orders.models import Order, OrderStatus
+from applications.orders.models import LogisticsState, Order, OrderStatus
 from applications.products.models import OrderStockTransactionType, Product, StockTransaction
 
 ProductTotals = dict[str, int]
@@ -81,7 +81,11 @@ def ensure_order_stock_transactions(
         affects_available=True,
     )
 
-    if order.status in {OrderStatus.IN_WORK, OrderStatus.ARCHIVED}:
+    should_issue = order.logistics_state == LogisticsState.SHIPPED or order.status in {
+        OrderStatus.IN_WORK,
+        OrderStatus.ARCHIVED,
+    }
+    if should_issue:
         _sync_transaction_group(
             order,
             OrderStockTransactionType.ISSUE,
@@ -93,16 +97,20 @@ def ensure_order_stock_transactions(
     else:
         _delete_transaction_group(order, OrderStockTransactionType.ISSUE)
 
+    return_sources: dict[UUID, int] | None = None
     if order.status == OrderStatus.ARCHIVED:
-        if return_quantities is None:
+        if return_quantities is None and not order.warehouse_received_at:
             raise ValueError('Return quantities must be provided for archived orders.')
-        normalized_returns = {
-            product_id: return_quantities.get(product_id, 0) for product_id in product_totals.keys()
-        }
+        source = return_quantities or product_totals
+        return_sources = {product_id: source.get(product_id, 0) for product_id in product_totals.keys()}
+    elif order.warehouse_received_at:
+        return_sources = product_totals
+
+    if return_sources:
         _sync_transaction_group(
             order,
             OrderStockTransactionType.RETURN,
-            normalized_returns.items(),
+            return_sources.items(),
             quantity_sign=1,
             affects_stock=True,
             affects_available=True,

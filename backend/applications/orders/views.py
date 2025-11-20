@@ -34,7 +34,7 @@ from .serializers import (
     OrderSummarySerializer,
     OrderWriteSerializer,
 )
-from .services.stock import reset_order_transactions
+from .services.stock import ensure_order_stock_transactions, reset_order_transactions
 from .services.yandex_maps import YandexMapsError, geocode_address
 
 
@@ -240,6 +240,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         if order.logistics_state != logistics_state:
             order.logistics_state = logistics_state
             order.save(update_fields=['logistics_state'])
+            ensure_order_stock_transactions(order)
         read_serializer = OrderSummarySerializer(order, context=self.get_serializer_context())
         return Response({'data': read_serializer.data})
 
@@ -253,6 +254,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             if not order.warehouse_received_by_id:
                 order.warehouse_received_by = request.user
             order.save(update_fields=['warehouse_received_at', 'warehouse_received_by'])
+            ensure_order_stock_transactions(order)
         read_serializer = OrderSummarySerializer(order, context=self.get_serializer_context())
         return Response({'data': read_serializer.data})
 
