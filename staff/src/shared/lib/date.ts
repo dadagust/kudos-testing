@@ -1,6 +1,6 @@
 const pad = (value: number): string => value.toString().padStart(2, '0');
 
-const DISPLAY_DATE_PATTERN = /^(\d{2})\.(\d{2})\.(\d{4})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?$/;
+const DISPLAY_DATE_PATTERN = /^(\d{2})([./])(\d{2})\2(\d{4})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?$/;
 const ISO_DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const ISO_DATE_TIME_PATTERN = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/;
 const ISO_DATE_TIME_WITH_SECONDS_PATTERN = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}/;
@@ -40,7 +40,7 @@ const parseDisplayDate = (value: string): ParsedDateParts | null => {
   if (!match) {
     return null;
   }
-  const [, dayRaw, monthRaw, yearRaw, hoursRaw, minutesRaw, secondsRaw] = match;
+  const [, dayRaw, , monthRaw, yearRaw, hoursRaw, minutesRaw, secondsRaw] = match;
   const year = Number(yearRaw);
   const month = Number(monthRaw);
   const day = Number(dayRaw);
@@ -102,7 +102,7 @@ const parseDateParts = (value: string | null | undefined): ParsedDateParts | nul
 };
 
 const formatDateParts = (parts: ParsedDateParts): string =>
-  `${pad(parts.day)}.${pad(parts.month)}.${parts.year}`;
+  `${pad(parts.day)}/${pad(parts.month)}/${parts.year}`;
 
 const formatTimeParts = (parts: ParsedDateParts): string => {
   if (!parts.hasTime) {
@@ -142,13 +142,6 @@ export const toServerDateValue = (value: string | null | undefined): string => {
   const trimmed = value?.trim() ?? '';
   if (!trimmed) {
     return '';
-  }
-  if (DISPLAY_DATE_PATTERN.test(trimmed)) {
-    return trimmed;
-  }
-  if (ISO_DATE_ONLY_PATTERN.test(trimmed)) {
-    const [year, month, day] = trimmed.split('-');
-    return `${day}.${month}.${year}`;
   }
   const parts = parseDateParts(trimmed);
   if (!parts) {

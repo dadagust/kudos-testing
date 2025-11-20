@@ -49,6 +49,7 @@ import {
   Accordion,
   Alert,
   Button,
+  DateInput,
   Drawer,
   FormField,
   Input,
@@ -477,8 +478,7 @@ const OrderFormContent = ({
     setForm((prev) => ({ ...prev, payment_status: value }));
   };
 
-  const handleInstallationDateChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { value } = event.target;
+  const handleInstallationDateChange = (value: string) => {
     setForm((prev) => ({ ...prev, installation_date: value }));
   };
 
@@ -492,8 +492,7 @@ const OrderFormContent = ({
     setForm((prev) => ({ ...prev, mount_datetime_to: value }));
   };
 
-  const handleDismantleDateChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { value } = event.target;
+  const handleDismantleDateChange = (value: string) => {
     setForm((prev) => ({ ...prev, dismantle_date: value }));
   };
 
@@ -687,8 +686,7 @@ const OrderFormContent = ({
             </option>
           ))}
         </Select>
-        <Input
-          type="date"
+        <DateInput
           label="Дата монтажа"
           value={form.installation_date}
           onChange={handleInstallationDateChange}
@@ -706,8 +704,7 @@ const OrderFormContent = ({
           value={form.mount_datetime_to}
           onChange={handleMountTimeToChange}
         />
-        <Input
-          type="date"
+        <DateInput
           label="Дата демонтажа"
           value={form.dismantle_date}
           onChange={handleDismantleDateChange}
