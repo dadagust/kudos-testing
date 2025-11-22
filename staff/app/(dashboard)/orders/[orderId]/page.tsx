@@ -143,7 +143,45 @@ const parseDecimal = (value: string | number | null | undefined) => {
 const formatDecimal = (value: number | undefined) =>
   value === undefined ? undefined : value.toFixed(2);
 
-const buildAvailableTransports = (
+const FALLBACK_TRANSPORT_OPTIONS: DeliveryTransportOption[] = [
+  {
+    transport_label: 'Любой',
+    transport_value: 'any',
+    transport_capacity_volume_cm3: 750_000,
+    required_volume_cm3: null,
+    cost_per_transport: 1_500,
+  },
+  {
+    transport_label: 'Только грузовой',
+    transport_value: 'truck_only',
+    transport_capacity_volume_cm3: 1_500_000,
+    required_volume_cm3: null,
+    cost_per_transport: 2_500,
+  },
+  {
+    transport_label: 'Только большегрузный',
+    transport_value: 'heavy_only',
+    transport_capacity_volume_cm3: 2_400_000,
+    required_volume_cm3: null,
+    cost_per_transport: 3_200,
+  },
+  {
+    transport_label: 'Только «Большегрузный 16+»',
+    transport_value: 'heavy16_only',
+    transport_capacity_volume_cm3: 3_200_000,
+    required_volume_cm3: null,
+    cost_per_transport: 4_500,
+  },
+  {
+    transport_label: 'Только «Особый 2»',
+    transport_value: 'special2_only',
+    transport_capacity_volume_cm3: 4_200_000,
+    required_volume_cm3: null,
+    cost_per_transport: 6_000,
+  },
+];
+
+const buildSuggestedTransports = (
   pricing: DeliveryPricingSummary | null | undefined
 ): DeliveryTransportOption[] => {
   const transports = pricing?.transports ?? [];
@@ -166,9 +204,25 @@ const buildAvailableTransports = (
   );
 };
 
+const mergeTransportCatalog = (
+  suggestedTransports: DeliveryTransportOption[]
+): DeliveryTransportOption[] => {
+  const catalog = new Map<string, DeliveryTransportOption>();
+  [...suggestedTransports, ...FALLBACK_TRANSPORT_OPTIONS].forEach((transport) => {
+    if (catalog.has(transport.transport_value)) {
+      return;
+    }
+    catalog.set(transport.transport_value, transport);
+  });
+  return Array.from(catalog.values()).sort(
+    (a, b) => (b.transport_capacity_volume_cm3 ?? 0) - (a.transport_capacity_volume_cm3 ?? 0)
+  );
+};
+
 const evaluateDeliverySelection = (
   form: DeliveryPricingForm,
   options: DeliveryTransportOption[],
+  requiredOptions: DeliveryTransportOption[],
   defaults: { distance_km?: string; total_volume_cm3?: number | null | string }
 ): {
   payload: DeliveryPricingSummary | null;
@@ -231,7 +285,7 @@ const evaluateDeliverySelection = (
   );
   const averageCostPerTransport =
     totalTransportCount > 0 ? totalDeliveryCost / totalTransportCount : null;
-  const requiredMaxCapacity = options.reduce(
+  const requiredMaxCapacity = (requiredOptions.length ? requiredOptions : options).reduce(
     (max, item) => Math.max(max, item.transport_capacity_volume_cm3 ?? 0),
     0
   );
@@ -413,9 +467,13 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
   const router = useRouter();
   const { data, isLoading, isError, error } = useOrderQuery(params.orderId);
   const order = data?.data;
-  const availableTransports = useMemo(
-    () => buildAvailableTransports(order?.delivery_pricing ?? null),
+  const suggestedTransports = useMemo(
+    () => buildSuggestedTransports(order?.delivery_pricing ?? null),
     [order?.delivery_pricing]
+  );
+  const availableTransports = useMemo(
+    () => mergeTransportCatalog(suggestedTransports),
+    [suggestedTransports]
   );
   const customerPhone = order?.customer?.phone?.trim() ?? '';
   const canManageOrders = usePermission('orders_change_order');
@@ -521,12 +579,18 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
 
   const deliveryPricingEvaluation = useMemo(
     () =>
-      evaluateDeliverySelection(serviceTotalsForm.delivery_pricing, availableTransports, {
-        distance_km: order?.delivery_pricing?.distance_km,
-        total_volume_cm3: order?.delivery_pricing?.total_volume_cm3,
-      }),
+      evaluateDeliverySelection(
+        serviceTotalsForm.delivery_pricing,
+        availableTransports,
+        suggestedTransports,
+        {
+          distance_km: order?.delivery_pricing?.distance_km,
+          total_volume_cm3: order?.delivery_pricing?.total_volume_cm3,
+        }
+      ),
     [
       availableTransports,
+      suggestedTransports,
       order?.delivery_pricing?.distance_km,
       order?.delivery_pricing?.total_volume_cm3,
       serviceTotalsForm.delivery_pricing,
@@ -542,6 +606,7 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
     const deliveryPricing = evaluateDeliverySelection(
       serviceTotalsForm.delivery_pricing,
       availableTransports,
+      suggestedTransports,
       {
         distance_km: order.delivery_pricing?.distance_km,
         total_volume_cm3: order.delivery_pricing?.total_volume_cm3,
