@@ -140,8 +140,7 @@ const buildDeliveryPricingForm = (
           ? String(transport.transport_count)
           : '',
       required_volume_cm3:
-        transport.required_volume_cm3 !== undefined &&
-        transport.required_volume_cm3 !== null
+        transport.required_volume_cm3 !== undefined && transport.required_volume_cm3 !== null
           ? String(transport.required_volume_cm3)
           : '',
       total_capacity_cm3:
@@ -167,9 +166,7 @@ const parseInteger = (value: string) => {
   return Math.trunc(numericValue);
 };
 
-const buildDeliveryPricingPayload = (
-  form: DeliveryPricingForm
-): DeliveryPricingSummary | null => {
+const buildDeliveryPricingPayload = (form: DeliveryPricingForm): DeliveryPricingSummary | null => {
   const transports = form.transports
     .map((item) => ({
       transport: {
@@ -222,6 +219,7 @@ const buildDeliveryPricingPayload = (
   };
 
   if (transports.length) {
+    //todo: ГОЙДАНИКА ЕГО
     payload.transports = transports;
   }
 
@@ -354,12 +352,7 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
   };
 
   const handleServiceTotalsChange =
-    (
-      field:
-        | 'delivery_total_amount'
-        | 'installation_total_amount'
-        | 'dismantle_total_amount'
-    ) =>
+    (field: 'delivery_total_amount' | 'installation_total_amount' | 'dismantle_total_amount') =>
     (event: ChangeEvent<HTMLInputElement>) => {
       const { value } = event.target;
       setServiceTotalsForm((prev) => ({ ...prev, [field]: value }));
@@ -377,27 +370,25 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
       }));
     };
 
-  const handleDeliveryTransportChange = (
-    index: number,
-    field: keyof DeliveryPricingForm['transports'][number]
-  ) =>
-  (event: ChangeEvent<HTMLInputElement>) => {
-    const { value } = event.target;
-    setServiceTotalsForm((prev) => {
-      const transports = [...prev.delivery_pricing.transports];
-      transports[index] = {
-        ...transports[index],
-        [field]: value,
-      };
-      return {
-        ...prev,
-        delivery_pricing: {
-          ...prev.delivery_pricing,
-          transports,
-        },
-      };
-    });
-  };
+  const handleDeliveryTransportChange =
+    (index: number, field: keyof DeliveryPricingForm['transports'][number]) =>
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const { value } = event.target;
+      setServiceTotalsForm((prev) => {
+        const transports = [...prev.delivery_pricing.transports];
+        transports[index] = {
+          ...transports[index],
+          [field]: value,
+        };
+        return {
+          ...prev,
+          delivery_pricing: {
+            ...prev.delivery_pricing,
+            transports,
+          },
+        };
+      });
+    };
 
   const handleAddTransportRow = () => {
     setServiceTotalsForm((prev) => ({
@@ -761,19 +752,25 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                               }}
                             >
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
+                                <span
+                                  style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}
+                                >
                                   Транспорт
                                 </span>
                                 <span style={{ fontWeight: 600 }}>{transport.transport.label}</span>
                               </div>
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
+                                <span
+                                  style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}
+                                >
                                   Машин
                                 </span>
                                 <span style={{ fontWeight: 600 }}>{transport.transport_count}</span>
                               </div>
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
+                                <span
+                                  style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}
+                                >
                                   Объём заказа
                                 </span>
                                 <span style={{ fontWeight: 600 }}>
@@ -781,7 +778,9 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                                 </span>
                               </div>
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
+                                <span
+                                  style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}
+                                >
                                   Вместимость машин
                                 </span>
                                 <span style={{ fontWeight: 600 }}>
@@ -789,7 +788,9 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                                 </span>
                               </div>
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
+                                <span
+                                  style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}
+                                >
                                   Стоимость
                                 </span>
                                 <span style={{ fontWeight: 600 }}>
@@ -1072,7 +1073,10 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                       step="1"
                       inputMode="numeric"
                       value={transport.transport_capacity_volume_cm3}
-                      onChange={handleDeliveryTransportChange(index, 'transport_capacity_volume_cm3')}
+                      onChange={handleDeliveryTransportChange(
+                        index,
+                        'transport_capacity_volume_cm3'
+                      )}
                       disabled={isSavingServiceTotals}
                     />
                     <Input
@@ -1115,7 +1119,9 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                       onChange={handleDeliveryTransportChange(index, 'total_cost')}
                       disabled={isSavingServiceTotals}
                     />
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                    <div
+                      style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}
+                    >
                       <Button
                         type="button"
                         variant="ghost"

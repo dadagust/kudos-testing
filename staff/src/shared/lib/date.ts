@@ -1,7 +1,6 @@
 const pad = (value: number): string => value.toString().padStart(2, '0');
 
 const DISPLAY_DATE_PATTERN = /^(\d{2})([./])(\d{2})\2(\d{4})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?$/;
-const ISO_DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const ISO_DATE_TIME_PATTERN = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/;
 const ISO_DATE_TIME_WITH_SECONDS_PATTERN = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}/;
 const TIME_ONLY_PATTERN = /^(\d{2}):(\d{2})(?::(\d{2}))?$/;

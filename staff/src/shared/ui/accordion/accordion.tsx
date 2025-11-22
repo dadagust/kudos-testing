@@ -3,6 +3,8 @@
 import clsx from 'clsx';
 import { FC, ReactNode, useState } from 'react';
 
+import { Icon } from '../icon/icon';
+
 import styles from './accordion.module.sass';
 
 interface AccordionProps {
@@ -27,7 +29,7 @@ export const Accordion: FC<AccordionProps> = ({
         <span className={styles.controls}>
           {actions ? <span className={styles.actions}>{actions}</span> : null}
           <span className={styles.chevron} aria-hidden>
-            ⌄
+            <Icon name="chevron-down" size={14} />
           </span>
         </span>
       </button>
