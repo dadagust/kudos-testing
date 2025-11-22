@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChangeEvent, FormEvent, useState } from 'react';
+import { ChangeEvent, FormEvent, useMemo, useState } from 'react';
 
 import {
   DeliveryPricingSummary,
@@ -15,7 +15,7 @@ import {
 } from '@/entities/order';
 import { RoleGuard, usePermission } from '@/features/auth';
 import { ensureDateDisplay, ensureDateTimeDisplay, ensureTimeDisplay } from '@/shared/lib/date';
-import { Alert, Badge, Button, Input, Modal, Spinner, Table, Tag } from '@/shared/ui';
+import { Alert, Badge, Button, Input, Modal, Select, Spinner, Table, Tag } from '@/shared/ui';
 import type { TableColumn } from '@/shared/ui';
 
 const formatDate = (value: string) => ensureDateDisplay(value);
@@ -80,76 +80,39 @@ const formatDistance = (value: string | null | undefined) => {
   return `${numericValue.toFixed(2)} км`;
 };
 
-type DeliveryPricingForm = {
+type DeliveryTransportOption = {
   transport_label: string;
   transport_value: string;
-  transport_capacity_volume_cm3: string;
+  transport_capacity_volume_cm3: number | null;
+  required_volume_cm3: number | null;
+  cost_per_transport: number | null;
+};
+
+type DeliveryTransportSelection = {
+  transport_value: string;
   transport_count: string;
+};
+
+type DeliveryPricingForm = {
   distance_km: string;
-  cost_per_transport: string;
-  total_delivery_cost: string;
   total_volume_cm3: string;
-  total_capacity_cm3: string;
-  transports: Array<{
-    transport_label: string;
-    transport_value: string;
-    transport_capacity_volume_cm3: string;
-    transport_count: string;
-    required_volume_cm3: string;
-    total_capacity_cm3: string;
-    total_cost: string;
-  }>;
+  transports: DeliveryTransportSelection[];
 };
 
 const buildDeliveryPricingForm = (
   pricing: DeliveryPricingSummary | null | undefined
 ): DeliveryPricingForm => ({
-  transport_label: pricing?.transport?.label ?? '',
-  transport_value: pricing?.transport?.value ?? '',
-  transport_capacity_volume_cm3:
-    pricing?.transport?.capacity_volume_cm3 !== undefined &&
-    pricing?.transport?.capacity_volume_cm3 !== null
-      ? String(pricing.transport.capacity_volume_cm3)
-      : '',
-  transport_count:
-    pricing?.transport_count !== undefined && pricing?.transport_count !== null
-      ? String(pricing.transport_count)
-      : '',
   distance_km: pricing?.distance_km ?? '',
-  cost_per_transport: pricing?.cost_per_transport ?? '',
-  total_delivery_cost: pricing?.total_delivery_cost ?? '',
   total_volume_cm3:
     pricing?.total_volume_cm3 !== undefined && pricing?.total_volume_cm3 !== null
       ? String(pricing.total_volume_cm3)
       : '',
-  total_capacity_cm3:
-    pricing?.total_capacity_cm3 !== undefined && pricing?.total_capacity_cm3 !== null
-      ? String(pricing.total_capacity_cm3)
-      : '',
   transports:
     pricing?.transports?.map((transport) => ({
-      transport_label: transport.transport.label ?? '',
       transport_value: transport.transport.value ?? '',
-      transport_capacity_volume_cm3:
-        transport.transport.capacity_volume_cm3 !== undefined &&
-        transport.transport.capacity_volume_cm3 !== null
-          ? String(transport.transport.capacity_volume_cm3)
-          : '',
       transport_count:
         transport.transport_count !== undefined && transport.transport_count !== null
           ? String(transport.transport_count)
-          : '',
-      required_volume_cm3:
-        transport.required_volume_cm3 !== undefined && transport.required_volume_cm3 !== null
-          ? String(transport.required_volume_cm3)
-          : '',
-      total_capacity_cm3:
-        transport.total_capacity_cm3 !== undefined && transport.total_capacity_cm3 !== null
-          ? String(transport.total_capacity_cm3)
-          : '',
-      total_cost:
-        transport.total_cost !== undefined && transport.total_cost !== null
-          ? String(transport.total_cost)
           : '',
     })) ?? [],
 });
@@ -166,64 +129,251 @@ const parseInteger = (value: string) => {
   return Math.trunc(numericValue);
 };
 
-const buildDeliveryPricingPayload = (form: DeliveryPricingForm): DeliveryPricingSummary | null => {
-  const transports = form.transports
-    .map((item) => ({
-      transport: {
-        value: item.transport_value.trim(),
-        label: item.transport_label.trim() || item.transport_value.trim(),
-        capacity_volume_cm3: parseInteger(item.transport_capacity_volume_cm3),
-      },
-      transport_count: parseInteger(item.transport_count),
-      required_volume_cm3: parseInteger(item.required_volume_cm3),
-      total_capacity_cm3: parseInteger(item.total_capacity_cm3),
-      total_cost: item.total_cost.trim() || undefined,
-    }))
-    .filter(
-      (item) =>
-        item.transport.label ||
-        item.transport.value ||
-        item.transport_count !== undefined ||
-        item.required_volume_cm3 !== undefined ||
-        item.total_capacity_cm3 !== undefined ||
-        item.total_cost !== undefined
-    );
+const parseDecimal = (value: string | number | null | undefined) => {
+  if (value === null || value === undefined) {
+    return undefined;
+  }
+  const numericValue = typeof value === 'string' ? Number(value) : value;
+  if (!Number.isFinite(numericValue)) {
+    return undefined;
+  }
+  return numericValue;
+};
 
-  const hasTopLevelValues =
-    !!form.transport_label.trim() ||
-    !!form.transport_value.trim() ||
-    !!form.transport_capacity_volume_cm3.trim() ||
-    !!form.transport_count.trim() ||
-    !!form.distance_km.trim() ||
-    !!form.cost_per_transport.trim() ||
-    !!form.total_delivery_cost.trim() ||
-    !!form.total_volume_cm3.trim() ||
-    !!form.total_capacity_cm3.trim();
+const formatDecimal = (value: number | undefined) =>
+  value === undefined ? undefined : value.toFixed(2);
 
-  if (!hasTopLevelValues && transports.length === 0) {
-    return null;
+const FALLBACK_TRANSPORT_OPTIONS: DeliveryTransportOption[] = [
+  {
+    transport_label: 'Любой',
+    transport_value: 'any',
+    transport_capacity_volume_cm3: 750_000,
+    required_volume_cm3: null,
+    cost_per_transport: 1_500,
+  },
+  {
+    transport_label: 'Только грузовой',
+    transport_value: 'truck_only',
+    transport_capacity_volume_cm3: 1_500_000,
+    required_volume_cm3: null,
+    cost_per_transport: 2_500,
+  },
+  {
+    transport_label: 'Только большегрузный',
+    transport_value: 'heavy_only',
+    transport_capacity_volume_cm3: 2_400_000,
+    required_volume_cm3: null,
+    cost_per_transport: 3_200,
+  },
+  {
+    transport_label: 'Только «Большегрузный 16+»',
+    transport_value: 'heavy16_only',
+    transport_capacity_volume_cm3: 3_200_000,
+    required_volume_cm3: null,
+    cost_per_transport: 4_500,
+  },
+  {
+    transport_label: 'Только «Особый 2»',
+    transport_value: 'special2_only',
+    transport_capacity_volume_cm3: 4_200_000,
+    required_volume_cm3: null,
+    cost_per_transport: 6_000,
+  },
+];
+
+const buildSuggestedTransports = (
+  pricing: DeliveryPricingSummary | null | undefined
+): DeliveryTransportOption[] => {
+  const transports = pricing?.transports ?? [];
+  const uniqueTransports = new Map<string, DeliveryTransportOption>();
+  transports.forEach((transport) => {
+    const value = transport.transport.value ?? '';
+    if (!value || uniqueTransports.has(value)) {
+      return;
+    }
+    uniqueTransports.set(value, {
+      transport_label: transport.transport.label ?? value,
+      transport_value: value,
+      transport_capacity_volume_cm3: parseDecimal(transport.transport.capacity_volume_cm3) ?? null,
+      required_volume_cm3: parseDecimal(transport.required_volume_cm3) ?? null,
+      cost_per_transport: parseDecimal(transport.cost_per_transport) ?? null,
+    });
+  });
+  return Array.from(uniqueTransports.values()).sort(
+    (a, b) => (b.transport_capacity_volume_cm3 ?? 0) - (a.transport_capacity_volume_cm3 ?? 0)
+  );
+};
+
+const mergeTransportCatalog = (
+  suggestedTransports: DeliveryTransportOption[]
+): DeliveryTransportOption[] => {
+  const catalog = new Map<string, DeliveryTransportOption>();
+  [...suggestedTransports, ...FALLBACK_TRANSPORT_OPTIONS].forEach((transport) => {
+    if (catalog.has(transport.transport_value)) {
+      return;
+    }
+    catalog.set(transport.transport_value, transport);
+  });
+  return Array.from(catalog.values()).sort(
+    (a, b) => (b.transport_capacity_volume_cm3 ?? 0) - (a.transport_capacity_volume_cm3 ?? 0)
+  );
+};
+
+const evaluateDeliverySelection = (
+  form: DeliveryPricingForm,
+  options: DeliveryTransportOption[],
+  requiredOptions: DeliveryTransportOption[],
+  defaults: { distance_km?: string; total_volume_cm3?: number | null | string }
+): {
+  payload: DeliveryPricingSummary | null;
+  error?: string;
+  totalCapacityCm3: number | null;
+  totalDeliveryCost: number | null;
+  averageCostPerTransport: number | null;
+  totalTransportCount: number;
+  transports: Array<{
+    option: DeliveryTransportOption;
+    count: number;
+    totalCapacity: number | null;
+    totalCost: number | null;
+  }>;
+} => {
+  const totalVolumeCm3 = parseInteger(String(defaults.total_volume_cm3 ?? form.total_volume_cm3));
+  const normalizedTransports = form.transports
+    .map((item) => {
+      const option = options.find(
+        (candidate) => candidate.transport_value === item.transport_value
+      );
+      const count = parseInteger(item.transport_count);
+      if (!option || count === undefined || count <= 0) {
+        return null;
+      }
+      return { option, count } as const;
+    })
+    .filter((item): item is { option: DeliveryTransportOption; count: number } => item !== null);
+
+  if (normalizedTransports.length === 0) {
+    return {
+      payload: null,
+      totalCapacityCm3: null,
+      totalDeliveryCost: null,
+      averageCostPerTransport: null,
+      totalTransportCount: 0,
+      transports: [],
+    };
+  }
+
+  const transports = normalizedTransports.map((item) => ({
+    option: item.option,
+    count: item.count,
+    totalCapacity:
+      item.option.transport_capacity_volume_cm3 !== null
+        ? item.option.transport_capacity_volume_cm3 * item.count
+        : null,
+    totalCost:
+      item.option.cost_per_transport !== null ? item.option.cost_per_transport * item.count : null,
+  }));
+
+  const totalTransportCount = transports.reduce((total, current) => total + current.count, 0);
+  const totalCapacityCm3 = transports.reduce(
+    (total, current) => total + (current.totalCapacity ?? 0),
+    0
+  );
+  const totalDeliveryCost = transports.reduce(
+    (total, current) => total + (current.totalCost ?? 0),
+    0
+  );
+  const averageCostPerTransport =
+    totalTransportCount > 0 ? totalDeliveryCost / totalTransportCount : null;
+  const requiredMaxCapacity = (requiredOptions.length ? requiredOptions : options).reduce(
+    (max, item) => Math.max(max, item.transport_capacity_volume_cm3 ?? 0),
+    0
+  );
+  const selectedMaxCapacity = transports.reduce(
+    (max, current) => Math.max(max, current.option.transport_capacity_volume_cm3 ?? 0),
+    0
+  );
+
+  if (requiredMaxCapacity && selectedMaxCapacity < requiredMaxCapacity) {
+    return {
+      payload: null,
+      error: 'Выбранные типы транспорта не соответствуют требованиям заказа.',
+      totalCapacityCm3,
+      totalDeliveryCost,
+      averageCostPerTransport,
+      totalTransportCount,
+      transports,
+    };
+  }
+
+  if (totalVolumeCm3 !== undefined && totalVolumeCm3 > 0 && totalCapacityCm3 < totalVolumeCm3) {
+    return {
+      payload: null,
+      error: 'Выбранные машины не перекрывают требуемый объём заказа.',
+      totalCapacityCm3,
+      totalDeliveryCost,
+      averageCostPerTransport,
+      totalTransportCount,
+      transports,
+    };
+  }
+
+  const primaryTransport = transports.reduce((largest, current) => {
+    if (
+      (largest?.option.transport_capacity_volume_cm3 ?? 0) >=
+      (current.option.transport_capacity_volume_cm3 ?? 0)
+    ) {
+      return largest ?? current;
+    }
+    return current;
+  });
+
+  if (!primaryTransport) {
+    return {
+      payload: null,
+      totalCapacityCm3,
+      totalDeliveryCost,
+      averageCostPerTransport,
+      totalTransportCount,
+      transports,
+    };
   }
 
   const payload: DeliveryPricingSummary = {
     transport: {
-      value: form.transport_value.trim(),
-      label: form.transport_label.trim() || form.transport_value.trim(),
-      capacity_volume_cm3: parseInteger(form.transport_capacity_volume_cm3),
+      value: primaryTransport.option.transport_value,
+      label: primaryTransport.option.transport_label,
+      capacity_volume_cm3: primaryTransport.option.transport_capacity_volume_cm3 ?? undefined,
     },
-    transport_count: parseInteger(form.transport_count) ?? 0,
-    distance_km: form.distance_km.trim() || undefined,
-    cost_per_transport: form.cost_per_transport.trim() || undefined,
-    total_delivery_cost: form.total_delivery_cost.trim() || undefined,
-    total_volume_cm3: parseInteger(form.total_volume_cm3),
-    total_capacity_cm3: parseInteger(form.total_capacity_cm3),
+    transport_count: totalTransportCount,
+    distance_km: defaults.distance_km || undefined,
+    cost_per_transport: formatDecimal(averageCostPerTransport ?? undefined),
+    total_delivery_cost: formatDecimal(totalDeliveryCost ?? undefined),
+    total_volume_cm3: totalVolumeCm3,
+    total_capacity_cm3: totalCapacityCm3,
+    transports: transports.map((current) => ({
+      transport: {
+        value: current.option.transport_value,
+        label: current.option.transport_label,
+        capacity_volume_cm3: current.option.transport_capacity_volume_cm3 ?? undefined,
+      },
+      transport_count: current.count,
+      required_volume_cm3: current.option.required_volume_cm3 ?? undefined,
+      capacity_volume_cm3: current.option.transport_capacity_volume_cm3 ?? undefined,
+      total_capacity_cm3: current.totalCapacity ?? undefined,
+      cost_per_transport: formatDecimal(current.option.cost_per_transport ?? undefined),
+      total_cost: formatDecimal(current.totalCost ?? undefined),
+    })),
   };
 
-  if (transports.length) {
-    //todo: ГОЙДАНИКА ЕГО
-    payload.transports = transports;
-  }
-
-  return payload;
+  return {
+    payload,
+    totalCapacityCm3,
+    totalDeliveryCost,
+    averageCostPerTransport,
+    totalTransportCount,
+    transports,
+  };
 };
 
 const STATUS_TONE: Record<OrderStatus, 'default' | 'info' | 'success' | 'warning' | 'danger'> = {
@@ -317,6 +467,14 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
   const router = useRouter();
   const { data, isLoading, isError, error } = useOrderQuery(params.orderId);
   const order = data?.data;
+  const suggestedTransports = useMemo(
+    () => buildSuggestedTransports(order?.delivery_pricing ?? null),
+    [order?.delivery_pricing]
+  );
+  const availableTransports = useMemo(
+    () => mergeTransportCatalog(suggestedTransports),
+    [suggestedTransports]
+  );
   const customerPhone = order?.customer?.phone?.trim() ?? '';
   const canManageOrders = usePermission('orders_change_order');
   const [isServiceTotalsModalOpen, setIsServiceTotalsModalOpen] = useState(false);
@@ -359,20 +517,8 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
     };
 
   const handleDeliveryPricingChange =
-    (field: keyof DeliveryPricingForm) => (event: ChangeEvent<HTMLInputElement>) => {
-      const { value } = event.target;
-      setServiceTotalsForm((prev) => ({
-        ...prev,
-        delivery_pricing: {
-          ...prev.delivery_pricing,
-          [field]: value,
-        },
-      }));
-    };
-
-  const handleDeliveryTransportChange =
-    (index: number, field: keyof DeliveryPricingForm['transports'][number]) =>
-    (event: ChangeEvent<HTMLInputElement>) => {
+    (index: number, field: keyof DeliveryTransportSelection) =>
+    (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       const { value } = event.target;
       setServiceTotalsForm((prev) => {
         const transports = [...prev.delivery_pricing.transports];
@@ -398,13 +544,8 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
         transports: [
           ...prev.delivery_pricing.transports,
           {
-            transport_label: '',
-            transport_value: '',
-            transport_capacity_volume_cm3: '',
-            transport_count: '',
-            required_volume_cm3: '',
-            total_capacity_cm3: '',
-            total_cost: '',
+            transport_value: availableTransports[0]?.transport_value ?? '',
+            transport_count: '1',
           },
         ],
       },
@@ -427,7 +568,7 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
   const handleResetDeliveryPricing = () => {
     setServiceTotalsForm((prev) => ({
       ...prev,
-      delivery_pricing: buildDeliveryPricingForm(null),
+      delivery_pricing: buildDeliveryPricingForm(order?.delivery_pricing ?? null),
     }));
   };
 
@@ -436,17 +577,50 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
     return normalized || '0';
   };
 
+  const deliveryPricingEvaluation = useMemo(
+    () =>
+      evaluateDeliverySelection(
+        serviceTotalsForm.delivery_pricing,
+        availableTransports,
+        suggestedTransports,
+        {
+          distance_km: order?.delivery_pricing?.distance_km,
+          total_volume_cm3: order?.delivery_pricing?.total_volume_cm3,
+        }
+      ),
+    [
+      availableTransports,
+      suggestedTransports,
+      order?.delivery_pricing?.distance_km,
+      order?.delivery_pricing?.total_volume_cm3,
+      serviceTotalsForm.delivery_pricing,
+    ]
+  );
+
   const handleServiceTotalsSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!order) {
       return;
     }
     setServiceTotalsError(null);
+    const deliveryPricing = evaluateDeliverySelection(
+      serviceTotalsForm.delivery_pricing,
+      availableTransports,
+      suggestedTransports,
+      {
+        distance_km: order.delivery_pricing?.distance_km,
+        total_volume_cm3: order.delivery_pricing?.total_volume_cm3,
+      }
+    );
+    if (deliveryPricing.error) {
+      setServiceTotalsError(deliveryPricing.error);
+      return;
+    }
     const payload = {
       delivery_total_amount: normalizeAmountInput(serviceTotalsForm.delivery_total_amount),
       installation_total_amount: normalizeAmountInput(serviceTotalsForm.installation_total_amount),
       dismantle_total_amount: normalizeAmountInput(serviceTotalsForm.dismantle_total_amount),
-      delivery_pricing: buildDeliveryPricingPayload(serviceTotalsForm.delivery_pricing),
+      delivery_pricing: deliveryPricing.payload,
     };
     updateServiceTotalsMutation.mutate(
       { orderId: order.id, payload },
@@ -947,46 +1121,22 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
               }}
             >
               <Input
-                label="Тип транспорта"
-                value={serviceTotalsForm.delivery_pricing.transport_label}
-                onChange={handleDeliveryPricingChange('transport_label')}
-                disabled={isSavingServiceTotals}
+                label="Дистанция маршрута, км"
+                type="number"
+                min="0"
+                step="0.01"
+                inputMode="decimal"
+                value={order?.delivery_pricing?.distance_km ?? ''}
+                disabled
               />
               <Input
-                label="Код транспорта"
-                value={serviceTotalsForm.delivery_pricing.transport_value}
-                onChange={handleDeliveryPricingChange('transport_value')}
-                disabled={isSavingServiceTotals}
-              />
-              <Input
-                label="Вместимость транспорта, см³"
+                label="Объём заказа, см³"
                 type="number"
                 min="0"
                 step="1"
                 inputMode="numeric"
-                value={serviceTotalsForm.delivery_pricing.transport_capacity_volume_cm3}
-                onChange={handleDeliveryPricingChange('transport_capacity_volume_cm3')}
-                disabled={isSavingServiceTotals}
-              />
-              <Input
-                label="Количество машин"
-                type="number"
-                min="0"
-                step="1"
-                inputMode="numeric"
-                value={serviceTotalsForm.delivery_pricing.transport_count}
-                onChange={handleDeliveryPricingChange('transport_count')}
-                disabled={isSavingServiceTotals}
-              />
-              <Input
-                label="Общий объём заказа, см³"
-                type="number"
-                min="0"
-                step="1"
-                inputMode="numeric"
-                value={serviceTotalsForm.delivery_pricing.total_volume_cm3}
-                onChange={handleDeliveryPricingChange('total_volume_cm3')}
-                disabled={isSavingServiceTotals}
+                value={order?.delivery_pricing?.total_volume_cm3 ?? ''}
+                disabled
               />
               <Input
                 label="Общая вместимость, см³"
@@ -994,19 +1144,8 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                 min="0"
                 step="1"
                 inputMode="numeric"
-                value={serviceTotalsForm.delivery_pricing.total_capacity_cm3}
-                onChange={handleDeliveryPricingChange('total_capacity_cm3')}
-                disabled={isSavingServiceTotals}
-              />
-              <Input
-                label="Дистанция маршрута, км"
-                type="number"
-                min="0"
-                step="0.01"
-                inputMode="decimal"
-                value={serviceTotalsForm.delivery_pricing.distance_km}
-                onChange={handleDeliveryPricingChange('distance_km')}
-                disabled={isSavingServiceTotals}
+                value={deliveryPricingEvaluation.totalCapacityCm3 ?? ''}
+                disabled
               />
               <Input
                 label="Средняя стоимость машины, ₽"
@@ -1014,9 +1153,11 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                 min="0"
                 step="0.01"
                 inputMode="decimal"
-                value={serviceTotalsForm.delivery_pricing.cost_per_transport}
-                onChange={handleDeliveryPricingChange('cost_per_transport')}
-                disabled={isSavingServiceTotals}
+                value={
+                  formatDecimal(deliveryPricingEvaluation.averageCostPerTransport ?? undefined) ??
+                  ''
+                }
+                disabled
               />
               <Input
                 label="Итоговая стоимость доставки, ₽"
@@ -1024,18 +1165,24 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                 min="0"
                 step="0.01"
                 inputMode="decimal"
-                value={serviceTotalsForm.delivery_pricing.total_delivery_cost}
-                onChange={handleDeliveryPricingChange('total_delivery_cost')}
-                disabled={isSavingServiceTotals}
+                value={
+                  formatDecimal(deliveryPricingEvaluation.totalDeliveryCost ?? undefined) ?? ''
+                }
+                disabled
               />
             </div>
+            {availableTransports.length === 0 ? (
+              <Alert tone="info" title="Нет доступных транспортов">
+                Для этого заказа нет предложенных вариантов транспорта. Проверьте расчёт доставки.
+              </Alert>
+            ) : null}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h4 style={{ margin: 0, fontSize: '0.95rem' }}>Машины в рейсе</h4>
               <Button
                 type="button"
                 variant="ghost"
                 onClick={handleAddTransportRow}
-                disabled={isSavingServiceTotals}
+                disabled={isSavingServiceTotals || availableTransports.length === 0}
               >
                 Добавить машину
               </Button>
@@ -1054,70 +1201,86 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                       gap: '12px',
                     }}
                   >
-                    <Input
+                    <Select
                       label="Транспорт"
-                      value={transport.transport_label}
-                      onChange={handleDeliveryTransportChange(index, 'transport_label')}
-                      disabled={isSavingServiceTotals}
-                    />
-                    <Input
-                      label="Код транспорта"
                       value={transport.transport_value}
-                      onChange={handleDeliveryTransportChange(index, 'transport_value')}
-                      disabled={isSavingServiceTotals}
-                    />
-                    <Input
-                      label="Вместимость, см³"
-                      type="number"
-                      min="0"
-                      step="1"
-                      inputMode="numeric"
-                      value={transport.transport_capacity_volume_cm3}
-                      onChange={handleDeliveryTransportChange(
-                        index,
-                        'transport_capacity_volume_cm3'
-                      )}
-                      disabled={isSavingServiceTotals}
-                    />
+                      onChange={handleDeliveryPricingChange(index, 'transport_value')}
+                      disabled={isSavingServiceTotals || availableTransports.length === 0}
+                      required
+                    >
+                      <option value="">Выберите транспорт</option>
+                      {availableTransports.map((option) => (
+                        <option key={option.transport_value} value={option.transport_value}>
+                          {option.transport_label}
+                        </option>
+                      ))}
+                    </Select>
                     <Input
                       label="Машин"
                       type="number"
-                      min="0"
+                      min="1"
                       step="1"
                       inputMode="numeric"
                       value={transport.transport_count}
-                      onChange={handleDeliveryTransportChange(index, 'transport_count')}
+                      onChange={handleDeliveryPricingChange(index, 'transport_count')}
                       disabled={isSavingServiceTotals}
+                      required
                     />
                     <Input
-                      label="Объём заказа, см³"
+                      label="Вместимость машины, см³"
                       type="number"
                       min="0"
                       step="1"
                       inputMode="numeric"
-                      value={transport.required_volume_cm3}
-                      onChange={handleDeliveryTransportChange(index, 'required_volume_cm3')}
-                      disabled={isSavingServiceTotals}
+                      value={
+                        availableTransports.find(
+                          (option) => option.transport_value === transport.transport_value
+                        )?.transport_capacity_volume_cm3 ?? ''
+                      }
+                      disabled
                     />
                     <Input
-                      label="Вместимость, см³"
+                      label="Суммарная вместимость, см³"
                       type="number"
                       min="0"
                       step="1"
                       inputMode="numeric"
-                      value={transport.total_capacity_cm3}
-                      onChange={handleDeliveryTransportChange(index, 'total_capacity_cm3')}
-                      disabled={isSavingServiceTotals}
+                      value={
+                        deliveryPricingEvaluation.transports.find(
+                          (item) => item.option.transport_value === transport.transport_value
+                        )?.totalCapacity ?? ''
+                      }
+                      disabled
                     />
                     <Input
-                      label="Стоимость, ₽"
+                      label="Стоимость за машину, ₽"
                       type="number"
                       min="0"
                       step="0.01"
                       inputMode="decimal"
-                      value={transport.total_cost}
-                      onChange={handleDeliveryTransportChange(index, 'total_cost')}
-                      disabled={isSavingServiceTotals}
+                      value={
+                        formatDecimal(
+                          availableTransports.find(
+                            (option) => option.transport_value === transport.transport_value
+                          )?.cost_per_transport ?? undefined
+                        ) ?? ''
+                      }
+                      disabled
+                    />
+                    <Input
+                      label="Стоимость итого, ₽"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      inputMode="decimal"
+                      value={
+                        formatDecimal(
+                          deliveryPricingEvaluation.transports.find(
+                            (item) => item.option.transport_value === transport.transport_value
+                          )?.totalCost ?? undefined
+                        ) ?? ''
+                      }
+                      disabled
                     />
                     <div
                       style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}
