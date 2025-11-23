@@ -121,7 +121,7 @@ export const AdminLayout: FC<AdminLayoutProps> = ({ user, children }) => {
                 Меню
               </Button>
             )}
-            <div>
+            <div className={styles.topbarTitle}>
               <h2>Панель управления</h2>
               <span>Рабочее пространство агрегатора kudos.ru</span>
             </div>

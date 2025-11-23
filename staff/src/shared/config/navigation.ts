@@ -53,27 +53,6 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     permission: 'adminpanel_view_inventory',
   },
   {
-    id: 'documents',
-    label: 'Документы',
-    href: '/documents',
-    icon: 'documents',
-    permission: 'adminpanel_view_documents',
-  },
-  {
-    id: 'integrations',
-    label: 'Интеграции',
-    href: '/integrations',
-    icon: 'integrations',
-    permission: 'adminpanel_view_integrations',
-  },
-  {
-    id: 'settings',
-    label: 'Настройки',
-    href: '/settings',
-    icon: 'settings',
-    permission: 'adminpanel_view_settings',
-  },
-  {
     id: 'logs',
     label: 'Логи',
     href: '/logs',

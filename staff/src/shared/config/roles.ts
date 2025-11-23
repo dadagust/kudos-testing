@@ -46,9 +46,6 @@ export const ADMIN_SECTIONS = [
   'logistics',
   'customers',
   'inventory',
-  'documents',
-  'integrations',
-  'settings',
   'logs',
 ] as const;
 

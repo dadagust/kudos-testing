@@ -14,9 +14,6 @@ const sectionsLabels: Record<(typeof ADMIN_SECTIONS)[number], string> = {
   logistics: 'Логистика',
   customers: 'Клиенты',
   inventory: 'Склад',
-  documents: 'Документы',
-  integrations: 'Интеграции',
-  settings: 'Настройки',
   logs: 'Логи',
 };
 

@@ -2,6 +2,7 @@
   min-height: 100vh
   display: grid
   grid-template-columns: 280px 1fr
+  grid-template-rows: 1fr
   background-color: var(--color-background)
 
 .sidebar
@@ -11,6 +12,11 @@
   flex-direction: column
   padding: var(--space-2xl) var(--space-xl)
   gap: var(--space-2xl)
+  position: sticky
+  top: 0
+  height: 100vh
+  align-self: start
+  overflow-y: auto
 
 .sidebarHeader
   display: flex
@@ -67,6 +73,13 @@
   padding: var(--space-xl) var(--space-2xl)
   border-bottom: 1px solid var(--color-border)
   background-color: var(--color-surface)
+  position: sticky
+  top: 0
+  z-index: 10
+
+.topbarTitle
+  display: flex
+  flex-direction: column
 
 .topbarLeft
   display: flex
@@ -145,3 +158,7 @@
   .layout.sidebarOpen .overlay
     opacity: 1
     visibility: visible
+
+@media (max-width: 750px)
+  .topbarTitle
+    display: none
