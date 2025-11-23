@@ -78,8 +78,11 @@
       fill="currentColor"
     />
   </symbol>
-    <symbol id="chevron-down" viewBox="0 0 24 24">
+  <symbol id="chevron-down" viewBox="0 0 24 24">
     <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="menu" viewBox="0 0 24 24">
+    <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" fill="currentColor"/>
   </symbol>
 
 </svg>
