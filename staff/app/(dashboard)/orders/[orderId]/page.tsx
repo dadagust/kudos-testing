@@ -223,7 +223,7 @@ const evaluateDeliverySelection = (
   form: DeliveryPricingForm,
   options: DeliveryTransportOption[],
   requiredOptions: DeliveryTransportOption[],
-  defaults: { distance_km?: string; total_volume_cm3?: number | null | string }
+  defaults: { distance_km?: string | null; total_volume_cm3?: number | null | string }
 ): {
   payload: DeliveryPricingSummary | null;
   error?: string;

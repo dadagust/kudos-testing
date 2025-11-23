@@ -29,7 +29,7 @@ class DeliveryPricingResult:
     total_delivery_cost: Decimal
     total_volume_cm3: int
     total_capacity_cm3: int
-    allocations: tuple['TransportAllocation', ...]
+    allocations: tuple[TransportAllocation, ...]
 
 
 @dataclass(frozen=True)

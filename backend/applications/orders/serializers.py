@@ -294,9 +294,7 @@ class OrderDetailSerializer(OrderSummarySerializer):
     delivery_pricing = serializers.SerializerMethodField()
 
     class Meta(OrderSummarySerializer.Meta):
-        fields = OrderSummarySerializer.Meta.fields + (
-            'delivery_pricing',
-        )
+        fields = OrderSummarySerializer.Meta.fields + ('delivery_pricing',)
 
     def get_delivery_pricing(self, obj: Order) -> dict[str, Any] | None:
         details = getattr(obj, 'delivery_pricing_details', None)

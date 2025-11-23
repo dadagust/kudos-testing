@@ -102,7 +102,9 @@ def ensure_order_stock_transactions(
         if return_quantities is None and not order.warehouse_received_at:
             raise ValueError('Return quantities must be provided for archived orders.')
         source = return_quantities or product_totals
-        return_sources = {product_id: source.get(product_id, 0) for product_id in product_totals.keys()}
+        return_sources = {
+            product_id: source.get(product_id, 0) for product_id in product_totals.keys()
+        }
     elif order.warehouse_received_at:
         return_sources = product_totals
 
