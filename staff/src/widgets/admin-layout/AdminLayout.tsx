@@ -27,6 +27,7 @@ export const AdminLayout: FC<AdminLayoutProps> = ({ user, children }) => {
   const router = useRouter();
   const { logout } = useAuth();
   const navItems = getAvailableNavItems(user);
+  const [isCompactViewport, setIsCompactViewport] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const openSidebar = () => setIsSidebarOpen(true);
@@ -43,6 +44,24 @@ export const AdminLayout: FC<AdminLayoutProps> = ({ user, children }) => {
     closeSidebar();
   }, [pathname]);
 
+  useEffect(() => {
+    const updateViewport = () => {
+      setIsCompactViewport(window.innerWidth <= 1000);
+
+      if (window.innerWidth > 1000) {
+        closeSidebar();
+      }
+    };
+
+    updateViewport();
+
+    window.addEventListener('resize', updateViewport);
+
+    return () => {
+      window.removeEventListener('resize', updateViewport);
+    };
+  }, []);
+
   return (
     <div className={clsx(styles.layout, isSidebarOpen && styles.sidebarOpen)}>
       <aside className={styles.sidebar}>
@@ -51,15 +70,17 @@ export const AdminLayout: FC<AdminLayoutProps> = ({ user, children }) => {
             <Icon name="logo" size={28} />
             Kudos Admin
           </Link>
-          <Button
-            className={styles.sidebarClose}
-            variant="ghost"
-            iconLeft="close"
-            aria-label="Закрыть меню"
-            onClick={closeSidebar}
-          >
-            Закрыть
-          </Button>
+          {isCompactViewport && (
+            <Button
+              className={styles.sidebarClose}
+              variant="ghost"
+              iconLeft="close"
+              aria-label="Закрыть меню"
+              onClick={closeSidebar}
+            >
+              Закрыть
+            </Button>
+          )}
         </div>
         <nav className={styles.nav}>
           {navItems.map((item) => {
@@ -89,15 +110,17 @@ export const AdminLayout: FC<AdminLayoutProps> = ({ user, children }) => {
       <div className={styles.content}>
         <header className={styles.topbar}>
           <div className={styles.topbarLeft}>
-            <Button
-              className={styles.menuButton}
-              variant="ghost"
-              iconLeft="menu"
-              aria-label="Открыть меню"
-              onClick={openSidebar}
-            >
-              Меню
-            </Button>
+            {isCompactViewport && (
+              <Button
+                className={styles.menuButton}
+                variant="ghost"
+                iconLeft="menu"
+                aria-label="Открыть меню"
+                onClick={openSidebar}
+              >
+                Меню
+              </Button>
+            )}
             <div>
               <h2>Панель управления</h2>
               <span>Рабочее пространство агрегатора kudos.ru</span>
