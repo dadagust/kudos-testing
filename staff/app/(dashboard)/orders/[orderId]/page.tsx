@@ -10,6 +10,7 @@ import {
   OrderDetail,
   OrderStatus,
   ORDER_STATUS_LABELS,
+  DELIVERY_TYPE_LABELS,
   useOrderQuery,
   useUpdateOrderServiceTotalsMutation,
 } from '@/entities/order';
@@ -862,7 +863,10 @@ export default function OrderDetailsPage({ params }: OrderDetailsPageProps) {
                       }}
                     >
                       <h3 style={{ margin: 0, fontSize: '1rem' }}>Детали доставки</h3>
-                      <Tag tone="info">{order.delivery_pricing.transport.label}</Tag>
+                      <Tag tone="info">
+                        {order.delivery_pricing.transport?.label ??
+                          DELIVERY_TYPE_LABELS[order.delivery_type]}
+                      </Tag>
                     </div>
                     <dl style={{ display: 'grid', gap: '12px' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
