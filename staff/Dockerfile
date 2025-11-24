@@ -12,7 +12,7 @@ RUN apk add --no-cache libc6-compat \
 
 COPY pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY .prettierrc ./
-COPY frontend/package.json ./frontend/package.json
+COPY staff/package.json ./staff/package.json
 COPY staff ./staff
 
 WORKDIR /app/staff
