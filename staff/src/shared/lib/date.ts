@@ -101,7 +101,7 @@ const parseDateParts = (value: string | null | undefined): ParsedDateParts | nul
 };
 
 const formatDateParts = (parts: ParsedDateParts): string =>
-  `${pad(parts.day)}/${pad(parts.month)}/${parts.year}`;
+  `${pad(parts.day)}.${pad(parts.month)}.${parts.year}`;
 
 const formatTimeParts = (parts: ParsedDateParts): string => {
   if (!parts.hasTime) {
