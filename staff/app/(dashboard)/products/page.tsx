@@ -21,12 +21,14 @@ import {
   ProductDetail,
   ProductImage,
   ProductComplementarySummary,
+  ProductSimilarSummary,
   ProductUpdatePayload,
   ProductStockTransaction,
   CreateProductStockTransactionPayload,
   productsApi,
   useInfiniteProductsQuery,
 } from '@/entities/product';
+import { ProductGroup, ProductGroupPayload, productGroupsApi } from '@/entities/product-group';
 import { RoleGuard, usePermission } from '@/features/auth';
 import { ensureDateTimeDisplay } from '@/shared/lib/date';
 import {
@@ -119,6 +121,7 @@ type CreateProductFormState = {
   features: string[];
   featureDraft: string;
   complementaryProducts: ProductComplementarySummary[];
+  similarProducts: ProductSimilarSummary[];
   dimensions: {
     shape: DimensionShape | '';
     circle: { diameter_cm: string };
@@ -172,6 +175,11 @@ type ProductFormImage = {
   removed?: boolean;
 };
 
+type ProductGroupFormState = {
+  name: string;
+  products: ProductListItem[];
+};
+
 const createEmptyProductForm = (defaults?: {
   rentalMode?: RentalMode;
   reservationMode?: ReservationMode;
@@ -187,6 +195,7 @@ const createEmptyProductForm = (defaults?: {
   features: [],
   featureDraft: '',
   complementaryProducts: [],
+  similarProducts: [],
   dimensions: {
     shape: '' as DimensionShape | '',
     circle: { diameter_cm: '' },
@@ -252,6 +261,10 @@ const createFormFromProduct = (product: ProductDetail): CreateProductFormState =
     complementaryProducts:
       product.complementary_products?.map((item) => ({ id: item.id, name: item.name })) ??
       product.complementary_product_ids?.map((id) => ({ id, name: id })) ??
+      [],
+    similarProducts:
+      product.similar_products?.map((item) => ({ id: item.id, name: item.name })) ??
+      product.similar_product_ids?.map((id) => ({ id, name: id })) ??
       [],
     dimensions: {
       shape,
@@ -597,6 +610,9 @@ const buildCreatePayload = (form: CreateProductFormState): ProductCreatePayload 
   const complementaryIds = Array.from(new Set(form.complementaryProducts.map((item) => item.id)));
   payload.complementary_product_ids = complementaryIds;
 
+  const similarIds = Array.from(new Set(form.similarProducts.map((item) => item.id)));
+  payload.similar_product_ids = similarIds;
+
   const features = sanitizeStringList(form.features);
   if (features.length) {
     payload.features = features;
@@ -736,6 +752,11 @@ const buildCreatePayload = (form: CreateProductFormState): ProductCreatePayload 
   return payload;
 };
 
+const buildGroupPayload = (form: ProductGroupFormState): ProductGroupPayload => ({
+  name: form.name.trim(),
+  product_ids: Array.from(new Set(form.products.map((item) => item.id))),
+});
+
 const ProductCard = ({
   product,
   categoryName,
@@ -828,6 +849,7 @@ const ProductCard = ({
 };
 
 export default function ProductsPage() {
+  const [activeTab, setActiveTab] = useState<'catalog' | 'groups'>('catalog');
   const [searchInput, setSearchInput] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedColor, setSelectedColor] = useState<ProductListQuery['color'] | ''>('');
@@ -848,6 +870,9 @@ export default function ProductsPage() {
   const [isComplementaryPickerVisible, setIsComplementaryPickerVisible] = useState(false);
   const [complementarySearch, setComplementarySearch] = useState('');
   const complementaryLoadMoreRef = useRef<HTMLDivElement | null>(null);
+  const [isSimilarPickerVisible, setIsSimilarPickerVisible] = useState(false);
+  const [similarSearch, setSimilarSearch] = useState('');
+  const similarLoadMoreRef = useRef<HTMLDivElement | null>(null);
 
   const [isTransactionsModalOpen, setIsTransactionsModalOpen] = useState(false);
   const [transactionProduct, setTransactionProduct] = useState<ProductListItem | null>(null);
@@ -860,6 +885,16 @@ export default function ProductsPage() {
   const [writeOffForm, setWriteOffForm] = useState({ quantity: '', affectsAvailable: true });
   const [receiveForm, setReceiveForm] = useState({ quantity: '' });
   const [planForm, setPlanForm] = useState({ quantity: '', scheduledFor: '' });
+  const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
+  const [groupModalMode, setGroupModalMode] = useState<'create' | 'edit'>('create');
+  const [groupForm, setGroupForm] = useState<ProductGroupFormState>({ name: '', products: [] });
+  const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
+  const [groupSearch, setGroupSearch] = useState('');
+  const groupLoadMoreRef = useRef<HTMLDivElement | null>(null);
+  const [groupNotification, setGroupNotification] = useState<string | null>(null);
+  const [groupToDelete, setGroupToDelete] = useState<ProductGroup | null>(null);
+  const [isDeleteGroupModalOpen, setIsDeleteGroupModalOpen] = useState(false);
+  const [groupFormError, setGroupFormError] = useState<string | null>(null);
 
   const canManageProducts = usePermission('products_add_product');
   const queryClient = useQueryClient();
@@ -925,6 +960,78 @@ export default function ProductsPage() {
     [createForm.complementaryProducts]
   );
 
+  const similarQueryParams = useMemo<ProductListQuery>(
+    () => ({
+      limit: 20,
+      q: similarSearch.trim() || undefined,
+      ordering: 'name',
+    }),
+    [similarSearch]
+  );
+
+  const {
+    data: similarProductPages,
+    fetchNextPage: fetchNextSimilarProducts,
+    hasNextPage: hasMoreSimilarProducts = false,
+    isFetchingNextPage: isFetchingMoreSimilarProducts,
+    isLoading: isLoadingSimilarProducts,
+  } = useInfiniteProductsQuery(similarQueryParams, { enabled: isSimilarPickerVisible });
+
+  const similarProductsOptions = useMemo(() => {
+    const fetched = similarProductPages?.pages.flatMap((page) => page.results) ?? [];
+    const currentId = formMode === 'edit' ? editingProductId : null;
+    const seen = new Set<string>();
+    return fetched.filter((product) => {
+      if (product.id === currentId) {
+        return false;
+      }
+      if (seen.has(product.id)) {
+        return false;
+      }
+      seen.add(product.id);
+      return true;
+    });
+  }, [similarProductPages, formMode, editingProductId]);
+
+  const selectedSimilarIds = useMemo(
+    () => new Set(createForm.similarProducts.map((item) => item.id)),
+    [createForm.similarProducts]
+  );
+
+  const groupProductsQueryParams = useMemo<ProductListQuery>(
+    () => ({
+      limit: 20,
+      q: groupSearch.trim() || undefined,
+      ordering: 'name',
+    }),
+    [groupSearch]
+  );
+
+  const {
+    data: groupProductPages,
+    fetchNextPage: fetchNextGroupProducts,
+    hasNextPage: hasMoreGroupProducts = false,
+    isFetchingNextPage: isFetchingMoreGroupProducts,
+    isLoading: isLoadingGroupProducts,
+  } = useInfiniteProductsQuery(groupProductsQueryParams, { enabled: isGroupModalOpen });
+
+  const groupProductsOptions = useMemo(() => {
+    const fetched = groupProductPages?.pages.flatMap((page) => page.results) ?? [];
+    const seen = new Set<string>();
+    return fetched.filter((product) => {
+      if (seen.has(product.id)) {
+        return false;
+      }
+      seen.add(product.id);
+      return true;
+    });
+  }, [groupProductPages]);
+
+  const selectedGroupProductIds = useMemo(
+    () => new Set(groupForm.products.map((item) => item.id)),
+    [groupForm.products]
+  );
+
   const { data: enumsData } = useQuery({
     queryKey: ['products', 'enums'],
     queryFn: productsApi.enums,
@@ -935,6 +1042,33 @@ export default function ProductsPage() {
     queryKey: ['products', 'categories'],
     queryFn: productsApi.categories,
     staleTime: 5 * 60 * 1000,
+  });
+
+  const {
+    data: productGroups,
+    isLoading: isLoadingGroups,
+    isError: isGroupsError,
+    error: groupsError,
+  } = useQuery({
+    queryKey: ['product-groups'],
+    queryFn: productGroupsApi.list,
+    enabled: activeTab === 'groups',
+  });
+
+  const {
+    data: editingGroup,
+    isLoading: isEditingGroupLoading,
+    isError: isEditingGroupError,
+    error: editingGroupError,
+  } = useQuery({
+    queryKey: ['product-groups', 'detail', editingGroupId],
+    queryFn: () => {
+      if (!editingGroupId) {
+        throw new Error('groupId is not set');
+      }
+      return productGroupsApi.details(editingGroupId);
+    },
+    enabled: isGroupModalOpen && groupModalMode === 'edit' && Boolean(editingGroupId),
   });
 
   const categoryOptions = useMemo(
@@ -964,7 +1098,7 @@ export default function ProductsPage() {
       }
       return productsApi.details(
         editingProductId,
-        'images,seo,dimensions,complementary_products,rental'
+        'images,seo,dimensions,complementary_products,similar_products,rental'
       );
     },
     enabled: formMode === 'edit' && Boolean(editingProductId) && isProductModalOpen,
@@ -1002,10 +1136,37 @@ export default function ProductsPage() {
       });
     },
   });
+  const createGroupMutation = useMutation<ProductGroup, Error, ProductGroupPayload>({
+    mutationFn: (payload: ProductGroupPayload) => productGroupsApi.create(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['product-groups'], refetchType: 'active' });
+    },
+  });
+  const updateGroupMutation = useMutation<ProductGroup, Error, { id: string; payload: ProductGroupPayload }>(
+    {
+      mutationFn: ({ id, payload }) => productGroupsApi.update(id, payload),
+      onSuccess: (_, variables) => {
+        queryClient.invalidateQueries({ queryKey: ['product-groups'], refetchType: 'active' });
+        queryClient.invalidateQueries({ queryKey: ['product-groups', 'detail', variables.id] });
+      },
+    }
+  );
+  const deleteGroupMutation = useMutation<void, Error, string>({
+    mutationFn: (groupId: string) => productGroupsApi.remove(groupId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['product-groups'], refetchType: 'active' });
+    },
+  });
   const isCreatingProduct = createProductMutation.status === 'pending';
   const isUpdatingProduct = updateProductMutation.status === 'pending';
   const isDeletingProduct = deleteProductMutation.status === 'pending';
+  const isCreatingGroup = createGroupMutation.status === 'pending';
+  const isUpdatingGroup = updateGroupMutation.status === 'pending';
+  const isDeletingGroup = deleteGroupMutation.status === 'pending';
   const isSubmittingProduct = formMode === 'create' ? isCreatingProduct : isUpdatingProduct;
+  const isSubmittingGroup = groupModalMode === 'create' ? isCreatingGroup : isUpdatingGroup;
+  const isGroupFormReady =
+    groupModalMode === 'create' || (!isEditingGroupLoading && !isEditingGroupError);
   const productFormErrorMessage = (() => {
     const errorInstance =
       formMode === 'create' ? createProductMutation.error : updateProductMutation.error;
@@ -1017,6 +1178,7 @@ export default function ProductsPage() {
       : 'Не удалось обновить товар. Попробуйте позже.';
   })();
   const productMutation = formMode === 'create' ? createProductMutation : updateProductMutation;
+  const groupMutation = groupModalMode === 'create' ? createGroupMutation : updateGroupMutation;
   const isEditReady =
     formMode === 'edit'
       ? Boolean(editingProduct) && !isEditingProductLoading && !isEditingProductError
@@ -1025,6 +1187,18 @@ export default function ProductsPage() {
     deleteProductMutation.error instanceof Error
       ? deleteProductMutation.error.message
       : 'Не удалось удалить товар. Попробуйте позже.';
+  const groupFormErrorMessage = (() => {
+    if (groupMutation.error instanceof Error) {
+      return groupMutation.error.message;
+    }
+    return groupModalMode === 'create'
+      ? 'Не удалось создать группу. Попробуйте позже.'
+      : 'Не удалось обновить группу. Попробуйте позже.';
+  })();
+  const deleteGroupErrorMessage =
+    deleteGroupMutation.error instanceof Error
+      ? deleteGroupMutation.error.message
+      : 'Не удалось удалить группу. Попробуйте позже.';
 
   const products = useMemo(() => data?.pages.flatMap((page) => page.results) ?? [], [data]);
 
@@ -1595,6 +1769,20 @@ export default function ProductsPage() {
     }
   };
 
+  const handleConfirmDeleteGroup = async () => {
+    if (!groupToDelete) {
+      return;
+    }
+    try {
+      await deleteGroupMutation.mutateAsync(groupToDelete.id);
+      setGroupNotification(`Группа «${groupToDelete.name}» удалена.`);
+      setIsDeleteGroupModalOpen(false);
+      setGroupToDelete(null);
+    } catch (error) {
+      // Ошибка будет показана в модальном окне удаления
+    }
+  };
+
   useEffect(() => {
     if (formMode !== 'edit' || !editingProduct) {
       return;
@@ -1603,6 +1791,14 @@ export default function ProductsPage() {
     setCreateTouched(false);
     setProductImages(mapProductImagesToForm(editingProduct.images));
   }, [formMode, editingProduct]);
+
+  useEffect(() => {
+    if (groupModalMode !== 'edit' || !editingGroup) {
+      return;
+    }
+    setGroupForm({ name: editingGroup.name ?? '', products: editingGroup.products ?? [] });
+    setGroupFormError(null);
+  }, [groupModalMode, editingGroup]);
 
   useEffect(() => {
     if (!isComplementaryPickerVisible || !hasMoreComplementaryProducts) {
@@ -1626,6 +1822,50 @@ export default function ProductsPage() {
     isFetchingMoreComplementaryProducts,
   ]);
 
+  useEffect(() => {
+    if (!isSimilarPickerVisible || !hasMoreSimilarProducts) {
+      return;
+    }
+    const element = similarLoadMoreRef.current;
+    if (!element) {
+      return;
+    }
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0]?.isIntersecting && !isFetchingMoreSimilarProducts) {
+        fetchNextSimilarProducts();
+      }
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [
+    isSimilarPickerVisible,
+    hasMoreSimilarProducts,
+    fetchNextSimilarProducts,
+    isFetchingMoreSimilarProducts,
+  ]);
+
+  useEffect(() => {
+    if (!isGroupModalOpen || !hasMoreGroupProducts) {
+      return;
+    }
+    const element = groupLoadMoreRef.current;
+    if (!element) {
+      return;
+    }
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0]?.isIntersecting && !isFetchingMoreGroupProducts) {
+        fetchNextGroupProducts();
+      }
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [
+    isGroupModalOpen,
+    hasMoreGroupProducts,
+    fetchNextGroupProducts,
+    isFetchingMoreGroupProducts,
+  ]);
+
   const closeProductModal = () => {
     setIsProductModalOpen(false);
     setCreateTouched(false);
@@ -1638,6 +1878,8 @@ export default function ProductsPage() {
     updateProductMutation.reset();
     setComplementarySearch('');
     setIsComplementaryPickerVisible(false);
+    setSimilarSearch('');
+    setIsSimilarPickerVisible(false);
   };
 
   const handleDimensionShapeChange = (event: ChangeEvent<HTMLSelectElement>) => {
@@ -1706,6 +1948,130 @@ export default function ProductsPage() {
 
   const handleClearComplementaryProducts = () => {
     setCreateForm((prev) => ({ ...prev, complementaryProducts: [] }));
+  };
+
+  const handleSimilarSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setSimilarSearch(event.target.value);
+  };
+
+  const toggleSimilarPicker = () => {
+    setIsSimilarPickerVisible((prev) => {
+      const next = !prev;
+      if (!prev) {
+        setSimilarSearch('');
+      }
+      return next;
+    });
+  };
+
+  const handleToggleSimilarProduct = (product: ProductListItem) => {
+    if (formMode === 'edit' && editingProductId && product.id === editingProductId) {
+      return;
+    }
+    setCreateForm((prev) => {
+      const exists = prev.similarProducts.some((item) => item.id === product.id);
+      if (exists) {
+        return {
+          ...prev,
+          similarProducts: prev.similarProducts.filter((item) => item.id !== product.id),
+        };
+      }
+      return {
+        ...prev,
+        similarProducts: [...prev.similarProducts, { id: product.id, name: product.name }],
+      };
+    });
+  };
+
+  const handleRemoveSimilarProduct = (productId: string) => {
+    setCreateForm((prev) => ({
+      ...prev,
+      similarProducts: prev.similarProducts.filter((item) => item.id !== productId),
+    }));
+  };
+
+  const handleClearSimilarProducts = () => {
+    setCreateForm((prev) => ({ ...prev, similarProducts: [] }));
+  };
+
+  const openCreateGroupModal = () => {
+    setGroupModalMode('create');
+    setGroupForm({ name: '', products: [] });
+    setEditingGroupId(null);
+    setGroupSearch('');
+    setGroupFormError(null);
+    createGroupMutation.reset();
+    updateGroupMutation.reset();
+    setIsGroupModalOpen(true);
+  };
+
+  const openEditGroupModal = (groupId: string) => {
+    setGroupModalMode('edit');
+    setEditingGroupId(groupId);
+    setGroupSearch('');
+    setGroupFormError(null);
+    createGroupMutation.reset();
+    updateGroupMutation.reset();
+    setIsGroupModalOpen(true);
+  };
+
+  const closeGroupModal = () => {
+    setIsGroupModalOpen(false);
+    setGroupModalMode('create');
+    setEditingGroupId(null);
+    setGroupForm({ name: '', products: [] });
+    setGroupSearch('');
+    setGroupFormError(null);
+    createGroupMutation.reset();
+    updateGroupMutation.reset();
+  };
+
+  const handleGroupNameChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setGroupFormError(null);
+    setGroupForm((prev) => ({ ...prev, name: event.target.value }));
+  };
+
+  const handleGroupSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setGroupSearch(event.target.value);
+  };
+
+  const handleToggleGroupProduct = (product: ProductListItem) => {
+    setGroupFormError(null);
+    setGroupForm((prev) => {
+      const exists = prev.products.some((item) => item.id === product.id);
+      if (exists) {
+        return {
+          ...prev,
+          products: prev.products.filter((item) => item.id !== product.id),
+        };
+      }
+      return { ...prev, products: [...prev.products, product] };
+    });
+  };
+
+  const handleRemoveGroupProduct = (productId: string) => {
+    setGroupFormError(null);
+    setGroupForm((prev) => ({
+      ...prev,
+      products: prev.products.filter((item) => item.id !== productId),
+    }));
+  };
+
+  const handleClearGroupProducts = () => {
+    setGroupFormError(null);
+    setGroupForm((prev) => ({ ...prev, products: [] }));
+  };
+
+  const openDeleteGroupModal = (group: ProductGroup) => {
+    setGroupToDelete(group);
+    deleteGroupMutation.reset();
+    setIsDeleteGroupModalOpen(true);
+  };
+
+  const closeDeleteGroupModal = () => {
+    setIsDeleteGroupModalOpen(false);
+    setGroupToDelete(null);
+    deleteGroupMutation.reset();
   };
 
   const handleAddFeature = () => {
@@ -1881,6 +2247,31 @@ export default function ProductsPage() {
     }
   };
 
+  const handleSubmitGroupForm = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const payload = buildGroupPayload(groupForm);
+    if (!payload.name) {
+      setGroupFormError('Введите название группы');
+      return;
+    }
+    if (payload.product_ids.length === 0) {
+      setGroupFormError('Добавьте хотя бы один товар в группу');
+      return;
+    }
+    try {
+      if (groupModalMode === 'create') {
+        const created = await createGroupMutation.mutateAsync(payload);
+        setGroupNotification(`Группа «${created.name}» создана.`);
+      } else if (editingGroupId) {
+        const updated = await updateGroupMutation.mutateAsync({ id: editingGroupId, payload });
+        setGroupNotification(`Группа «${updated.name}» обновлена.`);
+      }
+      closeGroupModal();
+    } catch (error) {
+      // ошибка выводится из состояния мутации
+    }
+  };
+
   return (
     <RoleGuard allow={['adminpanel_view_products', 'inventory_view_inventoryitem']}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -1890,169 +2281,350 @@ export default function ProductsPage() {
             justifyContent: 'space-between',
             gap: '24px',
             alignItems: 'center',
+            flexWrap: 'wrap',
           }}
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <h1>Каталог товаров</h1>
+            <h1>Товары</h1>
             <p style={{ color: 'var(--color-text-muted)', maxWidth: '48rem' }}>
-              Реальный прайс-лист с поддержкой поиска, фильтрации и бесконечной прокрутки. Выбирайте
-              товары по категории, цвету и доступности самовывоза.
+              {activeTab === 'catalog'
+                ? 'Реальный прайс-лист с поддержкой поиска, фильтрации и бесконечной прокрутки.'
+                : 'Объединяйте товары в группы, чтобы быстрее управлять подборками и подбором похожих изделий.'}
             </p>
           </div>
-          {canManageProducts ? (
-            <Button iconLeft="plus" onClick={openCreateModal}>
-              Новый товар
-            </Button>
-          ) : null}
+          {activeTab === 'catalog'
+            ? canManageProducts && (
+                <Button iconLeft="plus" onClick={openCreateModal}>
+                  Новый товар
+                </Button>
+              )
+            : canManageProducts && (
+                <Button iconLeft="plus" onClick={openCreateGroupModal}>
+                  Новая группа
+                </Button>
+              )}
         </header>
 
-        {pageNotification ? (
-          <Alert tone="success" title="Товар создан">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-              <span>{pageNotification}</span>
-              <Button variant="ghost" type="button" onClick={() => setPageNotification(null)}>
-                Скрыть
-              </Button>
-            </div>
-          </Alert>
-        ) : null}
-
-        <section
+        <div
           style={{
-            padding: '20px',
-            borderRadius: '16px',
-            background: 'var(--color-surface)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '16px',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+            gap: '12px',
+            width: '100%',
           }}
         >
-          <form
-            onSubmit={handleSubmit}
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-              gap: '16px',
-              alignItems: 'end',
-            }}
+          <Button
+            type="button"
+            variant={activeTab === 'catalog' ? 'primary' : 'ghost'}
+            onClick={() => setActiveTab('catalog')}
+            style={{ width: '100%' }}
           >
-            <Input
-              label="Поиск"
-              placeholder="Название товара"
-              value={searchInput}
-              onChange={(event) => setSearchInput(event.target.value)}
-            />
-            <Select
-              label="Категория"
-              value={selectedCategory}
-              onChange={(event) => setSelectedCategory(event.target.value)}
+            Каталог
+          </Button>
+          <Button
+            type="button"
+            variant={activeTab === 'groups' ? 'primary' : 'ghost'}
+            onClick={() => setActiveTab('groups')}
+            style={{ width: '100%' }}
+          >
+            Группы товаров
+          </Button>
+        </div>
+
+        {activeTab === 'catalog' ? (
+          <>
+            {pageNotification ? (
+              <Alert tone="success" title="Товар создан">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                  <span>{pageNotification}</span>
+                  <Button variant="ghost" type="button" onClick={() => setPageNotification(null)}>
+                    Скрыть
+                  </Button>
+                </div>
+              </Alert>
+            ) : null}
+
+            <section
+              style={{
+                padding: '20px',
+                borderRadius: '16px',
+                background: 'var(--color-surface)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px',
+              }}
             >
-              <option value="">Все категории</option>
-              {categoryOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
+              <form
+                onSubmit={handleSubmit}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                  gap: '16px',
+                  alignItems: 'end',
+                }}
+              >
+                <Input
+                  label="Поиск"
+                  placeholder="Название товара"
+                  value={searchInput}
+                  onChange={(event) => setSearchInput(event.target.value)}
+                />
+                <Select
+                  label="Категория"
+                  value={selectedCategory}
+                  onChange={(event) => setSelectedCategory(event.target.value)}
+                >
+                  <option value="">Все категории</option>
+                  {categoryOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </Select>
+                <Select
+                  label="Цвет"
+                  value={selectedColor ?? ''}
+                  onChange={(event) =>
+                    setSelectedColor(event.target.value as ProductListQuery['color'] | '')
+                  }
+                >
+                  <option value="">Все цвета</option>
+                  {colorOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </Select>
+                <Select
+                  label="Самовывоз"
+                  value={selfPickup}
+                  onChange={(event) => setSelfPickup(event.target.value)}
+                >
+                  {selfPickupOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </Select>
+                <Select
+                  label="Сортировка"
+                  value={ordering ?? '-created_at'}
+                  onChange={(event) => setOrdering(event.target.value as ProductListQuery['ordering'])}
+                >
+                  {orderingOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </Select>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <Button type="submit" variant="primary">
+                    Применить
+                  </Button>
+                  <Button type="button" variant="ghost" onClick={handleReset}>
+                    Сбросить
+                  </Button>
+                </div>
+              </form>
+            </section>
+
+            <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {isLoading ? <Spinner label="Загружаем товары" /> : null}
+
+              {isError ? (
+                <Alert tone="danger" title="Не удалось загрузить товары">
+                  {error instanceof Error
+                    ? error.message
+                    : 'Попробуйте обновить страницу немного позже.'}
+                </Alert>
+              ) : null}
+
+              {!isLoading && !isError && products.length === 0 ? (
+                <Alert tone="info" title="Товары не найдены">
+                  Попробуйте скорректировать параметры поиска.
+                </Alert>
+              ) : null}
+
+              {products.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  categoryName={categoryNameMap[product.category_id ?? '']}
+                  colorLabel={product.color ? colorLabelMap[product.color] : undefined}
+                  transportLabel={
+                    product.delivery.transport_restriction
+                      ? transportLabelMap[product.delivery.transport_restriction]
+                      : undefined
+                  }
+                  onEdit={openEditModal}
+                  onDelete={openDeleteModal}
+                  onAddTransaction={openTransactionsModal}
+                  canManage={canManageProducts}
+                />
               ))}
-            </Select>
-            <Select
-              label="Цвет"
-              value={selectedColor ?? ''}
-              onChange={(event) =>
-                setSelectedColor(event.target.value as ProductListQuery['color'] | '')
-              }
+
+              <div ref={loadMoreRef} />
+
+              {isFetchingNextPage ? <Spinner label="Загружаем ещё" /> : null}
+
+              {hasNextPage && !isFetchingNextPage ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => fetchNextPage()}
+                  disabled={isFetchingNextPage}
+                >
+                  Загрузить ещё
+                </Button>
+              ) : null}
+
+              {isFetching && !isLoading && !isFetchingNextPage ? <Spinner /> : null}
+            </section>
+          </>
+        ) : (
+          <>
+            {groupNotification ? (
+              <Alert tone="success" title="Группа сохранена">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                  <span>{groupNotification}</span>
+                  <Button variant="ghost" type="button" onClick={() => setGroupNotification(null)}>
+                    Скрыть
+                  </Button>
+                </div>
+              </Alert>
+            ) : null}
+
+            <section
+              style={{
+                padding: '20px',
+                borderRadius: '16px',
+                background: 'var(--color-surface)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px',
+              }}
             >
-              <option value="">Все цвета</option>
-              {colorOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </Select>
-            <Select
-              label="Самовывоз"
-              value={selfPickup}
-              onChange={(event) => setSelfPickup(event.target.value)}
-            >
-              {selfPickupOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </Select>
-            <Select
-              label="Сортировка"
-              value={ordering ?? '-created_at'}
-              onChange={(event) => setOrdering(event.target.value as ProductListQuery['ordering'])}
-            >
-              {orderingOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </Select>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <Button type="submit" variant="primary">
-                Применить
-              </Button>
-              <Button type="button" variant="ghost" onClick={handleReset}>
-                Сбросить
-              </Button>
-            </div>
-          </form>
-        </section>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <h2 style={{ margin: 0 }}>Группы товаров</h2>
+                  <p style={{ margin: 0, color: 'var(--color-text-muted)' }}>
+                    Создавайте подборки похожих или связанных товаров и управляйте ими в одном месте.
+                  </p>
+                </div>
+                {canManageProducts ? (
+                  <Button iconLeft="plus" onClick={openCreateGroupModal}>
+                    Новая группа
+                  </Button>
+                ) : null}
+              </div>
 
-        <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {isLoading ? <Spinner label="Загружаем товары" /> : null}
+              {isLoadingGroups ? <Spinner label="Загружаем группы" /> : null}
 
-          {isError ? (
-            <Alert tone="danger" title="Не удалось загрузить товары">
-              {error instanceof Error
-                ? error.message
-                : 'Попробуйте обновить страницу немного позже.'}
-            </Alert>
-          ) : null}
+              {isGroupsError ? (
+                <Alert tone="danger" title="Не удалось загрузить группы">
+                  {groupsError instanceof Error
+                    ? groupsError.message
+                    : 'Попробуйте обновить страницу немного позже.'}
+                </Alert>
+              ) : null}
 
-          {!isLoading && !isError && products.length === 0 ? (
-            <Alert tone="info" title="Товары не найдены">
-              Попробуйте скорректировать параметры поиска.
-            </Alert>
-          ) : null}
+              {!isLoadingGroups && !isGroupsError && (productGroups?.length ?? 0) === 0 ? (
+                <Alert tone="info" title="Группы не найдены">
+                  Создайте первую группу, чтобы объединить похожие товары.
+                </Alert>
+              ) : null}
 
-          {products.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              categoryName={categoryNameMap[product.category_id ?? '']}
-              colorLabel={product.color ? colorLabelMap[product.color] : undefined}
-              transportLabel={
-                product.delivery.transport_restriction
-                  ? transportLabelMap[product.delivery.transport_restriction]
-                  : undefined
-              }
-              onEdit={openEditModal}
-              onDelete={openDeleteModal}
-              onAddTransaction={openTransactionsModal}
-              canManage={canManageProducts}
-            />
-          ))}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '16px',
+                  width: '100%',
+                }}
+              >
+                {productGroups?.map((group) => (
+                  <div
+                    key={group.id}
+                    style={{
+                      border: '1px solid var(--color-border)',
+                      borderRadius: '12px',
+                      padding: '16px',
+                      background: 'var(--color-surface)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '12px',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <h3 style={{ margin: 0 }}>{group.name}</h3>
+                        <span style={{ color: 'var(--color-text-muted)' }}>
+                          {group.products.length} товаров
+                        </span>
+                      </div>
+                      {canManageProducts ? (
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                          <Button variant="ghost" onClick={() => openEditGroupModal(group.id)}>
+                            Редактировать
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            tone="danger"
+                            onClick={() => openDeleteGroupModal(group)}
+                            disabled={isDeletingGroup && groupToDelete?.id === group.id}
+                          >
+                            Удалить
+                          </Button>
+                        </div>
+                      ) : null}
+                    </div>
 
-          <div ref={loadMoreRef} />
-
-          {isFetchingNextPage ? <Spinner label="Загружаем ещё" /> : null}
-
-          {hasNextPage && !isFetchingNextPage ? (
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => fetchNextPage()}
-              disabled={isFetchingNextPage}
-            >
-              Загрузить ещё
-            </Button>
-          ) : null}
-
-          {isFetching && !isLoading && !isFetchingNextPage ? <Spinner /> : null}
-        </section>
+                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                      {group.products.slice(0, 6).map((product) => (
+                        <div
+                          key={product.id}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            padding: '8px',
+                            borderRadius: '10px',
+                            border: '1px solid var(--color-border)',
+                            background: 'var(--color-surface-muted)',
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: 48,
+                              height: 48,
+                              borderRadius: '10px',
+                              overflow: 'hidden',
+                              background: 'var(--color-surface)',
+                              border: '1px solid var(--color-border)',
+                            }}
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={product.thumbnail_url ?? '/placeholder-product.jpg'}
+                              alt={product.name}
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                          </div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <span style={{ fontWeight: 600 }}>{product.name}</span>
+                            <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                              {formatPrice(product.price_rub)}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </>
+        )}
       </div>
 
       <Modal
@@ -2322,6 +2894,127 @@ export default function ProductsPage() {
                             )}
                             <div ref={complementaryLoadMoreRef} />
                             {isFetchingMoreComplementaryProducts ? (
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  justifyContent: 'center',
+                                  padding: '12px 0',
+                                }}
+                              >
+                                <Spinner />
+                              </div>
+                            ) : null}
+                          </div>
+                        </div>
+                      </Accordion>
+                    ) : null}
+                  </div>
+                </FormField>
+
+                <FormField
+                  label="Похожие товары"
+                  description="Добавьте товары, которые стоит показывать как похожие."
+                >
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {createForm.similarProducts.length ? (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                        {createForm.similarProducts.map((product) => (
+                          <div
+                            key={product.id}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              padding: '6px 12px',
+                              borderRadius: '999px',
+                              background: 'var(--color-surface-muted)',
+                            }}
+                          >
+                            <span style={{ fontSize: '0.875rem' }}>{product.name}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveSimilarProduct(product.id)}
+                              style={{
+                                border: 'none',
+                                background: 'transparent',
+                                color: 'var(--color-text-muted)',
+                                cursor: 'pointer',
+                                fontSize: '0.875rem',
+                                lineHeight: 1,
+                              }}
+                              aria-label={`Удалить ${product.name}`}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                        Похожие товары не выбраны.
+                      </span>
+                    )}
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      <Button type="button" variant="ghost" onClick={toggleSimilarPicker}>
+                        {isSimilarPickerVisible ? 'Скрыть' : 'Добавить'}
+                      </Button>
+                      {createForm.similarProducts.length ? (
+                        <Button type="button" variant="ghost" onClick={handleClearSimilarProducts}>
+                          Очистить
+                        </Button>
+                      ) : null}
+                    </div>
+                    {isSimilarPickerVisible ? (
+                      <Accordion title="Выбор похожих товаров" defaultOpen>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                          <Input
+                            placeholder="Поиск товара"
+                            value={similarSearch}
+                            onChange={handleSimilarSearchChange}
+                          />
+                          <div
+                            style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '8px',
+                              maxHeight: 260,
+                              overflow: 'auto',
+                            }}
+                          >
+                            {isLoadingSimilarProducts ? (
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  justifyContent: 'center',
+                                  padding: '16px 0',
+                                }}
+                              >
+                                <Spinner />
+                              </div>
+                            ) : similarProductsOptions.length ? (
+                              similarProductsOptions.map((product) => {
+                                const isSelected = selectedSimilarIds.has(product.id);
+                                return (
+                                  <Button
+                                    key={product.id}
+                                    type="button"
+                                    variant={isSelected ? 'primary' : 'ghost'}
+                                    onClick={() => handleToggleSimilarProduct(product)}
+                                    style={{ justifyContent: 'flex-start' }}
+                                  >
+                                    {product.name}
+                                  </Button>
+                                );
+                              })
+                            ) : (
+                              <span
+                                style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}
+                              >
+                                Товары не найдены.
+                              </span>
+                            )}
+                            <div ref={similarLoadMoreRef} />
+                            {isFetchingMoreSimilarProducts ? (
                               <div
                                 style={{
                                   display: 'flex',
@@ -3053,6 +3746,212 @@ export default function ProductsPage() {
       </Modal>
 
       <Modal
+        open={isGroupModalOpen}
+        title={groupModalMode === 'create' ? 'Новая группа товаров' : 'Редактирование группы товаров'}
+        onClose={closeGroupModal}
+      >
+        <form
+          onSubmit={handleSubmitGroupForm}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px',
+            maxHeight: '70vh',
+            overflowY: 'auto',
+            padding: '8px 0',
+          }}
+        >
+          {groupMutation.isError ? (
+            <Alert tone="danger" title="Не удалось сохранить группу">
+              {groupFormErrorMessage}
+            </Alert>
+          ) : null}
+          {groupFormError ? (
+            <Alert tone="warning" title="Проверьте данные группы">
+              {groupFormError}
+            </Alert>
+          ) : null}
+
+          {groupModalMode === 'edit' && isEditingGroupLoading ? (
+            <Spinner label="Загружаем группу" />
+          ) : groupModalMode === 'edit' && isEditingGroupError ? (
+            <Alert tone="danger" title="Не удалось загрузить данные группы">
+              {editingGroupError instanceof Error
+                ? editingGroupError.message
+                : 'Попробуйте закрыть окно и повторить попытку.'}
+            </Alert>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <FormField label="Название группы" description="Например, Столы в белом цвете.">
+                <Input
+                  value={groupForm.name}
+                  onChange={handleGroupNameChange}
+                  placeholder="Название группы"
+                  disabled={isSubmittingGroup}
+                  error={groupFormError?.includes('название') ? groupFormError : undefined}
+                />
+              </FormField>
+
+              <FormField
+                label="Товары в группе"
+                description="Используйте поиск по названию, чтобы добавить товары с фото."
+              >
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {groupForm.products.length ? (
+                    <div
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+                        gap: '12px',
+                      }}
+                    >
+                      {groupForm.products.map((product) => (
+                        <div
+                          key={product.id}
+                          style={{
+                            display: 'flex',
+                            gap: '12px',
+                            border: '1px solid var(--color-border)',
+                            borderRadius: '12px',
+                            padding: '10px',
+                            alignItems: 'center',
+                            background: 'var(--color-surface-muted)',
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: 56,
+                              height: 56,
+                              borderRadius: '10px',
+                              overflow: 'hidden',
+                              background: 'var(--color-surface)',
+                              border: '1px solid var(--color-border)',
+                              flexShrink: 0,
+                            }}
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={product.thumbnail_url ?? '/placeholder-product.jpg'}
+                              alt={product.name}
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                          </div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
+                            <span style={{ fontWeight: 600 }}>{product.name}</span>
+                            <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                              {formatPrice(product.price_rub)}
+                            </span>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => handleRemoveGroupProduct(product.id)}
+                            disabled={isSubmittingGroup}
+                          >
+                            Удалить
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                      Товары не выбраны.
+                    </span>
+                  )}
+
+                  <Input
+                    placeholder="Поиск товара по названию"
+                    value={groupSearch}
+                    onChange={handleGroupSearchChange}
+                    disabled={isSubmittingGroup}
+                  />
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px',
+                      maxHeight: 280,
+                      overflow: 'auto',
+                    }}
+                  >
+                    {isLoadingGroupProducts ? (
+                      <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0' }}>
+                        <Spinner />
+                      </div>
+                    ) : groupProductsOptions.length ? (
+                      groupProductsOptions.map((product) => {
+                        const isSelected = selectedGroupProductIds.has(product.id);
+                        return (
+                          <Button
+                            key={product.id}
+                            type="button"
+                            variant={isSelected ? 'primary' : 'ghost'}
+                            onClick={() => handleToggleGroupProduct(product)}
+                            style={{ justifyContent: 'flex-start', gap: '12px' }}
+                            disabled={isSubmittingGroup}
+                          >
+                            <div
+                              style={{
+                                width: 48,
+                                height: 48,
+                                borderRadius: '10px',
+                                overflow: 'hidden',
+                                background: 'var(--color-surface-muted)',
+                                border: '1px solid var(--color-border)',
+                                flexShrink: 0,
+                              }}
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={product.thumbnail_url ?? '/placeholder-product.jpg'}
+                                alt={product.name}
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              />
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', textAlign: 'left' }}>
+                              <span style={{ fontWeight: 600 }}>{product.name}</span>
+                              <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                                {formatPrice(product.price_rub)}
+                              </span>
+                            </div>
+                          </Button>
+                        );
+                      })
+                    ) : (
+                      <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                        Ничего не найдено.
+                      </span>
+                    )}
+                    <div ref={groupLoadMoreRef} />
+                    {isFetchingMoreGroupProducts ? (
+                      <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0' }}>
+                        <Spinner />
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              </FormField>
+            </div>
+          )}
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+            <Button type="button" variant="ghost" onClick={closeGroupModal} disabled={isSubmittingGroup}>
+              Отмена
+            </Button>
+            <Button type="submit" variant="primary" disabled={isSubmittingGroup || !isGroupFormReady}>
+              {isSubmittingGroup
+                ? groupModalMode === 'create'
+                  ? 'Создаём…'
+                  : 'Сохраняем…'
+                : groupModalMode === 'create'
+                  ? 'Создать группу'
+                  : 'Сохранить изменения'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      <Modal
         open={isTransactionsModalOpen}
         title={
           transactionProduct
@@ -3281,6 +4180,32 @@ export default function ProductsPage() {
               </form>
             </div>
           </section>
+        </div>
+      </Modal>
+
+      <Modal open={isDeleteGroupModalOpen} title="Удаление группы" onClose={closeDeleteGroupModal}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <p style={{ margin: 0, lineHeight: 1.5 }}>
+            Удалить группу «{groupToDelete?.name ?? 'Без названия'}»? Это действие нельзя отменить.
+          </p>
+          {deleteGroupMutation.isError ? (
+            <Alert tone="danger" title="Не удалось удалить группу">
+              {deleteGroupErrorMessage}
+            </Alert>
+          ) : null}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+            <Button type="button" variant="ghost" onClick={closeDeleteGroupModal} disabled={isDeletingGroup}>
+              Отмена
+            </Button>
+            <Button
+              type="button"
+              tone="danger"
+              onClick={handleConfirmDeleteGroup}
+              disabled={isDeletingGroup}
+            >
+              {isDeletingGroup ? 'Удаляем…' : 'Удалить'}
+            </Button>
+          </div>
         </div>
       </Modal>
 

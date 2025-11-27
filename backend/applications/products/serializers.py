@@ -15,6 +15,7 @@ from .models import (
     Color,
     InstallerQualification,
     Product,
+    ProductGroup,
     ProductImage,
     StockTransaction,
     TransportRestriction,
@@ -369,6 +370,11 @@ class ProductBaseSerializer(serializers.ModelSerializer):
         required=False,
         allow_empty=True,
     )
+    similar_product_ids = serializers.ListField(
+        child=serializers.UUIDField(),
+        required=False,
+        allow_empty=True,
+    )
 
     class Meta:
         model = Product
@@ -379,6 +385,7 @@ class ProductBaseSerializer(serializers.ModelSerializer):
             'category',
             'category_id',
             'complementary_product_ids',
+            'similar_product_ids',
             'price_rub',
             'loss_compensation_rub',
             'color',
@@ -457,6 +464,7 @@ class ProductBaseSerializer(serializers.ModelSerializer):
     def create(self, validated_data):  # type: ignore[override]
         dimensions = validated_data.pop('dimensions')
         complementary_ids = validated_data.pop('complementary_product_ids', [])
+        similar_ids = validated_data.pop('similar_product_ids', [])
         occupancy = validated_data.pop('occupancy', {}) or {}
         delivery = validated_data.pop('delivery', {}) or {}
         setup = validated_data.pop('setup', {}) or {}
@@ -475,12 +483,15 @@ class ProductBaseSerializer(serializers.ModelSerializer):
             self._apply_seo(product, seo)
             if complementary_ids:
                 product.complementary_products.set(complementary_ids)
+            if similar_ids:
+                product.similar_products.set(similar_ids)
             product.save()
         return product
 
     def update(self, instance: Product, validated_data):  # type: ignore[override]
         dimensions = validated_data.pop('dimensions', None)
         complementary_ids = validated_data.pop('complementary_product_ids', None)
+        similar_ids = validated_data.pop('similar_product_ids', None)
         occupancy = validated_data.pop('occupancy', None)
         delivery = validated_data.pop('delivery', None)
         setup = validated_data.pop('setup', None)
@@ -507,6 +518,8 @@ class ProductBaseSerializer(serializers.ModelSerializer):
             self._apply_seo(instance, seo)
         if complementary_ids is not None:
             instance.complementary_products.set(complementary_ids)
+        if similar_ids is not None:
+            instance.similar_products.set(similar_ids)
 
         instance.save()
         return instance
@@ -547,6 +560,12 @@ class ProductBaseSerializer(serializers.ModelSerializer):
         ]
         if 'complementary_products' in include or self.context.get('detail'):
             data['complementary_products'] = serialize_complementary_products(instance)
+        data['similar_product_ids'] = [
+            str(product_id)
+            for product_id in instance.similar_products.values_list('id', flat=True)
+        ]
+        if 'similar_products' in include or self.context.get('detail'):
+            data['similar_products'] = serialize_similar_products(instance)
         data.pop('created', None)
         data.pop('modified', None)
         data.pop('category', None)
@@ -841,6 +860,16 @@ def serialize_complementary_products(product: Product) -> list[dict]:
     ]
 
 
+def serialize_similar_products(product: Product) -> list[dict]:
+    return [
+        {
+            'id': str(similar.id),
+            'name': similar.name,
+        }
+        for similar in product.similar_products.all()
+    ]
+
+
 def decimal_to_float(value):
     if value in (None, ''):
         return None
@@ -861,13 +890,72 @@ def prefetch_for_include(include: Iterable[str]):
                 queryset=Product.objects.only('id', 'name'),
             )
         )
+    if 'similar_products' in include:
+        prefetches.append(
+            Prefetch(
+                'similar_products',
+                queryset=Product.objects.only('id', 'name'),
+            )
+        )
     return prefetches
+
+
+class ProductGroupSerializer(serializers.ModelSerializer):
+    products = ProductListItemSerializer(many=True, read_only=True)
+    product_ids = serializers.ListField(
+        child=serializers.UUIDField(),
+        required=False,
+        allow_empty=True,
+        write_only=True,
+    )
+
+    class Meta:
+        model = ProductGroup
+        fields = (
+            'id',
+            'name',
+            'product_ids',
+            'products',
+            'created',
+            'modified',
+        )
+        read_only_fields = (
+            'id',
+            'products',
+            'created',
+            'modified',
+        )
+
+    def create(self, validated_data):  # type: ignore[override]
+        product_ids = validated_data.pop('product_ids', [])
+        group = ProductGroup.objects.create(**validated_data)
+        if product_ids:
+            group.products.set(product_ids)
+        return group
+
+    def update(self, instance: ProductGroup, validated_data):  # type: ignore[override]
+        product_ids = validated_data.pop('product_ids', None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        if product_ids is not None:
+            instance.products.set(product_ids)
+        return instance
+
+    def to_representation(self, instance: ProductGroup):  # type: ignore[override]
+        data = super().to_representation(instance)
+        data['created_at'] = DATETIME_FIELD.to_representation(instance.created)
+        data['updated_at'] = DATETIME_FIELD.to_representation(instance.modified)
+        data.pop('created', None)
+        data.pop('modified', None)
+        return data
 
 
 __all__ = [
     'EnumChoiceSerializer',
     'ProductBaseSerializer',
     'ProductDetailSerializer',
+    'ProductGroupSerializer',
     'ProductImageSerializer',
     'ProductListItemSerializer',
     'prefetch_for_include',
@@ -875,6 +963,7 @@ __all__ = [
     'serialize_dimensions',
     'serialize_occupancy',
     'serialize_complementary_products',
+    'serialize_similar_products',
     'serialize_rental',
     'serialize_seo',
     'serialize_setup',

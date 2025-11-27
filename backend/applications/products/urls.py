@@ -8,6 +8,7 @@ from .views import (
     CategoryTreeView,
     ColorsListView,
     EnumsAggregateView,
+    ProductGroupViewSet,
     ProductTransactionViewSet,
     ProductViewSet,
 )
@@ -85,6 +86,27 @@ urlpatterns = allow_optional_trailing_slash(
             'products/enums/',
             EnumsAggregateView.as_view(),
             name='product-enums',
+        ),
+        path(
+            'products/groups/',
+            ProductGroupViewSet.as_view(
+                {
+                    'get': 'list',
+                    'post': 'create',
+                }
+            ),
+            name='product-groups-list',
+        ),
+        path(
+            'products/groups/<uuid:id>/',
+            ProductGroupViewSet.as_view(
+                {
+                    'get': 'retrieve',
+                    'patch': 'partial_update',
+                    'delete': 'destroy',
+                }
+            ),
+            name='product-groups-detail',
         ),
     ]
 )
