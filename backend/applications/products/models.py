@@ -226,6 +226,12 @@ class Product(Date):
         related_name='complemented_by',
         blank=True,
     )
+    similar_products = models.ManyToManyField(
+        to='self',
+        verbose_name='Похожие товары',
+        symmetrical=True,
+        blank=True,
+    )
     price_rub = models.DecimalField(
         verbose_name='Стоимость, руб',
         max_digits=12,
@@ -638,6 +644,35 @@ class StockTransaction(Date):
         super().save(*args, **kwargs)
 
 
+class ProductGroup(Date):
+    """Named group of products."""
+
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
+    name = models.CharField(
+        verbose_name='Название',
+        max_length=255,
+        unique=True,
+    )
+    products = models.ManyToManyField(
+        to=Product,
+        related_name='groups',
+        verbose_name='Товары',
+        blank=True,
+    )
+
+    class Meta(Date.Meta):
+        verbose_name = 'Группа товаров'
+        verbose_name_plural = 'Группы товаров'
+        ordering = ['name']
+
+    def __str__(self) -> str:  # pragma: no cover - human readable repr
+        return self.name
+
+
 class ProductImage(Date):
     """Image for a product with explicit order."""
 
@@ -740,6 +775,7 @@ class ProductImage(Date):
 __all__ = [
     'Category',
     'Product',
+    'ProductGroup',
     'ProductImage',
     'StockTransaction',
     'OrderStockTransactionType',
