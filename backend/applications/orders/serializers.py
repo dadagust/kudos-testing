@@ -742,6 +742,7 @@ class OrderWriteSerializer(serializers.ModelSerializer):
         )
         return instance
 
+
     @staticmethod
     def _reset_delivery_metadata(attrs: dict[str, Any]) -> None:
         attrs['delivery_address_full'] = ''
@@ -877,6 +878,51 @@ class OrderWriteSerializer(serializers.ModelSerializer):
             order.delivery_pricing_details = manual_details or {}
         elif not getattr(order, 'delivery_pricing_details', None):
             order.delivery_pricing_details = {}
+
+
+class CustomerOrderCreateSerializer(OrderWriteSerializer):
+    """Serializer for customer-side order creation with restricted fields."""
+
+    class Meta(OrderWriteSerializer.Meta):
+        fields = tuple(
+            field
+            for field in OrderWriteSerializer.Meta.fields
+            if field
+            not in {
+                'comment_for_waybill',
+                'customer_id',
+                'logistics_state',
+                'payment_status',
+                'status',
+            }
+        )
+
+    def _resolve_customer(self) -> Customer | None:
+        request = self.context.get('request')
+        user = getattr(request, 'user', None)
+
+        if not user or not user.is_authenticated:
+            return None
+
+        return Customer.objects.filter(owner=user).first()
+
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        attrs = super().validate(attrs)
+        attrs['status'] = OrderStatus.NEW
+        attrs['payment_status'] = PaymentStatus.UNPAID
+        attrs.pop('logistics_state', None)
+        attrs.pop('comment_for_waybill', None)
+        return attrs
+
+    def create(self, validated_data: dict[str, Any]) -> Order:
+        customer = validated_data.get('customer') or self._resolve_customer()
+        if customer:
+            validated_data['customer'] = customer
+        validated_data['status'] = OrderStatus.NEW
+        validated_data['payment_status'] = PaymentStatus.UNPAID
+        validated_data.pop('logistics_state', None)
+        validated_data.pop('comment_for_waybill', None)
+        return super().create(validated_data)
 
 
 class OrderCalculationSerializer(OrderWriteSerializer):

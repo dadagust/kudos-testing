@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from applications.products.models import Product
+
+from .serializers import CustomerOrderCreateSerializer, OrderDetailSerializer
 
 
 def _serialize_product(product: Product) -> dict[str, object]:
@@ -35,3 +38,18 @@ def product_detail(request, product_id: str):
     if not product:
         return Response({'detail': 'Product not found'}, status=404)
     return Response({'data': _serialize_product(product)})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_customer_order(request):
+    """Create an order from the customer-facing interface."""
+
+    serializer = CustomerOrderCreateSerializer(
+        data=request.data,
+        context={'request': request},
+    )
+    serializer.is_valid(raise_exception=True)
+    order = serializer.save()
+    response_serializer = OrderDetailSerializer(order, context={'request': request})
+    return Response({'data': response_serializer.data}, status=status.HTTP_201_CREATED)

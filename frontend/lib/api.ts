@@ -169,13 +169,11 @@ export interface CreateOrderPayload {
   delivery_address?: string | null;
   comment?: string | null;
   items: Array<{ product_id: string; quantity: number }>;
-  status?: 'new';
-  customer_id?: string | null;
 }
 
 export interface OrderItem {
   id: number;
-  product: string;
+  product: string | null;
   product_label: string;
   quantity: number;
   unit_price: string;
@@ -267,7 +265,7 @@ export const productsApi = {
 
 export const ordersApi = {
   create: (payload: CreateOrderPayload, token: string) =>
-    performRequest<OrderDetailResponse>(API_V1_URL, '/order/', {
+    performRequest<OrderDetailResponse>(CORE_API_URL, '/orders/', {
       method: 'POST',
       body: payload,
       token,
