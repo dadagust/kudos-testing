@@ -1,7 +1,15 @@
 import type { FC, FormEvent } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 
-import { ApiError, authApi, ordersApi, productsApi, type ProductSummary } from '../lib/api';
+import {
+  ApiError,
+  authApi,
+  ordersApi,
+  productsApi,
+  type ProductSummary,
+  type YandexSuggestItem,
+  yandexApi,
+} from '../lib/api';
 
 import './App.css';
 
@@ -30,6 +38,12 @@ const App: FC = () => {
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [comment, setComment] = useState('');
 
+  const [addressSuggestions, setAddressSuggestions] = useState<YandexSuggestItem[]>([]);
+  const [isLoadingSuggest, setIsLoadingSuggest] = useState(false);
+  const [isSuggestOpen, setIsSuggestOpen] = useState(false);
+
+  const trimmedDelivery = deliveryAddress.trim();
+
   const [orderMessage, setOrderMessage] = useState<string | null>(null);
   const [orderError, setOrderError] = useState<string | null>(null);
   const [createdOrderId, setCreatedOrderId] = useState<number | null>(null);
@@ -52,6 +66,50 @@ const App: FC = () => {
   useEffect(() => {
     void loadProducts(accessToken);
   }, [accessToken]);
+
+  useEffect(() => {
+    if (deliveryType !== 'delivery') {
+      setAddressSuggestions([]);
+      setIsLoadingSuggest(false);
+      setIsSuggestOpen(false);
+      return;
+    }
+
+    const trimmed = deliveryAddress.trim();
+    if (!accessToken || trimmed.length < 3) {
+      setAddressSuggestions([]);
+      setIsLoadingSuggest(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    let cancelled = false;
+    setIsLoadingSuggest(true);
+
+    yandexApi
+      .fetchAddressSuggestions(trimmed, { token: accessToken, signal: controller.signal })
+      .then((results) => {
+        if (!cancelled) {
+          setAddressSuggestions(results);
+        }
+      })
+      .catch((error: unknown) => {
+        const name = (error as Error | null)?.name;
+        if (name !== 'AbortError' && !cancelled) {
+          setAddressSuggestions([]);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setIsLoadingSuggest(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [accessToken, deliveryAddress, deliveryType]);
 
   const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -129,6 +187,17 @@ const App: FC = () => {
     }
   };
 
+  const handleAddressChange = (value: string) => {
+    setDeliveryAddress(value);
+    setIsSuggestOpen(true);
+  };
+
+  const handleSuggestionSelect = (suggestion: YandexSuggestItem) => {
+    setDeliveryAddress(suggestion.value);
+    setIsSuggestOpen(false);
+    setAddressSuggestions([]);
+  };
+
   return (
     <main className="page">
       <header className="page__header">
@@ -175,7 +244,7 @@ const App: FC = () => {
           {isLoadingProducts ? <span className="pill">Загрузка...</span> : null}
         </div>
         {productsError ? <p className="status status--error">{productsError}</p> : null}
-        <div className="product-grid">
+        <div className="product-grid product-grid--scroll">
           {products.map((product) => (
             <article key={product.id} className="product">
               <div className="product__heading">
@@ -263,14 +332,46 @@ const App: FC = () => {
           </label>
           <label className="field">
             <span>Адрес доставки</span>
-            <input
-              type="text"
-              value={deliveryAddress}
-              onChange={(event) => setDeliveryAddress(event.target.value)}
-              placeholder="г. Москва, улица..."
-              disabled={deliveryType === 'pickup'}
-              required={deliveryType === 'delivery'}
-            />
+            <div className="suggest">
+              <input
+                type="text"
+                value={deliveryAddress}
+                onFocus={() => setIsSuggestOpen(true)}
+                onChange={(event) => handleAddressChange(event.target.value)}
+                onBlur={() => setTimeout(() => setIsSuggestOpen(false), 120)}
+                placeholder="г. Москва, улица..."
+                disabled={deliveryType === 'pickup'}
+                required={deliveryType === 'delivery'}
+                autoComplete="off"
+              />
+              {deliveryType === 'delivery' && isSuggestOpen ? (
+                <ul className="suggest__dropdown">
+                  {isLoadingSuggest ? (
+                    <li className="suggest__placeholder">Загрузка подсказок...</li>
+                  ) : null}
+                  {!isLoadingSuggest && addressSuggestions.length > 0
+                    ? addressSuggestions.map((suggestion) => (
+                        <li key={`${suggestion.value}-${suggestion.uri ?? 'local'}`}>
+                          <button
+                            type="button"
+                            className="suggest__item"
+                            onMouseDown={(event) => event.preventDefault()}
+                            onClick={() => handleSuggestionSelect(suggestion)}
+                          >
+                            <span className="suggest__title">{suggestion.title}</span>
+                            {suggestion.subtitle ? (
+                              <span className="suggest__subtitle">{suggestion.subtitle}</span>
+                            ) : null}
+                          </button>
+                        </li>
+                      ))
+                    : null}
+                  {!isLoadingSuggest && addressSuggestions.length === 0 && trimmedDelivery.length >= 3 ? (
+                    <li className="suggest__placeholder">Ничего не найдено</li>
+                  ) : null}
+                </ul>
+              ) : null}
+            </div>
           </label>
         </div>
 

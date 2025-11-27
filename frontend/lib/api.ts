@@ -63,6 +63,7 @@ interface RequestOptions {
   headers?: Record<string, string>;
   body?: unknown;
   token?: string | null;
+  signal?: AbortSignal;
 }
 
 interface ApiErrorPayload {
@@ -93,7 +94,7 @@ const buildUrl = (base: string, path: string) => {
 const performRequest = async <T>(
   baseUrl: string,
   path: string,
-  { method = 'GET', headers = {}, body, token }: RequestOptions = {}
+  { method = 'GET', headers = {}, body, token, signal }: RequestOptions = {}
 ): Promise<T> => {
   const url = buildUrl(baseUrl, path);
 
@@ -115,6 +116,10 @@ const performRequest = async <T>(
   if (body !== undefined) {
     requestHeaders['Content-Type'] = 'application/json';
     requestInit.body = JSON.stringify(body);
+  }
+
+  if (signal) {
+    requestInit.signal = signal;
   }
 
   const response = await fetch(url, requestInit);
@@ -156,6 +161,13 @@ export interface ProductSummary {
 
 export interface ProductListResponse {
   data: ProductSummary[];
+}
+
+export interface YandexSuggestItem {
+  title: string;
+  subtitle?: string;
+  value: string;
+  uri?: string;
 }
 
 export interface CreateOrderPayload {
@@ -260,6 +272,80 @@ export const productsApi = {
       }
       throw error;
     }
+  },
+};
+
+export const yandexApi = {
+  fetchAddressSuggestions: async (
+    query: string,
+    { token, signal }: { token: string | null; signal?: AbortSignal },
+  ): Promise<YandexSuggestItem[]> => {
+    const trimmed = query.trim();
+
+    if (!trimmed || !token) {
+      return [];
+    }
+
+    let response: { results?: unknown[] };
+    try {
+      response = await performRequest<{ results?: unknown[] }>(
+        CORE_API_URL,
+        `/ymaps/suggest/?q=${encodeURIComponent(trimmed)}`,
+        {
+          method: 'GET',
+          token,
+          signal,
+        },
+      );
+    } catch (error) {
+      if ((error as Error).name === 'AbortError') {
+        const abortError = new Error('Request aborted');
+        abortError.name = 'AbortError';
+        throw abortError;
+      }
+
+      if (error instanceof ApiError) {
+        return [];
+      }
+
+      throw error;
+    }
+
+    const rawResults = Array.isArray(response?.results)
+      ? (response.results as unknown[])
+      : [];
+    const suggestions: YandexSuggestItem[] = [];
+
+    for (const item of rawResults) {
+      if (!item || typeof item !== 'object') {
+        continue;
+      }
+
+      const record = item as Record<string, unknown>;
+      const rawTitle = (record.title as string | { text?: string } | undefined) ?? '';
+      const rawSubtitle = record.subtitle as string | { text?: string } | undefined;
+      const rawAddress = record.address as { formatted_address?: string; full_address?: string } | undefined;
+
+      const title = typeof rawTitle === 'string' ? rawTitle : rawTitle.text ?? '';
+      const subtitle =
+        typeof rawSubtitle === 'string' ? rawSubtitle : rawSubtitle?.text ?? undefined;
+      const formatted = rawAddress?.formatted_address ?? rawAddress?.full_address ?? title;
+      const value = formatted || title;
+      const uri = typeof record.uri === 'string' ? record.uri : undefined;
+
+      if (!value) {
+        continue;
+      }
+
+      suggestions.push({
+        title: title || value,
+        subtitle,
+        value,
+        uri,
+      });
+    }
+
+    return suggestions;
   },
 };
 
