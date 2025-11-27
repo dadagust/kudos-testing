@@ -17,7 +17,9 @@ def _serialize_product(product: Product) -> dict[str, object]:
         'id': str(product.id),
         'name': product.name,
         'base_price': float(product.price_rub),
-        'color': product.color,
+        'color': product.color_id,
+        'available_stock_qty': product.available_stock_qty,
+        'stock_qty': product.stock_qty,
     }
 
 
