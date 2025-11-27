@@ -1,4 +1,5 @@
 import { ProductListItem } from '@/entities/product';
+import type { PaginationLinks, PaginationMeta } from '@/shared/api/types';
 
 export type ProductGroup = {
   id: string;
@@ -11,4 +12,10 @@ export type ProductGroup = {
 export type ProductGroupPayload = {
   name: string;
   product_ids: string[];
+};
+
+export type ProductGroupListResponse = {
+  data: ProductGroup[];
+  meta?: { pagination: PaginationMeta };
+  links?: PaginationLinks;
 };

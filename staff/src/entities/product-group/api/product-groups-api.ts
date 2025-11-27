@@ -1,7 +1,7 @@
 import { apiV1Client } from '@/shared/api/httpClient';
 import { ensureAbsoluteUrl } from '@/shared/lib/url';
 
-import { ProductGroup, ProductGroupPayload } from '../model/types';
+import { ProductGroup, ProductGroupListResponse, ProductGroupPayload } from '../model/types';
 
 const normalizeGroup = (group: ProductGroup): ProductGroup => ({
   ...group,
@@ -13,8 +13,11 @@ const normalizeGroup = (group: ProductGroup): ProductGroup => ({
 
 export const productGroupsApi = {
   list: async (): Promise<ProductGroup[]> => {
-    const { data } = await apiV1Client.get<ProductGroup[]>('/products/groups');
-    return data.map(normalizeGroup);
+    const { data } = await apiV1Client.get<ProductGroupListResponse | ProductGroup[]>(
+      '/products/groups'
+    );
+    const groups = Array.isArray(data) ? data : data?.data ?? [];
+    return groups.map(normalizeGroup);
   },
   details: async (groupId: string): Promise<ProductGroup> => {
     const { data } = await apiV1Client.get<ProductGroup>(`/products/groups/${groupId}`);
