@@ -87,6 +87,11 @@ export type ProductComplementarySummary = {
   name: string;
 };
 
+export type ProductSimilarSummary = {
+  id: string;
+  name: string;
+};
+
 export type ProductAttribute = {
   attribute_id: string;
   code: string;
@@ -160,6 +165,7 @@ export interface ProductListItem {
   short_description?: string;
   updated_at?: string;
   complementary_product_ids?: string[];
+  similar_product_ids?: string[];
   rental?: ProductRental;
 }
 
@@ -188,6 +194,7 @@ export interface ProductDetail extends ProductListItem {
   created_at: string;
   updated_at: string;
   complementary_products?: ProductComplementarySummary[];
+  similar_products?: ProductSimilarSummary[];
 }
 
 export interface ProductListTotals {
@@ -274,6 +281,7 @@ export interface ProductCreatePayload {
   features?: string[];
   category_id: string;
   complementary_product_ids?: string[];
+  similar_product_ids?: string[];
   price_rub: number;
   loss_compensation_rub?: number;
   color?: ProductColor | null;
