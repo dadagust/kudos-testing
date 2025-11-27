@@ -7,6 +7,7 @@ from .models import (
     Color,
     InstallerQualification,
     Product,
+    ProductGroup,
     ProductImage,
     StockTransaction,
     TransportRestriction,
@@ -65,6 +66,17 @@ class ProductAdmin(admin.ModelAdmin):
         'color',
     )
     inlines = (ProductImageInline,)
+
+
+@admin.register(ProductGroup)
+class ProductGroupAdmin(admin.ModelAdmin):
+    list_display = (
+        'name',
+        'created',
+        'modified',
+    )
+    search_fields = ('name',)
+    filter_horizontal = ('products',)
 
 
 @admin.register(InstallerQualification)

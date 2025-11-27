@@ -5,7 +5,7 @@ from __future__ import annotations
 from decimal import Decimal, InvalidOperation
 
 from django.db import IntegrityError, models
-from django.db.models import Q
+from django.db.models import Prefetch, Q
 from django.shortcuts import get_object_or_404
 from rest_framework import mixins, serializers, status, viewsets
 from rest_framework.decorators import action
@@ -21,6 +21,7 @@ from .models import (
     Color,
     InstallerQualification,
     Product,
+    ProductGroup,
     ProductImage,
     StockTransaction,
     TransportRestriction,
@@ -30,6 +31,7 @@ from .serializers import (
     EnumChoiceSerializer,
     ProductBaseSerializer,
     ProductDetailSerializer,
+    ProductGroupSerializer,
     ProductImageSerializer,
     ProductListItemSerializer,
     StockTransactionSerializer,
@@ -339,6 +341,22 @@ class ProductTransactionViewSet(
         serializer.save()
 
 
+class ProductGroupViewSet(viewsets.ModelViewSet):
+    queryset = ProductGroup.objects.all()
+    serializer_class = ProductGroupSerializer
+    lookup_field = 'id'
+
+    def get_queryset(self):  # type: ignore[override]
+        product_queryset = Product.objects.select_related(
+            'category', 'color', 'delivery_transport_restriction'
+        ).prefetch_related(
+            Prefetch('images', queryset=ProductImage.objects.order_by('position')),
+        )
+        return super().get_queryset().prefetch_related(
+            Prefetch('products', queryset=product_queryset)
+        )
+
+
 class CategoryTreeView(APIView):
     def get(self, request: Request):
         categories = Category.objects.all().order_by('name')
@@ -387,6 +405,7 @@ __all__ = [
     'CategoryTreeView',
     'ColorsListView',
     'EnumsAggregateView',
+    'ProductGroupViewSet',
     'ProductTransactionViewSet',
     'ProductViewSet',
 ]

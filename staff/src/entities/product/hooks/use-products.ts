@@ -10,7 +10,10 @@ export const useProductsQuery = (params: ProductListQuery) =>
     staleTime: 30 * 1000,
   });
 
-export const useInfiniteProductsQuery = (params: ProductListQuery) =>
+export const useInfiniteProductsQuery = (
+  params: ProductListQuery,
+  options: { enabled?: boolean } = {}
+) =>
   useInfiniteQuery<ProductListResponse, Error>({
     queryKey: ['products', 'infinite', params],
     queryFn: ({ pageParam }) =>
@@ -18,4 +21,5 @@ export const useInfiniteProductsQuery = (params: ProductListQuery) =>
     initialPageParam: params.cursor ?? undefined,
     getNextPageParam: (lastPage) => lastPage.next_cursor ?? undefined,
     staleTime: 30 * 1000,
+    enabled: options.enabled ?? true,
   });
