@@ -2536,9 +2536,10 @@ export default function ProductsPage() {
 
               <div
                 style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+                  display: 'flex',
+                  flexDirection: 'column',
                   gap: '16px',
+                  width: '100%',
                 }}
               >
                 {productGroups?.map((group) => (
