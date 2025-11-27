@@ -1,19 +1,17 @@
-# Python
 __pycache__/
-*.py[cod]
-*.egg-info/
-.venv/
 .env
-
-# Node
-node_modules/
-.next/
-dist/
-*.log
 .env.local
-/backend/config/.env.local
-/frontend/.env.local
-/staff/.env.local
+.next/
+.venv/
+*.egg-info/
+*.log
+*.py[cod]
 *.tsbuildinfo
+/backend/config/.env.local
+/backend/settings/local_settings.py
+/frontend/.env.local
 /media/
+/staff/.env.local
 /staticfiles/
+dist/
+node_modules/

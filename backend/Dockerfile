@@ -23,13 +23,11 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 COPY backend/pyproject.toml backend/poetry.lock ./
-RUN pip install --no-cache-dir "poetry==1.8.3" \
+RUN pip install --no-cache-dir "poetry==2.1.2" \
  && poetry install --no-interaction --no-ansi --no-root
 
 COPY backend/ ./
 COPY backend/entrypoint.sh ./entrypoint.sh
-
-# Ensure LF line endings + executable on Windows checkouts
 RUN sed -i 's/\r$//' ./entrypoint.sh && chmod +x ./entrypoint.sh
 
 EXPOSE 8000

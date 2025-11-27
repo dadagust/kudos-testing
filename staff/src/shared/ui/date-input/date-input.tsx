@@ -25,7 +25,7 @@ interface DateInputProps extends NativeInputProps {
   label?: string;
   helperText?: string;
   error?: string;
-  value?: string; // ISO 'YYYY-MM-DD' или 'dd.mm.yyyy'
+  value?: string;
   onChange?: (value: string, event?: ChangeEvent<HTMLInputElement>) => void; // наружу всегда ISO
 }
 

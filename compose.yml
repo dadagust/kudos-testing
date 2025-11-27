@@ -26,7 +26,6 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile
-    command: ["python", "manage.py", "runserver", "0.0.0.0:${BACKEND_PORT:-8000}"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -35,51 +34,27 @@ services:
     env_file:
       - ./backend/config/.env.local
     environment:
-        BACKEND_PORT: "${BACKEND_PORT:-8000}"
+      BACKEND_PORT: "${BACKEND_PORT:-8000}"
     ports:
-      - "${BACKEND_PORT:-8000}:${BACKEND_PORT:-8000}"
-    volumes:
-      - ./backend:/app
+      - "${BACKEND_PORT:-8000}:8000"
 
   frontend:
     build:
       context: .
       dockerfile: frontend/Dockerfile
-    command:
-      - sh
-      - -c
-      - pnpm install --frozen-lockfile && pnpm exec next dev -p ${FRONTEND_PORT:-4000} --hostname 0.0.0.0
-    depends_on:
-      backend:
-        condition: service_started
     env_file:
       - ./frontend/.env.local
     ports:
-      - "${FRONTEND_PORT:-4000}:${FRONTEND_PORT:-4000}"
-    volumes:
-      - ./frontend:/app/frontend
-      - frontend_node_modules:/app/frontend/node_modules
+      - "${FRONTEND_PORT:-4000}:4000"
 
   staff:
     build:
       context: .
       dockerfile: staff/Dockerfile
-    command:
-      - sh
-      - -c
-      - pnpm install --frozen-lockfile && pnpm exec next dev -p ${STAFF_PORT:-3000} --hostname 0.0.0.0
-    depends_on:
-      backend:
-        condition: service_started
     env_file:
       - ./staff/.env.local
     ports:
-      - "${STAFF_PORT:-3000}:${STAFF_PORT:-3000}"
-    volumes:
-      - ./staff:/app/staff
-      - staff_node_modules:/app/staff/node_modules
+      - "${STAFF_PORT:-3000}:3000"
 
 volumes:
-  frontend_node_modules:
-  staff_node_modules:
   postgres_data:
