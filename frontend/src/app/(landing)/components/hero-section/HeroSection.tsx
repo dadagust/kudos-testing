@@ -63,7 +63,7 @@ const FrontendHeader: FC = () => (
           </button>
           <button type="button" className={styles.iconButton} aria-label="Корзина">
             <Icon name="shopping-logo" size={20}/>
-            <span className={styles.badge}>2</span>
+            <span className={styles.counter}>2</span>
           </button>
           <button type="button" className={styles.iconButton} aria-label="Личный кабинет">
             <Icon name="user-icon" size={20}/>
