@@ -1,8 +1,9 @@
 import Image from 'next/image';
-import type { FC } from 'react';
+import type {FC} from 'react';
 
-import { Button } from '../../../../shared/ui/button/Button';
-import { Icon } from '../../../../shared/ui/icon/Icon';
+import {Button} from '../../../../shared/ui/button/Button';
+import {Icon} from '../../../../shared/ui/icon/Icon';
+import Logo from '../../../../../../static/logo/kudos-logo.svg'
 
 import styles from './hero-section.module.sass';
 
@@ -14,12 +15,14 @@ const TopBar: FC = () => (
         <span>МО, Люберцы, квартал 30131, 1020</span>
       </div>
       <div className={styles.contactLinks}>
+        <a href="mailto:info@kudos.ru">
+          <div className={styles.contactItem}>
+            <Icon name="mail" size={18}/>
+            <span>info@kudos.ru</span>
+          </div>
+        </a>
         <div className={styles.contactItem}>
-          <Icon name="mail" size={18} />
-          <span>info@kudos.ru</span>
-        </div>
-        <div className={styles.contactItem}>
-          <Icon name="phone" size={18} />
+          <Icon name="phone" size={18}/>
           <span>+7 (495) 991-05-79</span>
         </div>
       </div>
@@ -32,18 +35,17 @@ const FrontendHeader: FC = () => (
     <div className={`${styles.container} ${styles.headerContent}`}>
       <div className={styles.headerSide}>
         <button type="button" className={styles.catalogButton}>
-          <Icon name="dashboard" size={18} />
+          <Icon name="catalogue" size={18} />
           <span>Каталог</span>
         </button>
         <label className={styles.searchField}>
-          <Icon name="search" size={18} />
+          <Icon name="search-icon" size={18} />
           <input type="text" placeholder="Хочу взять в аренду..." />
         </label>
       </div>
 
       <div className={styles.logoBlock}>
-        <div className={styles.logoText}>KUDOS</div>
-        <div className={styles.logoSub}>АРЕНДА МЕБЕЛИ И ДЕКОРА</div>
+        {/*Logo*/}
       </div>
 
       <div className={styles.headerSide}>
@@ -78,7 +80,7 @@ export const HeroSection: FC = () => (
     <div className={styles.hero}>
       <div className={styles.heroImage}>
         <Image
-          src="/images/kudos-hero-desktop.png"
+          src="/images/kudos-hero-desktop.jpg"
           alt="Сервированный стол"
           fill
           priority
