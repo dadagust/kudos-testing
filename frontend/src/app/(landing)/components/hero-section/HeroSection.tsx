@@ -81,11 +81,11 @@ const TopBar: FC<TopBarProps> = ({isMobile, onMenuToggle, isMenuOpen}) => {
         <div className={styles.iconRow}>
           <button type="button" className={styles.iconButton} aria-label="Избранное">
             <Icon name="heart" size={20}/>
-            <span className={styles.counter}>0</span>
+            <span className={styles.countText}>0</span>
           </button>
           <button type="button" className={styles.iconButton} aria-label="Корзина">
             <Icon name="shopping-logo" size={20}/>
-            <span className={styles.badge}>2</span>
+            <span className={styles.countText}>2</span>
           </button>
           <button type="button" className={styles.iconButton} aria-label="Личный кабинет">
             <Icon name="user-icon" size={20}/>
@@ -135,11 +135,11 @@ const FrontendHeader: FC<FrontendHeaderProps> = ({isMobile}) => (
             <div className={styles.iconRow}>
               <button type="button" className={styles.iconButton} aria-label="Избранное">
                 <Icon name="heart" size={20}/>
-                <span className={styles.counter}>0</span>
+                <span className={styles.countText}>0</span>
               </button>
               <button type="button" className={styles.iconButton} aria-label="Корзина">
                 <Icon name="shopping-logo" size={20}/>
-                <span className={styles.badge}>2</span>
+                <span className={styles.countText}>2</span>
               </button>
               <button type="button" className={styles.iconButton} aria-label="Личный кабинет">
                 <Icon name="user-icon" size={20}/>
@@ -205,6 +205,14 @@ export const HeroSection: FC = () => {
           />
           <aside className={`${styles.mobileMenu}${isMenuOpen ? ` ${styles.mobileMenuOpen}` : ''}`}>
             <div className={styles.menuContent}>
+              <button
+                type="button"
+                className={styles.menuCloseButton}
+                onClick={closeMenu}
+                aria-label="Закрыть меню"
+              >
+                <Icon name="close" size={20}/>
+              </button>
               <label className={styles.menuSearchField}>
                 <Icon name="search-icon" size={20}/>
                 <input type="text" placeholder="Хочу взять в аренду..." />
