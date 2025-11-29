@@ -199,11 +199,22 @@ $topbar-bg: #f5f4f4
 
 .heroImage
   position: absolute
-  inset: 0
+  top: 0
+  bottom: 0
+  left: 50%
+  width: 100%
+  max-width: 1400px
+  height: 100%
+  transform: translateX(-50%)
+  overflow: hidden
+  border-radius: 0
 
 .image
   object-fit: cover
   z-index: 0
+
+.heroImage .image
+  border-radius: inherit
 
 .heroOverlay
   position: absolute
@@ -211,6 +222,9 @@ $topbar-bg: #f5f4f4
   background: linear-gradient(90deg, rgba(0, 0, 0, 0.18) 0%, rgba(0, 0, 0, 0.08) 38%, rgba(0, 0, 0, 0) 64%)
   pointer-events: none
   z-index: 1
+
+.heroImage .heroOverlay
+  border-radius: inherit
 
 .heroContent
   position: relative
@@ -252,6 +266,10 @@ $topbar-bg: #f5f4f4
 
   .heroInner
     padding: 0 28px 80px
+
+@media (min-width: 1400px)
+  .heroImage
+    border-radius: 28px
 
 @media (max-width: 900px)
   .container
