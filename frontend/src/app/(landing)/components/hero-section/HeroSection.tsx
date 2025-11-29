@@ -119,66 +119,51 @@ const FrontendHeader: FC<FrontendHeaderProps> = ({isMobile}) => {
   };
 
   const searchFieldClassName = `${styles.searchField}${isSearchActive ? ` ${styles.searchFieldActive}` : ''}${isMobile ? ` ${styles.searchFieldMobile}` : ` ${styles.searchFieldDesktop}`}`;
+  const searchRowClassName = `${styles.searchRow}${isSearchActive ? ` ${styles.searchRowActive}` : ''}${isMobile ? ` ${styles.searchRowMobile}` : ''}`;
+  const catalogButtonClassName = `${styles.catalogButton}${isSearchActive ? ` ${styles.catalogButtonCollapsed}` : ''}`;
+
+  const renderSearchRow = () => (
+    <div className={searchRowClassName}>
+      <button
+        type="button"
+        className={catalogButtonClassName}
+        aria-hidden={isSearchActive}
+        tabIndex={isSearchActive ? -1 : 0}
+      >
+        <Icon name="catalogue" size={20}/>
+        <span>Каталог</span>
+      </button>
+      <label className={searchFieldClassName}>
+        <Icon name="search-icon" size={20}/>
+        <input
+          type="text"
+          placeholder="Хочу взять в аренду..."
+          value={searchQuery}
+          onChange={handleSearchChange}
+        />
+        {isSearchActive && (
+          <div className={styles.searchActions}>
+            <button type="button" className={styles.searchActionButton} onClick={handleClear} aria-label="Очистить поиск">
+              <Icon name="close" size={16}/>
+            </button>
+            <button type="button" className={styles.searchActionButton} aria-label="Перейти в каталог">
+              <Icon name="arrow-right" size={16}/>
+            </button>
+          </div>
+        )}
+      </label>
+    </div>
+  );
 
   return (
     <header className={styles.header}>
       <div className={`${styles.container} ${styles.headerContent}${isMobile ? ` ${styles.headerContentMobile}` : ''}`}>
         {isMobile ? (
-          <>
-            {!isSearchActive && (
-              <button type="button" className={styles.catalogButton}>
-                <Icon name="catalogue" size={20}/>
-                <span>Каталог</span>
-              </button>
-            )}
-            <label className={searchFieldClassName}>
-              <Icon name="search-icon" size={20}/>
-              <input
-                type="text"
-                placeholder="Хочу взять в аренду..."
-                value={searchQuery}
-                onChange={handleSearchChange}
-              />
-              {isSearchActive && (
-                <div className={styles.searchActions}>
-                  <button type="button" className={styles.searchActionButton} onClick={handleClear} aria-label="Очистить поиск">
-                    <Icon name="close" size={16}/>
-                  </button>
-                  <button type="button" className={styles.searchActionButton} aria-label="Перейти в каталог">
-                    <Icon name="arrow-right" size={16}/>
-                  </button>
-                </div>
-              )}
-            </label>
-          </>
+          renderSearchRow()
         ) : (
           <>
             <div className={`${styles.headerSide} ${styles.headerLeft}`}>
-              {!isSearchActive && (
-                <button type="button" className={styles.catalogButton}>
-                  <Icon name="catalogue" size={20}/>
-                  <span>Каталог</span>
-                </button>
-              )}
-              <label className={searchFieldClassName}>
-                <Icon name="search-icon" size={20}/>
-                <input
-                  type="text"
-                  placeholder="Хочу взять в аренду..."
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                />
-                {isSearchActive && (
-                  <div className={styles.searchActions}>
-                    <button type="button" className={styles.searchActionButton} onClick={handleClear} aria-label="Очистить поиск">
-                      <Icon name="close" size={16}/>
-                    </button>
-                    <button type="button" className={styles.searchActionButton} aria-label="Перейти в каталог">
-                      <Icon name="arrow-right" size={16}/>
-                    </button>
-                  </div>
-                )}
-              </label>
+              {renderSearchRow()}
             </div>
 
             <div className={styles.logoBlock}>
