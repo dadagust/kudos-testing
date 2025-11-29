@@ -166,4 +166,17 @@
       <path d="M17.5 17.5L13.875 13.875" stroke="#979797" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
   </symbol>
+  <symbol id="menu-icon" viewBox="0 0 32 32">
+    <svg width="32" height="32" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M2.5 10H17.5" stroke="#4A4B4D" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M2.5 5H17.5" stroke="#4A4B4D" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M2.5 15H17.5" stroke="#4A4B4D" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </symbol>
+  <symbol id="menu-close" viewBox="0 0 32 32">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M18 6L6 18" stroke="#4A4B4D" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M6 6L18 18" stroke="#4A4B4D" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </symbol>
 </svg>
