@@ -36,6 +36,14 @@ $topbar-bg: #f5f4f4
   align-items: center
   gap: 18px
 
+.topBarContentMobile
+  display: flex
+  align-items: center
+  justify-content: space-between
+  gap: 18px
+  min-height: 72px
+  padding: 12px 0
+
 .topBarLeft
   display: inline-flex
   align-items: center
@@ -82,7 +90,23 @@ $topbar-bg: #f5f4f4
   background-color: #fff
 
 .headerContent
+  display: grid
+  grid-template-columns: 1fr auto 1fr
+  align-items: center
+  column-gap: 40px
+  min-height: 96px
+  padding: 24px 40px
+
+.headerContentMobile
   display: flex
+  flex-direction: column
+  align-items: stretch
+  gap: 14px
+  padding: 16px 0 18px
+  min-height: auto
+
+.headerSide
+  display: inline-flex
   align-items: center
   gap: 20px
   width: 100%
@@ -129,30 +153,11 @@ $topbar-bg: #f5f4f4
 
 .searchField input::placeholder
   color: $muted-color
-  font-weight: 400
 
 .logoBlock
-  text-align: center
-  justify-self: center
   display: inline-flex
-  align-items: center
   justify-content: center
-
-.headerSpacer
-  width: 140px
-  flex-shrink: 0
-
-.logoText
-  font-size: 34px
-  letter-spacing: 0.24em
-  font-weight: 400
-  line-height: 1.1
-
-.logoSub
-  margin-top: 4px
-  font-size: 10px
-  letter-spacing: 0.3em
-  line-height: 1.2
+  align-items: center
 
 .iconRow
   display: inline-flex
@@ -160,41 +165,61 @@ $topbar-bg: #f5f4f4
   gap: 18px
 
 .iconButton
-  position: relative
   display: inline-flex
   align-items: center
   justify-content: center
-  gap: 6px
-  padding: 6px
+  position: relative
   border: none
   background: transparent
+  padding: 6px
   cursor: pointer
   color: $primary-color
 
-.iconButton:focus-visible
-  outline: none
-  box-shadow: 0 0 0 2px rgba(74, 75, 77, 0.2)
-  border-radius: 50%
-
 .counter
-  margin-left: 6px
-  font-size: 12px
+  position: absolute
+  top: 0
+  right: -6px
+  min-width: 14px
+  height: 14px
+  border-radius: 50%
+  background: #ededed
+  display: grid
+  place-items: center
+  font-size: 10px
   line-height: 1
 
 .badge
   position: absolute
-  top: -6px
-  right: -10px
-  width: 18px
+  top: -4px
+  right: -8px
+  min-width: 18px
   height: 18px
   border-radius: 50%
-  background-color: $primary-color
-  color: #fff
+  background: #f7df94
+  display: grid
+  place-items: center
+  font-size: 10px
+  line-height: 1
+
+.menuButton
   display: inline-flex
   align-items: center
-  justify-content: center
-  font-size: 12px
-  line-height: 1
+  gap: 8px
+  border: none
+  background: transparent
+  color: $primary-color
+  padding: 10px
+  border-radius: 8px
+  cursor: pointer
+  transition: background-color 0.2s ease, color 0.2s ease
+
+.menuButtonActive, .menuButton:hover
+  background-color: #e8e7e7
+
+.menuButton:focus-visible
+  outline: none
+  box-shadow: 0 0 0 2px rgba(74, 75, 77, 0.2)
+  background-color: #e8e7e7
 
 .menuButton
   display: inline-flex
@@ -384,22 +409,6 @@ $topbar-bg: #f5f4f4
   .heroImage
     border-radius: 28px
 
-@media (max-width: 1100px)
-  .container
-    padding: 0 22px
-
-  .topNav
-    gap: 18px
-
-  .contactItem
-    font-size: 13px
-
-  .catalogButton
-    padding: 10px 16px
-
-  .searchField
-    min-width: 200px
-
 @media (max-width: 1000px)
   .container
     padding: 0 20px
@@ -407,12 +416,8 @@ $topbar-bg: #f5f4f4
   .topBar
     font-size: 13px
 
-  .topBarPrimary
-    gap: 14px
-    min-height: 64px
-
-  .branding
-    gap: 12px
+  .topBarContent
+    display: none
 
   .logoBlock
     justify-content: flex-start
@@ -423,9 +428,6 @@ $topbar-bg: #f5f4f4
   .iconButton
     padding: 4px
 
-  .topBarSecondary
-    display: none
-
   .headerContent
     flex-direction: column
     align-items: stretch
@@ -433,7 +435,16 @@ $topbar-bg: #f5f4f4
     padding: 16px 0 18px
     min-height: auto
 
-  .catalogButton
+  .headerContentMobile
+    grid-template-columns: none
+    padding: 16px 0 18px
+
+  .logoBlock
+    grid-area: logo
+    justify-self: center
+
+  .headerLeft
+    grid-area: search
     width: 100%
     justify-content: center
     padding: 10px 14px
@@ -468,3 +479,26 @@ $topbar-bg: #f5f4f4
 
   .heroButton
     align-self: center
+
+  .topBarContentMobile
+    display: flex
+
+  .topBarLeft,
+  .topBarRight
+    display: none
+
+@media (max-width: 900px)
+  .container
+    padding: 0 22px
+
+  .topNav
+    gap: 18px
+
+  .contactItem
+    font-size: 13px
+
+  .catalogButton
+    padding: 10px 16px
+
+  .searchField
+    min-width: 200px
