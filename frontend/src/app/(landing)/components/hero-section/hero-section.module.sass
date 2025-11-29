@@ -35,6 +35,12 @@ $topbar-bg: #f5f4f4
   min-height: 72px
   padding: 12px 0
 
+.branding
+  display: inline-flex
+  align-items: center
+  gap: 12px
+
+
 .topBarLeft
   display: inline-flex
   align-items: center
@@ -312,7 +318,7 @@ $topbar-bg: #f5f4f4
   max-width: 1400px
   margin: 0 auto
   padding: 0 40px 92px
-  height: 100%
+  height: 720px
   display: flex
   align-items: flex-end
   justify-content: flex-start
@@ -351,9 +357,9 @@ $topbar-bg: #f5f4f4
   position: fixed
   top: 0
   left: 0
+  right: 0
   bottom: 0
-  width: 360px
-  max-width: 90vw
+  width: 100%
   background: #fff
   transform: translateX(-100%)
   transition: transform 0.3s ease
@@ -419,6 +425,7 @@ $topbar-bg: #f5f4f4
   flex-direction: column
   gap: 18px
   margin-top: auto
+  background-color: $topbar-bg
 
 .menuContactItem
   display: flex
@@ -476,7 +483,7 @@ $topbar-bg: #f5f4f4
 
   .headerContentMobile
     grid-template-columns: none
-    padding: 16px 0 18px
+    padding: 22px
 
   .logoBlock
     grid-area: logo
@@ -504,8 +511,8 @@ $topbar-bg: #f5f4f4
     justify-content: center
 
   .heroTextBlock
-    align-items: center
     text-align: center
+
 
   .heroTitle
     font-size: 24px
@@ -525,7 +532,7 @@ $topbar-bg: #f5f4f4
 
 @media (max-width: 900px)
   .container
-    padding: 0 22px
+    padding: 10px
 
   .topNav
     gap: 18px
@@ -533,3 +540,5 @@ $topbar-bg: #f5f4f4
   .contactItem
     font-size: 13px
 
+  .topBar
+    background-color: #fff

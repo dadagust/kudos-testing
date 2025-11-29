@@ -3,7 +3,7 @@ import {ChangeEvent, FC, useEffect, useState} from 'react';
 
 import {Button} from '../../../../shared/ui/button/Button';
 import {Icon} from '../../../../shared/ui/icon/Icon';
-import Logo from '../../../../../../static/logo/kudos-logo.svg';
+import Logo from '../../../../../../static/logo/kudos-logo.png';
 
 import styles from './hero-section.module.sass';
 
@@ -74,7 +74,13 @@ const TopBar: FC<TopBarProps> = ({isMobile, onMenuToggle, isMenuOpen}) => {
             <Icon name="menu" size={20}/>
           </button>
           <div className={styles.logoBlock}>
-            <Image src={Logo} alt="KUDOS" width={135} height={42} priority />
+            <Image
+              src={Logo}
+              alt="KUDOS"
+              width={typeof window !== 'undefined' && window.innerWidth < 1000 ? 110 : 135}
+              height={typeof window !== 'undefined' && window.innerWidth < 1000 ? 34 : 42}
+              priority
+            />
           </div>
         </div>
 
