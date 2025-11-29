@@ -6,6 +6,7 @@ $topbar-bg: #f5f4f4
   background-color: #fff
   color: $primary-color
   font-family: inherit
+  min-height: 100vh
 
 .container
   max-width: 1400px
@@ -14,24 +15,51 @@ $topbar-bg: #f5f4f4
 
 .topBar
   background-color: $topbar-bg
+  font-size: 14px
+  line-height: 1.4
 
 .topBarContent
   display: flex
   align-items: center
   justify-content: space-between
-  height: 44px
-  font-size: 14px
-  line-height: 1.4
+  gap: 24px
+  min-height: 44px
+  padding: 8px 0
+
+.topBarLeft
+  display: inline-flex
+  align-items: center
+  gap: 20px
+  flex-wrap: wrap
+
+.topBarRight
+  display: inline-flex
+  align-items: center
+  justify-content: flex-end
+  gap: 24px
+  flex: 1
+  min-width: 0
 
 .contactItem
   display: inline-flex
   align-items: center
   gap: 8px
+  color: $primary-color
+  text-decoration: none
 
-.contactLinks
+.contactItem span
+  white-space: nowrap
+
+.topNav
   display: inline-flex
   align-items: center
-  gap: 28px
+  gap: 24px
+  flex-wrap: wrap
+  justify-content: flex-end
+
+.topNav a
+  color: $primary-color
+  text-decoration: none
 
 .header
   background-color: #fff
@@ -52,6 +80,13 @@ $topbar-bg: #f5f4f4
 .headerSide:last-of-type
   justify-self: end
   gap: 24px
+
+.headerLeft
+  gap: 20px
+  flex-wrap: nowrap
+
+.headerRight
+  gap: 18px
 
 .catalogButton
   display: inline-flex
@@ -81,6 +116,7 @@ $topbar-bg: #f5f4f4
   padding-bottom: 8px
   border-bottom: 2px solid #d7d7d7
   min-width: 240px
+  flex: 1
 
 .searchField input
   border: none
@@ -97,6 +133,9 @@ $topbar-bg: #f5f4f4
 .logoBlock
   text-align: center
   justify-self: center
+  display: inline-flex
+  align-items: center
+  justify-content: center
 
 .logoText
   font-size: 34px
@@ -109,17 +148,6 @@ $topbar-bg: #f5f4f4
   font-size: 10px
   letter-spacing: 0.3em
   line-height: 1.2
-
-.navLinks
-  display: inline-flex
-  align-items: center
-  gap: 28px
-  font-size: 14px
-  justify-content: flex-end
-
-.navLinks a
-  color: $primary-color
-  text-decoration: none
 
 .iconRow
   display: inline-flex
@@ -211,3 +239,108 @@ $topbar-bg: #f5f4f4
 
 .heroButton
   align-self: flex-start
+
+@media (max-width: 1200px)
+  .container
+    padding: 0 28px
+
+  .headerContent
+    column-gap: 28px
+
+  .hero
+    min-height: 640px
+
+  .heroInner
+    padding: 0 28px 80px
+
+@media (max-width: 900px)
+  .container
+    padding: 0 22px
+
+  .topNav
+    gap: 18px
+
+  .contactItem
+    font-size: 13px
+
+  .catalogButton
+    padding: 10px 16px
+
+  .searchField
+    min-width: 200px
+
+@media (max-width: 768px)
+  .container
+    padding: 0 20px
+
+  .topBarContent
+    flex-direction: column
+    align-items: flex-start
+    gap: 10px
+    min-height: auto
+    padding: 12px 0
+
+  .topBarLeft
+    width: 100%
+    gap: 12px
+
+  .topBarRight
+    width: 100%
+    flex-direction: column
+    align-items: flex-start
+    gap: 10px
+
+  .topNav
+    width: 100%
+    gap: 14px
+    justify-content: flex-start
+
+  .topBar
+    font-size: 12px
+
+  .topBarContent .contactItem span
+    white-space: normal
+
+  .headerContent
+    grid-template-columns: 1fr auto
+    grid-template-areas: 'logo icons' 'search search'
+    row-gap: 16px
+    column-gap: 16px
+    padding: 16px 0 18px
+
+  .logoBlock
+    grid-area: logo
+    justify-self: center
+
+  .headerLeft
+    grid-area: search
+    width: 100%
+    gap: 12px
+
+  .headerRight
+    grid-area: icons
+    justify-self: end
+
+  .searchField
+    min-width: 0
+    width: 100%
+
+  .searchField input
+    font-size: 12px
+
+  .catalogButton
+    padding: 10px 14px
+
+  .hero
+    min-height: 520px
+
+  .heroInner
+    padding: 0 20px 48px
+
+  .heroTitle
+    font-size: 22px
+    line-height: 1.3
+    letter-spacing: 0.1em
+
+  .heroButton
+    min-width: 140px
