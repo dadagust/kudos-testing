@@ -16,7 +16,7 @@ export const productGroupsApi = {
     const { data } = await apiV1Client.get<ProductGroupListResponse | ProductGroup[]>(
       '/products/groups'
     );
-    const groups = Array.isArray(data) ? data : data?.data ?? [];
+    const groups = Array.isArray(data) ? data : (data?.data ?? []);
     return groups.map(normalizeGroup);
   },
   details: async (groupId: string): Promise<ProductGroup> => {

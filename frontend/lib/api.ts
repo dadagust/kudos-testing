@@ -1,5 +1,6 @@
 const DEFAULT_CORE_PATH = '/core';
 const DEFAULT_API_V1_PATH = '/api/v1';
+export type OrderStatus = 'new' | 'reserved' | 'rented' | 'in_work' | 'archived' | 'declined';
 
 const normalizeBaseUrl = (value: string) => value.replace(/\/$/, '');
 
@@ -170,7 +171,9 @@ export interface YandexSuggestItem {
   uri?: string;
 }
 
+
 export interface CreateOrderPayload {
+  status: OrderStatus;
   installation_date: string;
   mount_datetime_from: string | null;
   mount_datetime_to: string | null;

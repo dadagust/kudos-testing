@@ -1142,15 +1142,17 @@ export default function ProductsPage() {
       queryClient.invalidateQueries({ queryKey: ['product-groups'], refetchType: 'active' });
     },
   });
-  const updateGroupMutation = useMutation<ProductGroup, Error, { id: string; payload: ProductGroupPayload }>(
-    {
-      mutationFn: ({ id, payload }) => productGroupsApi.update(id, payload),
-      onSuccess: (_, variables) => {
-        queryClient.invalidateQueries({ queryKey: ['product-groups'], refetchType: 'active' });
-        queryClient.invalidateQueries({ queryKey: ['product-groups', 'detail', variables.id] });
-      },
-    }
-  );
+  const updateGroupMutation = useMutation<
+    ProductGroup,
+    Error,
+    { id: string; payload: ProductGroupPayload }
+  >({
+    mutationFn: ({ id, payload }) => productGroupsApi.update(id, payload),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['product-groups'], refetchType: 'active' });
+      queryClient.invalidateQueries({ queryKey: ['product-groups', 'detail', variables.id] });
+    },
+  });
   const deleteGroupMutation = useMutation<void, Error, string>({
     mutationFn: (groupId: string) => productGroupsApi.remove(groupId),
     onSuccess: () => {
@@ -1859,12 +1861,7 @@ export default function ProductsPage() {
     });
     observer.observe(element);
     return () => observer.disconnect();
-  }, [
-    isGroupModalOpen,
-    hasMoreGroupProducts,
-    fetchNextGroupProducts,
-    isFetchingMoreGroupProducts,
-  ]);
+  }, [isGroupModalOpen, hasMoreGroupProducts, fetchNextGroupProducts, isFetchingMoreGroupProducts]);
 
   const closeProductModal = () => {
     setIsProductModalOpen(false);
@@ -2055,11 +2052,6 @@ export default function ProductsPage() {
       ...prev,
       products: prev.products.filter((item) => item.id !== productId),
     }));
-  };
-
-  const handleClearGroupProducts = () => {
-    setGroupFormError(null);
-    setGroupForm((prev) => ({ ...prev, products: [] }));
   };
 
   const openDeleteGroupModal = (group: ProductGroup) => {
@@ -2335,7 +2327,9 @@ export default function ProductsPage() {
           <>
             {pageNotification ? (
               <Alert tone="success" title="Товар создан">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                <div
+                  style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}
+                >
                   <span>{pageNotification}</span>
                   <Button variant="ghost" type="button" onClick={() => setPageNotification(null)}>
                     Скрыть
@@ -2409,7 +2403,9 @@ export default function ProductsPage() {
                 <Select
                   label="Сортировка"
                   value={ordering ?? '-created_at'}
-                  onChange={(event) => setOrdering(event.target.value as ProductListQuery['ordering'])}
+                  onChange={(event) =>
+                    setOrdering(event.target.value as ProductListQuery['ordering'])
+                  }
                 >
                   {orderingOptions.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -2485,7 +2481,9 @@ export default function ProductsPage() {
           <>
             {groupNotification ? (
               <Alert tone="success" title="Группа сохранена">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                <div
+                  style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}
+                >
                   <span>{groupNotification}</span>
                   <Button variant="ghost" type="button" onClick={() => setGroupNotification(null)}>
                     Скрыть
@@ -2504,11 +2502,19 @@ export default function ProductsPage() {
                 gap: '16px',
               }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  gap: '12px',
+                  flexWrap: 'wrap',
+                }}
+              >
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   <h2 style={{ margin: 0 }}>Группы товаров</h2>
                   <p style={{ margin: 0, color: 'var(--color-text-muted)' }}>
-                    Создавайте подборки похожих или связанных товаров и управляйте ими в одном месте.
+                    Создавайте подборки похожих или связанных товаров и управляйте ими в одном
+                    месте.
                   </p>
                 </div>
                 {canManageProducts ? (
@@ -2569,7 +2575,6 @@ export default function ProductsPage() {
                           </Button>
                           <Button
                             variant="ghost"
-                            tone="danger"
                             onClick={() => openDeleteGroupModal(group)}
                             disabled={isDeletingGroup && groupToDelete?.id === group.id}
                           >
@@ -2612,7 +2617,9 @@ export default function ProductsPage() {
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                             <span style={{ fontWeight: 600 }}>{product.name}</span>
-                            <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                            <span
+                              style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}
+                            >
                               {formatPrice(product.price_rub)}
                             </span>
                           </div>
@@ -3747,7 +3754,9 @@ export default function ProductsPage() {
 
       <Modal
         open={isGroupModalOpen}
-        title={groupModalMode === 'create' ? 'Новая группа товаров' : 'Редактирование группы товаров'}
+        title={
+          groupModalMode === 'create' ? 'Новая группа товаров' : 'Редактирование группы товаров'
+        }
         onClose={closeGroupModal}
       >
         <form
@@ -3766,11 +3775,7 @@ export default function ProductsPage() {
               {groupFormErrorMessage}
             </Alert>
           ) : null}
-          {groupFormError ? (
-            <Alert tone="warning" title="Проверьте данные группы">
-              {groupFormError}
-            </Alert>
-          ) : null}
+          {groupFormError ? <Alert title="Проверьте данные группы">{groupFormError}</Alert> : null}
 
           {groupModalMode === 'edit' && isEditingGroupLoading ? (
             <Spinner label="Загружаем группу" />
@@ -3836,9 +3841,18 @@ export default function ProductsPage() {
                               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             />
                           </div>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
+                          <div
+                            style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '4px',
+                              flex: 1,
+                            }}
+                          >
                             <span style={{ fontWeight: 600 }}>{product.name}</span>
-                            <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                            <span
+                              style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}
+                            >
                               {formatPrice(product.price_rub)}
                             </span>
                           </div>
@@ -3908,9 +3922,18 @@ export default function ProductsPage() {
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                               />
                             </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', textAlign: 'left' }}>
+                            <div
+                              style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '2px',
+                                textAlign: 'left',
+                              }}
+                            >
                               <span style={{ fontWeight: 600 }}>{product.name}</span>
-                              <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                              <span
+                                style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}
+                              >
                                 {formatPrice(product.price_rub)}
                               </span>
                             </div>
@@ -3935,10 +3958,19 @@ export default function ProductsPage() {
           )}
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-            <Button type="button" variant="ghost" onClick={closeGroupModal} disabled={isSubmittingGroup}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={closeGroupModal}
+              disabled={isSubmittingGroup}
+            >
               Отмена
             </Button>
-            <Button type="submit" variant="primary" disabled={isSubmittingGroup || !isGroupFormReady}>
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={isSubmittingGroup || !isGroupFormReady}
+            >
               {isSubmittingGroup
                 ? groupModalMode === 'create'
                   ? 'Создаём…'
@@ -4194,15 +4226,15 @@ export default function ProductsPage() {
             </Alert>
           ) : null}
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-            <Button type="button" variant="ghost" onClick={closeDeleteGroupModal} disabled={isDeletingGroup}>
-              Отмена
-            </Button>
             <Button
               type="button"
-              tone="danger"
-              onClick={handleConfirmDeleteGroup}
+              variant="ghost"
+              onClick={closeDeleteGroupModal}
               disabled={isDeletingGroup}
             >
+              Отмена
+            </Button>
+            <Button type="button" onClick={handleConfirmDeleteGroup} disabled={isDeletingGroup}>
               {isDeletingGroup ? 'Удаляем…' : 'Удалить'}
             </Button>
           </div>

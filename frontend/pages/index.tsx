@@ -336,7 +336,7 @@ export default function Home() {
 
       const response = await ordersApi.create(payload, tokens.access);
       setOrderSuccess(response.data);
-      setOrderForm((previous) => ({
+      setOrderForm(() => ({
         ...createInitialOrderForm(),
         productQuantities: ensureQuantities(latestProducts),
       }));
