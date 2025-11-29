@@ -1,30 +1,36 @@
 import Image from 'next/image';
-import type {FC} from 'react';
+import {FC, useEffect, useState} from 'react';
 
 import {Button} from '../../../../shared/ui/button/Button';
 import {Icon} from '../../../../shared/ui/icon/Icon';
-import Logo from '../../../../../../static/logo/kudos-logo.svg'
+import Logo from '../../../../../../static/logo/kudos-logo.svg';
 
 import styles from './hero-section.module.sass';
 
 const TopBar: FC = () => (
   <div className={styles.topBar}>
     <div className={`${styles.container} ${styles.topBarContent}`}>
-      <div className={styles.contactItem}>
-        <Icon name="map-pin" size={18} />
-        <span>МО, Люберцы, квартал 30131, 1020</span>
-      </div>
-      <div className={styles.contactLinks}>
-        <a href="mailto:info@kudos.ru">
-          <div className={styles.contactItem}>
-            <Icon name="mail" size={18}/>
-            <span>info@kudos.ru</span>
-          </div>
+      <div className={styles.topBarLeft}>
+        <a href="mailto:info@kudos.ru" className={styles.contactItem}>
+          <Icon name="mail" size={18} />
+          <span>info@kudos.ru</span>
         </a>
-        <div className={styles.contactItem}>
-          <Icon name="phone" size={18}/>
+        <a href="tel:+74959910579" className={styles.contactItem}>
+          <Icon name="phone" size={18} />
           <span>+7 (495) 991-05-79</span>
+        </a>
+      </div>
+
+      <div className={styles.topBarRight}>
+        <div className={styles.contactItem}>
+          <Icon name="map-pin" size={18} />
+          <span>МО, Люберцы, квартал 30131, 1020</span>
         </div>
+        <nav className={styles.topNav} aria-label="Ссылки верхнего меню">
+          <a href="#">Доставка и самовывоз</a>
+          <a href="#">Условия работы</a>
+          <a href="#">Вопросы и ответы</a>
+        </nav>
       </div>
     </div>
   </div>
@@ -33,7 +39,7 @@ const TopBar: FC = () => (
 const FrontendHeader: FC = () => (
   <header className={styles.header}>
     <div className={`${styles.container} ${styles.headerContent}`}>
-      <div className={styles.headerSide}>
+      <div className={`${styles.headerSide} ${styles.headerLeft}`}>
         <button type="button" className={styles.catalogButton}>
           <Icon name="catalogue" size={18} />
           <span>Каталог</span>
@@ -45,15 +51,10 @@ const FrontendHeader: FC = () => (
       </div>
 
       <div className={styles.logoBlock}>
-        {/*Logo*/}
+        <Image src={Logo} alt="KUDOS" width={135} height={42} priority />
       </div>
 
-      <div className={styles.headerSide}>
-        <nav className={styles.navLinks} aria-label="Главное меню">
-          <a href="#">Доставка и самовывоз</a>
-          <a href="#">Условия работы</a>
-          <a href="#">Вопросы и ответы</a>
-        </nav>
+      <div className={`${styles.headerSide} ${styles.headerRight}`}>
         <div className={styles.iconRow}>
           <button type="button" className={styles.iconButton} aria-label="Избранное">
             <Icon name="heart" size={18} />
@@ -72,40 +73,58 @@ const FrontendHeader: FC = () => (
   </header>
 );
 
-export const HeroSection: FC = () => (
-  <section className={styles.wrapper}>
-    <TopBar />
-    <FrontendHeader />
+export const HeroSection: FC = () => {
+  const [isMobile, setIsMobile] = useState(false);
 
-    <div className={styles.hero}>
-      <div className={styles.heroImage}>
-        <Image
-          src="/images/kudos-hero-desktop.jpg"
-          alt="Сервированный стол"
-          fill
-          priority
-          sizes="100vw"
-          className={styles.image}
-        />
-        <div className={styles.heroOverlay} />
-      </div>
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 768px)');
+    const handleChange = (event: MediaQueryListEvent) => {
+      setIsMobile(event.matches);
+    };
 
-      <div className={styles.heroContent}>
-        <div className={styles.heroInner}>
-          <div className={styles.heroTextBlock}>
-            <p className={styles.heroTitle}>
-              АРЕНДА
-              <br />
-              МЕБЕЛИ И ДЕКОРА
-            </p>
-            <Button variant="primary" size="lg" className={styles.heroButton}>
-              Подробнее
-            </Button>
+    setIsMobile(mediaQuery.matches);
+    mediaQuery.addEventListener('change', handleChange);
+
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+
+  const heroImageSrc = isMobile ? '/images/kudos-hero-mobile.jpg' : '/images/kudos-hero-desktop.jpg';
+
+  return (
+    <section className={styles.wrapper}>
+      <TopBar />
+      <FrontendHeader />
+
+      <div className={styles.hero}>
+        <div className={styles.heroImage}>
+          <Image
+            src={heroImageSrc}
+            alt="Сервированный стол"
+            fill
+            priority
+            sizes="100vw"
+            className={styles.image}
+          />
+          <div className={styles.heroOverlay} />
+        </div>
+
+        <div className={styles.heroContent}>
+          <div className={styles.heroInner}>
+            <div className={styles.heroTextBlock}>
+              <p className={styles.heroTitle}>
+                АРЕНДА
+                <br />
+                МЕБЕЛИ И ДЕКОРА
+              </p>
+              <Button variant="primary" size="lg" className={styles.heroButton}>
+                Подробнее
+              </Button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 export { FrontendHeader };
