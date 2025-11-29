@@ -171,7 +171,6 @@ export interface YandexSuggestItem {
   uri?: string;
 }
 
-
 export interface CreateOrderPayload {
   status: OrderStatus;
   installation_date: string;
@@ -281,7 +280,7 @@ export const productsApi = {
 export const yandexApi = {
   fetchAddressSuggestions: async (
     query: string,
-    { token, signal }: { token: string | null; signal?: AbortSignal },
+    { token, signal }: { token: string | null; signal?: AbortSignal }
   ): Promise<YandexSuggestItem[]> => {
     const trimmed = query.trim();
 
@@ -298,7 +297,7 @@ export const yandexApi = {
           method: 'GET',
           token,
           signal,
-        },
+        }
       );
     } catch (error) {
       if ((error as Error).name === 'AbortError') {
@@ -314,9 +313,7 @@ export const yandexApi = {
       throw error;
     }
 
-    const rawResults = Array.isArray(response?.results)
-      ? (response.results as unknown[])
-      : [];
+    const rawResults = Array.isArray(response?.results) ? (response.results as unknown[]) : [];
     const suggestions: YandexSuggestItem[] = [];
 
     for (const item of rawResults) {
@@ -327,11 +324,13 @@ export const yandexApi = {
       const record = item as Record<string, unknown>;
       const rawTitle = (record.title as string | { text?: string } | undefined) ?? '';
       const rawSubtitle = record.subtitle as string | { text?: string } | undefined;
-      const rawAddress = record.address as { formatted_address?: string; full_address?: string } | undefined;
+      const rawAddress = record.address as
+        | { formatted_address?: string; full_address?: string }
+        | undefined;
 
-      const title = typeof rawTitle === 'string' ? rawTitle : rawTitle.text ?? '';
+      const title = typeof rawTitle === 'string' ? rawTitle : (rawTitle.text ?? '');
       const subtitle =
-        typeof rawSubtitle === 'string' ? rawSubtitle : rawSubtitle?.text ?? undefined;
+        typeof rawSubtitle === 'string' ? rawSubtitle : (rawSubtitle?.text ?? undefined);
       const formatted = rawAddress?.formatted_address ?? rawAddress?.full_address ?? title;
       const value = formatted || title;
       const uri = typeof record.uri === 'string' ? record.uri : undefined;

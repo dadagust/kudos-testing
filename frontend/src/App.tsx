@@ -139,7 +139,7 @@ const App: FC = () => {
       Object.entries(productQuantities)
         .filter(([, qty]) => qty > 0)
         .map(([productId, quantity]) => ({ product_id: productId, quantity })),
-    [productQuantities],
+    [productQuantities]
   );
 
   const handleCreateOrder = async () => {
@@ -296,11 +296,19 @@ const App: FC = () => {
           </label>
           <label className="field">
             <span>Монтаж (с)</span>
-            <input type="time" value={mountFrom} onChange={(event) => setMountFrom(event.target.value)} />
+            <input
+              type="time"
+              value={mountFrom}
+              onChange={(event) => setMountFrom(event.target.value)}
+            />
           </label>
           <label className="field">
             <span>Монтаж (до)</span>
-            <input type="time" value={mountTo} onChange={(event) => setMountTo(event.target.value)} />
+            <input
+              type="time"
+              value={mountTo}
+              onChange={(event) => setMountTo(event.target.value)}
+            />
           </label>
           <label className="field">
             <span>Демонтаж (с)</span>
@@ -367,7 +375,9 @@ const App: FC = () => {
                         </li>
                       ))
                     : null}
-                  {!isLoadingSuggest && addressSuggestions.length === 0 && trimmedDelivery.length >= 3 ? (
+                  {!isLoadingSuggest &&
+                  addressSuggestions.length === 0 &&
+                  trimmedDelivery.length >= 3 ? (
                     <li className="suggest__placeholder">Ничего не найдено</li>
                   ) : null}
                 </ul>

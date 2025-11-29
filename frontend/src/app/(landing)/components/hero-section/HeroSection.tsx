@@ -11,21 +11,22 @@ const TopBar: FC = () => (
   <div className={styles.topBar}>
     <div className={`${styles.container} ${styles.topBarContent}`}>
       <div className={styles.topBarLeft}>
+        <div className={styles.contactItem}>
+          <Icon name="map-pin" size={20}/>
+          <span>МО, Люберцы, квартал 30131, 1020</span>
+        </div>
         <a href="mailto:info@kudos.ru" className={styles.contactItem}>
-          <Icon name="mail" size={18} />
+          <Icon name="mail" size={20}/>
           <span>info@kudos.ru</span>
         </a>
         <a href="tel:+74959910579" className={styles.contactItem}>
-          <Icon name="phone" size={18} />
+          <Icon name="phone" size={20}/>
           <span>+7 (495) 991-05-79</span>
         </a>
       </div>
 
       <div className={styles.topBarRight}>
-        <div className={styles.contactItem}>
-          <Icon name="map-pin" size={18} />
-          <span>МО, Люберцы, квартал 30131, 1020</span>
-        </div>
+
         <nav className={styles.topNav} aria-label="Ссылки верхнего меню">
           <a href="#">Доставка и самовывоз</a>
           <a href="#">Условия работы</a>
@@ -41,11 +42,11 @@ const FrontendHeader: FC = () => (
     <div className={`${styles.container} ${styles.headerContent}`}>
       <div className={`${styles.headerSide} ${styles.headerLeft}`}>
         <button type="button" className={styles.catalogButton}>
-          <Icon name="catalogue" size={18} />
+          <Icon name="catalogue" size={20}/>
           <span>Каталог</span>
         </button>
         <label className={styles.searchField}>
-          <Icon name="search-icon" size={18} />
+          <Icon name="search-icon" size={20}/>
           <input type="text" placeholder="Хочу взять в аренду..." />
         </label>
       </div>
@@ -57,15 +58,15 @@ const FrontendHeader: FC = () => (
       <div className={`${styles.headerSide} ${styles.headerRight}`}>
         <div className={styles.iconRow}>
           <button type="button" className={styles.iconButton} aria-label="Избранное">
-            <Icon name="heart" size={18} />
+            <Icon name="heart" size={20}/>
             <span className={styles.counter}>0</span>
           </button>
           <button type="button" className={styles.iconButton} aria-label="Корзина">
-            <Icon name="shopping-logo" size={18} />
+            <Icon name="shopping-logo" size={20}/>
             <span className={styles.badge}>2</span>
           </button>
           <button type="button" className={styles.iconButton} aria-label="Личный кабинет">
-            <Icon name="user-icon" size={18} />
+            <Icon name="user-icon" size={20}/>
           </button>
         </div>
       </div>
@@ -105,15 +106,14 @@ export const HeroSection: FC = () => {
             sizes="100vw"
             className={styles.image}
           />
-          <div className={styles.heroOverlay} />
+          <div className={styles.heroOverlay}/>
         </div>
-
         <div className={styles.heroContent}>
           <div className={styles.heroInner}>
             <div className={styles.heroTextBlock}>
               <p className={styles.heroTitle}>
                 АРЕНДА
-                <br />
+                <br/>
                 МЕБЕЛИ И ДЕКОРА
               </p>
               <Button variant="primary" size="lg" className={styles.heroButton}>
@@ -127,4 +127,4 @@ export const HeroSection: FC = () => {
   );
 };
 
-export { FrontendHeader };
+export {FrontendHeader};

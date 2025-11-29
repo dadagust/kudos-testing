@@ -9,7 +9,12 @@ type IconProps = {
 };
 
 export const Icon: FC<IconProps> = ({ name, size = 20, className }) => (
-  <svg className={`${styles.icon}${className ? ` ${className}` : ''}`} width={size} height={size} aria-hidden>
+  <svg
+    className={`${styles.icon}${className ? ` ${className}` : ''}`}
+    width={size}
+    height={size}
+    aria-hidden
+  >
     <use xlinkHref={`/sprite.svg#${name}`} />
   </svg>
 );
