@@ -7,55 +7,78 @@ import Logo from '../../../../../../static/logo/kudos-logo.svg';
 
 import styles from './hero-section.module.sass';
 
-const TopBar: FC = () => (
-  <div className={styles.topBar}>
-    <div className={`${styles.container} ${styles.topBarContent}`}>
-      <div className={styles.topBarLeft}>
-        <div className={styles.contactItem}>
-          <Icon name="map-pin" size={20}/>
-          <span>МО, Люберцы, квартал 30131, 1020</span>
+type NavLink = { href: string; label: string };
+type ContactInfo = { icon: string; label: string; href?: string };
+
+const navLinks: NavLink[] = [
+  { href: '#', label: 'Каталог' },
+  { href: '#', label: 'Условия работы' },
+  { href: '#', label: 'Вопросы и ответы' },
+  { href: '#', label: 'Доставка и самовывоз' },
+];
+
+const contacts: ContactInfo[] = [
+  { icon: 'map-pin', label: 'МО, Люберцы, квартал 30131, 1020' },
+  { href: 'mailto:info@kudos.ru', icon: 'mail', label: 'info@kudos.ru' },
+  { href: 'tel:+74959910579', icon: 'phone', label: '+7 (495) 991-05-79' },
+];
+
+type TopBarProps = {
+  isMobile: boolean;
+  onMenuToggle: () => void;
+  isMenuOpen: boolean;
+};
+
+const TopBar: FC<TopBarProps> = ({isMobile, onMenuToggle, isMenuOpen}) => {
+  if (!isMobile) {
+    return (
+      <div className={styles.topBar}>
+        <div className={`${styles.container} ${styles.topBarContent}`}>
+          <div className={styles.topBarLeft}>
+            <div className={styles.contactItem}>
+              <Icon name="map-pin" size={20}/>
+              <span>МО, Люберцы, квартал 30131, 1020</span>
+            </div>
+            <a href="mailto:info@kudos.ru" className={styles.contactItem}>
+              <Icon name="mail" size={20}/>
+              <span>info@kudos.ru</span>
+            </a>
+            <a href="tel:+74959910579" className={styles.contactItem}>
+              <Icon name="phone" size={20}/>
+              <span>+7 (495) 991-05-79</span>
+            </a>
+          </div>
+
+          <div className={styles.topBarRight}>
+            <nav className={styles.topNav} aria-label="Ссылки верхнего меню">
+              <a href="#">Доставка и самовывоз</a>
+              <a href="#">Условия работы</a>
+              <a href="#">Вопросы и ответы</a>
+            </nav>
+          </div>
         </div>
-        <a href="mailto:info@kudos.ru" className={styles.contactItem}>
-          <Icon name="mail" size={20}/>
-          <span>info@kudos.ru</span>
-        </a>
-        <a href="tel:+74959910579" className={styles.contactItem}>
-          <Icon name="phone" size={20}/>
-          <span>+7 (495) 991-05-79</span>
-        </a>
       </div>
+    );
+  }
 
-      <div className={styles.topBarRight}>
+  return (
+    <div className={styles.topBar}>
+      <div className={`${styles.container} ${styles.topBarContentMobile}`}>
+        <div className={styles.branding}>
+          <button
+            type="button"
+            className={`${styles.menuButton}${isMenuOpen ? ` ${styles.menuButtonActive}` : ''}`}
+            onClick={onMenuToggle}
+            aria-label="Открыть меню"
+          >
+            <Icon name="menu" size={20}/>
+            <span>Меню</span>
+          </button>
+          <div className={styles.logoBlock}>
+            <Image src={Logo} alt="KUDOS" width={135} height={42} priority />
+          </div>
+        </div>
 
-        <nav className={styles.topNav} aria-label="Ссылки верхнего меню">
-          <a href="#">Доставка и самовывоз</a>
-          <a href="#">Условия работы</a>
-          <a href="#">Вопросы и ответы</a>
-        </nav>
-      </div>
-    </div>
-  </div>
-);
-
-const FrontendHeader: FC = () => (
-  <header className={styles.header}>
-    <div className={`${styles.container} ${styles.headerContent}`}>
-      <div className={`${styles.headerSide} ${styles.headerLeft}`}>
-        <button type="button" className={styles.catalogButton}>
-          <Icon name="catalogue" size={20}/>
-          <span>Каталог</span>
-        </button>
-        <label className={styles.searchField}>
-          <Icon name="search-icon" size={20}/>
-          <input type="text" placeholder="Хочу взять в аренду..." />
-        </label>
-      </div>
-
-      <div className={styles.logoBlock}>
-        <Image src={Logo} alt="KUDOS" width={135} height={42} priority />
-      </div>
-
-      <div className={`${styles.headerSide} ${styles.headerRight}`}>
         <div className={styles.iconRow}>
           <button type="button" className={styles.iconButton} aria-label="Избранное">
             <Icon name="heart" size={20}/>
@@ -71,14 +94,71 @@ const FrontendHeader: FC = () => (
         </div>
       </div>
     </div>
+  );
+};
+
+type FrontendHeaderProps = {
+  isMobile: boolean;
+};
+
+const FrontendHeader: FC<FrontendHeaderProps> = ({isMobile}) => (
+  <header className={styles.header}>
+    <div className={`${styles.container} ${styles.headerContent}${isMobile ? ` ${styles.headerContentMobile}` : ''}`}>
+      {isMobile ? (
+        <>
+          <button type="button" className={styles.catalogButton}>
+            <Icon name="catalogue" size={20}/>
+            <span>Каталог</span>
+          </button>
+          <label className={styles.searchField}>
+            <Icon name="search-icon" size={20}/>
+            <input type="text" placeholder="Хочу взять в аренду..." />
+          </label>
+        </>
+      ) : (
+        <>
+          <div className={`${styles.headerSide} ${styles.headerLeft}`}>
+            <button type="button" className={styles.catalogButton}>
+              <Icon name="catalogue" size={20}/>
+              <span>Каталог</span>
+            </button>
+            <label className={styles.searchField}>
+              <Icon name="search-icon" size={20}/>
+              <input type="text" placeholder="Хочу взять в аренду..." />
+            </label>
+          </div>
+
+          <div className={styles.logoBlock}>
+            <Image src={Logo} alt="KUDOS" width={135} height={42} priority />
+          </div>
+
+          <div className={`${styles.headerSide} ${styles.headerRight}`}>
+            <div className={styles.iconRow}>
+              <button type="button" className={styles.iconButton} aria-label="Избранное">
+                <Icon name="heart" size={20}/>
+                <span className={styles.counter}>0</span>
+              </button>
+              <button type="button" className={styles.iconButton} aria-label="Корзина">
+                <Icon name="shopping-logo" size={20}/>
+                <span className={styles.badge}>2</span>
+              </button>
+              <button type="button" className={styles.iconButton} aria-label="Личный кабинет">
+                <Icon name="user-icon" size={20}/>
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
   </header>
 );
 
 export const HeroSection: FC = () => {
   const [isMobile, setIsMobile] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(max-width: 768px)');
+    const mediaQuery = window.matchMedia('(max-width: 1000px)');
     const handleChange = (event: MediaQueryListEvent) => {
       setIsMobile(event.matches);
     };
@@ -89,12 +169,75 @@ export const HeroSection: FC = () => {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
+  useEffect(() => {
+    if (!isMobile) {
+      setIsMenuOpen(false);
+    }
+  }, [isMobile]);
+
+  useEffect(() => {
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleEsc);
+
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, []);
+
   const heroImageSrc = isMobile ? '/images/kudos-hero-mobile.jpg' : '/images/kudos-hero-desktop.jpg';
+
+  const toggleMenu = () => setIsMenuOpen((prev) => !prev);
+  const closeMenu = () => setIsMenuOpen(false);
 
   return (
     <section className={styles.wrapper}>
-      <TopBar />
-      <FrontendHeader />
+      <TopBar isMobile={isMobile} onMenuToggle={toggleMenu} isMenuOpen={isMenuOpen} />
+      <FrontendHeader isMobile={isMobile} />
+
+      {isMobile && (
+        <>
+          <div
+            className={`${styles.menuOverlay}${isMenuOpen ? ` ${styles.menuOverlayVisible}` : ''}`}
+            onClick={closeMenu}
+            aria-hidden
+          />
+          <aside className={`${styles.mobileMenu}${isMenuOpen ? ` ${styles.mobileMenuOpen}` : ''}`}>
+            <div className={styles.menuContent}>
+              <label className={styles.menuSearchField}>
+                <Icon name="search-icon" size={20}/>
+                <input type="text" placeholder="Хочу взять в аренду..." />
+              </label>
+
+              <nav className={styles.menuNav} aria-label="Мобильное меню">
+                {navLinks.map((link) => (
+                  <a key={link.label} href={link.href}>
+                    {link.label}
+                  </a>
+                ))}
+              </nav>
+
+              <div className={styles.menuContacts}>
+                {contacts.map((contact) =>
+                  contact.href ? (
+                    <a key={contact.label} href={contact.href} className={styles.menuContactItem}>
+                      <Icon name={contact.icon} size={20}/>
+                      <span>{contact.label}</span>
+                    </a>
+                  ) : (
+                    <div key={contact.label} className={styles.menuContactItem}>
+                      <Icon name={contact.icon} size={20}/>
+                      <span>{contact.label}</span>
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
+          </aside>
+        </>
+      )}
 
       <div className={styles.hero}>
         <div className={styles.heroImage}>
@@ -112,9 +255,7 @@ export const HeroSection: FC = () => {
           <div className={styles.heroInner}>
             <div className={styles.heroTextBlock}>
               <p className={styles.heroTitle}>
-                АРЕНДА
-                <br/>
-                МЕБЕЛИ И ДЕКОРА
+                АРЕНДА МЕБЕЛИ И ДЕКОРА
               </p>
               <Button variant="primary" size="lg" className={styles.heroButton}>
                 Подробнее
