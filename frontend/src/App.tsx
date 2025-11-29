@@ -164,6 +164,7 @@ const App: FC = () => {
 
     try {
       const payload = {
+        status: 'new',
         installation_date: installationDate,
         dismantle_date: dismantleDate,
         mount_datetime_from: mountFrom || null,
