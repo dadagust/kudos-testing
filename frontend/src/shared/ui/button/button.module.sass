@@ -1,0 +1,39 @@
+$primary-color: #4a4b4d
+
+.button
+  display: inline-flex
+  align-items: center
+  justify-content: center
+  gap: 8px
+  border: 1px solid $primary-color
+  border-radius: 2px
+  background-color: #fff
+  color: $primary-color
+  font-weight: 500
+  letter-spacing: 0.02em
+  cursor: pointer
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease
+  text-decoration: none
+  white-space: nowrap
+
+.button:hover
+  background-color: $primary-color
+  color: #fff
+
+.button:focus-visible
+  outline: none
+  box-shadow: 0 0 0 2px rgba(74, 75, 77, 0.25)
+
+.button:disabled
+  opacity: 0.5
+  cursor: not-allowed
+
+.md
+  min-height: 36px
+  padding: 8px 18px
+  font-size: 13px
+
+.lg
+  min-height: 42px
+  padding: 10px 22px
+  font-size: 14px
