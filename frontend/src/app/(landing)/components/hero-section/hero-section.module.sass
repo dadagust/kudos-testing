@@ -101,6 +101,7 @@ $topbar-bg: #f5f4f4
 .headerLeft
   gap: 20px
   flex-wrap: nowrap
+  width: 100%
 
 .headerRight
   gap: 18px
@@ -130,21 +131,65 @@ $topbar-bg: #f5f4f4
   display: inline-flex
   align-items: center
   gap: 10px
+  position: relative
   padding-bottom: 8px
   border-bottom: 2px solid #d7d7d7
   min-width: 240px
   flex: 1
+  max-width: 520px
+  width: 100%
+  transition: border-color 0.2s ease, max-width 0.3s ease
+
+.searchFieldDesktop
+  max-width: 520px
+
+.searchFieldMobile
+  max-width: none
 
 .searchField input
+  flex: 1
   border: none
   outline: none
   background: transparent
   color: $primary-color
   font-size: 14px
   width: 100%
+  min-width: 0
 
 .searchField input::placeholder
   color: $muted-color
+
+.searchFieldActive
+  border-bottom-color: #000
+  max-width: 100%
+
+.searchActions
+  display: inline-flex
+  align-items: center
+  gap: 8px
+  margin-left: auto
+  opacity: 0
+  visibility: hidden
+  transition: opacity 0.2s ease
+
+.searchFieldActive .searchActions
+  opacity: 1
+  visibility: visible
+
+.searchActionButton
+  display: inline-flex
+  align-items: center
+  justify-content: center
+  border: none
+  background: transparent
+  padding: 4px
+  color: $primary-color
+  cursor: pointer
+  transition: color 0.2s ease, transform 0.2s ease
+
+.searchActionButton:hover
+  color: darken($primary-color, 8%)
+  transform: translateY(-1px)
 
 .logoBlock
   display: inline-flex
