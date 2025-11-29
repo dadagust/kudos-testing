@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import {FC, useEffect, useState} from 'react';
+import {ChangeEvent, FC, useEffect, useState} from 'react';
 
 import {Button} from '../../../../shared/ui/button/Button';
 import {Icon} from '../../../../shared/ui/icon/Icon';
@@ -100,57 +100,91 @@ type FrontendHeaderProps = {
   isMobile: boolean;
 };
 
-const FrontendHeader: FC<FrontendHeaderProps> = ({isMobile}) => (
-  <header className={styles.header}>
-    <div className={`${styles.container} ${styles.headerContent}${isMobile ? ` ${styles.headerContentMobile}` : ''}`}>
-      {isMobile ? (
-        <>
-          <button type="button" className={styles.catalogButton}>
-            <Icon name="catalogue" size={20}/>
-            <span>Каталог</span>
-          </button>
-          <label className={styles.searchField}>
-            <Icon name="search-icon" size={20}/>
-            <input type="text" placeholder="Хочу взять в аренду..." />
-          </label>
-        </>
-      ) : (
-        <>
-          <div className={`${styles.headerSide} ${styles.headerLeft}`}>
-            <button type="button" className={styles.catalogButton}>
-              <Icon name="catalogue" size={20}/>
-              <span>Каталог</span>
+const FrontendHeader: FC<FrontendHeaderProps> = ({isMobile}) => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const isSearchActive = Boolean(searchQuery.trim().length);
+
+  const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const handleClear = () => {
+    setSearchQuery('');
+  };
+
+  const searchFieldClassName = `${styles.searchField}${isSearchActive ? ` ${styles.searchFieldActive}` : ''}${isMobile ? ` ${styles.searchFieldMobile}` : ` ${styles.searchFieldDesktop}`}`;
+  const searchRowClassName = `${styles.searchRow}${isSearchActive ? ` ${styles.searchRowActive}` : ''}${isMobile ? ` ${styles.searchRowMobile}` : ''}`;
+  const catalogButtonClassName = `${styles.catalogButton}${isSearchActive ? ` ${styles.catalogButtonCollapsed}` : ''}`;
+
+  const renderSearchRow = () => (
+    <div className={searchRowClassName}>
+      <button
+        type="button"
+        className={catalogButtonClassName}
+        aria-hidden={isSearchActive}
+        tabIndex={isSearchActive ? -1 : 0}
+      >
+        <Icon name="catalogue" size={20}/>
+        <span>Каталог</span>
+      </button>
+      <label className={searchFieldClassName}>
+        <Icon name="search-icon" size={20}/>
+        <input
+          type="text"
+          placeholder="Хочу взять в аренду..."
+          value={searchQuery}
+          onChange={handleSearchChange}
+        />
+        {isSearchActive && (
+          <div className={styles.searchActions}>
+            <button type="button" className={styles.searchActionButton} onClick={handleClear} aria-label="Очистить поиск">
+              <Icon name="close" size={16}/>
             </button>
-            <label className={styles.searchField}>
-              <Icon name="search-icon" size={20}/>
-              <input type="text" placeholder="Хочу взять в аренду..." />
-            </label>
+            <button type="button" className={styles.searchActionButton} aria-label="Перейти в каталог">
+              <Icon name="arrow-right" size={16}/>
+            </button>
           </div>
-
-          <div className={styles.logoBlock}>
-            <Image src={Logo} alt="KUDOS" width={135} height={42} priority />
-          </div>
-
-          <div className={`${styles.headerSide} ${styles.headerRight}`}>
-            <div className={styles.iconRow}>
-              <button type="button" className={styles.iconButton} aria-label="Избранное">
-                <Icon name="heart" size={20}/>
-                <span className={styles.countText}>0</span>
-              </button>
-              <button type="button" className={styles.iconButton} aria-label="Корзина">
-                <Icon name="shopping-logo" size={20}/>
-                <span className={styles.countText}>2</span>
-              </button>
-              <button type="button" className={styles.iconButton} aria-label="Личный кабинет">
-                <Icon name="user-icon" size={20}/>
-              </button>
-            </div>
-          </div>
-        </>
-      )}
+        )}
+      </label>
     </div>
-  </header>
-);
+  );
+
+  return (
+    <header className={styles.header}>
+      <div className={`${styles.container} ${styles.headerContent}${isMobile ? ` ${styles.headerContentMobile}` : ''}`}>
+        {isMobile ? (
+          renderSearchRow()
+        ) : (
+          <>
+            <div className={`${styles.headerSide} ${styles.headerLeft}`}>
+              {renderSearchRow()}
+            </div>
+
+            <div className={styles.logoBlock}>
+              <Image src={Logo} alt="KUDOS" width={135} height={42} priority />
+            </div>
+
+            <div className={`${styles.headerSide} ${styles.headerRight}`}>
+              <div className={styles.iconRow}>
+                <button type="button" className={styles.iconButton} aria-label="Избранное">
+                  <Icon name="heart" size={20}/>
+                  <span className={styles.countText}>0</span>
+                </button>
+                <button type="button" className={styles.iconButton} aria-label="Корзина">
+                  <Icon name="shopping-logo" size={20}/>
+                  <span className={styles.countText}>2</span>
+                </button>
+                <button type="button" className={styles.iconButton} aria-label="Личный кабинет">
+                  <Icon name="user-icon" size={20}/>
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </header>
+  );
+};
 
 export const HeroSection: FC = () => {
   const [isMobile, setIsMobile] = useState(false);

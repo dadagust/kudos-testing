@@ -99,8 +99,9 @@ $topbar-bg: #f5f4f4
   gap: 24px
 
 .headerLeft
-  gap: 20px
+  gap: 0
   flex-wrap: nowrap
+  width: 100%
 
 .headerRight
   gap: 18px
@@ -117,7 +118,11 @@ $topbar-bg: #f5f4f4
   font-size: 14px
   letter-spacing: 0.02em
   cursor: pointer
-  transition: background-color 0.2s ease
+  transition: background-color 0.2s ease, max-width 0.35s ease, padding 0.35s ease, margin 0.35s ease, opacity 0.25s ease
+  overflow: hidden
+  white-space: nowrap
+  flex-shrink: 0
+  max-width: 180px
 
 .catalogButton:hover
   background-color: darken($primary-color, 5%)
@@ -126,25 +131,93 @@ $topbar-bg: #f5f4f4
   outline: none
   box-shadow: 0 0 0 2px rgba(74, 75, 77, 0.25)
 
+.catalogButtonCollapsed
+  max-width: 0
+  padding-left: 0
+  padding-right: 0
+  margin: 0
+  opacity: 0
+  pointer-events: none
+
+.searchRow
+  display: inline-flex
+  align-items: center
+  gap: 16px
+  flex: 1
+  min-width: 0
+  transition: gap 0.35s ease
+
+.searchRowActive
+  gap: 12px
+
+.searchRowMobile
+  width: 100%
+
 .searchField
   display: inline-flex
   align-items: center
   gap: 10px
+  position: relative
   padding-bottom: 8px
   border-bottom: 2px solid #d7d7d7
   min-width: 240px
-  flex: 1
+  flex: 1 1 320px
+  max-width: 520px
+  width: 100%
+  transition: border-color 0.2s ease, max-width 0.35s ease, flex 0.35s ease
+  will-change: max-width, flex
+
+.searchFieldDesktop
+  max-width: 520px
+
+.searchFieldMobile
+  max-width: none
 
 .searchField input
+  flex: 1
   border: none
   outline: none
   background: transparent
   color: $primary-color
   font-size: 14px
   width: 100%
+  min-width: 0
 
 .searchField input::placeholder
   color: $muted-color
+
+.searchFieldActive
+  border-bottom-color: #000
+  max-width: 100%
+  flex: 1 1 100%
+
+.searchActions
+  display: inline-flex
+  align-items: center
+  gap: 8px
+  margin-left: auto
+  opacity: 0
+  visibility: hidden
+  transition: opacity 0.2s ease
+
+.searchFieldActive .searchActions
+  opacity: 1
+  visibility: visible
+
+.searchActionButton
+  display: inline-flex
+  align-items: center
+  justify-content: center
+  border: none
+  background: transparent
+  padding: 4px
+  color: $primary-color
+  cursor: pointer
+  transition: color 0.2s ease, transform 0.2s ease
+
+.searchActionButton:hover
+  color: darken($primary-color, 8%)
+  transform: translateY(-1px)
 
 .logoBlock
   display: inline-flex
@@ -412,7 +485,7 @@ $topbar-bg: #f5f4f4
   .headerLeft
     grid-area: search
     width: 100%
-    gap: 12px
+    gap: 0
 
   .headerRight
     grid-area: icons
