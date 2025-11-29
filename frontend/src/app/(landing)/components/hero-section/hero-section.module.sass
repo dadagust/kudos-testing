@@ -20,21 +20,11 @@ $topbar-bg: #f5f4f4
 
 .topBarContent
   display: flex
-  flex-direction: column
-  gap: 12px
-  padding: 12px 0
-
-.topBarPrimary
-  display: flex
   align-items: center
   justify-content: space-between
   gap: 24px
-  min-height: 72px
-
-.branding
-  display: inline-flex
-  align-items: center
-  gap: 18px
+  min-height: 44px
+  padding: 8px 40px
 
 .topBarContentMobile
   display: flex
@@ -79,13 +69,6 @@ $topbar-bg: #f5f4f4
   color: $primary-color
   text-decoration: none
 
-.topBarSecondary
-  display: flex
-  align-items: center
-  justify-content: space-between
-  gap: 20px
-  padding-top: 6px
-
 .header
   background-color: #fff
 
@@ -108,10 +91,18 @@ $topbar-bg: #f5f4f4
 .headerSide
   display: inline-flex
   align-items: center
+  gap: 28px
+
+.headerSide:last-of-type
+  justify-self: end
+  gap: 24px
+
+.headerLeft
   gap: 20px
-  width: 100%
-  min-height: 88px
-  padding: 20px 0 24px
+  flex-wrap: nowrap
+
+.headerRight
+  gap: 18px
 
 .catalogButton
   display: inline-flex
@@ -204,31 +195,13 @@ $topbar-bg: #f5f4f4
 .menuButton
   display: inline-flex
   align-items: center
-  gap: 8px
+  justify-content: center
+  position: relative
+  gap: 6px
   border: none
   background: transparent
   color: $primary-color
-  padding: 10px
-  border-radius: 8px
-  cursor: pointer
-  transition: background-color 0.2s ease, color 0.2s ease
-
-.menuButtonActive, .menuButton:hover
-  background-color: #e8e7e7
-
-.menuButton:focus-visible
-  outline: none
-  box-shadow: 0 0 0 2px rgba(74, 75, 77, 0.2)
-  background-color: #e8e7e7
-
-.menuButton
-  display: inline-flex
-  align-items: center
-  gap: 8px
-  border: none
-  background: transparent
-  color: $primary-color
-  padding: 10px
+  padding: 6px
   border-radius: 8px
   cursor: pointer
   transition: background-color 0.2s ease, color 0.2s ease
@@ -393,8 +366,7 @@ $topbar-bg: #f5f4f4
     padding: 0 28px
 
   .headerContent
-    gap: 16px
-    min-height: 82px
+    column-gap: 28px
 
   .hero
     min-height: 640px
@@ -429,11 +401,11 @@ $topbar-bg: #f5f4f4
     padding: 4px
 
   .headerContent
-    flex-direction: column
-    align-items: stretch
-    gap: 14px
+    grid-template-columns: 1fr auto
+    grid-template-areas: 'logo icons' 'search search'
+    row-gap: 16px
+    column-gap: 16px
     padding: 16px 0 18px
-    min-height: auto
 
   .headerContentMobile
     grid-template-columns: none
@@ -446,18 +418,21 @@ $topbar-bg: #f5f4f4
   .headerLeft
     grid-area: search
     width: 100%
-    justify-content: center
-    padding: 10px 14px
+    gap: 12px
+
+  .headerRight
+    grid-area: icons
+    justify-self: end
 
   .searchField
     min-width: 0
     width: 100%
 
   .searchField input
-    font-size: 14px
+    font-size: 12px
 
-  .headerSpacer
-    display: none
+  .catalogButton
+    padding: 10px 14px
 
   .hero
     min-height: 560px
@@ -497,8 +472,3 @@ $topbar-bg: #f5f4f4
   .contactItem
     font-size: 13px
 
-  .catalogButton
-    padding: 10px 16px
-
-  .searchField
-    min-width: 200px
