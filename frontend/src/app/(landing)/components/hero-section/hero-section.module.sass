@@ -17,6 +17,7 @@ $topbar-bg: #f5f4f4
   background-color: $topbar-bg
   font-size: 14px
   line-height: 1.4
+  border-bottom: 1px solid #dcdcdc
 
 .topBarContent
   display: flex
@@ -82,9 +83,9 @@ $topbar-bg: #f5f4f4
 
 .headerContentMobile
   display: flex
-  flex-direction: column
-  align-items: stretch
-  gap: 14px
+  flex-direction: row
+  align-items: center
+  gap: 16px
   padding: 16px 0 18px
   min-height: auto
 
@@ -166,31 +167,11 @@ $topbar-bg: #f5f4f4
   cursor: pointer
   color: $primary-color
 
-.counter
-  position: absolute
-  top: 0
-  right: -6px
-  min-width: 14px
-  height: 14px
-  border-radius: 50%
-  background: #ededed
-  display: grid
-  place-items: center
-  font-size: 10px
-  line-height: 1
-
-.badge
-  position: absolute
-  top: -4px
-  right: -8px
-  min-width: 18px
-  height: 18px
-  border-radius: 50%
-  background: #f7df94
-  display: grid
-  place-items: center
-  font-size: 10px
-  line-height: 1
+.countText
+  margin-left: 8px
+  font-size: 13px
+  line-height: 1.2
+  color: $primary-color
 
 .menuButton
   display: inline-flex
@@ -319,6 +300,19 @@ $topbar-bg: #f5f4f4
   height: 100%
   overflow-y: auto
 
+.menuCloseButton
+  align-self: flex-start
+  border: none
+  background: transparent
+  color: $primary-color
+  padding: 6px
+  margin: -6px 0 6px
+  cursor: pointer
+  transition: color 0.2s ease, background-color 0.2s ease
+
+.menuCloseButton:hover
+  background-color: #f0f0f0
+
 .menuSearchField
   display: flex
   align-items: center
@@ -427,12 +421,6 @@ $topbar-bg: #f5f4f4
   .searchField
     min-width: 0
     width: 100%
-
-  .searchField input
-    font-size: 12px
-
-  .catalogButton
-    padding: 10px 14px
 
   .hero
     min-height: 560px
