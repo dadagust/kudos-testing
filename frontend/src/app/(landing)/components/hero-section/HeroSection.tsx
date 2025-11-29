@@ -18,7 +18,11 @@ const navLinks: NavLink[] = [
 ];
 
 const contacts: ContactInfo[] = [
-  { icon: 'map-pin', label: 'МО, Люберцы, квартал 30131, 1020' },
+  {
+    href: 'https://yandex.ru/maps/org/kudos/114603073135/?ll=37.984067%2C55.579811&z=17',
+    icon: 'map-pin',
+    label: 'МО, Люберцы, квартал 30131, 1020'
+  },
   { href: 'mailto:info@kudos.ru', icon: 'mail', label: 'info@kudos.ru' },
   { href: 'tel:+74959910579', icon: 'phone', label: '+7 (495) 991-05-79' },
 ];
@@ -35,10 +39,12 @@ const TopBar: FC<TopBarProps> = ({isMobile, onMenuToggle, isMenuOpen}) => {
       <div className={styles.topBar}>
         <div className={`${styles.container} ${styles.topBarContent}`}>
           <div className={styles.topBarLeft}>
-            <div className={styles.contactItem}>
-              <Icon name="map-pin" size={20}/>
-              <span>МО, Люберцы, квартал 30131, 1020</span>
-            </div>
+            <a href="https://yandex.ru/maps/org/kudos/114603073135/?ll=37.984067%2C55.579811&z=17">
+              <div className={styles.contactItem}>
+                <Icon name="map-pin" size={20}/>
+                <span>МО, Люберцы, квартал 30131, 1020</span>
+              </div>
+            </a>
             <a href="mailto:info@kudos.ru" className={styles.contactItem}>
               <Icon name="mail" size={20}/>
               <span>info@kudos.ru</span>
