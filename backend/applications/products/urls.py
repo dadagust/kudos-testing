@@ -7,6 +7,7 @@ from applications.common.url_utils import allow_optional_trailing_slash
 from .views import (
     CategoryTreeView,
     CategoryProductsView,
+    NewProductsView,
     ColorsListView,
     EnumsAggregateView,
     ProductGroupViewSet,
@@ -82,6 +83,11 @@ urlpatterns = allow_optional_trailing_slash(
             'products/category-items/',
             CategoryProductsView.as_view(),
             name='product-category-items',
+        ),
+        path(
+            'products/new-items/',
+            NewProductsView.as_view(),
+            name='product-new-items',
         ),
         path(
             'products/colors/',
