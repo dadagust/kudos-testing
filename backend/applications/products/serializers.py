@@ -902,6 +902,7 @@ def prefetch_for_include(include: Iterable[str]):
 
 class ProductGroupSerializer(serializers.ModelSerializer):
     products = ProductListItemSerializer(many=True, read_only=True)
+    show_in_new = serializers.BooleanField(default=False)
     category_id = serializers.PrimaryKeyRelatedField(
         source='category',
         queryset=Category.objects.all(),
@@ -923,6 +924,7 @@ class ProductGroupSerializer(serializers.ModelSerializer):
             'id',
             'category_id',
             'name',
+            'show_in_new',
             'image',
             'image_url',
             'remove_image',

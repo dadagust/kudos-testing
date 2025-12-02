@@ -16,6 +16,7 @@ const buildGroupFormData = (payload: ProductGroupPayload) => {
   const formData = new FormData();
   formData.append('name', payload.name);
   formData.append('category_id', payload.category_id);
+  formData.append('show_in_new', String(payload.show_in_new));
   payload.product_ids.forEach((id) => formData.append('product_ids', id));
 
   if (payload.image instanceof File) {

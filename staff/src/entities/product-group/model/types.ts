@@ -5,6 +5,7 @@ export type ProductGroup = {
   id: string;
   category_id: string | null;
   name: string;
+  show_in_new: boolean;
   image_url?: string | null;
   products: ProductListItem[];
   created_at?: string;
@@ -15,6 +16,7 @@ export type ProductGroupPayload = {
   name: string;
   category_id: string;
   product_ids: string[];
+  show_in_new: boolean;
   image?: File | null;
   remove_image?: boolean;
 };
