@@ -22,16 +22,17 @@ const buildRows = (items: NewArrivalItem[], itemsPerRow: number): NewArrivalItem
 };
 
 const resolveColorStyle = (value: string, isActive: boolean) => {
-  const normalized = value.trim().toLowerCase();
+  const normalized = value.trim();
+  const normalizedLower = normalized.toLowerCase();
 
-  if (normalized === 'multicolored') {
+  if (normalizedLower === 'multicolored') {
     return {
       background: 'linear-gradient(135deg, #f4a261 0%, #8ec5fc 50%, #ff6f91 100%)',
       borderColor: isActive ? '#4a4b4d' : '#c0c0c0',
     };
   }
 
-  if (normalized === 'not-important') {
+  if (normalizedLower === 'not-important') {
     return {
       backgroundColor: 'transparent',
       borderColor: isActive ? '#4a4b4d' : '#b7b7b7',
@@ -156,7 +157,9 @@ export const NewArrivalsSection: FC = () => {
 
           {isGroup && (
             <div className={styles.variantBlock}>
-              <div className={styles.variantName}>{activeVariant?.color_name || 'Цвет'}</div>
+              <div className={styles.variantName}>
+                {activeVariant?.name || activeVariant?.color_name || 'Цвет'}
+              </div>
               <div className={styles.variantList} role="list" aria-label="Выбор цвета">
                 {item.variants?.map((variant) => {
                   const isActive = activeVariant?.id === variant.id;
@@ -170,7 +173,7 @@ export const NewArrivalsSection: FC = () => {
                       style={style}
                       onClick={() => selectVariant(item.id, variant.id)}
                       aria-pressed={isActive}
-                      aria-label={variant.color_name}
+                      aria-label={variant.name || variant.color_name}
                     />
                   );
                 })}
