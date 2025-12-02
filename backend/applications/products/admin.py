@@ -71,12 +71,14 @@ class ProductAdmin(admin.ModelAdmin):
 @admin.register(ProductGroup)
 class ProductGroupAdmin(admin.ModelAdmin):
     list_display = (
+        'category',
         'name',
         'created',
         'modified',
     )
-    search_fields = ('name',)
+    search_fields = ('name', 'category__name')
     filter_horizontal = ('products',)
+    autocomplete_fields = ('category',)
 
 
 @admin.register(InstallerQualification)
