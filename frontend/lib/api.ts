@@ -346,14 +346,18 @@ const normalizeNewArrivalItem = (value: unknown): NewArrivalItem | null => {
 
   const record = value as Record<string, unknown>;
   const rawId = record.id ?? record.slug;
-  const rawType = (record.type ?? record.kind) as string | undefined;
+  const rawType = (record.item_type ?? record.type ?? record.kind) as string | undefined;
 
   if (!rawId || !rawType) {
     return null;
   }
 
   const type = rawType === 'group' ? 'group' : 'product';
-  const variantsRaw = Array.isArray(record.variants) ? (record.variants as unknown[]) : [];
+  const variantsRaw = Array.isArray(record.variants)
+    ? (record.variants as unknown[])
+    : Array.isArray(record.products)
+      ? (record.products as unknown[])
+      : [];
   const variants = variantsRaw.map(normalizeNewArrivalVariant).filter(Boolean) as NewArrivalVariant[];
 
   return {
@@ -361,7 +365,11 @@ const normalizeNewArrivalItem = (value: unknown): NewArrivalItem | null => {
     type,
     name: String(record.name ?? ''),
     price_rub: Number(record.price_rub ?? record.price ?? 0) || 0,
-    image: (record.image ?? record.preview_image) as string | null | undefined,
+    image:
+      (record.image_url ?? record.image ?? record.preview_image ?? record.thumbnail_url) as
+        | string
+        | null
+        | undefined,
     slug: (record.slug ?? record.url) as string | null | undefined,
     variants: variants.length > 0 ? variants : undefined,
   };
