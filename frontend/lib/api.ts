@@ -178,6 +178,26 @@ export interface CatalogueCategory {
   image: string | null;
 }
 
+export type NewArrivalType = 'product' | 'group';
+
+export interface NewArrivalVariant {
+  id: string;
+  color_name: string;
+  color_value: string;
+  image: string;
+  slug?: string | null;
+}
+
+export interface NewArrivalItem {
+  id: string;
+  type: NewArrivalType;
+  name: string;
+  price_rub: number;
+  image?: string | null;
+  slug?: string | null;
+  variants?: NewArrivalVariant[];
+}
+
 export interface CreateOrderPayload {
   status: OrderStatus;
   installation_date: string;
@@ -295,6 +315,75 @@ export const catalogueApi = {
     );
 
     return response.data ?? [];
+  },
+};
+
+const normalizeNewArrivalVariant = (value: unknown): NewArrivalVariant | null => {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const variant = value as Record<string, unknown>;
+  const id = variant.id ?? variant.slug;
+
+  if (!id) {
+    return null;
+  }
+
+  return {
+    id: String(id),
+    color_name: String(variant.color_name ?? variant.color ?? ''),
+    color_value: String(variant.color_value ?? variant.value ?? ''),
+    image: String(variant.image ?? ''),
+    slug: (variant.slug ?? variant.url) as string | null | undefined,
+  };
+};
+
+const normalizeNewArrivalItem = (value: unknown): NewArrivalItem | null => {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const record = value as Record<string, unknown>;
+  const rawId = record.id ?? record.slug;
+  const rawType = (record.item_type ?? record.type ?? record.kind) as string | undefined;
+
+  if (!rawId || !rawType) {
+    return null;
+  }
+
+  const type = rawType === 'group' ? 'group' : 'product';
+  const variantsRaw = Array.isArray(record.variants)
+    ? (record.variants as unknown[])
+    : Array.isArray(record.products)
+      ? (record.products as unknown[])
+      : [];
+  const variants = variantsRaw.map(normalizeNewArrivalVariant).filter(Boolean) as NewArrivalVariant[];
+
+  return {
+    id: String(rawId),
+    type,
+    name: String(record.name ?? ''),
+    price_rub: Number(record.price_rub ?? record.price ?? 0) || 0,
+    image:
+      (record.image_url ?? record.image ?? record.preview_image ?? record.thumbnail_url) as
+        | string
+        | null
+        | undefined,
+    slug: (record.slug ?? record.url) as string | null | undefined,
+    variants: variants.length > 0 ? variants : undefined,
+  };
+};
+
+export const newArrivalsApi = {
+  list: async (): Promise<NewArrivalItem[]> => {
+    const response = await performRequest<{ data?: unknown }>(CORE_API_URL, '/products/new-items/', {
+      method: 'GET',
+    });
+
+    const data = Array.isArray(response?.data) ? (response.data as unknown[]) : [];
+
+    return data.map(normalizeNewArrivalItem).filter((item): item is NewArrivalItem => Boolean(item));
   },
 };
 
