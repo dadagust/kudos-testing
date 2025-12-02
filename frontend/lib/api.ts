@@ -362,6 +362,18 @@ export const catalogueApi = {
   },
 };
 
+const coerceString = (value: unknown, fallback = ''): string => {
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+
+  if (value && typeof value === 'object' && 'value' in (value as Record<string, unknown>)) {
+    return coerceString((value as Record<string, unknown>).value, fallback);
+  }
+
+  return fallback;
+};
+
 const normalizeNewArrivalVariant = (value: unknown): NewArrivalVariant | null => {
   if (!value || typeof value !== 'object') {
     return null;
@@ -377,15 +389,9 @@ const normalizeNewArrivalVariant = (value: unknown): NewArrivalVariant | null =>
 
   return {
     id: String(id),
-    name: String(
-      variant.name ?? (typeof color?.name === 'string' ? color.name : '') ?? '',
-    ),
-    color_name: String(
-      variant.color_name ?? (typeof color?.name === 'string' ? color.name : '') ?? '',
-    ),
-    color_value: String(
-      variant.color_value ?? (typeof color?.value === 'string' ? color.value : '') ?? variant.value ?? '',
-    ),
+    name: coerceString(variant.name ?? color?.name),
+    color_name: coerceString(variant.color_name ?? color?.name),
+    color_value: coerceString(variant.color_value ?? variant.value ?? color?.value),
     image: resolveMediaUrl((variant.image ?? variant.image_url) as string | null | undefined),
     slug: (variant.slug ?? variant.url) as string | null | undefined,
   };
