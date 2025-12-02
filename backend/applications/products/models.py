@@ -695,9 +695,15 @@ class ProductGroup(Date):
         should_process_image = self.image and (
             not update_fields or 'image' in update_fields
         )
+
         super().save(*args, **kwargs)
-        if should_process_image:
-            self._process_image()
+
+        if should_process_image and not getattr(self, '_processing_image', False):
+            self._processing_image = True
+            try:
+                self._process_image()
+            finally:
+                self._processing_image = False
 
     def _process_image(self) -> None:
         """Crop the image to a 2000x2000 JPEG square."""
@@ -745,7 +751,8 @@ class ProductGroup(Date):
                 logger.exception('Failed to close image file for product group %s', self.pk)
 
         try:
-            self.image.save(original_name, ContentFile(buffer.getvalue()), save=True)
+            self.image.save(original_name, ContentFile(buffer.getvalue()), save=False)
+            super().save(update_fields=['image'])
         except Exception:  # pragma: no cover - unexpected save failure
             logger.exception('Failed to save processed image for product group %s', self.pk)
 
