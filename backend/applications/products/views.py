@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from decimal import Decimal, InvalidOperation
+from pprint import pprint
 
 from django.db import IntegrityError, models
 from django.db.models import Prefetch, Q
@@ -435,7 +436,7 @@ class NewProductsView(APIView):
 
         data = [{'item_type': 'group', **group} for group in groups_data]
         data.extend({'item_type': 'product', **product} for product in products_data)
-
+        pprint(data)
         return Response({'data': data})
 
 

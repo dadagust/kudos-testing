@@ -24,7 +24,6 @@ const buildRows = (items: NewArrivalItem[], itemsPerRow: number): NewArrivalItem
 const resolveColorStyle = (value: string, isActive: boolean) => {
   const normalized = value.trim();
   const normalizedLower = normalized.toLowerCase();
-
   if (normalizedLower === 'multicolored') {
     return {
       background: 'linear-gradient(135deg, #f4a261 0%, #8ec5fc 50%, #ff6f91 100%)',
@@ -40,7 +39,6 @@ const resolveColorStyle = (value: string, isActive: boolean) => {
   }
 
   const color = normalized || '#d8d8d8';
-
   return {
     backgroundColor: color,
     borderColor: isActive ? '#4a4b4d' : '#d0d0d0',

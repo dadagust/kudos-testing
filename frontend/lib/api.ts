@@ -371,6 +371,25 @@ const normalizeNewArrivalVariant = (value: unknown): NewArrivalVariant | null =>
   const id = variant.id ?? variant.slug;
   const color = (variant.color ?? null) as Record<string, unknown> | null;
 
+  const resolvedColorValue = (() => {
+    const rawVariantValue = typeof variant.color === 'string' ? variant.color : null;
+    const rawColorValue = typeof color?.value === 'string' ? color.value : null;
+    const fallbackValue = typeof variant.value === 'string' ? variant.value : null;
+
+    const variantValue = rawVariantValue?.trim();
+
+    if (variantValue) {
+      return variantValue;
+    }
+
+    const colorValue = rawColorValue?.trim();
+    if (colorValue) {
+      return colorValue;
+    }
+
+    return fallbackValue?.trim() ?? '';
+  })();
+
   if (!id) {
     return null;
   }
@@ -383,9 +402,7 @@ const normalizeNewArrivalVariant = (value: unknown): NewArrivalVariant | null =>
     color_name: String(
       variant.color_name ?? (typeof color?.name === 'string' ? color.name : '') ?? '',
     ),
-    color_value: String(
-      variant.color_value ?? (typeof color?.value === 'string' ? color.value : '') ?? variant.value ?? '',
-    ),
+    color_value: resolvedColorValue,
     image: resolveMediaUrl((variant.image ?? variant.image_url) as string | null | undefined),
     slug: (variant.slug ?? variant.url) as string | null | undefined,
   };
