@@ -199,6 +199,7 @@ type ProductGroupFormState = {
   name: string;
   categoryId: string;
   products: ProductListItem[];
+  showInNew: boolean;
   imageFile: File | null;
   imagePreviewUrl: string | null;
   existingImageUrl: string | null;
@@ -269,6 +270,7 @@ const createEmptyGroupForm = (): ProductGroupFormState => ({
   name: '',
   categoryId: '',
   products: [],
+  showInNew: true,
   imageFile: null,
   imagePreviewUrl: null,
   existingImageUrl: null,
@@ -792,6 +794,7 @@ const buildGroupPayload = (form: ProductGroupFormState): ProductGroupPayload => 
     name: form.name.trim(),
     category_id: form.categoryId,
     product_ids: Array.from(new Set(form.products.map((item) => item.id))),
+    show_in_new: form.showInNew,
   };
 
   if (form.imageFile) {
@@ -1885,6 +1888,7 @@ export default function ProductsPage() {
         name: editingGroup.name ?? '',
         categoryId: editingGroup.category_id ?? '',
         products: editingGroup.products ?? [],
+        showInNew: editingGroup.show_in_new ?? false,
         imageFile: null,
         imagePreviewUrl: null,
         existingImageUrl: editingGroup.image_url ?? null,
@@ -4155,6 +4159,21 @@ export default function ProductsPage() {
                   ) : null}
                 </div>
               </FormField>
+
+              <label style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <input
+                  type="checkbox"
+                  checked={groupForm.showInNew}
+                  onChange={(event) =>
+                    setGroupForm((prev) => ({
+                      ...prev,
+                      showInNew: event.target.checked,
+                    }))
+                  }
+                  disabled={isSubmittingGroup}
+                />
+                Показывать в «Новинках»
+              </label>
 
               <FormField
                 label="Фотография группы"

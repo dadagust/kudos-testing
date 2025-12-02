@@ -683,6 +683,10 @@ class ProductGroup(Date):
         verbose_name='Товары',
         blank=True,
     )
+    show_in_new = models.BooleanField(
+        verbose_name='Показывать в новинках',
+        default=False,
+    )
 
     class Meta(Date.Meta):
         verbose_name = 'Группа товаров'
