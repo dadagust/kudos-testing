@@ -1,0 +1,118 @@
+$primary-color: #4a4b4d
+$background-color: #f5f4f4
+
+.section
+  background: $background-color
+  padding: 64px 0 80px
+  color: $primary-color
+
+.container
+  max-width: 1400px
+  margin: 0 auto
+  padding: 0 40px
+
+.title
+  font-size: 42px
+  line-height: 1.1
+  letter-spacing: 0.04em
+  text-transform: uppercase
+  margin: 0 0 36px
+
+.error
+  margin: 0 0 24px
+  color: #c0392b
+  font-size: 16px
+
+.grid
+  display: grid
+  gap: 20px
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr))
+
+.card
+  position: relative
+  overflow: hidden
+  border-radius: 8px
+  min-height: 280px
+  background: #dcdcdc
+
+.cardMedia
+  position: absolute
+  inset: 0
+
+.cardImage
+  object-fit: cover
+
+.cardPlaceholder
+  width: 100%
+  height: 100%
+  background: linear-gradient(180deg, #dcdcdc 0%, #bfbfbf 100%)
+
+.cardOverlay
+  position: absolute
+  inset: 0
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0.7) 100%)
+
+.cardTitle
+  position: absolute
+  left: 24px
+  bottom: 22px
+  right: 24px
+  font-size: 28px
+  line-height: 1.2
+  letter-spacing: 0.02em
+  color: #fff
+  text-transform: uppercase
+  z-index: 2
+
+.skeletonRow
+  display: grid
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr))
+  gap: 20px
+  width: 100%
+  min-height: 280px
+
+.skeletonRow::before
+  content: ''
+  display: block
+  width: 100%
+  height: 100%
+  border-radius: 8px
+  background: linear-gradient(90deg, #d9d9d9 25%, #ededed 37%, #d9d9d9 63%)
+  background-size: 400% 100%
+  animation: shimmer 1.4s ease-in-out infinite
+
+@keyframes shimmer
+  0%
+    background-position: -200% 0
+  100%
+    background-position: 200% 0
+
+@media (max-width: 1000px)
+  .section
+    padding: 48px 0 64px
+
+  .container
+    padding: 0 20px
+
+  .title
+    font-size: 32px
+    margin-bottom: 24px
+
+  .card
+    min-height: 260px
+
+  .cardTitle
+    font-size: 22px
+    left: 20px
+    right: 20px
+    bottom: 18px
+
+  .grid
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr))
+
+@media (max-width: 600px)
+  .grid
+    grid-template-columns: 1fr
+
+  .title
+    font-size: 28px

@@ -171,6 +171,13 @@ export interface YandexSuggestItem {
   uri?: string;
 }
 
+export interface CatalogueCategory {
+  id: string;
+  name: string;
+  slug: string;
+  image: string | null;
+}
+
 export interface CreateOrderPayload {
   status: OrderStatus;
   installation_date: string;
@@ -274,6 +281,20 @@ export const productsApi = {
       }
       throw error;
     }
+  },
+};
+
+export const catalogueApi = {
+  list: async (): Promise<CatalogueCategory[]> => {
+    const response = await performRequest<{ data?: CatalogueCategory[] }>(
+      CORE_API_URL,
+      '/catalogue/',
+      {
+        method: 'GET',
+      }
+    );
+
+    return response.data ?? [];
   },
 };
 

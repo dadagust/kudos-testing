@@ -1,5 +1,6 @@
 import Head from 'next/head';
 
+import { CatalogueList } from '../src/app/(landing)/components/catalogue-list/CatalogueList';
 import { HeroSection } from '../src/app/(landing)/components/hero-section/HeroSection';
 import { FrontendFooter } from '../src/app/(landing)/components/footer/Footer';
 
@@ -11,6 +12,7 @@ export default function Home() {
         <meta name="description" content="Аренда мебели и декора для мероприятий KUDOS" />
       </Head>
       <HeroSection />
+      <CatalogueList />
       <FrontendFooter />
     </>
   );
