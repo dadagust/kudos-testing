@@ -62,12 +62,6 @@ export const FrontendFooter: FC = () => (
           <div className={styles.logoWrapper}>
             <Image src={Logo} alt="KUDOS" width={135} height={42} priority />
           </div>
-          <p className={styles.tagline}>АРЕНДА МЕБЕЛИ И ДЕКОРА</p>
-          <div className={styles.actionIcons} aria-hidden>
-            <Icon name="heart" size={20} />
-            <Icon name="shopping-logo" size={20} />
-            <Icon name="user-icon" size={20} />
-          </div>
         </div>
 
         <div className={styles.linksColumn}>
