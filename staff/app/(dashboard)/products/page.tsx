@@ -902,6 +902,7 @@ export default function ProductsPage() {
   const [selectedColor, setSelectedColor] = useState<ProductListQuery['color'] | ''>('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [categorySearch, setCategorySearch] = useState('');
+  const [isCategoryPickerOpen, setIsCategoryPickerOpen] = useState(false);
   const [selfPickup, setSelfPickup] = useState('');
   const [ordering, setOrdering] = useState<ProductListQuery['ordering']>('-created_at');
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
@@ -945,6 +946,7 @@ export default function ProductsPage() {
   const [isDeleteGroupModalOpen, setIsDeleteGroupModalOpen] = useState(false);
   const [groupFormError, setGroupFormError] = useState<string | null>(null);
   const [groupCategorySearch, setGroupCategorySearch] = useState('');
+  const [isGroupCategoryPickerOpen, setIsGroupCategoryPickerOpen] = useState(false);
 
   const canManageProducts = usePermission('products_add_product');
   const queryClient = useQueryClient();
@@ -1147,6 +1149,12 @@ export default function ProductsPage() {
       filterCategoryOptions(categoryOptions, groupCategorySearch, groupForm.categoryId),
     [categoryOptions, groupCategorySearch, groupForm.categoryId]
   );
+  const selectedCategoryLabel = selectedCategory
+    ? categoryNameMap[selectedCategory] ?? 'Выберите категорию'
+    : 'Все категории';
+  const selectedGroupCategoryLabel = groupForm.categoryId
+    ? categoryNameMap[groupForm.categoryId] ?? 'Выберите категорию'
+    : 'Выберите категорию';
   const colorOptions = enumsData?.colors ?? [];
   const colorLabelMap = useMemo(() => createEnumMap(enumsData?.colors), [enumsData]);
   const transportLabelMap = useMemo(
@@ -1525,6 +1533,8 @@ export default function ProductsPage() {
     setSearchTerm('');
     setSelectedColor('');
     setSelectedCategory('');
+    setCategorySearch('');
+    setIsCategoryPickerOpen(false);
     setSelfPickup('');
     setOrdering('-created_at');
   };
@@ -2079,6 +2089,7 @@ export default function ProductsPage() {
     setEditingGroupId(null);
     setGroupSearch('');
     setGroupCategorySearch('');
+    setIsGroupCategoryPickerOpen(false);
     setGroupFormError(null);
     createGroupMutation.reset();
     updateGroupMutation.reset();
@@ -2091,6 +2102,7 @@ export default function ProductsPage() {
     setEditingGroupId(groupId);
     setGroupSearch('');
     setGroupCategorySearch('');
+    setIsGroupCategoryPickerOpen(false);
     setGroupFormError(null);
     createGroupMutation.reset();
     updateGroupMutation.reset();
@@ -2104,6 +2116,7 @@ export default function ProductsPage() {
     resetGroupForm();
     setGroupSearch('');
     setGroupCategorySearch('');
+    setIsGroupCategoryPickerOpen(false);
     setGroupFormError(null);
     createGroupMutation.reset();
     updateGroupMutation.reset();
@@ -2504,42 +2517,78 @@ export default function ProductsPage() {
                   onChange={(event) => setSearchInput(event.target.value)}
                 />
                 <FormField label="Категория">
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <Input
-                      placeholder="Введите название категории"
-                      value={categorySearch}
-                      onChange={(event) => setCategorySearch(event.target.value)}
-                    />
-                    <div
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '8px',
-                        maxHeight: 240,
-                        overflow: 'auto',
-                      }}
+                  <div style={{ position: 'relative' }}>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => setIsCategoryPickerOpen((prev) => !prev)}
+                      style={{ width: '100%', justifyContent: 'space-between' }}
                     >
-                      <Button
-                        type="button"
-                        variant={selectedCategory === '' ? 'primary' : 'ghost'}
-                        onClick={() => setSelectedCategory('')}
+                      <span style={{ textAlign: 'left' }}>{selectedCategoryLabel}</span>
+                      <span aria-hidden="true">▾</span>
+                    </Button>
+
+                    {isCategoryPickerOpen ? (
+                      <div
+                        style={{
+                          position: 'absolute',
+                          zIndex: 2,
+                          marginTop: 8,
+                          width: '100%',
+                          borderRadius: '12px',
+                          border: '1px solid var(--color-border)',
+                          background: 'var(--color-surface)',
+                          boxShadow: '0 12px 40px rgba(0, 0, 0, 0.12)',
+                          padding: '8px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '8px',
+                        }}
                       >
-                        Все категории
-                      </Button>
-                      {filteredCategoryOptions.map((option) => {
-                        const isSelected = option.value === selectedCategory;
-                        return (
+                        <Input
+                          placeholder="Введите название категории"
+                          value={categorySearch}
+                          onChange={(event) => setCategorySearch(event.target.value)}
+                          autoFocus
+                        />
+                        <div
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '8px',
+                            maxHeight: 240,
+                            overflow: 'auto',
+                          }}
+                        >
                           <Button
-                            key={option.value}
                             type="button"
-                            variant={isSelected ? 'primary' : 'ghost'}
-                            onClick={() => setSelectedCategory(option.value)}
+                            variant={selectedCategory === '' ? 'primary' : 'ghost'}
+                            onClick={() => {
+                              setSelectedCategory('');
+                              setIsCategoryPickerOpen(false);
+                            }}
                           >
-                            {option.label}
+                            Все категории
                           </Button>
-                        );
-                      })}
-                    </div>
+                          {filteredCategoryOptions.map((option) => {
+                            const isSelected = option.value === selectedCategory;
+                            return (
+                              <Button
+                                key={option.value}
+                                type="button"
+                                variant={isSelected ? 'primary' : 'ghost'}
+                                onClick={() => {
+                                  setSelectedCategory(option.value);
+                                  setIsCategoryPickerOpen(false);
+                                }}
+                              >
+                                {option.label}
+                              </Button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
                 </FormField>
                 <Select
@@ -4023,50 +4072,87 @@ export default function ProductsPage() {
                 label="Категория группы"
                 description="Категория поможет быстрее находить группы на странице каталога."
               >
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <Input
-                    placeholder="Введите название категории"
-                    value={groupCategorySearch}
-                    onChange={(event) => setGroupCategorySearch(event.target.value)}
+                <div style={{ position: 'relative' }}>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setIsGroupCategoryPickerOpen((prev) => !prev)}
+                    style={{ width: '100%', justifyContent: 'space-between' }}
                     disabled={isSubmittingGroup}
-                  />
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '8px',
-                      maxHeight: 240,
-                      overflow: 'auto',
-                    }}
                   >
-                    <Button
-                      type="button"
-                      variant={groupForm.categoryId === '' ? 'primary' : 'ghost'}
-                      onClick={() => handleGroupCategoryChange('')}
-                      disabled={isSubmittingGroup}
+                    <span style={{ textAlign: 'left' }}>{selectedGroupCategoryLabel}</span>
+                    <span aria-hidden="true">▾</span>
+                  </Button>
+
+                  {isGroupCategoryPickerOpen ? (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        zIndex: 2,
+                        marginTop: 8,
+                        width: '100%',
+                        borderRadius: '12px',
+                        border: '1px solid var(--color-border)',
+                        background: 'var(--color-surface)',
+                        boxShadow: '0 12px 40px rgba(0, 0, 0, 0.12)',
+                        padding: '8px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '8px',
+                      }}
                     >
-                      Выберите категорию
-                    </Button>
-                    {filteredGroupCategoryOptions.map((option) => {
-                      const isSelected = option.value === groupForm.categoryId;
-                      return (
+                      <Input
+                        placeholder="Введите название категории"
+                        value={groupCategorySearch}
+                        onChange={(event) => setGroupCategorySearch(event.target.value)}
+                        disabled={isSubmittingGroup}
+                        autoFocus
+                      />
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '8px',
+                          maxHeight: 240,
+                          overflow: 'auto',
+                        }}
+                      >
                         <Button
-                          key={option.value}
                           type="button"
-                          variant={isSelected ? 'primary' : 'ghost'}
-                          onClick={() => handleGroupCategoryChange(option.value)}
+                          variant={groupForm.categoryId === '' ? 'primary' : 'ghost'}
+                          onClick={() => {
+                            handleGroupCategoryChange('');
+                            setIsGroupCategoryPickerOpen(false);
+                          }}
                           disabled={isSubmittingGroup}
                         >
-                          {option.label}
+                          Выберите категорию
                         </Button>
-                      );
-                    })}
-                    {groupFormError?.includes('категор') ? (
-                      <span style={{ color: 'var(--color-danger)', fontSize: '0.875rem' }}>
-                        {groupFormError}
-                      </span>
-                    ) : null}
-                  </div>
+                        {filteredGroupCategoryOptions.map((option) => {
+                          const isSelected = option.value === groupForm.categoryId;
+                          return (
+                            <Button
+                              key={option.value}
+                              type="button"
+                              variant={isSelected ? 'primary' : 'ghost'}
+                              onClick={() => {
+                                handleGroupCategoryChange(option.value);
+                                setIsGroupCategoryPickerOpen(false);
+                              }}
+                              disabled={isSubmittingGroup}
+                            >
+                              {option.label}
+                            </Button>
+                          );
+                        })}
+                        {groupFormError?.includes('категор') ? (
+                          <span style={{ color: 'var(--color-danger)', fontSize: '0.875rem' }}>
+                            {groupFormError}
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
               </FormField>
 
