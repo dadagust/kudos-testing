@@ -225,6 +225,7 @@ export type NewArrivalType = 'product' | 'group';
 
 export interface NewArrivalVariant {
   id: string;
+  name?: string;
   color_name: string;
   color_value: string;
   image: string;
@@ -368,6 +369,7 @@ const normalizeNewArrivalVariant = (value: unknown): NewArrivalVariant | null =>
 
   const variant = value as Record<string, unknown>;
   const id = variant.id ?? variant.slug;
+  const color = (variant.color ?? null) as Record<string, unknown> | null;
 
   if (!id) {
     return null;
@@ -375,8 +377,15 @@ const normalizeNewArrivalVariant = (value: unknown): NewArrivalVariant | null =>
 
   return {
     id: String(id),
-    color_name: String(variant.color_name ?? variant.color ?? ''),
-    color_value: String(variant.color_value ?? variant.value ?? ''),
+    name: String(
+      variant.name ?? (typeof color?.name === 'string' ? color.name : '') ?? '',
+    ),
+    color_name: String(
+      variant.color_name ?? (typeof color?.name === 'string' ? color.name : '') ?? '',
+    ),
+    color_value: String(
+      variant.color_value ?? (typeof color?.value === 'string' ? color.value : '') ?? variant.value ?? '',
+    ),
     image: resolveMediaUrl((variant.image ?? variant.image_url) as string | null | undefined),
     slug: (variant.slug ?? variant.url) as string | null | undefined,
   };
