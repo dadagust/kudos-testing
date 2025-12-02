@@ -151,48 +151,50 @@ export const NewArrivalsSection: FC = () => {
 
     return (
       <article key={item.id} className={styles.card}>
-        <Link
-          href={item.slug || '#'}
-          className={styles.cardMedia}
-          aria-label={`Подробнее о ${item.name}`}
-          prefetch={false}
-        >
-          {imageSrc ? (
-            <Image
-              src={imageSrc}
-              alt={item.name}
-              fill
-              className={styles.cardImage}
-              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
-            />
-          ) : (
-            <div className={styles.cardPlaceholder} aria-hidden/>
-          )}
-        </Link>
+        <div className={styles.cardMediaWrapper}>
+          <Link
+            href={item.slug || '#'}
+            className={styles.cardMedia}
+            aria-label={`Подробнее о ${item.name}`}
+            prefetch={false}
+          >
+            {imageSrc ? (
+              <Image
+                src={imageSrc}
+                alt={item.name}
+                fill
+                className={styles.cardImage}
+                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+              />
+            ) : (
+              <div className={styles.cardPlaceholder} aria-hidden/>
+            )}
+          </Link>
 
-        {isGroup && (
-          <div className={styles.variantBlock}>
-            <div className={styles.variantName}>{activeVariant?.color_name || 'Цвет'}</div>
-            <div className={styles.variantList} role="list" aria-label="Выбор цвета">
-              {item.variants?.map((variant) => {
-                const isActive = activeVariant?.id === variant.id;
-                const style = resolveColorStyle(variant.color_value, isActive);
+          {isGroup && (
+            <div className={styles.variantBlock}>
+              <div className={styles.variantName}>{activeVariant?.color_name || 'Цвет'}</div>
+              <div className={styles.variantList} role="list" aria-label="Выбор цвета">
+                {item.variants?.map((variant) => {
+                  const isActive = activeVariant?.id === variant.id;
+                  const style = resolveColorStyle(variant.color_value, isActive);
 
-                return (
-                  <button
-                    key={variant.id}
-                    type="button"
-                    className={`${styles.colorDot}${isActive ? ` ${styles.colorDotActive}` : ''}`}
-                    style={style}
-                    onClick={() => selectVariant(item.id, variant.id)}
-                    aria-pressed={isActive}
-                    aria-label={variant.color_name}
-                  />
-                );
-              })}
+                  return (
+                    <button
+                      key={variant.id}
+                      type="button"
+                      className={`${styles.colorDot}${isActive ? ` ${styles.colorDotActive}` : ''}`}
+                      style={style}
+                      onClick={() => selectVariant(item.id, variant.id)}
+                      aria-pressed={isActive}
+                      aria-label={variant.color_name}
+                    />
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         <Link href={item.slug || '#'} className={styles.cardTitle} prefetch={false}>
           {item.name}
