@@ -132,6 +132,12 @@ class Category(Date):
         max_length=255,
         unique=True,
     )
+    image = models.ImageField(
+        verbose_name='Изображение',
+        upload_to=PathAndRename('products/category_photo/image'),
+        null=True,
+        blank=True,
+    )
 
     class Meta(Date.Meta):
         verbose_name = 'Категория'

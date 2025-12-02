@@ -1,6 +1,7 @@
 """Admin registrations for product models."""
 
 from django.contrib import admin
+from django.utils.html import format_html
 
 from .models import (
     Category,
@@ -31,6 +32,7 @@ class ProductImageInline(admin.TabularInline):
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = (
+        'image_preview',
         'name',
         'slug',
         'parent',
@@ -41,6 +43,20 @@ class CategoryAdmin(admin.ModelAdmin):
     )
     list_filter = ('parent',)
     raw_id_fields = ('parent',)
+    readonly_fields = ('image_preview',)
+    fields = (
+        'name',
+        'slug',
+        'parent',
+        'image',
+        'image_preview',
+    )
+
+    @admin.display(description='Фото')
+    def image_preview(self, obj):  # pragma: no cover - admin helper
+        if obj.image:
+            return format_html('<img src="{}" style="max-height: 80px" />', obj.image.url)
+        return '—'
 
 
 @admin.register(Product)
