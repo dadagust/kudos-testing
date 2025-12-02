@@ -57,6 +57,49 @@ const resolveApiUrls = (): { core: string; apiV1: string } => {
 
 const { core: CORE_API_URL, apiV1: API_V1_URL } = resolveApiUrls();
 
+const DEFAULT_BACKEND_ORIGIN = 'http://localhost:8000';
+
+const detectBackendOrigin = () => {
+  const rawValue = process.env.KUDOS_BACKEND_ORIGIN ?? process.env.NEXT_PUBLIC_API_URL;
+
+  if (!rawValue) {
+    return DEFAULT_BACKEND_ORIGIN;
+  }
+
+  const normalized = normalizeBaseUrl(rawValue);
+  const isAbsolute = /^https?:\/\//i.test(normalized);
+
+  if (!isAbsolute) {
+    return DEFAULT_BACKEND_ORIGIN;
+  }
+
+  return resolveApiRoot(normalized);
+};
+
+const BACKEND_ORIGIN = detectBackendOrigin();
+
+const resolveMediaUrl = (value?: string | null) => {
+  const normalized = (value ?? '').trim();
+
+  if (!normalized) {
+    return '';
+  }
+
+  if (/^https?:\/\//i.test(normalized)) {
+    return normalized;
+  }
+
+  if (normalized.startsWith('/media/')) {
+    return `${BACKEND_ORIGIN}${normalized}`;
+  }
+
+  if (normalized.startsWith('media/')) {
+    return `${BACKEND_ORIGIN}/${normalized}`;
+  }
+
+  return normalized;
+};
+
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS';
 
 interface RequestOptions {
@@ -334,7 +377,7 @@ const normalizeNewArrivalVariant = (value: unknown): NewArrivalVariant | null =>
     id: String(id),
     color_name: String(variant.color_name ?? variant.color ?? ''),
     color_value: String(variant.color_value ?? variant.value ?? ''),
-    image: String(variant.image ?? ''),
+    image: resolveMediaUrl((variant.image ?? variant.image_url) as string | null | undefined),
     slug: (variant.slug ?? variant.url) as string | null | undefined,
   };
 };
@@ -365,11 +408,12 @@ const normalizeNewArrivalItem = (value: unknown): NewArrivalItem | null => {
     type,
     name: String(record.name ?? ''),
     price_rub: Number(record.price_rub ?? record.price ?? 0) || 0,
-    image:
+    image: resolveMediaUrl(
       (record.image_url ?? record.image ?? record.preview_image ?? record.thumbnail_url) as
         | string
         | null
         | undefined,
+    ),
     slug: (record.slug ?? record.url) as string | null | undefined,
     variants: variants.length > 0 ? variants : undefined,
   };
