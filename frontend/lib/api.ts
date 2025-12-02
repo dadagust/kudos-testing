@@ -57,6 +57,49 @@ const resolveApiUrls = (): { core: string; apiV1: string } => {
 
 const { core: CORE_API_URL, apiV1: API_V1_URL } = resolveApiUrls();
 
+const DEFAULT_BACKEND_ORIGIN = 'http://localhost:8000';
+
+const detectBackendOrigin = () => {
+  const rawValue = process.env.KUDOS_BACKEND_ORIGIN ?? process.env.NEXT_PUBLIC_API_URL;
+
+  if (!rawValue) {
+    return DEFAULT_BACKEND_ORIGIN;
+  }
+
+  const normalized = normalizeBaseUrl(rawValue);
+  const isAbsolute = /^https?:\/\//i.test(normalized);
+
+  if (!isAbsolute) {
+    return DEFAULT_BACKEND_ORIGIN;
+  }
+
+  return resolveApiRoot(normalized);
+};
+
+const BACKEND_ORIGIN = detectBackendOrigin();
+
+const resolveMediaUrl = (value?: string | null) => {
+  const normalized = (value ?? '').trim();
+
+  if (!normalized) {
+    return '';
+  }
+
+  if (/^https?:\/\//i.test(normalized)) {
+    return normalized;
+  }
+
+  if (normalized.startsWith('/media/')) {
+    return `${BACKEND_ORIGIN}${normalized}`;
+  }
+
+  if (normalized.startsWith('media/')) {
+    return `${BACKEND_ORIGIN}/${normalized}`;
+  }
+
+  return normalized;
+};
+
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS';
 
 interface RequestOptions {
@@ -178,6 +221,26 @@ export interface CatalogueCategory {
   image: string | null;
 }
 
+export type NewArrivalType = 'product' | 'group';
+
+export interface NewArrivalVariant {
+  id: string;
+  color_name: string;
+  color_value: string;
+  image: string;
+  slug?: string | null;
+}
+
+export interface NewArrivalItem {
+  id: string;
+  type: NewArrivalType;
+  name: string;
+  price_rub: number;
+  image?: string | null;
+  slug?: string | null;
+  variants?: NewArrivalVariant[];
+}
+
 export interface CreateOrderPayload {
   status: OrderStatus;
   installation_date: string;
@@ -295,6 +358,76 @@ export const catalogueApi = {
     );
 
     return response.data ?? [];
+  },
+};
+
+const normalizeNewArrivalVariant = (value: unknown): NewArrivalVariant | null => {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const variant = value as Record<string, unknown>;
+  const id = variant.id ?? variant.slug;
+
+  if (!id) {
+    return null;
+  }
+
+  return {
+    id: String(id),
+    color_name: String(variant.color_name ?? variant.color ?? ''),
+    color_value: String(variant.color_value ?? variant.value ?? ''),
+    image: resolveMediaUrl((variant.image ?? variant.image_url) as string | null | undefined),
+    slug: (variant.slug ?? variant.url) as string | null | undefined,
+  };
+};
+
+const normalizeNewArrivalItem = (value: unknown): NewArrivalItem | null => {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const record = value as Record<string, unknown>;
+  const rawId = record.id ?? record.slug;
+  const rawType = (record.item_type ?? record.type ?? record.kind) as string | undefined;
+
+  if (!rawId || !rawType) {
+    return null;
+  }
+
+  const type = rawType === 'group' ? 'group' : 'product';
+  const variantsRaw = Array.isArray(record.variants)
+    ? (record.variants as unknown[])
+    : Array.isArray(record.products)
+      ? (record.products as unknown[])
+      : [];
+  const variants = variantsRaw.map(normalizeNewArrivalVariant).filter(Boolean) as NewArrivalVariant[];
+
+  return {
+    id: String(rawId),
+    type,
+    name: String(record.name ?? ''),
+    price_rub: Number(record.price_rub ?? record.price ?? 0) || 0,
+    image: resolveMediaUrl(
+      (record.image_url ?? record.image ?? record.preview_image ?? record.thumbnail_url) as
+        | string
+        | null
+        | undefined,
+    ),
+    slug: (record.slug ?? record.url) as string | null | undefined,
+    variants: variants.length > 0 ? variants : undefined,
+  };
+};
+
+export const newArrivalsApi = {
+  list: async (): Promise<NewArrivalItem[]> => {
+    const response = await performRequest<{ data?: unknown }>(CORE_API_URL, '/products/new-items/', {
+      method: 'GET',
+    });
+
+    const data = Array.isArray(response?.data) ? (response.data as unknown[]) : [];
+
+    return data.map(normalizeNewArrivalItem).filter((item): item is NewArrivalItem => Boolean(item));
   },
 };
 
