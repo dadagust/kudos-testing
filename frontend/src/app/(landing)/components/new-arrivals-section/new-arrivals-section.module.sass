@@ -41,6 +41,12 @@ $background-color: #f5f4f4
   flex-direction: column
   color: $primary-color
 
+.cardMediaWrapper
+  position: relative
+  border-radius: 12px
+  overflow: hidden
+  background: $background-color
+
 .cardMedia
   position: relative
   width: 100%
@@ -58,14 +64,41 @@ $background-color: #f5f4f4
   inset: 0
   background: linear-gradient(180deg, #e7e7e7 0%, #cfcfcf 100%)
 
+.cardOverlay
+  position: absolute
+  inset: 0
+  display: flex
+  align-items: flex-end
+  justify-content: flex-end
+  pointer-events: none
+
+.plusButton
+  position: absolute
+  left: 12px
+  bottom: 12px
+  width: 38px
+  height: 38px
+  border-radius: 50%
+  background: rgba(0, 0, 0, 0.65)
+  color: #fff
+  border: 1px solid rgba(255, 255, 255, 0.6)
+  display: inline-flex
+  align-items: center
+  justify-content: center
+  font-size: 22px
+  font-weight: 500
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.16)
+  pointer-events: none
+
 .variantBlock
-  margin-top: 14px
+  margin: 0 14px 14px 64px
   padding: 10px 12px
   border-radius: 10px
   background: rgba(245, 244, 244, 0.8)
   display: flex
   flex-direction: column
   gap: 10px
+  pointer-events: auto
 
 .variantName
   font-size: 14px
@@ -107,15 +140,6 @@ $background-color: #f5f4f4
   font-size: 16px
   line-height: 1.3
   color: $primary-color
-
-.plus
-  flex: 0 0 52px
-  display: inline-flex
-  align-items: center
-  justify-content: center
-  font-size: 32px
-  color: #bcbcbc
-  font-weight: 500
 
 .actions
   margin-top: 42px
@@ -163,9 +187,6 @@ $background-color: #f5f4f4
 .cardSkeletonPrice
   width: 50%
 
-.plusSkeleton
-  color: #d0d0d0
-
 @keyframes shimmer
   0%
     background-position: -200% 0
@@ -182,10 +203,6 @@ $background-color: #f5f4f4
 
   .row
     gap: 16px
-
-  .plus
-    flex-basis: 46px
-    font-size: 28px
 
 @media (max-width: 900px)
   .section
@@ -210,12 +227,11 @@ $background-color: #f5f4f4
   .row
     gap: 14px
 
-  .plus
-    flex-basis: 38px
-    font-size: 24px
-
   .cardMedia
     padding-top: 130%
+
+  .variantBlock
+    margin: 0 12px 12px 52px
 
   .colorDot
     width: 16px
@@ -224,9 +240,6 @@ $background-color: #f5f4f4
 @media (max-width: 480px)
   .row
     flex-direction: column
-
-  .plus
-    display: none
 
   .actions
     margin-top: 32px
