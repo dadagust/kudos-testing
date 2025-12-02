@@ -241,11 +241,33 @@ $background-color: #f5f4f4
     height: 16px
 
 @media (max-width: 480px)
+  .rows
+    gap: 22px
+
   .row
-    flex-direction: column
+    flex-wrap: nowrap
+    overflow-x: auto
+    scroll-snap-type: x mandatory
+    scrollbar-width: thin
+    margin: 0 -20px
+    padding: 0 20px 6px
+
+  .row::-webkit-scrollbar
+    height: 6px
+
+  .row::-webkit-scrollbar-thumb
+    background: #d0d0d0
+    border-radius: 999px
 
   .actions
     margin-top: 32px
 
   .card
-    width: 100%
+    flex: 0 0 82%
+    min-width: 260px
+    scroll-snap-align: start
+
+  .cardSkeleton
+    flex: 0 0 82%
+    min-width: 260px
+    scroll-snap-align: start

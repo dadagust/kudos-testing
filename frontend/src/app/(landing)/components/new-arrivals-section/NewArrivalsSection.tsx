@@ -98,10 +98,12 @@ export const NewArrivalsSection: FC = () => {
 
   const displayedItems = useMemo(() => items.slice(0, 10), [items]);
 
-  const rows = useMemo(
-    () => buildRows(displayedItems, Math.max(1, itemsPerRow)),
-    [displayedItems, itemsPerRow],
-  );
+  const rows = useMemo(() => {
+    const safeItemsPerRow = Math.max(1, itemsPerRow);
+    return safeItemsPerRow === 1
+      ? [displayedItems]
+      : buildRows(displayedItems, safeItemsPerRow);
+  }, [displayedItems, itemsPerRow]);
 
   const selectVariant = (itemId: string, variantId: string) => {
     setSelectedVariants((prev) => ({ ...prev, [itemId]: variantId }));
@@ -200,15 +202,19 @@ export const NewArrivalsSection: FC = () => {
     </div>
   );
 
-  const skeletonRows = useMemo(
-    () => buildRows(Array.from({length: Math.max(itemsPerRow * 2, 4)}, (_, index) => ({
+  const skeletonRows = useMemo(() => {
+    const safeItemsPerRow = Math.max(1, itemsPerRow);
+    const skeletonItems = Array.from({length: Math.max(itemsPerRow * 2, 4)}, (_, index) => ({
       id: `skeleton-${index}`,
       type: 'product',
       name: '',
       price_rub: 0,
-    } as NewArrivalItem)), Math.max(1, itemsPerRow)),
-    [itemsPerRow],
-  );
+    } as NewArrivalItem));
+
+    return safeItemsPerRow === 1
+      ? [skeletonItems]
+      : buildRows(skeletonItems, safeItemsPerRow);
+  }, [itemsPerRow]);
 
   return (
     <section className={styles.section} aria-labelledby="new-arrivals-title">
