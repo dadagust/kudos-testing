@@ -106,7 +106,7 @@ export const FrontendFooter: FC = () => (
             {socialLinks.map((social) => (
               <li key={social.label}>
                 <a href={social.href} aria-label={social.label} className={styles.socialLink}>
-                  <Icon name={social.icon} size={22} />
+                  <Icon name={social.icon} size={22} className={styles.socialIcon} />
                 </a>
               </li>
             ))}
