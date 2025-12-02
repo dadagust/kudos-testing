@@ -360,6 +360,50 @@ class ProductGroupViewSet(viewsets.ModelViewSet):
         )
 
 
+class CategoryProductsView(APIView):
+    def get(self, request: Request):
+        category_id = request.query_params.get('category_id')
+        if not category_id:
+            return Response(
+                {'detail': 'category_id query parameter is required'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        category = get_object_or_404(Category, pk=category_id)
+
+        product_queryset = Product.objects.filter(category=category).select_related(
+            'category', 'color', 'delivery_transport_restriction'
+        )
+        product_queryset = product_queryset.prefetch_related(
+            Prefetch('images', queryset=ProductImage.objects.order_by('position'))
+        )
+
+        groups = (
+            ProductGroup.objects.filter(category=category)
+            .select_related('category')
+            .prefetch_related(Prefetch('products', queryset=product_queryset))
+        )
+
+        grouped_product_ids = (
+            Product.objects.filter(groups__category=category)
+            .values_list('id', flat=True)
+            .distinct()
+        )
+        standalone_products = product_queryset.exclude(id__in=grouped_product_ids)
+
+        groups_data = ProductGroupSerializer(
+            groups, many=True, context={'request': request}
+        ).data
+        products_data = ProductListItemSerializer(
+            standalone_products, many=True, context={'request': request}
+        ).data
+
+        data = [{'item_type': 'group', **group} for group in groups_data]
+        data.extend({'item_type': 'product', **product} for product in products_data)
+
+        return Response({'data': data})
+
+
 class CategoryTreeView(APIView):
     def get(self, request: Request):
         categories = Category.objects.all().order_by('name')
@@ -406,6 +450,7 @@ class EnumsAggregateView(APIView):
 
 __all__ = [
     'CategoryTreeView',
+    'CategoryProductsView',
     'ColorsListView',
     'EnumsAggregateView',
     'ProductGroupViewSet',

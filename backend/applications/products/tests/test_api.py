@@ -19,6 +19,7 @@ from applications.products.models import (
     Color,
     InstallerQualification,
     Product,
+    ProductGroup,
     TransportRestriction,
 )
 
@@ -209,6 +210,42 @@ class ProductApiTests(APITestCase):
                 for item in installer_qualifications
             )
         )
+
+    def test_category_items_return_groups_and_unique_products(self):
+        grouped_product = Product.objects.create(
+            name='Стул в группе',
+            category=self.category,
+            price_rub='1800',
+            dimensions_shape=DimensionShape.LINE_LENGTH,
+            line_length_cm=75,
+            delivery_weight_kg='1.25',
+        )
+        standalone_product = Product.objects.create(
+            name='Стол без группы',
+            category=self.category,
+            price_rub='3200',
+            dimensions_shape=DimensionShape.LINE_LENGTH,
+            line_length_cm=120,
+            delivery_weight_kg='4.00',
+        )
+        group = ProductGroup.objects.create(name='Гостиный комплект', category=self.category)
+        group.products.add(grouped_product)
+
+        url = reverse('products:product-category-items')
+        response = self.client.get(url, {'category_id': str(self.category.id)})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        payload = response.json()['data']
+        self.assertEqual(len(payload), 2)
+
+        group_payload = next(item for item in payload if item['item_type'] == 'group')
+        product_payload = next(item for item in payload if item['item_type'] == 'product')
+
+        self.assertEqual(group_payload['id'], str(group.id))
+        self.assertEqual(len(group_payload['products']), 1)
+        self.assertEqual(group_payload['products'][0]['id'], str(grouped_product.id))
+        self.assertEqual(product_payload['id'], str(standalone_product.id))
+        self.assertNotEqual(product_payload['id'], str(grouped_product.id))
 
     def test_public_catalogue_endpoint(self):
         image_content = BytesIO()
