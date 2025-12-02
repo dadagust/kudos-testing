@@ -225,6 +225,7 @@ export type NewArrivalType = 'product' | 'group';
 
 export interface NewArrivalVariant {
   id: string;
+  name?: string;
   color_name: string;
   color_value: string;
   image: string;
@@ -361,6 +362,18 @@ export const catalogueApi = {
   },
 };
 
+const coerceString = (value: unknown, fallback = ''): string => {
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+
+  if (value && typeof value === 'object' && 'value' in (value as Record<string, unknown>)) {
+    return coerceString((value as Record<string, unknown>).value, fallback);
+  }
+
+  return fallback;
+};
+
 const normalizeNewArrivalVariant = (value: unknown): NewArrivalVariant | null => {
   if (!value || typeof value !== 'object') {
     return null;
@@ -368,6 +381,7 @@ const normalizeNewArrivalVariant = (value: unknown): NewArrivalVariant | null =>
 
   const variant = value as Record<string, unknown>;
   const id = variant.id ?? variant.slug;
+  const color = (variant.color ?? null) as Record<string, unknown> | null;
 
   if (!id) {
     return null;
@@ -375,8 +389,9 @@ const normalizeNewArrivalVariant = (value: unknown): NewArrivalVariant | null =>
 
   return {
     id: String(id),
-    color_name: String(variant.color_name ?? variant.color ?? ''),
-    color_value: String(variant.color_value ?? variant.value ?? ''),
+    name: coerceString(variant.name ?? color?.name),
+    color_name: coerceString(variant.color_name ?? color?.name),
+    color_value: coerceString(variant.color_value ?? variant.value ?? color?.value),
     image: resolveMediaUrl((variant.image ?? variant.image_url) as string | null | undefined),
     slug: (variant.slug ?? variant.url) as string | null | undefined,
   };
