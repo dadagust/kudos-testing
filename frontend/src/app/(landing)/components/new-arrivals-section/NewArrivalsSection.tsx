@@ -180,16 +180,16 @@ export const NewArrivalsSection: FC = () => {
               </div>
             </div>
           )}
+
+          <button type="button" className={styles.plusButton} aria-label="Добавить в подборку">
+            +
+          </button>
         </div>
 
         <Link href={item.slug || '#'} className={styles.cardTitle} prefetch={false}>
           {item.name}
         </Link>
         <div className={styles.cardPrice}>{priceText}</div>
-
-        <button type="button" className={styles.plusButton} aria-label="Добавить в подборку">
-          +
-        </button>
       </article>
     );
   };
