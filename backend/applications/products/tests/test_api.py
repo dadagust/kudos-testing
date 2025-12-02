@@ -210,6 +210,31 @@ class ProductApiTests(APITestCase):
             )
         )
 
+    def test_public_catalogue_endpoint(self):
+        image_content = BytesIO()
+        image = Image.new('RGB', (50, 50), color='blue')
+        image.save(image_content, format='PNG')
+        image_content.seek(0)
+
+        uploaded = SimpleUploadedFile(
+            'category.png', image_content.read(), content_type='image/png'
+        )
+        category = Category.objects.create(
+            name='Свет', slug='light', image=uploaded
+        )
+
+        response = self.client.get(reverse('catalogue-list'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        payload = response.json().get('data', [])
+        self.assertGreaterEqual(len(payload), 1)
+        target = next((item for item in payload if item['id'] == str(category.id)), None)
+
+        self.assertIsNotNone(target)
+        self.assertEqual(target['name'], category.name)
+        self.assertEqual(target['slug'], category.slug)
+        self.assertTrue(target['image'])
+
     def test_image_upload_and_reorder(self):
         product = Product.objects.create(
             name='Фон',
