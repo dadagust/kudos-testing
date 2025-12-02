@@ -14,6 +14,12 @@ type ContactItem = {
   icon?: 'map-pin' | 'mail' | 'phone';
 };
 
+type SocialLink = {
+  label: string;
+  href: string;
+  icon: 'telegram' | 'whatsapp' | 'vk';
+};
+
 const clientLinks: FooterLink[] = [
   { href: '#', label: 'Условия работы' },
   { href: '#', label: 'Доставка' },
@@ -40,6 +46,12 @@ const contactItems: ContactItem[] = [
 const policyLinks: FooterLink[] = [
   { href: '#', label: 'Договор оферты' },
   { href: '#', label: 'Политика конфиденциальности' }
+];
+
+const socialLinks: SocialLink[] = [
+  { href: '#', label: 'Telegram', icon: 'telegram' },
+  { href: '#', label: 'Whatsapp', icon: 'whatsapp' },
+  { href: '#', label: 'Vk', icon: 'vk' }
 ];
 
 export const FrontendFooter: FC = () => (
@@ -96,9 +108,18 @@ export const FrontendFooter: FC = () => (
               </li>
             ))}
           </ul>
+          <ul className={styles.socialList}>
+            {socialLinks.map((social) => (
+              <li key={social.label}>
+                <a href={social.href} aria-label={social.label} className={styles.socialLink}>
+                  <Icon name={social.icon} size={22} />
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
-
+      <div className={styles.divider} />
       <div className={styles.policies}>
         {policyLinks.map((link, index) => (
           <a key={link.label} href={link.href} className={styles.policyLink}>
