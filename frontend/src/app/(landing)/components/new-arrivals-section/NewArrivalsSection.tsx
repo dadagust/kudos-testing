@@ -7,32 +7,15 @@ import {Button} from '../../../../shared/ui/button/Button';
 
 import styles from './new-arrivals-section.module.sass';
 
-type RowItem =
-  | {
-  kind: 'product';
-  item: NewArrivalItem;
-}
-  | { kind: 'plus'; id: string };
-
 const formatPrice = (value: number) =>
   new Intl.NumberFormat('ru-RU').format(Math.max(0, Math.round(value)));
 
-const buildRows = (items: NewArrivalItem[], itemsPerRow: number): RowItem[][] => {
-  const rows: RowItem[][] = [];
+const buildRows = (items: NewArrivalItem[], itemsPerRow: number): NewArrivalItem[][] => {
+  const rows: NewArrivalItem[][] = [];
 
   for (let index = 0; index < items.length; index += itemsPerRow) {
     const rowItems = items.slice(index, index + itemsPerRow);
-    const row: RowItem[] = [];
-
-    rowItems.forEach((item, itemIndex) => {
-      row.push({kind: 'product', item});
-
-      if (itemIndex < rowItems.length - 1) {
-        row.push({kind: 'plus', id: `plus-${index}-${itemIndex}`});
-      }
-    });
-
-    rows.push(row);
+    rows.push(rowItems);
   }
 
   return rows;
@@ -200,6 +183,10 @@ export const NewArrivalsSection: FC = () => {
           {item.name}
         </Link>
         <div className={styles.cardPrice}>{priceText}</div>
+
+        <button type="button" className={styles.plusButton} aria-label="Добавить в подборку">
+          +
+        </button>
       </article>
     );
   };
@@ -235,28 +222,12 @@ export const NewArrivalsSection: FC = () => {
           {isLoading
             ? skeletonRows.map((row, rowIndex) => (
                 <div key={`skeleton-row-${rowIndex}`} className={styles.row}>
-                  {row.map((item) =>
-                    item.kind === 'plus' ? (
-                      <div key={item.id} className={`${styles.plus} ${styles.plusSkeleton}`} aria-hidden>
-                        +
-                      </div>
-                    ) : (
-                      renderSkeletonCard(item.item.id)
-                    ),
-                  )}
+                  {row.map((item) => renderSkeletonCard(item.id))}
                 </div>
               ))
             : rows.map((row, rowIndex) => (
                 <div key={`row-${rowIndex}`} className={styles.row}>
-                  {row.map((element) =>
-                    element.kind === 'plus' ? (
-                      <div key={element.id} className={styles.plus} aria-hidden>
-                        +
-                      </div>
-                    ) : (
-                      renderCard(element.item)
-                    ),
-                  )}
+                  {row.map((element) => renderCard(element))}
                 </div>
               ))}
         </div>
