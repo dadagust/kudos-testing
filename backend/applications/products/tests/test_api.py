@@ -234,6 +234,7 @@ class ProductApiTests(APITestCase):
         self.assertEqual(target['name'], category.name)
         self.assertEqual(target['slug'], category.slug)
         self.assertTrue(target['image'])
+        self.assertTrue(target['image'].startswith('http://testserver/media/'))
 
     def test_image_upload_and_reorder(self):
         product = Product.objects.create(

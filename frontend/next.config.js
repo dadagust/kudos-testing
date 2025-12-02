@@ -30,9 +30,20 @@ const detectBackendOrigin = () => {
 };
 
 const backendOrigin = detectBackendOrigin();
+const backendUrl = new URL(backendOrigin);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: backendUrl.protocol.replace(':', ''),
+        hostname: backendUrl.hostname,
+        port: backendUrl.port || undefined,
+        pathname: '/media/**',
+      },
+    ],
+  },
   async rewrites() {
     return [
       {
