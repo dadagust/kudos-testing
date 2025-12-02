@@ -177,7 +177,12 @@ type ProductFormImage = {
 
 type ProductGroupFormState = {
   name: string;
+  categoryId: string;
   products: ProductListItem[];
+  imageFile: File | null;
+  imagePreviewUrl: string | null;
+  existingImageUrl: string | null;
+  removeImage: boolean;
 };
 
 const createEmptyProductForm = (defaults?: {
@@ -238,6 +243,16 @@ const createEmptyProductForm = (defaults?: {
     meta_title: '',
     meta_description: '',
   },
+});
+
+const createEmptyGroupForm = (): ProductGroupFormState => ({
+  name: '',
+  categoryId: '',
+  products: [],
+  imageFile: null,
+  imagePreviewUrl: null,
+  existingImageUrl: null,
+  removeImage: false,
 });
 
 const createFormFromProduct = (product: ProductDetail): CreateProductFormState => {
@@ -752,10 +767,22 @@ const buildCreatePayload = (form: CreateProductFormState): ProductCreatePayload 
   return payload;
 };
 
-const buildGroupPayload = (form: ProductGroupFormState): ProductGroupPayload => ({
-  name: form.name.trim(),
-  product_ids: Array.from(new Set(form.products.map((item) => item.id))),
-});
+const buildGroupPayload = (form: ProductGroupFormState): ProductGroupPayload => {
+  const payload: ProductGroupPayload = {
+    name: form.name.trim(),
+    category_id: form.categoryId,
+    product_ids: Array.from(new Set(form.products.map((item) => item.id))),
+  };
+
+  if (form.imageFile) {
+    payload.image = form.imageFile;
+  } else if (form.removeImage) {
+    payload.image = null;
+    payload.remove_image = true;
+  }
+
+  return payload;
+};
 
 const ProductCard = ({
   product,
@@ -887,9 +914,10 @@ export default function ProductsPage() {
   const [planForm, setPlanForm] = useState({ quantity: '', scheduledFor: '' });
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
   const [groupModalMode, setGroupModalMode] = useState<'create' | 'edit'>('create');
-  const [groupForm, setGroupForm] = useState<ProductGroupFormState>({ name: '', products: [] });
+  const [groupForm, setGroupForm] = useState<ProductGroupFormState>(createEmptyGroupForm());
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [groupSearch, setGroupSearch] = useState('');
+  const groupImageInputRef = useRef<HTMLInputElement | null>(null);
   const groupLoadMoreRef = useRef<HTMLDivElement | null>(null);
   const [groupNotification, setGroupNotification] = useState<string | null>(null);
   const [groupToDelete, setGroupToDelete] = useState<ProductGroup | null>(null);
@@ -898,6 +926,15 @@ export default function ProductsPage() {
 
   const canManageProducts = usePermission('products_add_product');
   const queryClient = useQueryClient();
+
+  const resetGroupForm = () => {
+    setGroupForm((prev) => {
+      if (prev.imagePreviewUrl && prev.imageFile) {
+        URL.revokeObjectURL(prev.imagePreviewUrl);
+      }
+      return createEmptyGroupForm();
+    });
+  };
 
   const baseParams = useMemo<ProductListQuery>(
     () => ({
@@ -1798,7 +1835,21 @@ export default function ProductsPage() {
     if (groupModalMode !== 'edit' || !editingGroup) {
       return;
     }
-    setGroupForm({ name: editingGroup.name ?? '', products: editingGroup.products ?? [] });
+    setGroupForm((prev) => {
+      if (prev.imagePreviewUrl && prev.imageFile) {
+        URL.revokeObjectURL(prev.imagePreviewUrl);
+      }
+
+      return {
+        name: editingGroup.name ?? '',
+        categoryId: editingGroup.category_id ?? '',
+        products: editingGroup.products ?? [],
+        imageFile: null,
+        imagePreviewUrl: null,
+        existingImageUrl: editingGroup.image_url ?? null,
+        removeImage: false,
+      };
+    });
     setGroupFormError(null);
   }, [groupModalMode, editingGroup]);
 
@@ -1993,7 +2044,7 @@ export default function ProductsPage() {
 
   const openCreateGroupModal = () => {
     setGroupModalMode('create');
-    setGroupForm({ name: '', products: [] });
+    resetGroupForm();
     setEditingGroupId(null);
     setGroupSearch('');
     setGroupFormError(null);
@@ -2004,6 +2055,7 @@ export default function ProductsPage() {
 
   const openEditGroupModal = (groupId: string) => {
     setGroupModalMode('edit');
+    resetGroupForm();
     setEditingGroupId(groupId);
     setGroupSearch('');
     setGroupFormError(null);
@@ -2016,7 +2068,7 @@ export default function ProductsPage() {
     setIsGroupModalOpen(false);
     setGroupModalMode('create');
     setEditingGroupId(null);
-    setGroupForm({ name: '', products: [] });
+    resetGroupForm();
     setGroupSearch('');
     setGroupFormError(null);
     createGroupMutation.reset();
@@ -2026,6 +2078,56 @@ export default function ProductsPage() {
   const handleGroupNameChange = (event: ChangeEvent<HTMLInputElement>) => {
     setGroupFormError(null);
     setGroupForm((prev) => ({ ...prev, name: event.target.value }));
+  };
+
+  const handleGroupCategoryChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    setGroupFormError(null);
+    setGroupForm((prev) => ({ ...prev, categoryId: event.target.value }));
+  };
+
+  const handleGroupImageChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    setGroupFormError(null);
+    setGroupForm((prev) => {
+      if (prev.imagePreviewUrl && prev.imageFile) {
+        URL.revokeObjectURL(prev.imagePreviewUrl);
+      }
+
+      return {
+        ...prev,
+        imageFile: file,
+        imagePreviewUrl: URL.createObjectURL(file),
+        existingImageUrl: null,
+        removeImage: false,
+      };
+    });
+
+    event.target.value = '';
+  };
+
+  const handleRemoveGroupImage = () => {
+    setGroupFormError(null);
+    setGroupForm((prev) => {
+      if (prev.imagePreviewUrl && prev.imageFile) {
+        URL.revokeObjectURL(prev.imagePreviewUrl);
+      }
+
+      return {
+        ...prev,
+        imageFile: null,
+        imagePreviewUrl: null,
+        existingImageUrl: null,
+        removeImage: true,
+      };
+    });
+  };
+
+  const handlePickGroupImage = () => {
+    groupImageInputRef.current?.click();
   };
 
   const handleGroupSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -2244,6 +2346,10 @@ export default function ProductsPage() {
     const payload = buildGroupPayload(groupForm);
     if (!payload.name) {
       setGroupFormError('Введите название группы');
+      return;
+    }
+    if (!payload.category_id) {
+      setGroupFormError('Выберите категорию группы');
       return;
     }
     if (payload.product_ids.length === 0) {
@@ -2548,86 +2654,141 @@ export default function ProductsPage() {
                   width: '100%',
                 }}
               >
-                {productGroups?.map((group) => (
-                  <div
-                    key={group.id}
-                    style={{
-                      border: '1px solid var(--color-border)',
-                      borderRadius: '12px',
-                      padding: '16px',
-                      background: 'var(--color-surface)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '12px',
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <h3 style={{ margin: 0 }}>{group.name}</h3>
-                        <span style={{ color: 'var(--color-text-muted)' }}>
-                          {group.products.length} товаров
-                        </span>
-                      </div>
-                      {canManageProducts ? (
-                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                          <Button variant="ghost" onClick={() => openEditGroupModal(group.id)}>
-                            Редактировать
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            onClick={() => openDeleteGroupModal(group)}
-                            disabled={isDeletingGroup && groupToDelete?.id === group.id}
-                          >
-                            Удалить
-                          </Button>
-                        </div>
-                      ) : null}
-                    </div>
+                {productGroups?.map((group) => {
+                  const groupCategoryLabel = categoryNameMap[group.category_id ?? ''];
+                  const groupImage = group.image_url ?? null;
 
-                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                      {group.products.slice(0, 6).map((product) => (
+                  return (
+                    <div
+                      key={group.id}
+                      style={{
+                        border: '1px solid var(--color-border)',
+                        borderRadius: '12px',
+                        padding: '16px',
+                        background: 'var(--color-surface)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '12px',
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          gap: '12px',
+                          flexWrap: 'wrap',
+                          alignItems: 'center',
+                        }}
+                      >
                         <div
-                          key={product.id}
                           style={{
                             display: 'flex',
+                            gap: '12px',
                             alignItems: 'center',
-                            gap: '8px',
-                            padding: '8px',
-                            borderRadius: '10px',
-                            border: '1px solid var(--color-border)',
-                            background: 'var(--color-surface-muted)',
+                            flex: 1,
+                            minWidth: 280,
                           }}
                         >
                           <div
                             style={{
-                              width: 48,
-                              height: 48,
-                              borderRadius: '10px',
+                              width: 96,
+                              height: 96,
+                              borderRadius: '12px',
                               overflow: 'hidden',
-                              background: 'var(--color-surface)',
+                              background: 'var(--color-surface-muted)',
                               border: '1px solid var(--color-border)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              flexShrink: 0,
                             }}
                           >
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={product.thumbnail_url ?? '/placeholder-product.jpg'}
-                              alt={product.name}
-                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                            />
+                            {groupImage ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={groupImage}
+                                alt={group.name}
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              />
+                            ) : (
+                              <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                                Нет фото
+                              </span>
+                            )}
                           </div>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                            <span style={{ fontWeight: 600 }}>{product.name}</span>
-                            <span
-                              style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}
-                            >
-                              {formatPrice(product.price_rub)}
+
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
+                            <h3 style={{ margin: 0 }}>{group.name}</h3>
+                            <span style={{ color: 'var(--color-text-muted)' }}>
+                              {groupCategoryLabel || 'Без категории'}
+                            </span>
+                            <span style={{ color: 'var(--color-text-muted)' }}>
+                              {group.products.length} товаров
                             </span>
                           </div>
                         </div>
-                      ))}
+
+                        {canManageProducts ? (
+                          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            <Button variant="ghost" onClick={() => openEditGroupModal(group.id)}>
+                              Редактировать
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              onClick={() => openDeleteGroupModal(group)}
+                              disabled={isDeletingGroup && groupToDelete?.id === group.id}
+                            >
+                              Удалить
+                            </Button>
+                          </div>
+                        ) : null}
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                        {group.products.slice(0, 6).map((product) => (
+                          <div
+                            key={product.id}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              padding: '8px',
+                              borderRadius: '10px',
+                              border: '1px solid var(--color-border)',
+                              background: 'var(--color-surface-muted)',
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: 48,
+                                height: 48,
+                                borderRadius: '10px',
+                                overflow: 'hidden',
+                                background: 'var(--color-surface)',
+                                border: '1px solid var(--color-border)',
+                              }}
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={product.thumbnail_url ?? '/placeholder-product.jpg'}
+                                alt={product.name}
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              />
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                              <span style={{ fontWeight: 600 }}>{product.name}</span>
+                              <span
+                                style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}
+                              >
+                                {formatPrice(product.price_rub)}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
           </>
@@ -3795,6 +3956,81 @@ export default function ProductsPage() {
                   disabled={isSubmittingGroup}
                   error={groupFormError?.includes('название') ? groupFormError : undefined}
                 />
+              </FormField>
+
+              <FormField
+                label="Категория группы"
+                description="Категория поможет быстрее находить группы на странице каталога."
+              >
+                <Select
+                  value={groupForm.categoryId}
+                  onChange={handleGroupCategoryChange}
+                  disabled={isSubmittingGroup}
+                  error={groupFormError?.includes('категор') ? groupFormError : undefined}
+                >
+                  <option value="">Выберите категорию</option>
+                  {categoryOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </Select>
+              </FormField>
+
+              <FormField
+                label="Фотография группы"
+                description="Добавьте фото для отображения в списке групп."
+              >
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <div
+                    style={{
+                      width: 120,
+                      height: 120,
+                      borderRadius: '12px',
+                      overflow: 'hidden',
+                      background: 'var(--color-surface-muted)',
+                      border: '1px solid var(--color-border)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    {groupForm.imagePreviewUrl || groupForm.existingImageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={groupForm.imagePreviewUrl ?? groupForm.existingImageUrl ?? ''}
+                        alt="Фото группы"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                        Нет фото
+                      </span>
+                    )}
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <input
+                      ref={groupImageInputRef}
+                      type="file"
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                      onChange={handleGroupImageChange}
+                      disabled={isSubmittingGroup}
+                    />
+                    <Button type="button" variant="ghost" onClick={handlePickGroupImage} disabled={isSubmittingGroup}>
+                      {groupForm.imagePreviewUrl || groupForm.existingImageUrl ? 'Заменить фото' : 'Загрузить фото'}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={handleRemoveGroupImage}
+                      disabled={isSubmittingGroup || (!groupForm.imagePreviewUrl && !groupForm.existingImageUrl && !groupForm.imageFile && !groupForm.removeImage)}
+                    >
+                      Удалить
+                    </Button>
+                  </div>
+                </div>
               </FormField>
 
               <FormField

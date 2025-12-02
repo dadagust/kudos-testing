@@ -352,8 +352,11 @@ class ProductGroupViewSet(viewsets.ModelViewSet):
         ).prefetch_related(
             Prefetch('images', queryset=ProductImage.objects.order_by('position')),
         )
-        return super().get_queryset().prefetch_related(
-            Prefetch('products', queryset=product_queryset)
+        return (
+            super()
+            .get_queryset()
+            .select_related('category')
+            .prefetch_related(Prefetch('products', queryset=product_queryset))
         )
 
 
