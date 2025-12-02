@@ -652,10 +652,24 @@ class ProductGroup(Date):
         default=uuid.uuid4,
         editable=False,
     )
+    category = models.ForeignKey(
+        to=Category,
+        verbose_name='Категория',
+        on_delete=models.PROTECT,
+        related_name='product_groups',
+        null=True,
+        blank=True,
+    )
     name = models.CharField(
         verbose_name='Название',
         max_length=255,
         unique=True,
+    )
+    image = models.ImageField(
+        verbose_name='Изображение',
+        upload_to=PathAndRename('products/product_group_photo/file'),
+        null=True,
+        blank=True,
     )
     products = models.ManyToManyField(
         to=Product,
@@ -671,6 +685,76 @@ class ProductGroup(Date):
 
     def __str__(self) -> str:  # pragma: no cover - human readable repr
         return self.name
+
+    @property
+    def image_url(self) -> str:
+        return self.image.url if self.image else ''
+
+    def save(self, *args, **kwargs):  # type: ignore[override]
+        update_fields = kwargs.get('update_fields')
+        should_process_image = self.image and (
+            not update_fields or 'image' in update_fields
+        )
+
+        super().save(*args, **kwargs)
+
+        if should_process_image and not getattr(self, '_processing_image', False):
+            self._processing_image = True
+            try:
+                self._process_image()
+            finally:
+                self._processing_image = False
+
+    def _process_image(self) -> None:
+        """Crop the image to a 2000x2000 JPEG square."""
+
+        if not self.image:
+            return
+
+        original_name = self.image.name
+
+        try:
+            self.image.open('rb')
+            with Image.open(self.image) as img:
+                img = ImageOps.exif_transpose(img)
+                width, height = img.size
+                if not width or not height:
+                    return
+
+                min_side = min(width, height)
+                left = (width - min_side) / 2
+                top = (height - min_side) / 2
+                right = left + min_side
+                bottom = top + min_side
+                img = img.crop((left, top, right, bottom))
+
+                if img.size != (2000, 2000):
+                    img = img.resize((2000, 2000), RESAMPLE_STRATEGY)
+
+                if img.mode in {'RGBA', 'LA'} or (img.mode == 'P' and 'transparency' in img.info):
+                    rgba_image = img.convert('RGBA')
+                    background = Image.new('RGB', rgba_image.size, (255, 255, 255))
+                    background.paste(rgba_image, mask=rgba_image.split()[-1])
+                    img = background
+                else:
+                    img = img.convert('RGB')
+
+                buffer = BytesIO()
+                img.save(buffer, format='JPEG', quality=85, optimize=True)
+        except Exception:  # pragma: no cover - we don't expect processing to fail in tests
+            logger.exception('Failed to process product group image %s', self.pk)
+            return
+        finally:
+            try:
+                self.image.close()
+            except Exception:  # pragma: no cover - defensive cleanup
+                logger.exception('Failed to close image file for product group %s', self.pk)
+
+        try:
+            self.image.save(original_name, ContentFile(buffer.getvalue()), save=False)
+            super().save(update_fields=['image'])
+        except Exception:  # pragma: no cover - unexpected save failure
+            logger.exception('Failed to save processed image for product group %s', self.pk)
 
 
 class ProductImage(Date):

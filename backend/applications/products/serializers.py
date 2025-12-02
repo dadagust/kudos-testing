@@ -902,18 +902,30 @@ def prefetch_for_include(include: Iterable[str]):
 
 class ProductGroupSerializer(serializers.ModelSerializer):
     products = ProductListItemSerializer(many=True, read_only=True)
+    category_id = serializers.PrimaryKeyRelatedField(
+        source='category',
+        queryset=Category.objects.all(),
+        allow_null=True,
+    )
     product_ids = serializers.ListField(
         child=serializers.UUIDField(),
         required=False,
         allow_empty=True,
         write_only=True,
     )
+    image = serializers.ImageField(required=False, allow_null=True, write_only=True)
+    remove_image = serializers.BooleanField(required=False, default=False, write_only=True)
+    image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = ProductGroup
         fields = (
             'id',
+            'category_id',
             'name',
+            'image',
+            'image_url',
+            'remove_image',
             'product_ids',
             'products',
             'created',
@@ -921,6 +933,7 @@ class ProductGroupSerializer(serializers.ModelSerializer):
         )
         read_only_fields = (
             'id',
+            'image_url',
             'products',
             'created',
             'modified',
@@ -928,6 +941,13 @@ class ProductGroupSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):  # type: ignore[override]
         product_ids = validated_data.pop('product_ids', [])
+        should_remove_image = validated_data.pop('remove_image', False)
+        image = validated_data.pop('image', None)
+        if should_remove_image:
+            validated_data['image'] = None
+        elif image:
+            validated_data['image'] = image
+
         group = ProductGroup.objects.create(**validated_data)
         if product_ids:
             group.products.set(product_ids)
@@ -935,8 +955,20 @@ class ProductGroupSerializer(serializers.ModelSerializer):
 
     def update(self, instance: ProductGroup, validated_data):  # type: ignore[override]
         product_ids = validated_data.pop('product_ids', None)
+        should_remove_image = validated_data.pop('remove_image', False)
+        image = validated_data.pop('image', serializers.empty)
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
+
+        if should_remove_image:
+            if instance.image:
+                instance.image.delete(save=False)
+            instance.image = None
+        elif image is not serializers.empty:
+            if instance.image and image:
+                instance.image.delete(save=False)
+            instance.image = image or None
+
         instance.save()
         if product_ids is not None:
             instance.products.set(product_ids)
@@ -948,7 +980,12 @@ class ProductGroupSerializer(serializers.ModelSerializer):
         data['updated_at'] = DATETIME_FIELD.to_representation(instance.modified)
         data.pop('created', None)
         data.pop('modified', None)
+        if data.get('category_id') is not None:
+            data['category_id'] = str(data['category_id'])
         return data
+
+    def get_image_url(self, instance: ProductGroup) -> str | None:
+        return instance.image_url or None
 
 
 __all__ = [
