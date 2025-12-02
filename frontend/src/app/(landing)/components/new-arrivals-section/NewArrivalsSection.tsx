@@ -1,24 +1,38 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { FC, useEffect, useMemo, useState } from 'react';
+import {FC, useEffect, useMemo, useState} from 'react';
 
-import {
-  newArrivalsApi,
-  type NewArrivalItem,
-  type NewArrivalVariant,
-} from '../../../../../lib/api';
-import { Button } from '../../../../shared/ui/button/Button';
+import {type NewArrivalItem, newArrivalsApi, type NewArrivalVariant,} from '../../../../../lib/api';
+import {Button} from '../../../../shared/ui/button/Button';
 
 import styles from './new-arrivals-section.module.sass';
+
+type RowItem =
+  | {
+  kind: 'product';
+  item: NewArrivalItem;
+}
+  | { kind: 'plus'; id: string };
 
 const formatPrice = (value: number) =>
   new Intl.NumberFormat('ru-RU').format(Math.max(0, Math.round(value)));
 
-const buildRows = (items: NewArrivalItem[], itemsPerRow: number): NewArrivalItem[][] => {
-  const rows: NewArrivalItem[][] = [];
+const buildRows = (items: NewArrivalItem[], itemsPerRow: number): RowItem[][] => {
+  const rows: RowItem[][] = [];
 
   for (let index = 0; index < items.length; index += itemsPerRow) {
-    rows.push(items.slice(index, index + itemsPerRow));
+    const rowItems = items.slice(index, index + itemsPerRow);
+    const row: RowItem[] = [];
+
+    rowItems.forEach((item, itemIndex) => {
+      row.push({kind: 'product', item});
+
+      if (itemIndex < rowItems.length - 1) {
+        row.push({kind: 'plus', id: `plus-${index}-${itemIndex}`});
+      }
+    });
+
+    rows.push(row);
   }
 
   return rows;
@@ -64,6 +78,8 @@ export const NewArrivalsSection: FC = () => {
         setItemsPerRow(1);
       } else if (window.innerWidth <= 900) {
         setItemsPerRow(2);
+      } else if (window.innerWidth >= 1400) {
+        setItemsPerRow(5);
       } else {
         setItemsPerRow(4);
       }
@@ -135,56 +151,48 @@ export const NewArrivalsSection: FC = () => {
 
     return (
       <article key={item.id} className={styles.card}>
-        <div className={styles.cardMediaWrapper}>
-          <Link
-            href={item.slug || '#'}
-            className={styles.cardMedia}
-            aria-label={`Подробнее о ${item.name}`}
-            prefetch={false}
-          >
-            {imageSrc ? (
-              <Image
-                src={imageSrc}
-                alt={item.name}
-                fill
-                className={styles.cardImage}
-                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
-              />
-            ) : (
-              <div className={styles.cardPlaceholder} aria-hidden />
-            )}
-          </Link>
+        <Link
+          href={item.slug || '#'}
+          className={styles.cardMedia}
+          aria-label={`Подробнее о ${item.name}`}
+          prefetch={false}
+        >
+          {imageSrc ? (
+            <Image
+              src={imageSrc}
+              alt={item.name}
+              fill
+              className={styles.cardImage}
+              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+            />
+          ) : (
+            <div className={styles.cardPlaceholder} aria-hidden/>
+          )}
+        </Link>
 
-          <div className={styles.cardOverlay} aria-hidden={!isGroup}>
-            <div className={styles.plusButton} aria-hidden>
-              +
+        {isGroup && (
+          <div className={styles.variantBlock}>
+            <div className={styles.variantName}>{activeVariant?.color_name || 'Цвет'}</div>
+            <div className={styles.variantList} role="list" aria-label="Выбор цвета">
+              {item.variants?.map((variant) => {
+                const isActive = activeVariant?.id === variant.id;
+                const style = resolveColorStyle(variant.color_value, isActive);
+
+                return (
+                  <button
+                    key={variant.id}
+                    type="button"
+                    className={`${styles.colorDot}${isActive ? ` ${styles.colorDotActive}` : ''}`}
+                    style={style}
+                    onClick={() => selectVariant(item.id, variant.id)}
+                    aria-pressed={isActive}
+                    aria-label={variant.color_name}
+                  />
+                );
+              })}
             </div>
-
-            {isGroup && (
-              <div className={styles.variantBlock}>
-                <div className={styles.variantName}>{activeVariant?.color_name || 'Цвет'}</div>
-                <div className={styles.variantList} role="list" aria-label="Выбор цвета">
-                  {item.variants?.map((variant) => {
-                    const isActive = activeVariant?.id === variant.id;
-                    const style = resolveColorStyle(variant.color_value, isActive);
-
-                    return (
-                      <button
-                        key={variant.id}
-                        type="button"
-                        className={`${styles.colorDot}${isActive ? ` ${styles.colorDotActive}` : ''}`}
-                        style={style}
-                        onClick={() => selectVariant(item.id, variant.id)}
-                        aria-pressed={isActive}
-                        aria-label={variant.color_name}
-                      />
-                    );
-                  })}
-                </div>
-              </div>
-            )}
           </div>
-        </div>
+        )}
 
         <Link href={item.slug || '#'} className={styles.cardTitle} prefetch={false}>
           {item.name}
@@ -203,16 +211,12 @@ export const NewArrivalsSection: FC = () => {
   );
 
   const skeletonRows = useMemo(
-    () =>
-      buildRows(
-        Array.from({ length: Math.max(itemsPerRow * 2, 4) }, (_, index) => ({
-          id: `skeleton-${index}`,
-          type: 'product',
-          name: '',
-          price_rub: 0,
-        } as NewArrivalItem)),
-        Math.max(1, itemsPerRow),
-      ),
+    () => buildRows(Array.from({length: Math.max(itemsPerRow * 2, 4)}, (_, index) => ({
+      id: `skeleton-${index}`,
+      type: 'product',
+      name: '',
+      price_rub: 0,
+    } as NewArrivalItem)), Math.max(1, itemsPerRow)),
     [itemsPerRow],
   );
 
@@ -229,12 +233,28 @@ export const NewArrivalsSection: FC = () => {
           {isLoading
             ? skeletonRows.map((row, rowIndex) => (
                 <div key={`skeleton-row-${rowIndex}`} className={styles.row}>
-                  {row.map((item) => renderSkeletonCard(item.id))}
+                  {row.map((item) =>
+                    item.kind === 'plus' ? (
+                      <div key={item.id} className={`${styles.plus} ${styles.plusSkeleton}`} aria-hidden>
+                        +
+                      </div>
+                    ) : (
+                      renderSkeletonCard(item.item.id)
+                    ),
+                  )}
                 </div>
               ))
             : rows.map((row, rowIndex) => (
                 <div key={`row-${rowIndex}`} className={styles.row}>
-                  {row.map((element) => renderCard(element))}
+                  {row.map((element) =>
+                    element.kind === 'plus' ? (
+                      <div key={element.id} className={styles.plus} aria-hidden>
+                        +
+                      </div>
+                    ) : (
+                      renderCard(element.item)
+                    ),
+                  )}
                 </div>
               ))}
         </div>

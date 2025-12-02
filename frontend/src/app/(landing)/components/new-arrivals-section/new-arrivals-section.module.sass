@@ -10,7 +10,7 @@ $background-color: #f5f4f4
 .container
   max-width: 1400px
   margin: 0 auto
-  padding: 0 40px
+  padding: 0 32px
 
 .title
   font-size: 36px
@@ -32,7 +32,7 @@ $background-color: #f5f4f4
 .row
   display: flex
   align-items: stretch
-  gap: 20px
+  gap: 16px
 
 .card
   flex: 1 1 0
@@ -41,16 +41,10 @@ $background-color: #f5f4f4
   flex-direction: column
   color: $primary-color
 
-.cardMediaWrapper
-  position: relative
-  border-radius: 12px
-  overflow: hidden
-  background: $background-color
-
 .cardMedia
   position: relative
   width: 100%
-  padding-top: 120%
+  padding-top: 110%
   border-radius: 12px
   overflow: hidden
   background: $background-color
@@ -64,41 +58,14 @@ $background-color: #f5f4f4
   inset: 0
   background: linear-gradient(180deg, #e7e7e7 0%, #cfcfcf 100%)
 
-.cardOverlay
-  position: absolute
-  inset: 0
-  display: flex
-  align-items: flex-end
-  justify-content: flex-end
-  pointer-events: none
-
-.plusButton
-  position: absolute
-  left: 12px
-  bottom: 12px
-  width: 38px
-  height: 38px
-  border-radius: 50%
-  background: rgba(0, 0, 0, 0.65)
-  color: #fff
-  border: 1px solid rgba(255, 255, 255, 0.6)
-  display: inline-flex
-  align-items: center
-  justify-content: center
-  font-size: 22px
-  font-weight: 500
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.16)
-  pointer-events: none
-
 .variantBlock
-  margin: 0 14px 14px 64px
+  margin-top: 14px
   padding: 10px 12px
   border-radius: 10px
   background: rgba(245, 244, 244, 0.8)
   display: flex
   flex-direction: column
   gap: 10px
-  pointer-events: auto
 
 .variantName
   font-size: 14px
@@ -141,6 +108,15 @@ $background-color: #f5f4f4
   line-height: 1.3
   color: $primary-color
 
+.plus
+  flex: 0 0 44px
+  display: inline-flex
+  align-items: center
+  justify-content: center
+  font-size: 30px
+  color: #bcbcbc
+  font-weight: 500
+
 .actions
   margin-top: 42px
   display: flex
@@ -167,7 +143,7 @@ $background-color: #f5f4f4
 
 .cardSkeletonImage
   width: 100%
-  padding-top: 120%
+  padding-top: 110%
   border-radius: 12px
   background: linear-gradient(90deg, #d9d9d9 25%, #ededed 37%, #d9d9d9 63%)
   background-size: 400% 100%
@@ -187,6 +163,9 @@ $background-color: #f5f4f4
 .cardSkeletonPrice
   width: 50%
 
+.plusSkeleton
+  color: #d0d0d0
+
 @keyframes shimmer
   0%
     background-position: -200% 0
@@ -203,6 +182,10 @@ $background-color: #f5f4f4
 
   .row
     gap: 16px
+
+  .plus
+    flex-basis: 40px
+    font-size: 26px
 
 @media (max-width: 900px)
   .section
@@ -227,11 +210,12 @@ $background-color: #f5f4f4
   .row
     gap: 14px
 
+  .plus
+    flex-basis: 38px
+    font-size: 24px
+
   .cardMedia
     padding-top: 130%
-
-  .variantBlock
-    margin: 0 12px 12px 52px
 
   .colorDot
     width: 16px
@@ -240,6 +224,9 @@ $background-color: #f5f4f4
 @media (max-width: 480px)
   .row
     flex-direction: column
+
+  .plus
+    display: none
 
   .actions
     margin-top: 32px
