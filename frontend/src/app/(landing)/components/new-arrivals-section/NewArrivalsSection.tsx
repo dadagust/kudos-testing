@@ -131,8 +131,8 @@ export const NewArrivalsSection: FC = () => {
     const isGroup = item.type === 'group' && (item.variants?.length ?? 0) > 0;
     const activeVariant = resolveActiveVariant(item);
     const imageSrc = resolveImage(item);
-    const priceText = `${formatPrice(item.price_rub)} ₽ за сутки`;
-
+    const price = activeVariant?.price_rub ?? item.price_rub;
+    const priceText = `${formatPrice(price)} ₽ за сутки`;
     return (
       <article key={item.id} className={styles.card}>
         <div className={styles.cardMediaWrapper}>

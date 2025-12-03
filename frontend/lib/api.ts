@@ -237,6 +237,7 @@ export interface NewArrivalVariant {
   color_value: string;
   image: string;
   slug?: string | null;
+  price_rub: number;
 }
 
 export interface NewArrivalItem {
@@ -456,6 +457,7 @@ const normalizeNewArrivalVariant = (value: unknown): NewArrivalVariant | null =>
     color_value: resolvedColorValue,
     image: resolveMediaUrl((variant.image ?? variant.image_url) as string | null | undefined),
     slug: (variant.slug ?? variant.url) as string | null | undefined,
+    price_rub: Number(variant.price_rub ?? variant.price ?? 0) || 0,
   };
 };
 
