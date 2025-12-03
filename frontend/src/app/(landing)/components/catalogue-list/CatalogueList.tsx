@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { FC, useEffect, useState } from 'react';
 
 import { catalogueApi, type CatalogueCategory } from '../../../../../lib/api';
@@ -26,24 +27,31 @@ export const CatalogueList: FC = () => {
   }, []);
 
   const renderCard = (category: CatalogueCategory) => (
-    <article key={category.id} className={styles.card}>
-      <div className={styles.cardMedia}>
-        {category.image ? (
-          <Image
-            src={category.image}
-            alt={category.name}
-            fill
-            priority
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 32vw"
-            className={styles.cardImage}
-          />
-        ) : (
-          <div className={styles.cardPlaceholder} aria-hidden />
-        )}
-        <div className={styles.cardOverlay} />
-      </div>
-      <div className={styles.cardTitle}>{category.name}</div>
-    </article>
+    <Link
+      key={category.id}
+      href={`/catalogue/${category.slug}`}
+      className={styles.cardLink}
+      prefetch={false}
+    >
+      <article className={styles.card}>
+        <div className={styles.cardMedia}>
+          {category.image ? (
+            <Image
+              src={category.image}
+              alt={category.name}
+              fill
+              priority
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 32vw"
+              className={styles.cardImage}
+            />
+          ) : (
+            <div className={styles.cardPlaceholder} aria-hidden />
+          )}
+          <div className={styles.cardOverlay} />
+        </div>
+        <div className={styles.cardTitle}>{category.name}</div>
+      </article>
+    </Link>
   );
 
   return (
