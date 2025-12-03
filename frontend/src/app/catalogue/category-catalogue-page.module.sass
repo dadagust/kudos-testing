@@ -102,15 +102,19 @@ $background-color: #f5f4f4
   display: flex
   flex-direction: column
   gap: 36px
+  --card-width: clamp(220px, 18vw, 260px)
 
 .row
   display: flex
   align-items: center
   gap: 16px
+  justify-content: flex-start
 
 .card
-  flex: 1 1 0
-  min-width: 0
+  flex: 0 0 var(--card-width)
+  width: var(--card-width)
+  max-width: var(--card-width)
+  min-width: var(--card-width)
   display: flex
   flex-direction: column
   color: $primary-color
@@ -223,8 +227,10 @@ $background-color: #f5f4f4
   color: $primary-color
 
 .cardSkeleton
-  flex: 1 1 0
-  min-width: 0
+  flex: 0 0 var(--card-width)
+  width: var(--card-width)
+  max-width: var(--card-width)
+  min-width: var(--card-width)
   display: flex
   flex-direction: column
   gap: 10px
@@ -258,6 +264,9 @@ $background-color: #f5f4f4
     background-position: 200% 0
 
 @media (max-width: 900px)
+  .rows
+    --card-width: min(280px, 100%)
+
   .controls
     flex-direction: column
     align-items: flex-start
@@ -271,7 +280,7 @@ $background-color: #f5f4f4
     flex-direction: column
 
   .card
-    width: 100%
+    width: min(var(--card-width), 100%)
 
 @media (max-width: 600px)
   .container
