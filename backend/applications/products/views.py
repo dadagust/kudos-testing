@@ -440,6 +440,43 @@ class NewProductsView(APIView):
         return Response({'data': data})
 
 
+class CategoryItemsBySlugView(APIView):
+    def get(self, request: Request, slug: str):
+        category = get_object_or_404(Category, slug=slug)
+
+        product_queryset = Product.objects.filter(
+            category=category, visibility_show_on_site=True
+        ).select_related('category', 'color', 'delivery_transport_restriction')
+        product_queryset = product_queryset.prefetch_related(
+            Prefetch('images', queryset=ProductImage.objects.order_by('position'))
+        )
+
+        groups = (
+            ProductGroup.objects.filter(category=category)
+            .select_related('category')
+            .prefetch_related(Prefetch('products', queryset=product_queryset))
+        )
+
+        grouped_product_ids = (
+            Product.objects.filter(groups__category=category, visibility_show_on_site=True)
+            .values_list('id', flat=True)
+            .distinct()
+        )
+        standalone_products = product_queryset.exclude(id__in=grouped_product_ids)
+
+        groups_data = ProductGroupSerializer(
+            groups, many=True, context={'request': request}
+        ).data
+        products_data = ProductListItemSerializer(
+            standalone_products, many=True, context={'request': request}
+        ).data
+
+        data = [{'item_type': 'group', **group} for group in groups_data]
+        data.extend({'item_type': 'product', **product} for product in products_data)
+
+        return Response({'data': data})
+
+
 class CategoryTreeView(APIView):
     def get(self, request: Request):
         categories = Category.objects.all().order_by('name')

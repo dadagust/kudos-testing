@@ -7,7 +7,7 @@ from applications.orders.public_views import (
     product_list,
 )
 from applications.products.public_views import catalogue
-from applications.products.views import NewProductsView
+from applications.products.views import CategoryItemsBySlugView, NewProductsView
 from applications.orders.views import YandexSuggestView
 
 from .views import ping
@@ -20,6 +20,11 @@ urlpatterns = allow_optional_trailing_slash(
         path('orders/', create_customer_order, name='customer-order-create'),
         path('catalogue/', catalogue, name='catalogue-list'),
         path('products/new-items/', NewProductsView.as_view(), name='product-new-items-public'),
+        path(
+            'products/categories/<slug:slug>/items/',
+            CategoryItemsBySlugView.as_view(),
+            name='product-category-items-by-slug-public',
+        ),
         re_path(r'^products/?$', product_list, name='product-list'),
         re_path(r'^products/(?P<product_id>[^/]+)/?$', product_detail, name='product-detail'),
         path('ymaps/suggest/', YandexSuggestView.as_view(), name='ymaps-suggest-public'),

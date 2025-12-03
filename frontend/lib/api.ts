@@ -221,6 +221,13 @@ export interface CatalogueCategory {
   image: string | null;
 }
 
+export interface CategoryTreeItem {
+  id: string;
+  name: string;
+  slug: string;
+  children: CategoryTreeItem[];
+}
+
 export type NewArrivalType = 'product' | 'group';
 
 export interface NewArrivalVariant {
@@ -362,6 +369,50 @@ export const catalogueApi = {
   },
 };
 
+const normalizeCategoryNode = (value: unknown): CategoryTreeItem | null => {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const record = value as Record<string, unknown>;
+  const id = record.id ?? record.slug;
+  const name = record.name;
+  const slug = record.slug;
+
+  if (!id || typeof name !== 'string' || typeof slug !== 'string') {
+    return null;
+  }
+
+  const childrenRaw = Array.isArray(record.children) ? record.children : [];
+
+  return {
+    id: String(id),
+    name,
+    slug,
+    children: childrenRaw
+      .map(normalizeCategoryNode)
+      .filter((item): item is CategoryTreeItem => Boolean(item)),
+  };
+};
+
+export const categoriesApi = {
+  tree: async (): Promise<CategoryTreeItem[]> => {
+    const response = await performRequest<unknown>(CORE_API_URL, '/products/categories/', {
+      method: 'GET',
+    });
+
+    const payload = Array.isArray(response)
+      ? response
+      : Array.isArray((response as { data?: unknown[] } | null | undefined)?.data)
+        ? ((response as { data: unknown[] }).data as unknown[])
+        : [];
+
+    return payload
+      .map(normalizeCategoryNode)
+      .filter((item): item is CategoryTreeItem => Boolean(item));
+  },
+};
+
 const normalizeNewArrivalVariant = (value: unknown): NewArrivalVariant | null => {
   if (!value || typeof value !== 'object') {
     return null;
@@ -452,6 +503,32 @@ export const newArrivalsApi = {
     });
 
     const data = Array.isArray(response?.data) ? (response.data as unknown[]) : [];
+
+    return data.map(normalizeNewArrivalItem).filter((item): item is NewArrivalItem => Boolean(item));
+  },
+};
+
+export const categoryProductsApi = {
+  listBySlug: async (slug: string): Promise<NewArrivalItem[]> => {
+    const normalized = slug.trim();
+
+    if (!normalized) {
+      return [];
+    }
+
+    const response = await performRequest<{ data?: unknown }>(
+      CORE_API_URL,
+      `/products/categories/${encodeURIComponent(normalized)}/items/`,
+      {
+        method: 'GET',
+      }
+    );
+
+    const data = Array.isArray(response?.data)
+      ? (response.data as unknown[])
+      : Array.isArray(response)
+        ? (response as unknown[])
+        : [];
 
     return data.map(normalizeNewArrivalItem).filter((item): item is NewArrivalItem => Boolean(item));
   },
