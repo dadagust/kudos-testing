@@ -321,4 +321,4 @@ export const HeroSection: FC = () => {
   );
 };
 
-export {FrontendHeader};
+export {FrontendHeader, TopBar};
