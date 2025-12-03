@@ -28,15 +28,19 @@ $background-color: #f5f4f4
   display: flex
   flex-direction: column
   gap: 36px
+  --card-width: clamp(220px, 18vw, 260px)
 
 .row
   display: flex
   align-items: center
   gap: 16px
+  justify-content: flex-start
 
 .card
-  flex: 1 1 0
-  min-width: 0
+  flex: 0 0 var(--card-width)
+  width: var(--card-width)
+  max-width: var(--card-width)
+  min-width: var(--card-width)
   display: flex
   flex-direction: column
   color: $primary-color
@@ -163,8 +167,10 @@ $background-color: #f5f4f4
   color: #fff
 
 .cardSkeleton
-  flex: 1 1 0
-  min-width: 0
+  flex: 0 0 var(--card-width)
+  width: var(--card-width)
+  max-width: var(--card-width)
+  min-width: var(--card-width)
   display: flex
   flex-direction: column
   gap: 10px
@@ -240,6 +246,9 @@ $background-color: #f5f4f4
 
 @media (max-width: 480px)
   .rows
+    --card-width: min(82%, 260px)
+
+  .rows
     gap: 22px
 
   .cardPrice
@@ -267,11 +276,7 @@ $background-color: #f5f4f4
     margin-top: 32px
 
   .card
-    flex: 0 0 82%
-    min-width: 260px
     scroll-snap-align: start
 
   .cardSkeleton
-    flex: 0 0 82%
-    min-width: 260px
     scroll-snap-align: start
