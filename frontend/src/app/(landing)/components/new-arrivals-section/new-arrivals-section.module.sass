@@ -24,23 +24,14 @@ $background-color: #f5f4f4
   color: #c0392b
   text-align: center
 
-.rows
-  display: flex
-  flex-direction: column
-  gap: 36px
-  --card-width: clamp(220px, 18vw, 260px)
-
-.row
-  display: flex
-  align-items: center
-  gap: 16px
-  justify-content: flex-start
+.grid
+  display: grid
+  gap: 20px 16px
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr))
+  align-items: stretch
 
 .card
-  flex: 0 0 var(--card-width)
-  width: var(--card-width)
-  max-width: var(--card-width)
-  min-width: var(--card-width)
+  width: 100%
   display: flex
   flex-direction: column
   color: $primary-color
@@ -55,10 +46,13 @@ $background-color: #f5f4f4
 .cardMedia
   position: relative
   width: 100%
+  max-width: 260px
+  max-height: 260px
   padding-top: 100%
   border-radius: 12px
   overflow: hidden
   display: block
+  margin: 0 auto
 
 .cardImage
   object-fit: contain
@@ -179,16 +173,14 @@ $background-color: #f5f4f4
   color: #fff
 
 .cardSkeleton
-  flex: 0 0 var(--card-width)
-  width: var(--card-width)
-  max-width: var(--card-width)
-  min-width: var(--card-width)
+  width: 100%
   display: flex
   flex-direction: column
   gap: 10px
 
 .cardSkeletonImage
   width: 100%
+  max-width: 260px
   padding-top: 110%
   border-radius: 12px
   background: linear-gradient(90deg, #d9d9d9 25%, #ededed 37%, #d9d9d9 63%)
@@ -215,23 +207,17 @@ $background-color: #f5f4f4
   100%
     background-position: 200% 0
 
-@media (max-width: 1100px)
-  .container
-    padding: 0 28px
+  @media (max-width: 1100px)
+    .container
+      padding: 0 28px
 
-  .title
-    font-size: 32px
-    margin-bottom: 32px
-
-  .row
-    gap: 16px
+    .title
+      font-size: 32px
+      margin-bottom: 32px
 
 @media (max-width: 900px)
   .section
     padding: 52px 0 64px
-
-  .rows
-    gap: 28px
 
   .cardTitle
     font-size: 16px
@@ -246,9 +232,6 @@ $background-color: #f5f4f4
   .title
     font-size: 28px
 
-  .row
-    gap: 14px
-
   .cardMedia
     padding-top: 130%
 
@@ -257,10 +240,8 @@ $background-color: #f5f4f4
     height: 20px
 
 @media (max-width: 480px)
-  .rows
-    --card-width: min(82%, 260px)
-
-  .rows
+  .grid
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr))
     gap: 22px
 
   .cardPrice
@@ -268,27 +249,5 @@ $background-color: #f5f4f4
 
   .cardTitle
     padding: 0 10px
-
-  .row
-    flex-wrap: nowrap
-    overflow-x: auto
-    scroll-snap-type: x mandatory
-    scrollbar-width: thin
-    margin: 0 -20px
-    padding: 0 20px 6px
-
-  .row::-webkit-scrollbar
-    height: 6px
-
-  .row::-webkit-scrollbar-thumb
-    background: #d0d0d0
-    border-radius: 999px
-
   .actions
     margin-top: 32px
-
-  .card
-    scroll-snap-align: start
-
-  .cardSkeleton
-    scroll-snap-align: start
