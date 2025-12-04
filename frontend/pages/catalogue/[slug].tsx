@@ -353,7 +353,7 @@ const CategoryPageContent: FC<{ slug: string }> = ({slug}) => {
 
           <div className={styles.controls}>
             <div className={styles.subcategoryList}>
-              {subcategories.length === 0 && <span className={styles.breadcrumbLink}>Подкатегорий нет</span>}
+              {subcategories.length === 0 && <span className={styles.breadcrumbLink}></span>}
               {subcategories.map((subcategory) => (
                 <Link
                   key={subcategory.id}
