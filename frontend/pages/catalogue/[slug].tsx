@@ -249,11 +249,9 @@ const CategoryPageContent: FC<{ slug: string }> = ({slug}) => {
 
   const resolveImage = (item: NewArrivalItem) => {
     if (item.type === 'group') {
-      const activeVariant = resolveActiveVariant(item);
-      if (activeVariant?.image) {
-        return activeVariant.image;
-      }
-      return item.variants?.[0]?.image ?? '';
+      const variantImage = resolveActiveVariant(item)?.image ?? item.variants?.[0]?.image;
+
+      return variantImage || item.image || '';
     }
 
     return item.image || '';
@@ -289,8 +287,8 @@ const CategoryPageContent: FC<{ slug: string }> = ({slug}) => {
     const isGroup = item.type === 'group' && (item.variants?.length ?? 0) > 0;
     const activeVariant = resolveActiveVariant(item);
     const imageSrc = resolveImage(item);
-    const priceText = `${formatPrice(item.price_rub)} ₽ за сутки`;
-
+    const price = activeVariant?.price_rub ?? item.price_rub;
+    const priceText = `${formatPrice(price)} ₽ за сутки`;
     return (
       <article key={item.id} className={styles.card}>
         <div className={styles.cardMediaWrapper}>
@@ -382,7 +380,6 @@ const CategoryPageContent: FC<{ slug: string }> = ({slug}) => {
               Каталог
             </Link>
             <span className={styles.breadcrumbDivider}>/</span>
-            <span>{categoryName || slug}</span>
           </div>
           <h1 id="catalogue-category-title" className={styles.categoryTitle}>
             {categoryName || 'Каталог'}

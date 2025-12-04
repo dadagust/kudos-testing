@@ -16,7 +16,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .choices import DimensionShape, RentalMode, ReservationMode
-from .helpers import _has_error_code, build_category_tree, parse_include_param
+from .helpers import _has_error_code, build_category_tree, parse_include_param, _collect_colors
 from .models import (
     Category,
     Color,
@@ -440,27 +440,10 @@ class NewProductsView(APIView):
         return Response({'data': data})
 
 
+
+
+
 class CategoryItemsBySlugView(APIView):
-    def _collect_colors(self, groups, standalone_products):
-        colors: dict[str, Color] = {}
-
-        def register_product_color(product: Product):
-            color = getattr(product, 'color', None)
-            if color and color.value not in colors:
-                colors[color.value] = color
-
-        for group in groups:
-            for product in group.products.all():
-                register_product_color(product)
-
-        for product in standalone_products:
-            register_product_color(product)
-
-        return [
-            {'value': color.value, 'label': color.label}
-            for color in colors.values()
-        ]
-
     def get(self, request: Request, slug: str):
         if slug == 'new':
             product_queryset = Product.objects.filter(
@@ -496,7 +479,7 @@ class CategoryItemsBySlugView(APIView):
             data = [{'item_type': 'group', **group} for group in groups_data]
             data.extend({'item_type': 'product', **product} for product in products_data)
 
-            colors = self._collect_colors(groups, standalone_products)
+            colors = _collect_colors(groups, standalone_products)
 
             return Response({'data': data, 'colors': colors})
 
@@ -532,7 +515,7 @@ class CategoryItemsBySlugView(APIView):
         data = [{'item_type': 'group', **group} for group in groups_data]
         data.extend({'item_type': 'product', **product} for product in products_data)
 
-        colors = self._collect_colors(groups, standalone_products)
+        colors = _collect_colors(groups, standalone_products)
 
         return Response({'data': data, 'colors': colors})
 

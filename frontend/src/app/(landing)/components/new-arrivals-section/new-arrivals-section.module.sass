@@ -133,17 +133,29 @@ $background-color: #f5f4f4
   bottom: 12px
   width: 44px
   height: 44px
+  padding: 0
   border: none
-  background: transparent
-  color: $primary-color
-  font-size: 30px
-  font-weight: 500
+  appearance: none
   display: inline-flex
   align-items: center
   justify-content: center
-  cursor: pointer
-  z-index: 2
-  transition: transform 0.15s ease, color 0.15s ease
+  background: rgba(0,0,0,0.05)
+  border-radius: 50%
+  color: $primary-color
+  font-size: 0
+
+  &::before, &::after
+    content: ''
+    position: absolute
+    left: 50%
+    top: 50%
+    width: 18px
+    height: 2px
+    background: currentColor
+    transform: translate(-50%, -50%)
+
+  &::after
+    transform: translate(-50%, -50%) rotate(90deg)
 
 .plusButton:hover
   transform: scale(1.03)

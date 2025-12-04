@@ -183,13 +183,11 @@ export const NewArrivalsSection: FC = () => {
             </div>
           )}
 
-          <button type="button" className={styles.plusButton} aria-label="Добавить в подборку">
-            +
-          </button>
+          <button type="button" className={styles.plusButton} aria-label="Добавить в подборку"/>
         </div>
 
         <Link href={item.slug || '#'} className={styles.cardTitle} prefetch={false}>
-          {item.name}
+        {item.name}
         </Link>
         <div className={styles.cardPrice}>{priceText}</div>
       </article>
@@ -222,7 +220,7 @@ export const NewArrivalsSection: FC = () => {
     <section className={styles.section} aria-labelledby="new-arrivals-title">
       <div className={styles.container}>
         <h2 id="new-arrivals-title" className={styles.title}>
-          Новинки этого года
+          Новинки
         </h2>
 
         {error && !isLoading && <p className={styles.error}>{error}</p>}

@@ -1,6 +1,5 @@
+from applications.products.models import Category, Color, Product
 from rest_framework.request import Request
-
-from applications.products.models import Category
 
 
 def build_category_tree(categories: list[Category], parent: Category | None = None) -> list[dict]:
@@ -33,3 +32,23 @@ def _has_error_code(codes, target: str) -> bool:
     if isinstance(codes, dict):
         return any(_has_error_code(value, target) for value in codes.values())
     return False
+
+
+def _collect_colors(groups, standalone_products):
+    colors: dict[str, Color] = {}
+
+    def register_product_color(product: Product):
+        color = getattr(product, 'color', None)
+        if color and color.value not in colors:
+            colors[color.value] = color
+
+    for group in groups:
+        for product in group.products.all():
+            register_product_color(product)
+
+    for product in standalone_products:
+        register_product_color(product)
+    return [
+        {'value': color.value, 'label': color.label}
+        for color in colors.values()
+    ]
