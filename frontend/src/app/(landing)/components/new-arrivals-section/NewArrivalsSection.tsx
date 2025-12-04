@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import {useRouter} from 'next/router';
 import {FC, useEffect, useMemo, useState} from 'react';
 
 import {type NewArrivalItem, newArrivalsApi, type NewArrivalVariant,} from '../../../../../lib/api';
@@ -51,6 +52,7 @@ export const NewArrivalsSection: FC = () => {
   const [itemsPerRow, setItemsPerRow] = useState(4);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const updateLayout = () => {
@@ -240,7 +242,11 @@ export const NewArrivalsSection: FC = () => {
         </div>
 
         <div className={styles.actions}>
-          <Button className={styles.showAllButton} size="lg">
+          <Button
+            className={styles.showAllButton}
+            size="lg"
+            onClick={() => router.push('/catalogue/new')}
+          >
             Показать все новинки
           </Button>
         </div>

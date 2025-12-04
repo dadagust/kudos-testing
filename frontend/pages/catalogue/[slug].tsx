@@ -146,6 +146,12 @@ const CategoryPageContent: FC<{ slug: string }> = ({slug}) => {
   }, [slug]);
 
   useEffect(() => {
+    if (slug === 'new') {
+      setCategoryName('Новинки');
+      setSubcategories([]);
+      return;
+    }
+
     const fetchCategoryTree = async () => {
       try {
         const tree = await categoriesApi.tree();
