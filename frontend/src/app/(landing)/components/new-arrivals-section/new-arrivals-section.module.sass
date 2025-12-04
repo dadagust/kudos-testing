@@ -27,11 +27,14 @@ $background-color: #f5f4f4
 .grid
   display: grid
   gap: 20px 16px
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr))
+  grid-template-columns: repeat(auto-fit, minmax(240px, 260px))
   align-items: stretch
+  justify-content: center
 
 .card
   width: 100%
+  max-width: 260px
+  max-height: 350px
   display: flex
   flex-direction: column
   color: $primary-color
@@ -174,6 +177,8 @@ $background-color: #f5f4f4
 
 .cardSkeleton
   width: 100%
+  max-width: 260px
+  max-height: 350px
   display: flex
   flex-direction: column
   gap: 10px
