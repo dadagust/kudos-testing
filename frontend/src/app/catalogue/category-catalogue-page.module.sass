@@ -8,7 +8,7 @@ $background-color: #f5f4f4
   min-height: 100vh
 
 .container
-  max-width: 1400px
+  max-width: 1440px
   margin: 0 auto
   padding: 0 32px
 
@@ -210,23 +210,17 @@ $background-color: #f5f4f4
   color: #c0392b
   text-align: center
 
-.rows
-  display: flex
-  flex-direction: column
-  gap: 36px
-  --card-width: clamp(220px, 18vw, 260px)
-
-.row
-  display: flex
-  align-items: center
-  gap: 16px
-  justify-content: flex-start
+.grid
+  display: grid
+  gap: 20px 16px
+  grid-template-columns: repeat(auto-fit, minmax(240px, 260px))
+  align-items: stretch
+  justify-content: center
 
 .card
-  flex: 0 0 var(--card-width)
-  width: var(--card-width)
-  max-width: var(--card-width)
-  min-width: var(--card-width)
+  width: 100%
+  max-width: 260px
+  max-height: 350px
   display: flex
   flex-direction: column
   color: $primary-color
@@ -238,10 +232,13 @@ $background-color: #f5f4f4
 .cardMedia
   position: relative
   width: 100%
+  max-width: 260px
+  max-height: 260px
   padding-top: 100%
   border-radius: 12px
   overflow: hidden
   display: block
+  margin: 0 auto
 
 .cardImage
   position: absolute
@@ -350,16 +347,16 @@ $background-color: #f5f4f4
   color: $primary-color
 
 .cardSkeleton
-  flex: 0 0 var(--card-width)
-  width: var(--card-width)
-  max-width: var(--card-width)
-  min-width: var(--card-width)
+  width: 100%
+  max-width: 260px
+  max-height: 350px
   display: flex
   flex-direction: column
   gap: 10px
 
 .cardSkeletonImage
   width: 100%
+  max-width: 260px
   padding-top: 110%
   border-radius: 12px
   background: linear-gradient(90deg, #d9d9d9 25%, #ededed 37%, #d9d9d9 63%)
@@ -386,24 +383,15 @@ $background-color: #f5f4f4
   100%
     background-position: 200% 0
 
-@media (max-width: 900px)
-  .rows
-    --card-width: min(280px, 100%)
+  @media (max-width: 900px)
+    .controls
+      flex-direction: column
+      align-items: flex-start
 
-  .controls
-    flex-direction: column
-    align-items: flex-start
-
-  .filterControls
-    width: 100%
-    justify-content: flex-start
-    flex-wrap: wrap
-
-  .row
-    flex-direction: column
-
-  .card
-    width: min(var(--card-width), 100%)
+    .filterControls
+      width: 100%
+      justify-content: flex-start
+      flex-wrap: wrap
 
 @media (max-width: 600px)
   .container
