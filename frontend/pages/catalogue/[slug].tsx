@@ -72,6 +72,12 @@ const findCategoryBySlug = (
   return null;
 };
 
+const buildColorKey = (name?: string | null, value?: string | null) => {
+  const normalizedName = (name ?? value ?? 'Без цвета').trim();
+  const normalizedValue = (value ?? '').trim();
+  return `${normalizedName.toLowerCase()}|${normalizedValue.toLowerCase()}`;
+};
+
 const CategoryPageContent: FC<{ slug: string }> = ({slug}) => {
   const [items, setItems] = useState<NewArrivalItem[]>([]);
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
@@ -82,6 +88,10 @@ const CategoryPageContent: FC<{ slug: string }> = ({slug}) => {
   const [subcategories, setSubcategories] = useState<CategoryTreeItem[]>([]);
   const [isMobile, setIsMobile] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null);
+  const [selectedColors, setSelectedColors] = useState<string[]>([]);
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   useEffect(() => {
     const updateLayout = () => {
@@ -121,6 +131,11 @@ const CategoryPageContent: FC<{ slug: string }> = ({slug}) => {
   }, [isMobile]);
 
   useEffect(() => {
+    setSortOrder(null);
+    setSelectedColors([]);
+    setIsSortOpen(false);
+    setIsFilterOpen(false);
+
     const fetchItems = async () => {
       setIsLoading(true);
       try {
@@ -173,10 +188,60 @@ const CategoryPageContent: FC<{ slug: string }> = ({slug}) => {
     void fetchCategoryTree();
   }, [slug]);
 
+  const availableColors = useMemo(() => {
+    const colorsMap = new Map<string, { label: string; value: string }>();
+
+    items.forEach((item) => {
+      if (item.variants?.length) {
+        item.variants.forEach((variant) => {
+          const label = variant.color_name || variant.name || variant.color_value || 'Без цвета';
+          const key = buildColorKey(label, variant.color_value);
+
+          if (!colorsMap.has(key)) {
+            colorsMap.set(key, { label, value: variant.color_value });
+          }
+        });
+      }
+    });
+
+    return Array.from(colorsMap, ([key, color]) => ({ key, ...color }));
+  }, [items]);
+
+  const filteredItems = useMemo(() => {
+    let nextItems = items;
+
+    if (selectedColors.length) {
+      nextItems = nextItems.filter((item) => {
+        if (item.type !== 'group' || !item.variants?.length) {
+          return false;
+        }
+
+        return item.variants.some((variant) => {
+          const key = buildColorKey(variant.color_name || variant.name, variant.color_value);
+          return selectedColors.includes(key);
+        });
+      });
+    }
+
+    if (!sortOrder) {
+      return nextItems;
+    }
+
+    const sortedItems = [...nextItems].sort((first, second) => {
+      if (sortOrder === 'asc') {
+        return first.price_rub - second.price_rub;
+      }
+
+      return second.price_rub - first.price_rub;
+    });
+
+    return sortedItems;
+  }, [items, selectedColors, sortOrder]);
+
   const rows = useMemo(() => {
     const safeItemsPerRow = Math.max(1, itemsPerRow);
-    return safeItemsPerRow === 1 ? [items] : buildRows(items, safeItemsPerRow);
-  }, [items, itemsPerRow]);
+    return safeItemsPerRow === 1 ? [filteredItems] : buildRows(filteredItems, safeItemsPerRow);
+  }, [filteredItems, itemsPerRow]);
 
   const selectVariant = (itemId: string, variantId: string) => {
     setSelectedVariants((prev) => ({ ...prev, [itemId]: variantId }));
@@ -201,6 +266,32 @@ const CategoryPageContent: FC<{ slug: string }> = ({slug}) => {
     }
 
     return item.image || '';
+  };
+
+  const handleSortSelect = (order: 'asc' | 'desc') => {
+    setSortOrder((prev) => (prev === order ? null : order));
+    setIsSortOpen(false);
+    setIsFilterOpen(false);
+  };
+
+  const resetSort = () => {
+    setSortOrder(null);
+    setIsSortOpen(false);
+  };
+
+  const toggleColor = (colorKey: string) => {
+    setSelectedColors((prev) => {
+      if (prev.includes(colorKey)) {
+        return prev.filter((key) => key !== colorKey);
+      }
+
+      return [...prev, colorKey];
+    });
+  };
+
+  const resetFilters = () => {
+    setSelectedColors([]);
+    setIsFilterOpen(false);
   };
 
   const renderCard = (item: NewArrivalItem) => {
@@ -322,12 +413,101 @@ const CategoryPageContent: FC<{ slug: string }> = ({slug}) => {
             </div>
 
             <div className={styles.filterControls}>
-              <button type="button" className={styles.controlButton}>
-                Сортировка
-              </button>
-              <button type="button" className={styles.controlButton}>
-                Фильтры
-              </button>
+              <div className={styles.controlGroup}>
+                <button
+                  type="button"
+                  className={styles.controlToggle}
+                  onClick={() => {
+                    setIsSortOpen((prev) => !prev);
+                    setIsFilterOpen(false);
+                  }}
+                  aria-expanded={isSortOpen}
+                >
+                  <span>Сортировка</span>
+                  <span className={`${styles.chevron}${isSortOpen ? ` ${styles.chevronOpen}` : ''}`} aria-hidden />
+                </button>
+
+                {isSortOpen && (
+                  <div className={styles.dropdown} role="menu">
+                    <button
+                      type="button"
+                      className={`${styles.dropdownOption}${sortOrder === 'asc' ? ` ${styles.dropdownOptionActive}` : ''}`}
+                      onClick={() => handleSortSelect('asc')}
+                    >
+                      Дешевле
+                    </button>
+                    <button
+                      type="button"
+                      className={`${styles.dropdownOption}${sortOrder === 'desc' ? ` ${styles.dropdownOptionActive}` : ''}`}
+                      onClick={() => handleSortSelect('desc')}
+                    >
+                      Дороже
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.resetButton}
+                      onClick={resetSort}
+                      disabled={!sortOrder}
+                    >
+                      Сбросить сортировку
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div className={styles.controlGroup}>
+                <button
+                  type="button"
+                  className={styles.controlToggle}
+                  onClick={() => {
+                    setIsFilterOpen((prev) => !prev);
+                    setIsSortOpen(false);
+                  }}
+                  aria-expanded={isFilterOpen}
+                >
+                  <span>Фильтры</span>
+                  <span className={`${styles.chevron}${isFilterOpen ? ` ${styles.chevronOpen}` : ''}`} aria-hidden />
+                </button>
+
+                {isFilterOpen && (
+                  <div className={styles.dropdown} role="menu">
+                    {availableColors.length === 0 && <div className={styles.dropdownEmpty}>Цвета отсутствуют</div>}
+
+                    {availableColors.map((color) => {
+                      const isActive = selectedColors.includes(color.key);
+
+                      return (
+                        <label
+                          key={color.key}
+                          className={`${styles.checkboxOption}${isActive ? ` ${styles.checkboxOptionActive}` : ''}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isActive}
+                            onChange={() => toggleColor(color.key)}
+                            className={styles.checkboxInput}
+                          />
+                          <span
+                            className={styles.colorPreview}
+                            style={{ backgroundColor: color.value || '#d8d8d8' }}
+                            aria-hidden
+                          />
+                          <span>{color.label}</span>
+                        </label>
+                      );
+                    })}
+
+                    <button
+                      type="button"
+                      className={styles.resetButton}
+                      onClick={resetFilters}
+                      disabled={!selectedColors.length}
+                    >
+                      Сбросить фильтры
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
