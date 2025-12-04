@@ -228,6 +228,12 @@ export interface CategoryTreeItem {
   children: CategoryTreeItem[];
 }
 
+export interface CategoryInfo {
+  id?: string;
+  name?: string;
+  slug?: string;
+}
+
 export type NewArrivalType = 'product' | 'group';
 
 export interface ColorOption {
@@ -238,6 +244,8 @@ export interface ColorOption {
 export interface CategoryItemsResponse {
   items: NewArrivalItem[];
   colors: ColorOption[];
+  subcategories: CategoryTreeItem[];
+  category?: CategoryInfo | null;
 }
 
 export interface NewArrivalVariant {
@@ -405,6 +413,27 @@ const normalizeCategoryNode = (value: unknown): CategoryTreeItem | null => {
     children: childrenRaw
       .map(normalizeCategoryNode)
       .filter((item): item is CategoryTreeItem => Boolean(item)),
+  };
+};
+
+const normalizeCategoryInfo = (value: unknown): CategoryInfo | null => {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const record = value as Record<string, unknown>;
+  const id = record.id;
+  const name = record.name;
+  const slug = record.slug;
+
+  if (typeof name !== 'string' && typeof slug !== 'string') {
+    return null;
+  }
+
+  return {
+    id: typeof id === 'string' ? id : undefined,
+    name: typeof name === 'string' ? name : undefined,
+    slug: typeof slug === 'string' ? slug : undefined,
   };
 };
 
@@ -580,7 +609,7 @@ export const categoryProductsApi = {
     const normalized = slug.trim();
 
     if (!normalized) {
-      return { items: [], colors: [] };
+      return { items: [], colors: [], subcategories: [] };
     }
 
     const response = await performRequest<{ data?: unknown; colors?: unknown }>(
@@ -603,6 +632,16 @@ export const categoryProductsApi = {
         ? ((response as { colors: unknown[] }).colors as unknown[])
         : [];
 
+    const rawSubcategories = Array.isArray(
+      (response as { subcategories?: unknown[] } | null | undefined)?.subcategories
+    )
+      ? ((response as { subcategories: unknown[] }).subcategories as unknown[])
+      : [];
+
+    const category = normalizeCategoryInfo(
+      (response as { category?: unknown } | null | undefined)?.category
+    );
+
     return {
       items: data
         .map(normalizeNewArrivalItem)
@@ -610,6 +649,10 @@ export const categoryProductsApi = {
       colors: rawColors
         .map(normalizeColorOption)
         .filter((color): color is ColorOption => Boolean(color)),
+      subcategories: rawSubcategories
+        .map(normalizeCategoryNode)
+        .filter((item): item is CategoryTreeItem => Boolean(item)),
+      category,
     };
   },
 };

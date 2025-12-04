@@ -4,7 +4,6 @@ import {useRouter} from 'next/router';
 import {FC, useEffect, useMemo, useState} from 'react';
 
 import {
-  categoriesApi,
   categoryProductsApi,
   type CategoryTreeItem,
   type NewArrivalItem,
@@ -50,26 +49,6 @@ const resolveColorStyle = (value: string, isActive: boolean) => {
     backgroundColor: color,
     borderColor: isActive ? '#4a4b4d' : '#d0d0d0',
   };
-};
-
-const findCategoryBySlug = (
-  tree: CategoryTreeItem[],
-  slug: string
-): { node: CategoryTreeItem; parent: CategoryTreeItem | null } | null => {
-  for (const node of tree) {
-    if (node.slug === slug) {
-      return { node, parent: null };
-    }
-
-    if (node.children.length) {
-      const found = findCategoryBySlug(node.children, slug);
-      if (found) {
-        return { node: found.node, parent: node };
-      }
-    }
-  }
-
-  return null;
 };
 
 const normalizeColorValue = (value?: string | null) => (value ?? '').trim().toLowerCase();
@@ -137,9 +116,22 @@ const CategoryPageContent: FC<{ slug: string }> = ({slug}) => {
     const fetchItems = async () => {
       setIsLoading(true);
       try {
-        const { items: data, colors } = await categoryProductsApi.listBySlug(slug);
+        const { items: data, colors, subcategories: fetchedSubcategories, category } =
+          await categoryProductsApi.listBySlug(slug);
         setItems(data);
         setColorOptions(colors ?? []);
+        setSubcategories(slug === 'new' ? [] : fetchedSubcategories ?? []);
+        setCategoryName(() => {
+          if (slug === 'new') {
+            return 'Новинки';
+          }
+
+          if (category?.name) {
+            return category.name;
+          }
+
+          return 'Каталог';
+        });
 
         const defaults: Record<string, string> = {};
         data.forEach((item) => {
@@ -157,34 +149,6 @@ const CategoryPageContent: FC<{ slug: string }> = ({slug}) => {
     };
 
     void fetchItems();
-  }, [slug]);
-
-  useEffect(() => {
-    if (slug === 'new') {
-      setCategoryName('Новинки');
-      setSubcategories([]);
-      return;
-    }
-
-    const fetchCategoryTree = async () => {
-      try {
-        const tree = await categoriesApi.tree();
-        const found = findCategoryBySlug(tree, slug);
-
-        if (found?.node) {
-          setCategoryName(found.node.name);
-          setSubcategories(found.node.children);
-        } else {
-          setCategoryName('Каталог');
-          setSubcategories([]);
-        }
-      } catch {
-        setCategoryName('Каталог');
-        setSubcategories([]);
-      }
-    };
-
-    void fetchCategoryTree();
   }, [slug]);
 
   const availableColors = useMemo(

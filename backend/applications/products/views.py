@@ -445,6 +445,22 @@ class NewProductsView(APIView):
 
 class CategoryItemsBySlugView(APIView):
     def get(self, request: Request, slug: str):
+        if slug != 'new':
+            category = get_object_or_404(Category, slug=slug)
+            subcategories = Category.objects.filter(parent=category).order_by('name')
+            serialized_subcategories = [
+                {
+                    'id': str(item.id),
+                    'name': item.name,
+                    'slug': item.slug,
+                    'children': [],
+                }
+                for item in subcategories
+            ]
+        else:
+            category = None
+            serialized_subcategories: list[dict[str, str | list]] = []
+
         if slug == 'new':
             product_queryset = Product.objects.filter(
                 visibility_show_in_new=True
@@ -481,9 +497,14 @@ class CategoryItemsBySlugView(APIView):
 
             colors = _collect_colors(groups, standalone_products)
 
-            return Response({'data': data, 'colors': colors})
-
-        category = get_object_or_404(Category, slug=slug)
+            return Response(
+                {
+                    'data': data,
+                    'colors': colors,
+                    'subcategories': serialized_subcategories,
+                    'category': {'name': 'Новинки', 'slug': 'new'},
+                }
+            )
 
         product_queryset = Product.objects.filter(
             category=category, visibility_show_on_site=True
@@ -517,7 +538,14 @@ class CategoryItemsBySlugView(APIView):
 
         colors = _collect_colors(groups, standalone_products)
 
-        return Response({'data': data, 'colors': colors})
+        return Response(
+            {
+                'data': data,
+                'colors': colors,
+                'subcategories': serialized_subcategories,
+                'category': {'id': str(category.id), 'name': category.name, 'slug': category.slug},
+            }
+        )
 
 
 class CategoryTreeView(APIView):
