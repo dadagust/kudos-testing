@@ -72,11 +72,7 @@ const findCategoryBySlug = (
   return null;
 };
 
-const buildColorKey = (name?: string | null, value?: string | null) => {
-  const normalizedName = (name ?? value ?? 'Без цвета').trim();
-  const normalizedValue = (value ?? '').trim();
-  return `${normalizedName.toLowerCase()}|${normalizedValue.toLowerCase()}`;
-};
+const normalizeColorValue = (value?: string | null) => (value ?? '').trim().toLowerCase();
 
 const CategoryPageContent: FC<{ slug: string }> = ({slug}) => {
   const [items, setItems] = useState<NewArrivalItem[]>([]);
@@ -89,6 +85,7 @@ const CategoryPageContent: FC<{ slug: string }> = ({slug}) => {
   const [isMobile, setIsMobile] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null);
+  const [colorOptions, setColorOptions] = useState<Array<{ value: string; label: string }>>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -133,14 +130,16 @@ const CategoryPageContent: FC<{ slug: string }> = ({slug}) => {
   useEffect(() => {
     setSortOrder(null);
     setSelectedColors([]);
+    setColorOptions([]);
     setIsSortOpen(false);
     setIsFilterOpen(false);
 
     const fetchItems = async () => {
       setIsLoading(true);
       try {
-        const data = await categoryProductsApi.listBySlug(slug);
+        const { items: data, colors } = await categoryProductsApi.listBySlug(slug);
         setItems(data);
+        setColorOptions(colors ?? []);
 
         const defaults: Record<string, string> = {};
         data.forEach((item) => {
@@ -188,24 +187,14 @@ const CategoryPageContent: FC<{ slug: string }> = ({slug}) => {
     void fetchCategoryTree();
   }, [slug]);
 
-  const availableColors = useMemo(() => {
-    const colorsMap = new Map<string, { label: string; value: string }>();
-
-    items.forEach((item) => {
-      if (item.variants?.length) {
-        item.variants.forEach((variant) => {
-          const label = variant.color_name || variant.name || variant.color_value || 'Без цвета';
-          const key = buildColorKey(label, variant.color_value);
-
-          if (!colorsMap.has(key)) {
-            colorsMap.set(key, { label, value: variant.color_value });
-          }
-        });
-      }
-    });
-
-    return Array.from(colorsMap, ([key, color]) => ({ key, ...color }));
-  }, [items]);
+  const availableColors = useMemo(
+    () =>
+      colorOptions.map((color) => ({
+        key: normalizeColorValue(color.value || color.label),
+        ...color,
+      })),
+    [colorOptions]
+  );
 
   const filteredItems = useMemo(() => {
     let nextItems = items;
@@ -217,7 +206,9 @@ const CategoryPageContent: FC<{ slug: string }> = ({slug}) => {
         }
 
         return item.variants.some((variant) => {
-          const key = buildColorKey(variant.color_name || variant.name, variant.color_value);
+          const key = normalizeColorValue(
+            variant.color_value || variant.color_name || variant.name || variant.slug
+          );
           return selectedColors.includes(key);
         });
       });
@@ -466,7 +457,6 @@ const CategoryPageContent: FC<{ slug: string }> = ({slug}) => {
                   aria-expanded={isFilterOpen}
                 >
                   <span>Фильтры</span>
-                  <span className={`${styles.chevron}${isFilterOpen ? ` ${styles.chevronOpen}` : ''}`} aria-hidden />
                 </button>
 
                 {isFilterOpen && (

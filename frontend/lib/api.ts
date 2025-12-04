@@ -230,6 +230,16 @@ export interface CategoryTreeItem {
 
 export type NewArrivalType = 'product' | 'group';
 
+export interface ColorOption {
+  value: string;
+  label: string;
+}
+
+export interface CategoryItemsResponse {
+  items: NewArrivalItem[];
+  colors: ColorOption[];
+}
+
 export interface NewArrivalVariant {
   id: string;
   name?: string;
@@ -461,6 +471,25 @@ const normalizeNewArrivalVariant = (value: unknown): NewArrivalVariant | null =>
   };
 };
 
+const normalizeColorOption = (value: unknown): ColorOption | null => {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const option = value as Record<string, unknown>;
+  const rawValue = option.value;
+  const rawLabel = option.label;
+
+  if (typeof rawValue !== 'string' || typeof rawLabel !== 'string') {
+    return null;
+  }
+
+  return {
+    value: rawValue,
+    label: rawLabel,
+  };
+};
+
 const normalizeNewArrivalItem = (value: unknown): NewArrivalItem | null => {
   if (!value || typeof value !== 'object') {
     return null;
@@ -511,14 +540,14 @@ export const newArrivalsApi = {
 };
 
 export const categoryProductsApi = {
-  listBySlug: async (slug: string): Promise<NewArrivalItem[]> => {
+  listBySlug: async (slug: string): Promise<CategoryItemsResponse> => {
     const normalized = slug.trim();
 
     if (!normalized) {
-      return [];
+      return { items: [], colors: [] };
     }
 
-    const response = await performRequest<{ data?: unknown }>(
+    const response = await performRequest<{ data?: unknown; colors?: unknown }>(
       CORE_API_URL,
       `/products/categories/${encodeURIComponent(normalized)}/items/`,
       {
@@ -532,7 +561,20 @@ export const categoryProductsApi = {
         ? (response as unknown[])
         : [];
 
-    return data.map(normalizeNewArrivalItem).filter((item): item is NewArrivalItem => Boolean(item));
+    const rawColors = Array.isArray(response?.colors)
+      ? (response.colors as unknown[])
+      : Array.isArray((response as { colors?: unknown[] } | null | undefined)?.colors)
+        ? ((response as { colors: unknown[] }).colors as unknown[])
+        : [];
+
+    return {
+      items: data
+        .map(normalizeNewArrivalItem)
+        .filter((item): item is NewArrivalItem => Boolean(item)),
+      colors: rawColors
+        .map(normalizeColorOption)
+        .filter((color): color is ColorOption => Boolean(color)),
+    };
   },
 };
 

@@ -97,7 +97,9 @@ $background-color: #f5f4f4
   border-left: 1.5px solid currentColor
   border-bottom: 1.5px solid currentColor
   transform: rotate(-45deg)
-  margin-top: 2px
+  display: inline-flex
+  align-items: center
+  justify-content: center
   transition: transform 0.2s ease, color 0.2s ease
 
 .chevronOpen
@@ -148,6 +150,18 @@ $background-color: #f5f4f4
   border: 1px solid #dcdcdc
   border-radius: 10px
   background: #fff
+  border: 1px solid #e0e0e0
+  border-radius: 12px
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08)
+  z-index: 5
+
+.dropdownOption
+  width: 100%
+  text-align: left
+  padding: 10px 12px
+  border-radius: 10px
+  border: 1px solid transparent
+  background: #f7f7f7
   color: $primary-color
   padding: 10px 12px
   cursor: pointer
