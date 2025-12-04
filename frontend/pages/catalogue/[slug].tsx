@@ -202,7 +202,9 @@ const CategoryPageContent: FC<{ slug: string }> = ({slug}) => {
     if (selectedColors.length) {
       nextItems = nextItems.filter((item) => {
         if (item.type !== 'group' || !item.variants?.length) {
-          return false;
+          const key = normalizeColorValue(item.color_value || item.color_name);
+
+          return key ? selectedColors.includes(key) : false;
         }
 
         return item.variants.some((variant) => {
