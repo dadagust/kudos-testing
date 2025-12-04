@@ -257,6 +257,8 @@ export interface NewArrivalItem {
   price_rub: number;
   image?: string | null;
   slug?: string | null;
+  color_name?: string;
+  color_value?: string;
   variants?: NewArrivalVariant[];
 }
 
@@ -498,6 +500,7 @@ const normalizeNewArrivalItem = (value: unknown): NewArrivalItem | null => {
   const record = value as Record<string, unknown>;
   const rawId = record.id ?? record.slug;
   const rawType = (record.item_type ?? record.type ?? record.kind) as string | undefined;
+  const color = (record.color ?? null) as Record<string, unknown> | null;
 
   if (!rawId || !rawType) {
     return null;
@@ -511,6 +514,37 @@ const normalizeNewArrivalItem = (value: unknown): NewArrivalItem | null => {
       : [];
   const variants = variantsRaw.map(normalizeNewArrivalVariant).filter(Boolean) as NewArrivalVariant[];
 
+  const resolvedColorName = (() => {
+    if (typeof record.color_name === 'string') {
+      return record.color_name;
+    }
+
+    if (typeof color?.name === 'string') {
+      return color.name;
+    }
+
+    return '';
+  })();
+
+  const resolvedColorValue = (() => {
+    const rawVariantValue = typeof record.color === 'string' ? record.color : null;
+    const rawColorValue = typeof color?.value === 'string' ? color.value : null;
+    const fallbackValue = typeof record.color_value === 'string' ? record.color_value : null;
+
+    const variantValue = rawVariantValue?.trim();
+
+    if (variantValue) {
+      return variantValue;
+    }
+
+    const colorValue = rawColorValue?.trim();
+    if (colorValue) {
+      return colorValue;
+    }
+
+    return fallbackValue?.trim() ?? '';
+  })();
+
   return {
     id: String(rawId),
     type,
@@ -523,6 +557,8 @@ const normalizeNewArrivalItem = (value: unknown): NewArrivalItem | null => {
         | undefined,
     ),
     slug: (record.slug ?? record.url) as string | null | undefined,
+    color_name: resolvedColorName,
+    color_value: resolvedColorValue,
     variants: variants.length > 0 ? variants : undefined,
   };
 };
