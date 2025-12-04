@@ -11,17 +11,6 @@ import styles from './new-arrivals-section.module.sass';
 const formatPrice = (value: number) =>
   new Intl.NumberFormat('ru-RU').format(Math.max(0, Math.round(value)));
 
-const buildRows = (items: NewArrivalItem[], itemsPerRow: number): NewArrivalItem[][] => {
-  const rows: NewArrivalItem[][] = [];
-
-  for (let index = 0; index < items.length; index += itemsPerRow) {
-    const rowItems = items.slice(index, index + itemsPerRow);
-    rows.push(rowItems);
-  }
-
-  return rows;
-};
-
 const resolveColorStyle = (value: string, isActive: boolean) => {
   const normalized = value.trim();
   const normalizedLower = normalized.toLowerCase();
@@ -49,31 +38,9 @@ const resolveColorStyle = (value: string, isActive: boolean) => {
 export const NewArrivalsSection: FC = () => {
   const [items, setItems] = useState<NewArrivalItem[]>([]);
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
-  const [itemsPerRow, setItemsPerRow] = useState(4);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-
-  useEffect(() => {
-    const updateLayout = () => {
-      if (typeof window === 'undefined') return;
-
-      if (window.innerWidth <= 480) {
-        setItemsPerRow(1);
-      } else if (window.innerWidth <= 900) {
-        setItemsPerRow(2);
-      } else if (window.innerWidth >= 1400) {
-        setItemsPerRow(5);
-      } else {
-        setItemsPerRow(4);
-      }
-    };
-
-    updateLayout();
-    window.addEventListener('resize', updateLayout);
-
-    return () => window.removeEventListener('resize', updateLayout);
-  }, []);
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -99,13 +66,6 @@ export const NewArrivalsSection: FC = () => {
   }, []);
 
   const displayedItems = useMemo(() => items.slice(0, 10), [items]);
-
-  const rows = useMemo(() => {
-    const safeItemsPerRow = Math.max(1, itemsPerRow);
-    return safeItemsPerRow === 1
-      ? [displayedItems]
-      : buildRows(displayedItems, safeItemsPerRow);
-  }, [displayedItems, itemsPerRow]);
 
   const selectVariant = (itemId: string, variantId: string) => {
     setSelectedVariants((prev) => ({ ...prev, [itemId]: variantId }));
@@ -202,19 +162,16 @@ export const NewArrivalsSection: FC = () => {
     </div>
   );
 
-  const skeletonRows = useMemo(() => {
-    const safeItemsPerRow = Math.max(1, itemsPerRow);
-    const skeletonItems = Array.from({length: Math.max(itemsPerRow * 2, 4)}, (_, index) => ({
-      id: `skeleton-${index}`,
-      type: 'product',
-      name: '',
-      price_rub: 0,
-    } as NewArrivalItem));
-
-    return safeItemsPerRow === 1
-      ? [skeletonItems]
-      : buildRows(skeletonItems, safeItemsPerRow);
-  }, [itemsPerRow]);
+  const skeletonItems = useMemo(
+    () =>
+      Array.from({length: 10}, (_, index) => ({
+        id: `skeleton-${index}`,
+        type: 'product',
+        name: '',
+        price_rub: 0,
+      } as NewArrivalItem)),
+    []
+  );
 
   return (
     <section className={styles.section} aria-labelledby="new-arrivals-title">
@@ -225,18 +182,10 @@ export const NewArrivalsSection: FC = () => {
 
         {error && !isLoading && <p className={styles.error}>{error}</p>}
 
-        <div className={styles.rows}>
+        <div className={styles.grid}>
           {isLoading
-            ? skeletonRows.map((row, rowIndex) => (
-                <div key={`skeleton-row-${rowIndex}`} className={styles.row}>
-                  {row.map((item) => renderSkeletonCard(item.id))}
-                </div>
-              ))
-            : rows.map((row, rowIndex) => (
-                <div key={`row-${rowIndex}`} className={styles.row}>
-                  {row.map((element) => renderCard(element))}
-                </div>
-              ))}
+            ? skeletonItems.map((item) => renderSkeletonCard(item.id))
+            : displayedItems.map((element) => renderCard(element))}
         </div>
 
         <div className={styles.actions}>

@@ -16,17 +16,6 @@ import styles from '../../src/app/catalogue/category-catalogue-page.module.sass'
 
 const formatPrice = (value: number) => new Intl.NumberFormat('ru-RU').format(Math.max(0, Math.round(value)));
 
-const buildRows = (items: NewArrivalItem[], itemsPerRow: number): NewArrivalItem[][] => {
-  const rows: NewArrivalItem[][] = [];
-
-  for (let index = 0; index < items.length; index += itemsPerRow) {
-    const rowItems = items.slice(index, index + itemsPerRow);
-    rows.push(rowItems);
-  }
-
-  return rows;
-};
-
 const resolveColorStyle = (value: string, isActive: boolean) => {
   const normalized = value.trim();
   const normalizedLower = normalized.toLowerCase();
@@ -56,7 +45,6 @@ const normalizeColorValue = (value?: string | null) => (value ?? '').trim().toLo
 const CategoryPageContent: FC<{ slug: string }> = ({slug}) => {
   const [items, setItems] = useState<NewArrivalItem[]>([]);
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
-  const [itemsPerRow, setItemsPerRow] = useState(4);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [categoryName, setCategoryName] = useState('');
@@ -68,27 +56,6 @@ const CategoryPageContent: FC<{ slug: string }> = ({slug}) => {
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-
-  useEffect(() => {
-    const updateLayout = () => {
-      if (typeof window === 'undefined') return;
-
-      if (window.innerWidth <= 480) {
-        setItemsPerRow(1);
-      } else if (window.innerWidth <= 900) {
-        setItemsPerRow(2);
-      } else if (window.innerWidth >= 1400) {
-        setItemsPerRow(5);
-      } else {
-        setItemsPerRow(4);
-      }
-    };
-
-    updateLayout();
-    window.addEventListener('resize', updateLayout);
-
-    return () => window.removeEventListener('resize', updateLayout);
-  }, []);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 1000px)');
@@ -194,11 +161,6 @@ const CategoryPageContent: FC<{ slug: string }> = ({slug}) => {
 
     return sortedItems;
   }, [items, selectedColors, sortOrder]);
-
-  const rows = useMemo(() => {
-    const safeItemsPerRow = Math.max(1, itemsPerRow);
-    return safeItemsPerRow === 1 ? [filteredItems] : buildRows(filteredItems, safeItemsPerRow);
-  }, [filteredItems, itemsPerRow]);
 
   const selectVariant = (itemId: string, variantId: string) => {
     setSelectedVariants((prev) => ({ ...prev, [itemId]: variantId }));
@@ -318,17 +280,16 @@ const CategoryPageContent: FC<{ slug: string }> = ({slug}) => {
     </div>
   );
 
-  const skeletonRows = useMemo(() => {
-    const safeItemsPerRow = Math.max(1, itemsPerRow);
-    const skeletonItems = Array.from({length: Math.max(itemsPerRow * 2, 4)}, (_, index) => ({
-      id: `skeleton-${index}`,
-      type: 'product',
-      name: '',
-      price_rub: 0,
-    } as NewArrivalItem));
-
-    return safeItemsPerRow === 1 ? [skeletonItems] : buildRows(skeletonItems, safeItemsPerRow);
-  }, [itemsPerRow]);
+  const skeletonItems = useMemo(
+    () =>
+      Array.from({length: 10}, (_, index) => ({
+        id: `skeleton-${index}`,
+        type: 'product',
+        name: '',
+        price_rub: 0,
+      } as NewArrivalItem)),
+    []
+  );
 
   return (
     <div className={styles.page}>
@@ -470,18 +431,10 @@ const CategoryPageContent: FC<{ slug: string }> = ({slug}) => {
 
       <section className={styles.section} aria-labelledby="catalogue-category-title">
         <div className={styles.container}>
-          <div className={styles.rows}>
+          <div className={styles.grid}>
             {isLoading
-              ? skeletonRows.map((row, rowIndex) => (
-                  <div key={`skeleton-row-${rowIndex}`} className={styles.row}>
-                    {row.map((item) => renderSkeletonCard(item.id))}
-                  </div>
-                ))
-              : rows.map((row, rowIndex) => (
-                  <div key={`row-${rowIndex}`} className={styles.row}>
-                    {row.map((element) => renderCard(element))}
-                  </div>
-                ))}
+              ? skeletonItems.map((item) => renderSkeletonCard(item.id))
+              : filteredItems.map((element) => renderCard(element))}
           </div>
         </div>
       </section>

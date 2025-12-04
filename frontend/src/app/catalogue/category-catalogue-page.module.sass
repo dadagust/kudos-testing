@@ -210,23 +210,14 @@ $background-color: #f5f4f4
   color: #c0392b
   text-align: center
 
-.rows
-  display: flex
-  flex-direction: column
-  gap: 36px
-  --card-width: clamp(220px, 18vw, 260px)
-
-.row
-  display: flex
-  align-items: center
-  gap: 16px
-  justify-content: flex-start
+.grid
+  display: grid
+  gap: 20px 16px
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr))
+  align-items: stretch
 
 .card
-  flex: 0 0 var(--card-width)
-  width: var(--card-width)
-  max-width: var(--card-width)
-  min-width: var(--card-width)
+  width: 100%
   display: flex
   flex-direction: column
   color: $primary-color
@@ -350,10 +341,7 @@ $background-color: #f5f4f4
   color: $primary-color
 
 .cardSkeleton
-  flex: 0 0 var(--card-width)
-  width: var(--card-width)
-  max-width: var(--card-width)
-  min-width: var(--card-width)
+  width: 100%
   display: flex
   flex-direction: column
   gap: 10px
@@ -386,24 +374,15 @@ $background-color: #f5f4f4
   100%
     background-position: 200% 0
 
-@media (max-width: 900px)
-  .rows
-    --card-width: min(280px, 100%)
+  @media (max-width: 900px)
+    .controls
+      flex-direction: column
+      align-items: flex-start
 
-  .controls
-    flex-direction: column
-    align-items: flex-start
-
-  .filterControls
-    width: 100%
-    justify-content: flex-start
-    flex-wrap: wrap
-
-  .row
-    flex-direction: column
-
-  .card
-    width: min(var(--card-width), 100%)
+    .filterControls
+      width: 100%
+      justify-content: flex-start
+      flex-wrap: wrap
 
 @media (max-width: 600px)
   .container
